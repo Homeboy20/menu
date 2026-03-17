@@ -142,6 +142,37 @@ app.use((req, res, next) => {
   next();
 });
 
+// Record menu scans before serving menu.html
+app.get('/menu.html', (req, res, next) => {
+  const menuId = req.query.id;
+  
+  if (menuId) {
+    try {
+      // Record scan event
+      const now = new Date().toISOString();
+      const userAgent = req.headers['user-agent'] || '';
+      const ipAddress = req.ip || req.connection.remoteAddress || '';
+      const referrer = req.headers['referer'] || req.headers['referrer'] || '';
+      
+      stmts.recordScan.run(
+        String(menuId),
+        String(now),
+        String(userAgent),
+        String(ipAddress),
+        String(referrer)
+      );
+      
+      // Increment total scan count
+      stmts.incrementScans.run(String(now), String(menuId));
+    } catch (err) {
+      // Log error but don't block menu display
+      console.error('Failed to record scan:', err);
+    }
+  }
+  
+  next();
+});
+
 // Static file caching and optimization
 app.use(express.static('.', {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0', // 1 year cache in production
@@ -233,6 +264,27 @@ try { db.exec("ALTER TABLE menus ADD COLUMN bg_color      TEXT    NOT NULL DEFAU
 try { db.exec("ALTER TABLE menus ADD COLUMN card_bg       TEXT    NOT NULL DEFAULT ''"); } catch {}
 try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAULT ''"); } catch {}
 
+// QR Code and Analytics columns
+try { db.exec("ALTER TABLE menus ADD COLUMN qr_version INTEGER NOT NULL DEFAULT 1"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN qr_code TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN total_scans INTEGER NOT NULL DEFAULT 0"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN last_scan_at TEXT"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN updated_at TEXT"); } catch {}
+
+// Create scans analytics table
+db.exec(`
+  CREATE TABLE IF NOT EXISTS menu_scans (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    menu_id TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+    scanned_at TEXT NOT NULL,
+    user_agent TEXT,
+    ip_address TEXT,
+    referrer TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_scans_menu ON menu_scans (menu_id);
+  CREATE INDEX IF NOT EXISTS idx_scans_date ON menu_scans (scanned_at);
+`);
+
 // Cache frequently accessed data
 const menuCache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -299,8 +351,23 @@ const stmts = {
   insertMenu:  db.prepare(`INSERT INTO menus
     (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
      show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
-     created_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
+     qr_version, qr_code, total_scans, created_at, updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
+  recordScan:  db.prepare(`INSERT INTO menu_scans (menu_id, scanned_at, user_agent, ip_address, referrer)
+    VALUES (?,?,?,?,?)`),
+  incrementScans: db.prepare(`UPDATE menus SET total_scans = total_scans + 1, last_scan_at = ? WHERE id = ?`),
+  getMenuScans: db.prepare(`SELECT COUNT(*) as total FROM menu_scans WHERE menu_id = ?`),
+  getRecentScans: db.prepare(`SELECT * FROM menu_scans WHERE menu_id = ? ORDER BY scanned_at DESC LIMIT ?`),
+  getScansStats: db.prepare(`
+    SELECT 
+      DATE(scanned_at) as date,
+      COUNT(*) as scans
+    FROM menu_scans 
+    WHERE menu_id = ? AND scanned_at >= datetime('now', '-30 days')
+    GROUP BY DATE(scanned_at)
+    ORDER BY date DESC
+  `),
+  regenerateQR: db.prepare(`UPDATE menus SET qr_version = qr_version + 1, qr_code = ?, updated_at = ? WHERE id = ?`),
   insertItem:  db.prepare(`INSERT INTO menu_items
     (id, menu_id, name, category, price, description, tags, size, sort_order)
     VALUES (?,?,?,?,?,?,?,?,?)`),
@@ -312,12 +379,14 @@ const stmts = {
   deleteMenu:      db.prepare('DELETE FROM menus WHERE id = ?'),
   updateMenu:      db.prepare(`UPDATE menus SET
     restaurant_name=?, currency=?, brand_color=?, logo_url=?, tagline=?, font_style=?, bg_style=?,
-    show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?
+    show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?,
+    updated_at=?
     WHERE id=?`),
   deleteMenuItems: db.prepare('DELETE FROM menu_items WHERE menu_id=?'),
 };
 
-const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
+const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items, qrCode) => {
+  const now = new Date().toISOString();
   stmts.insertMenu.run(
     String(menuId),
     String(restaurantName),
@@ -335,7 +404,11 @@ const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, i
     String(branding.bgColor       || ''),
     String(branding.cardBg        || ''),
     String(branding.priceColor    || ''),
-    String(new Date().toISOString())
+    Number(1),                                          // qr_version (starts at 1)
+    String(qrCode || ''),                               // qr_code
+    Number(0),                                          // total_scans (starts at 0)
+    String(now),                                        // created_at
+    String(now)                                         // updated_at
   );
 
   items.forEach((item, index) => {
@@ -372,6 +445,7 @@ const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding,
     String(branding.bgColor       || ''),
     String(branding.cardBg        || ''),
     String(branding.priceColor    || ''),
+    String(new Date().toISOString()),                    // updated_at
     String(menuId)
   );
 
@@ -391,6 +465,9 @@ const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding,
       Number(item.sortOrder !== undefined ? item.sortOrder : index) // INTEGER
     );
   });
+  
+  // Clear cache for updated menu
+  menuCache.delete(menuId);
 });
 
 // One-time migration: import any data that was saved in the old menus.json
@@ -1085,6 +1162,19 @@ function sanitizeItem(it) {
   };
 }
 
+// ── QR Code generation ────────────────────────────────────────────────────────
+
+/** Generate QR code for a menu URL with version tracking */
+async function generateQRCode(menuId, version = 1) {
+  const menuUrl = `${HOST}/menu.html?id=${menuId}&v=${version}`;
+  const qrDataUrl = await QRCode.toDataURL(menuUrl, {
+    width: 300, 
+    margin: 2,
+    color: { dark: '#0d1b2a', light: '#f0fdf9' },
+  });
+  return qrDataUrl;
+}
+
 // Schema migrations will be handled first, then prepared statements will be created later
 
 // ── Routes ────────────────────────────────────────────────────────────────────
@@ -1142,13 +1232,14 @@ app.post('/api/menus', requireAuth, async (req, res) => {
     const safeItems    = items.map(sanitizeItem).filter(it => it.name.length >= 2);
 
     const menuId = crypto.randomUUID();
-    saveMenuTx(menuId, safeName, safeCurrency, branding, safeItems);
+    
+    // Generate QR code with version 1
+    const qrDataUrl = await generateQRCode(menuId, 1);
+    
+    // Save menu with QR code
+    saveMenuTx(menuId, safeName, safeCurrency, branding, safeItems, qrDataUrl);
 
-    const menuUrl   = `${HOST}/menu.html?id=${menuId}`;
-    const qrDataUrl = await QRCode.toDataURL(menuUrl, {
-      width: 300, margin: 2,
-      color: { dark: '#0d1b2a', light: '#f0fdf9' },
-    });
+    const menuUrl = `${HOST}/menu.html?id=${menuId}&v=1`;
 
     res.json({ menuId, menuUrl, qrDataUrl });
   } catch (err) {
@@ -1352,13 +1443,17 @@ app.put('/api/menus/:id', requireAuth, async (req, res) => {
     const safeItems    = items.map(sanitizeItem).filter(it => it.name.length >= 2);
     updateMenuTx(req.params.id, safeName, safeCurrency, branding, safeItems);
 
-    const menuUrl   = `${HOST}/menu.html?id=${req.params.id}`;
-    const qrDataUrl = await QRCode.toDataURL(menuUrl, {
-      width: 300, margin: 2,
-      color: { dark: '#0d1b2a', light: '#f0fdf9' },
-    });
+    // Use existing QR code and version (don't auto-regenerate on updates)
+    const qrVersion = menu.qr_version || 1;
+    const qrDataUrl = menu.qr_code || '';
+    const menuUrl = `${HOST}/menu.html?id=${req.params.id}&v=${qrVersion}`;
 
-    res.json({ menuId: req.params.id, menuUrl, qrDataUrl });
+    res.json({ 
+      menuId: req.params.id, 
+      menuUrl, 
+      qrDataUrl,
+      message: 'Menu updated successfully. Use "Regenerate QR Code" if you need a new QR version.'
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -1371,6 +1466,73 @@ app.delete('/api/menus/:id', requireAuth, (req, res) => {
   if (!menu) return res.status(404).json({ error: 'Menu not found.' });
   stmts.deleteMenu.run(req.params.id);
   res.json({ success: true });
+});
+
+// GET /api/menus/:id/analytics - Get scan analytics for a menu
+app.get('/api/menus/:id/analytics', requireAuth, (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const menu = stmts.getMenu.get(menuId);
+    
+    if (!menu) return res.status(404).json({ error: 'Menu not found.' });
+    
+    // Get scan statistics
+    const recentScans = stmts.getRecentScans.all(String(menuId), 10);
+    const scansStats = stmts.getScansStats.all(String(menuId));
+    
+    res.json({
+      menuId,
+      totalScans: menu.total_scans || 0,
+      lastScanAt: menu.last_scan_at || null,
+      qrVersion: menu.qr_version || 1,
+      updatedAt: menu.updated_at || menu.created_at,
+      recentScans: recentScans.map(scan => ({
+        scannedAt: scan.scanned_at,
+        userAgent: scan.user_agent,
+        ipAddress: scan.ip_address,
+        referrer: scan.referrer
+      })),
+      dailyStats: scansStats.map(stat => ({
+        date: stat.date,
+        scans: stat.scans
+      }))
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/menus/:id/regenerate-qr - Regenerate QR code with new version
+app.post('/api/menus/:id/regenerate-qr', requireAuth, async (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const menu = stmts.getMenu.get(menuId);
+    
+    if (!menu) return res.status(404).json({ error: 'Menu not found.' });
+    
+    const newVersion = (menu.qr_version || 1) + 1;
+    const qrDataUrl = await generateQRCode(menuId, newVersion);
+    const now = new Date().toISOString();
+    
+    stmts.regenerateQR.run(
+      String(qrDataUrl),
+      String(now),
+      String(menuId)
+    );
+    
+    const menuUrl = `${HOST}/menu.html?id=${menuId}&v=${newVersion}`;
+    
+    res.json({
+      success: true,
+      qrVersion: newVersion,
+      qrDataUrl,
+      menuUrl
+    });
+  } catch (err) {
+    console.error('QR regeneration error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
