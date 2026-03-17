@@ -524,7 +524,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.8.0'
+    version: '1.9.0'
   });
 });
 
