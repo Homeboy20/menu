@@ -582,6 +582,45 @@ app.get('/api/auth/check', (req, res) => {
   res.json({ authenticated: isValidSession(token) });
 });
 
+// POST /api/auth/change-password  – change the admin password
+app.post('/api/auth/change-password', requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current and new passwords are required.' });
+  }
+  if (typeof newPassword !== 'string' || newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  }
+
+  const match = await bcrypt.compare(currentPassword, ADMIN_SECRET_HASH);
+  if (!match) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  ADMIN_SECRET_HASH = newHash;
+
+  // Persist the new hash to .env
+  const envPath = path.join(__dirname, '.env');
+  try {
+    let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+    if (/^ADMIN_SECRET_HASH=.*/m.test(envContent)) {
+      envContent = envContent.replace(/^ADMIN_SECRET_HASH=.*/m, 'ADMIN_SECRET_HASH=' + newHash);
+    } else {
+      envContent += (envContent.endsWith('\n') ? '' : '\n') + 'ADMIN_SECRET_HASH=' + newHash + '\n';
+    }
+    fs.writeFileSync(envPath, envContent, 'utf8');
+  } catch (err) {
+    console.error('⚠ Could not update .env file:', err.message);
+    // Hash is still updated in memory, so the change is effective until restart
+  }
+
+  // Invalidate all existing sessions so the user must re-login with the new password
+  sessions.clear();
+
+  res.json({ ok: true });
+});
+
 // GET /api/health  – health check for containers/monitoring
 app.get('/api/health', (_req, res) => {
   try {

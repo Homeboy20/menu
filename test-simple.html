@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Simple Test</title>
+<style>
+body { 
+  font-family: system-ui; 
+  padding: 40px;
+  background: #FFF4E6; 
+}
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  max-width: 400px;
+  margin: 0 auto;
+}
+h1 { color: #FF9800; margin: 0 0 20px 0; }
+p { color: #757575; line-height: 1.6; }
+button {
+  background: #FF9800;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+}
+button:hover { background: #F57C00; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>✓ Server Working!</h1>
+  <p>If you can see this page with warm peach background and can right-click:</p>
+  <ul>
+    <li>Server is working correctly</li>
+    <li>Browser is not frozen</li>
+    <li>The issue is in menu.html</li>
+  </ul>
+  <button onclick="alert('JavaScript is working!')">Test JS</button>
+  <button onclick="window.location.href='/menu.html?id=ae125ecd-6a47-4767-b1e9-732a2d5c044b'">Try Menu</button>
+</div>
+</body>
+</html>

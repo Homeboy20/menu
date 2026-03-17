@@ -105,6 +105,25 @@ body   {
   padding: 0 4px;
   letter-spacing: -.2px;
 }
+#topbar-logo {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--brand);
+  background: rgba(201,162,39,.1);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#topbar-logo img { width: 100%; height: 100%; object-fit: cover; }
+#topbar-logo .topbar-initials {
+  font-size: 13px; font-weight: 800;
+  color: var(--brand); letter-spacing: -0.5px;
+}
+#topbar-powered {
+  display: none;
+  font-size: 9px; font-weight: 500;
+  color: #555555; letter-spacing: .04em;
+}
 .icon-btn {
   flex-shrink: 0;
   width: 38px; height: 38px;
@@ -312,12 +331,28 @@ html[data-theme="light"] .tab-active { color: #121212; }
 /* Checkout bar hidden by default */
 #checkout-bar { display: none; }
 
-/*  Footer  */
+/*  Footer (desktop only)  */
 #footer {
   display: flex; align-items: center; justify-content: center; gap: 5px;
   padding: 22px 16px calc(20px + var(--safe-b));
   font-size: 11px; color: #666666;
   border-top: 1px solid var(--border);
+}
+
+/*  Powered-by watermark above bottom nav (mobile)  */
+#powered-watermark {
+  display: none;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: #555555;
+  letter-spacing: .04em;
+  padding: 6px 0 2px;
+  position: fixed;
+  bottom: calc(56px + var(--safe-b));
+  left: 0; right: 0;
+  z-index: 59;
+  pointer-events: none;
 }
 
 /*  Error overlay  */
@@ -450,22 +485,30 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
 /* Mobile app: <768px */
 @media (max-width: 767px) {
   #topbar .icon-btn { display: none; }
-  #topbar-name { font-size: 16px; font-weight: 800; }
+  #topbar { gap: 10px; }
+  #topbar-logo { display: flex; }
+  #topbar-name { font-size: 16px; font-weight: 800; text-align: left; }
+  #topbar-powered { display: block; }
   #items-container { padding-bottom: calc(100px + var(--safe-b)); }
-  #footer { padding-bottom: calc(90px + var(--safe-b)); }
+  #footer { display: none; }
+  #powered-watermark { display: block; }
 }
 
 /* Desktop: 768px+  */
 @media (min-width: 768px) {
   #app { max-width: 720px; margin: 0 auto; }
   body { background: var(--outside-bg); }
+  #topbar { gap: 12px; padding: calc(var(--safe-t) + 10px) 24px 10px; }
+  #topbar-logo { display: flex; width: 36px; height: 36px; border-radius: 10px; }
+  #topbar-logo .topbar-initials { font-size: 14px; }
+  #topbar-name { text-align: left; font-size: 16px; font-weight: 800; }
   #hero      { padding: 32px 24px 28px; }
   #cat-tabs  { padding: 12px 24px; gap: 8px; }
   #count-bar { padding: 12px 24px 0; }
   .cat-header  { padding: 20px 24px 8px; }
   .item-row    { padding: 14px 24px; }
   .items-group { border-radius: 0; }
-  #bottom-nav, #cat-sheet-overlay, #cat-sheet { display: none !important; }
+  #bottom-nav, #cat-sheet-overlay, #cat-sheet, #powered-watermark { display: none !important; }
 }
 
 /* Large desktop: 1024px+  */
@@ -485,10 +528,17 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
 
   <!--  Topbar  -->
   <div id="topbar">
+    <div id="topbar-logo" style="display:none">
+      <img id="topbar-logo-img" src="" alt="" style="display:none"/>
+      <span class="topbar-initials" id="topbar-initials"></span>
+    </div>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center">
+      <div id="topbar-name">Menu</div>
+      <span id="topbar-powered">Powered by MenuAdmin</span>
+    </div>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
       <span class="material-symbols-outlined" id="theme-icon" style="font-size:20px">dark_mode</span>
     </button>
-    <div id="topbar-name">Menu</div>
     <button class="icon-btn" id="search-btn" onclick="toggleSearch()" aria-label="Search">
       <span class="material-symbols-outlined" style="font-size:20px">search</span>
     </button>
@@ -572,6 +622,9 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
   <div id="cat-sheet-title">Categories</div>
   <div id="cat-sheet-list"></div>
 </div>
+
+<!-- Powered-by watermark (mobile only) -->
+<div id="powered-watermark">Powered by MenuAdmin</div>
 
 <!--  Error state  -->
 <div id="error-state">
@@ -831,6 +884,29 @@ function applyBranding(data) {
   document.querySelector('meta[name=theme-color]').content = bgCol;
   buildHeader(data, color, headCol);
   document.getElementById('topbar-name').textContent = data.restaurantName || '';
+
+  // Populate topbar logo (initials or image)
+  const tbLogo = document.getElementById('topbar-logo');
+  const tbImg  = document.getElementById('topbar-logo-img');
+  const tbInit = document.getElementById('topbar-initials');
+  if (tbLogo) {
+    const rName = data.restaurantName || '';
+    if (data.logo) {
+      tbImg.src = data.logo;
+      tbImg.alt = rName;
+      tbImg.style.display = 'block';
+      tbInit.style.display = 'none';
+    } else if (rName) {
+      const words = rName.trim().split(/\s+/);
+      tbInit.textContent = words.length >= 2
+        ? (words[0][0] + words[1][0]).toUpperCase()
+        : rName.substring(0, 2).toUpperCase();
+      tbInit.style.display = 'flex';
+      tbImg.style.display = 'none';
+    }
+    tbLogo.style.display = 'flex';
+  }
+
   // Rebuild category tabs and items so accent colours flip for the new theme
   if (allItems.length) { buildTabs(); renderItems(); }
 }
