@@ -1,6 +1,6 @@
 {
   "name": "menu",
-  "version": "1.12.2",
+  "version": "1.12.3",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",

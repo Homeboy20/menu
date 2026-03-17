@@ -184,6 +184,42 @@ body   {
 .icon-btn:active { transform: scale(.9); }
 .icon-btn.lit { background: var(--brand); color: #121212; opacity: 1; }
 
+/*  Contact / Social bar  */
+#contact-bar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--topbar-bg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+#contact-bar.visible { display: flex; }
+#contact-bar a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--brand-dim, rgba(201,162,39,.08));
+  color: var(--brand);
+  text-decoration: none;
+  transition: background .15s, transform .1s;
+  flex-shrink: 0;
+}
+#contact-bar a:hover { background: var(--brand-dim-hover, rgba(201,162,39,.16)); transform: scale(1.08); }
+#contact-bar a:active { transform: scale(.94); }
+#contact-bar a svg { width: 16px; height: 16px; fill: currentColor; }
+#contact-bar .cb-divider {
+  width: 1px; height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
 /*  Search slide-in  */
 #search-drawer {
   overflow: hidden;
@@ -567,6 +603,7 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
   .cat-header  { padding: 20px 24px 8px; }
   .item-row    { padding: 14px 24px; }
   .items-group { border-radius: 0; }
+  #contact-bar { padding: 6px 24px; }
   #bottom-nav, #cat-sheet-overlay, #cat-sheet, #powered-watermark { display: none !important; }
 }
 
@@ -576,6 +613,7 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
   #topbar { padding: calc(var(--safe-t) + 0px) 28px 0; }
   #topbar-logo { width: 44px; height: 44px; border-radius: 14px; }
   #topbar-name { font-size: 18px; }
+  #contact-bar { padding: 6px 28px; }
   #hero.has-tagline { padding: 12px 28px 8px; }
   #cat-tabs  { padding: 12px 28px; }
   #count-bar { padding: 12px 28px 0; }
@@ -605,6 +643,9 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
       <span class="material-symbols-outlined" style="font-size:20px">search</span>
     </button>
   </div>
+
+  <!--  Contact / Social bar  -->
+  <div id="contact-bar"></div>
 
   <!--  Search drawer  -->
   <div id="search-drawer">
@@ -926,6 +967,9 @@ function applyBranding(data) {
     .bnav-active{color:${color}!important;background:${color}15!important;}
     #cat-sheet{background:${surfCol}!important;}
     #cat-sheet-handle{background:${isDark?'rgba(255,255,255,.15)':'rgba(0,0,0,.12)'}!important;}
+    #contact-bar{background:${topBg}!important;border-bottom-color:${dv}!important;--brand-dim:${color}14;--brand-dim-hover:${color}28;}
+    #contact-bar a{color:${color}!important;background:${color}14!important;}
+    #contact-bar a:hover{background:${color}28!important;}
   `;
 
   if (fontKey !== 'modern') {
@@ -964,6 +1008,9 @@ function applyBranding(data) {
     tbLogo.style.display = 'flex';
   }
 
+  // Populate contact/social bar
+  buildContactBar(data, color);
+
   // Rebuild category tabs and items so accent colours flip for the new theme
   if (allItems.length) { buildTabs(); renderItems(); }
 }
@@ -980,6 +1027,52 @@ function buildHeader(data, color, headCol) {
   } else {
     hero.classList.remove('has-tagline');
   }
+}
+
+//  Contact / Social bar builder
+function buildContactBar(data) {
+  const bar = document.getElementById('contact-bar');
+  if (!bar) return;
+  const links = [];
+
+  // Contact links
+  if (data.phone)   links.push({ href: 'tel:' + data.phone.replace(/\s/g,''), icon: '<svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.46.57 3.58a1 1 0 0 1-.25 1.01l-2.2 2.2z"/></svg>', title: data.phone });
+  if (data.email)   links.push({ href: 'mailto:' + data.email, icon: '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>', title: data.email });
+  if (data.address)  links.push({ href: 'https://maps.google.com/?q=' + encodeURIComponent(data.address), icon: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>', title: data.address });
+  if (data.website) {
+    let url = data.website;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    links.push({ href: url, icon: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>', title: data.website });
+  }
+
+  const hasSocial = data.socialInstagram || data.socialFacebook || data.socialTwitter || data.socialWhatsapp || data.socialTiktok || data.socialYoutube;
+
+  // Social links
+  const socials = [];
+  if (data.socialInstagram) socials.push({ href: data.socialInstagram, icon: '<svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>', title: 'Instagram' });
+  if (data.socialFacebook)  socials.push({ href: data.socialFacebook, icon: '<svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3l-.5 3H13v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>', title: 'Facebook' });
+  if (data.socialTwitter)   socials.push({ href: data.socialTwitter, icon: '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', title: 'X / Twitter' });
+  if (data.socialWhatsapp)  socials.push({ href: data.socialWhatsapp, icon: '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.05 21.785a9.74 9.74 0 0 1-4.968-1.358l-.356-.212-3.691.969.985-3.599-.232-.37A9.726 9.726 0 0 1 2.3 12.01C2.3 6.636 6.66 2.27 12.05 2.27S21.79 6.636 21.79 12.01c0 5.374-4.36 9.775-9.74 9.775zM12.05.22C5.556.22.25 5.528.25 12.01c0 2.084.544 4.108 1.58 5.897L.1 24l6.253-1.64a11.77 11.77 0 0 0 5.697 1.457C18.544 23.817 23.85 18.51 23.85 12.01S18.544.22 12.05.22z"/></svg>', title: 'WhatsApp' });
+  if (data.socialTiktok)    socials.push({ href: data.socialTiktok, icon: '<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1 0-5.78c.29 0 .58.04.85.11V9a6.33 6.33 0 0 0-.85-.06 6.34 6.34 0 1 0 6.34 6.34V9.41a8.16 8.16 0 0 0 4.77 1.52V7.49a4.85 4.85 0 0 1-1.01-.8z"/></svg>', title: 'TikTok' });
+  if (data.socialYoutube)   socials.push({ href: data.socialYoutube, icon: '<svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>', title: 'YouTube' });
+
+  if (!links.length && !socials.length) {
+    bar.classList.remove('visible');
+    bar.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  links.forEach(l => {
+    html += '<a href="' + l.href + '" target="_blank" rel="noopener noreferrer" title="' + l.title.replace(/"/g,'&quot;') + '">' + l.icon + '</a>';
+  });
+  if (links.length && socials.length) html += '<span class="cb-divider"></span>';
+  socials.forEach(l => {
+    html += '<a href="' + l.href + '" target="_blank" rel="noopener noreferrer" title="' + l.title + '">' + l.icon + '</a>';
+  });
+
+  bar.innerHTML = html;
+  bar.classList.add('visible');
 }
 
 //  Category tabs 

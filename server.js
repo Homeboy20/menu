@@ -272,6 +272,18 @@ try { db.exec("ALTER TABLE menus ADD COLUMN total_scans INTEGER NOT NULL DEFAULT
 try { db.exec("ALTER TABLE menus ADD COLUMN last_scan_at TEXT"); } catch {}
 try { db.exec("ALTER TABLE menus ADD COLUMN updated_at TEXT"); } catch {}
 
+// Contact & Social columns
+try { db.exec("ALTER TABLE menus ADD COLUMN phone            TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN email            TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN address          TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN website          TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_instagram TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_facebook  TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_twitter   TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_whatsapp  TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_tiktok    TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN social_youtube   TEXT NOT NULL DEFAULT ''"); } catch {}
+
 // Create scans analytics table
 db.exec(`
   CREATE TABLE IF NOT EXISTS menu_scans (
@@ -352,8 +364,10 @@ const stmts = {
   insertMenu:  db.prepare(`INSERT INTO menus
     (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
      show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
+     phone, email, address, website,
+     social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
      qr_version, qr_code, total_scans, created_at, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
   recordScan:  db.prepare(`INSERT INTO menu_scans (menu_id, scanned_at, user_agent, ip_address, referrer)
     VALUES (?,?,?,?,?)`),
   incrementScans: db.prepare(`UPDATE menus SET total_scans = total_scans + 1, last_scan_at = ? WHERE id = ?`),
@@ -382,6 +396,8 @@ const stmts = {
   updateMenu:      db.prepare(`UPDATE menus SET
     restaurant_name=?, currency=?, brand_color=?, logo_url=?, tagline=?, font_style=?, bg_style=?,
     show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?,
+    phone=?, email=?, address=?, website=?,
+    social_instagram=?, social_facebook=?, social_twitter=?, social_whatsapp=?, social_tiktok=?, social_youtube=?,
     updated_at=?
     WHERE id=?`),
   deleteMenuItems: db.prepare('DELETE FROM menu_items WHERE menu_id=?'),
@@ -406,6 +422,16 @@ const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, i
     String(branding.bgColor       || ''),
     String(branding.cardBg        || ''),
     String(branding.priceColor    || ''),
+    String(branding.phone           || ''),
+    String(branding.email           || ''),
+    String(branding.address         || ''),
+    String(branding.website         || ''),
+    String(branding.socialInstagram || ''),
+    String(branding.socialFacebook  || ''),
+    String(branding.socialTwitter   || ''),
+    String(branding.socialWhatsapp  || ''),
+    String(branding.socialTiktok    || ''),
+    String(branding.socialYoutube   || ''),
     Number(1),                                          // qr_version (starts at 1)
     String(qrCode || ''),                               // qr_code
     Number(0),                                          // total_scans (starts at 0)
@@ -447,6 +473,16 @@ const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding,
     String(branding.bgColor       || ''),
     String(branding.cardBg        || ''),
     String(branding.priceColor    || ''),
+    String(branding.phone           || ''),
+    String(branding.email           || ''),
+    String(branding.address         || ''),
+    String(branding.website         || ''),
+    String(branding.socialInstagram || ''),
+    String(branding.socialFacebook  || ''),
+    String(branding.socialTwitter   || ''),
+    String(branding.socialWhatsapp  || ''),
+    String(branding.socialTiktok    || ''),
+    String(branding.socialYoutube   || ''),
     String(new Date().toISOString()),                    // updated_at
     String(menuId)
   );
@@ -1187,6 +1223,16 @@ function sanitizeBranding(body) {
     bgColor:      sanitizeColor(bgColor),
     cardBg:       sanitizeColor(cardBg),
     priceColor:   sanitizeColor(priceColor),
+    phone:           sanitizeStr(body.phone, 50),
+    email:           sanitizeStr(body.email, 200),
+    address:         sanitizeStr(body.address, 500),
+    website:         sanitizeStr(body.website, 500),
+    socialInstagram: sanitizeStr(body.socialInstagram, 500),
+    socialFacebook:  sanitizeStr(body.socialFacebook, 500),
+    socialTwitter:   sanitizeStr(body.socialTwitter, 500),
+    socialWhatsapp:  sanitizeStr(body.socialWhatsapp, 500),
+    socialTiktok:    sanitizeStr(body.socialTiktok, 500),
+    socialYoutube:   sanitizeStr(body.socialYoutube, 500),
   };
 }
 
@@ -1342,6 +1388,16 @@ app.get('/api/menus/:id', (req, res) => {
       bgColor: '',
       cardBg: '',
       priceColor: '',
+      phone: '+1 (555) 123-4567',
+      email: 'hello@bellavista.com',
+      address: '123 Main St, New York, NY 10001',
+      website: 'https://bellavista.com',
+      socialInstagram: 'https://instagram.com/bellavista',
+      socialFacebook: 'https://facebook.com/bellavista',
+      socialTwitter: '',
+      socialWhatsapp: '',
+      socialTiktok: '',
+      socialYoutube: '',
       createdAt: new Date().toISOString(),
       items: [
         {
@@ -1447,6 +1503,16 @@ app.get('/api/menus/:id', (req, res) => {
     bgColor:        menu.bg_color      || '',
     cardBg:         menu.card_bg       || '',
     priceColor:     menu.price_color   || '',
+    phone:           menu.phone            || '',
+    email:           menu.email            || '',
+    address:         menu.address          || '',
+    website:         menu.website          || '',
+    socialInstagram: menu.social_instagram || '',
+    socialFacebook:  menu.social_facebook  || '',
+    socialTwitter:   menu.social_twitter   || '',
+    socialWhatsapp:  menu.social_whatsapp  || '',
+    socialTiktok:    menu.social_tiktok    || '',
+    socialYoutube:   menu.social_youtube   || '',
     createdAt:      menu.created_at,
     items: rawItems.map(it => ({
       id:          it.id,

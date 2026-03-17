@@ -457,6 +457,91 @@
         </div>
       </div>
 
+      <!-- ── Contact & Social ────────────────────────────────────────── -->
+      <div class="space-y-4 p-4 bg-surface rounded-xl border border-primary/10">
+        <button onclick="toggleContactSection()"
+                class="flex items-center gap-2 text-sm font-semibold text-slate-300 w-full text-left">
+          <span class="material-symbols-outlined text-[16px] text-primary">contact_phone</span>
+          Contact &amp; Social Media
+          <span class="flex-1 h-px bg-slate-800 ml-1"></span>
+          <span id="contact-section-arrow" class="material-symbols-outlined text-[16px] text-slate-500 transition-transform">expand_more</span>
+        </button>
+        <div id="contact-section" class="hidden space-y-4">
+          <!-- Phone & Email -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm text-slate-400 mb-1.5">Phone</label>
+              <input id="contact-phone" type="tel" placeholder="+1 (555) 123-4567"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-400 mb-1.5">Email</label>
+              <input id="contact-email" type="email" placeholder="hello@restaurant.com"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <!-- Address -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Address</label>
+            <input id="contact-address" type="text" placeholder="123 Main St, City, State"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+          </div>
+          <!-- Website -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Website</label>
+            <input id="contact-website" type="url" placeholder="https://myrestaurant.com"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+          </div>
+
+          <hr class="border-slate-800"/>
+
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Social Media Links</p>
+          <!-- Instagram & Facebook -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">Instagram</label>
+              <input id="social-instagram" type="url" placeholder="https://instagram.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">Facebook</label>
+              <input id="social-facebook" type="url" placeholder="https://facebook.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <!-- Twitter/X & WhatsApp -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">Twitter / X</label>
+              <input id="social-twitter" type="url" placeholder="https://x.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">WhatsApp</label>
+              <input id="social-whatsapp" type="text" placeholder="https://wa.me/15551234567"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <!-- TikTok & YouTube -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">TikTok</label>
+              <input id="social-tiktok" type="url" placeholder="https://tiktok.com/@…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1.5">YouTube</label>
+              <input id="social-youtube" type="url" placeholder="https://youtube.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-600 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[12px]">info</span>
+            All fields are optional. Only filled fields will appear on the menu.
+          </p>
+        </div>
+      </div>
+
       <!-- upload btn -->
       <button id="upload-btn" onclick="uploadFile()"
               class="w-full h-12 bg-primary text-bg-dark font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -977,6 +1062,16 @@ function getBranding() {
     bgColor:      advColorCustom['bg-color-custom'] ? document.getElementById('bg-color-custom').value : '',
     cardBg:       advColorCustom['card-bg-custom']  ? document.getElementById('card-bg-custom').value  : '',
     priceColor:   advColorCustom['price-color']     ? document.getElementById('price-color').value     : '',
+    phone:           document.getElementById('contact-phone').value.trim(),
+    email:           document.getElementById('contact-email').value.trim(),
+    address:         document.getElementById('contact-address').value.trim(),
+    website:         document.getElementById('contact-website').value.trim(),
+    socialInstagram: document.getElementById('social-instagram').value.trim(),
+    socialFacebook:  document.getElementById('social-facebook').value.trim(),
+    socialTwitter:   document.getElementById('social-twitter').value.trim(),
+    socialWhatsapp:  document.getElementById('social-whatsapp').value.trim(),
+    socialTiktok:    document.getElementById('social-tiktok').value.trim(),
+    socialYoutube:   document.getElementById('social-youtube').value.trim(),
   };
 }
 
@@ -1170,6 +1265,13 @@ function toggleAdvancedColors() {
   arrow.style.transform = nowHidden ? '' : 'rotate(180deg)';
 }
 
+function toggleContactSection() {
+  const panel = document.getElementById('contact-section');
+  const arrow = document.getElementById('contact-section-arrow');
+  const nowHidden = panel.classList.toggle('hidden');
+  arrow.style.transform = nowHidden ? '' : 'rotate(180deg)';
+}
+
 function onAccentChange() {
   if (!advColorCustom['price-color']) {
     document.getElementById('price-color').value = document.getElementById('brand-color').value;
@@ -1263,6 +1365,18 @@ async function loadMenuForEditing(id) {
     }
 
     updateBrandPreview();
+
+    // Contact & Social
+    document.getElementById('contact-phone').value    = data.phone           || '';
+    document.getElementById('contact-email').value    = data.email           || '';
+    document.getElementById('contact-address').value  = data.address         || '';
+    document.getElementById('contact-website').value  = data.website         || '';
+    document.getElementById('social-instagram').value = data.socialInstagram || '';
+    document.getElementById('social-facebook').value  = data.socialFacebook  || '';
+    document.getElementById('social-twitter').value   = data.socialTwitter   || '';
+    document.getElementById('social-whatsapp').value  = data.socialWhatsapp  || '';
+    document.getElementById('social-tiktok').value    = data.socialTiktok    || '';
+    document.getElementById('social-youtube').value   = data.socialYoutube   || '';
 
     // Items
     extractedItems = data.items.map(it => ({
