@@ -319,72 +319,76 @@ const stmts = {
 
 const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
   stmts.insertMenu.run(
-    menuId,
-    restaurantName,
-    currency || 'USD',
-    branding.brandColor    || '#2dd4bf',
-    branding.logoUrl       || '',
-    branding.tagline       || '',
-    branding.fontStyle     || 'modern',
-    branding.bgStyle       || 'dark',
-    branding.showLogo      !== undefined ? branding.showLogo      : 1,
-    branding.showName      !== undefined ? branding.showName      : 1,
-    branding.headerLayout  || 'logo-left',
-    branding.textColor     || '',
-    branding.headingColor  || '',
-    branding.bgColor       || '',
-    branding.cardBg        || '',
-    branding.priceColor    || '',
-    new Date().toISOString()
+    String(menuId),
+    String(restaurantName),
+    String(currency || 'USD'),
+    String(branding.brandColor    || '#2dd4bf'),
+    String(branding.logoUrl       || ''),
+    String(branding.tagline       || ''),
+    String(branding.fontStyle     || 'modern'),
+    String(branding.bgStyle       || 'dark'),
+    Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
+    Number(branding.showName      !== undefined ? branding.showName      : 1),
+    String(branding.headerLayout  || 'logo-left'),
+    String(branding.textColor     || ''),
+    String(branding.headingColor  || ''),
+    String(branding.bgColor       || ''),
+    String(branding.cardBg        || ''),
+    String(branding.priceColor    || ''),
+    String(new Date().toISOString())
   );
 
   items.forEach((item, index) => {
+    // Ensure all values are SQLite-compatible types
+    const tags = Array.isArray(item.tags) ? item.tags : [];
     stmts.insertItem.run(
-      item.id || crypto.randomUUID(),
-      menuId,
-      item.name,
-      item.category || 'General',
-      item.price || 0,
-      item.description || '',
-      JSON.stringify(item.tags || []),
-      item.size || '',
-      item.sortOrder !== undefined ? item.sortOrder : index
+      String(item.id || crypto.randomUUID()),             // TEXT
+      String(menuId),                                     // TEXT
+      String(item.name),                                  // TEXT
+      String(item.category || 'General'),                 // TEXT
+      Number(item.price || 0),                            // REAL
+      String(item.description || ''),                     // TEXT
+      String(JSON.stringify(tags)),                       // TEXT (JSON)
+      String(item.size || ''),                            // TEXT
+      Number(item.sortOrder !== undefined ? item.sortOrder : index) // INTEGER
     );
   });
 });
 
 const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
   stmts.updateMenu.run(
-    restaurantName,
-    currency || 'USD',
-    branding.brandColor    || '#2dd4bf',
-    branding.logoUrl       || '',
-    branding.tagline       || '',
-    branding.fontStyle     || 'modern',
-    branding.bgStyle       || 'dark',
-    branding.showLogo      !== undefined ? branding.showLogo      : 1,
-    branding.showName      !== undefined ? branding.showName      : 1,
-    branding.headerLayout  || 'logo-left',
-    branding.textColor     || '',
-    branding.headingColor  || '',
-    branding.bgColor       || '',
-    branding.cardBg        || '',
-    branding.priceColor    || '',
-    menuId
+    String(restaurantName),
+    String(currency || 'USD'),
+    String(branding.brandColor    || '#2dd4bf'),
+    String(branding.logoUrl       || ''),
+    String(branding.tagline       || ''),
+    String(branding.fontStyle     || 'modern'),
+    String(branding.bgStyle       || 'dark'),
+    Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
+    Number(branding.showName      !== undefined ? branding.showName      : 1),
+    String(branding.headerLayout  || 'logo-left'),
+    String(branding.textColor     || ''),
+    String(branding.headingColor  || ''),
+    String(branding.bgColor       || ''),
+    String(branding.cardBg        || ''),
+    String(branding.priceColor    || ''),
+    String(menuId)
   );
 
-  stmts.deleteMenuItems.run(menuId);
+  stmts.deleteMenuItems.run(String(menuId));
   items.forEach((item, index) => {
+    // Ensure all values are SQLite-compatible types
+    const tags = Array.isArray(item.tags) ? item.tags : [];
     stmts.insertItem.run(
-      item.id || crypto.randomUUID(),
-      menuId,
-      item.name,
-      item.category || 'General',
-      item.price || 0,
-      item.description || '',
-      JSON.stringify(item.tags || []),
-      item.size || '',
-      item.sortOrder !== undefined ? item.sortOrder : index
+      String(item.id || crypto.randomUUID()),             // TEXT
+      String(menuId),                                     // TEXT
+      String(item.name),                                  // TEXT
+      String(item.category || 'General'),                 // TEXT
+      Number(item.price || 0),                            // REAL
+      String(item.description || ''),                     // TEXT
+      String(JSON.stringify(tags)),                       // TEXT (JSON)
+      String(item.size || ''),                            // TEXT
+      Number(item.sortOrder !== undefined ? item.sortOrder : index) // INTEGER
     );
   });
 });
@@ -762,7 +766,7 @@ function parseTextToItems(text) {
   return items;
 }
 
-/** Parse a CSV file into menu items */
+/** Parse a CSV file into menu items with proper data type validation */
 function parseCsvFile(filePath) {
   return new Promise((resolve, reject) => {
     const rawRows = [];
@@ -793,15 +797,22 @@ function parseCsvFile(filePath) {
           rawPrices.push(rawPriceStr);
           const price = parseFloat((rawPriceStr || '0').replace(/[^0-9.]/g, '')) || 0;
 
+          // Parse tags - ensure it's an array of strings
+          const tagsRaw = get(row, 'tags', 'label', 'labels', 'tag') || '';
+          let tags = [];
+          if (tagsRaw) {
+            tags = tagsRaw.split(/[,;|]/).map(t => String(t).trim()).filter(Boolean);
+          }
+
+          // Ensure all values are SQLite-compatible types (string, number, null)
           items.push({
-            id:          crypto.randomUUID(),
-            name,
-            category:    catRaw ? toTitleCase(catRaw) : 'General',
-            price,
-            description: get(row, 'description', 'desc', 'details', 'notes', 'ingredients') || '',
-            tags:        (get(row, 'tags', 'label', 'labels', 'tag') || '')
-              .split(/[,;|]/).map(t => t.trim()).filter(Boolean),
-            size:        get(row, 'size', 'portion', 'serving', 'serving size', 'weight', 'volume', 'variant') || '',
+            id:          String(crypto.randomUUID()),                    // TEXT
+            name:        String(name),                                   // TEXT
+            category:    String(catRaw ? toTitleCase(catRaw) : 'General'), // TEXT
+            price:       Number(price) || 0,                             // REAL (number)
+            description: String(get(row, 'description', 'desc', 'details', 'notes', 'ingredients') || ''), // TEXT
+            tags:        tags,                                           // Array of strings (will be JSON.stringify'd)
+            size:        String(get(row, 'size', 'portion', 'serving', 'serving size', 'weight', 'volume', 'variant') || ''), // TEXT
           });
         }
         const detectedCurrency = detectCurrency([...rawPrices, ...Object.keys(rawRows[0] || {})]);
