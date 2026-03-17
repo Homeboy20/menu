@@ -214,6 +214,25 @@ app.get('/api/auth/check', (req, res) => {
   res.json({ authenticated: isValidSession(token) });
 });
 
+// GET /api/health  – health check for containers/monitoring
+app.get('/api/health', (_req, res) => {
+  try {
+    // Check database connectivity
+    db.prepare('SELECT 1').get();
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      version: require('./package.json').version 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'unhealthy', 
+      error: err.message,
+      timestamp: new Date().toISOString() 
+    });
+  }
+});
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

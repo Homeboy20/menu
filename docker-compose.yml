@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  restaurant-menu:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=http://localhost:3000
+      - ADMIN_SECRET_HASH=$2b$12$ogZ6ks85LLo5mFHjUgUAWOwt8U0akxiVavATYeCA5cJc2ZWhym7r.
+      - SESSION_TTL_MS=28800000
+      - LOGIN_RATE_LIMIT=10
+    volumes:
+      - menu_data:/app/data
+      - menu_uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  menu_data:
+    driver: local
+  menu_uploads:
+    driver: local
