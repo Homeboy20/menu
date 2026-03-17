@@ -202,6 +202,13 @@ app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8–10 MB enco
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+// ── Static routes ──────────────────────────────────────────────────────────────
+
+// GET /  – serve landing page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // ── Auth routes ────────────────────────────────────────────────────────────────
 
 // POST /api/auth/login  { secret } → { token }
@@ -998,7 +1005,94 @@ app.get('/api/menus', (_req, res) => {
 
 // GET /api/menus/:id  – get a single menu (used by customer page)
 app.get('/api/menus/:id', (req, res) => {
-  const menu = stmts.getMenu.get(req.params.id);
+  const { id } = req.params;
+  
+  // Handle demo menu - no database lookup needed
+  if (id === 'demo') {
+    return res.json({
+      id: 'demo',
+      restaurantName: 'Bella Vista Restaurant',
+      currency: 'USD',
+      brandColor: '#222222',
+      logoUrl: '',
+      tagline: 'Authentic Italian Cuisine',
+      fontStyle: 'elegant',
+      bgStyle: 'light',
+      showLogo: 1,
+      showName: 1,  
+      headerLayout: 'logo-left',
+      textColor: '',
+      headingColor: '',
+      bgColor: '',
+      cardBg: '',
+      priceColor: '',
+      createdAt: new Date().toISOString(),
+      items: [
+        {
+          id: 'demo-1',
+          name: 'Margherita Pizza',
+          category: 'Pizza',
+          price: 18.00,
+          description: 'Fresh mozzarella, basil, San Marzano tomato sauce on our signature wood-fired crust',
+          tags: ['vegetarian', 'classic'],
+          size: 'Large (12")',
+          sortOrder: 1
+        },
+        {
+          id: 'demo-2', 
+          name: 'Caesar Salad',
+          category: 'Salads',
+          price: 12.50,
+          description: 'Crispy romaine lettuce, parmesan cheese, house-made croutons with classic Caesar dressing',
+          tags: ['vegetarian'],
+          size: 'Regular',
+          sortOrder: 2
+        },
+        {
+          id: 'demo-3',
+          name: 'Grilled Salmon',
+          category: 'Main Course', 
+          price: 26.00,
+          description: 'Atlantic salmon fillet with seasonal roasted vegetables and lemon herb butter',
+          tags: ['healthy', 'gluten-free'],
+          size: '8oz',
+          sortOrder: 3
+        },
+        {
+          id: 'demo-4',
+          name: 'Tiramisu',
+          category: 'Desserts',
+          price: 8.50,
+          description: 'Traditional Italian dessert with mascarpone, coffee-soaked ladyfingers and cocoa',
+          tags: ['classic', 'coffee'],
+          size: 'Individual',
+          sortOrder: 4
+        },
+        {
+          id: 'demo-5',
+          name: 'Bruschetta',
+          category: 'Appetizers',
+          price: 9.00,
+          description: 'Toasted artisan bread topped with fresh tomatoes, basil, garlic and extra virgin olive oil',
+          tags: ['vegetarian', 'vegan'],
+          size: '3 pieces',
+          sortOrder: 5
+        },
+        {
+          id: 'demo-6',
+          name: 'House Wine',
+          category: 'Beverages',
+          price: 7.50,
+          description: 'Italian red or white wine by the glass',
+          tags: ['alcohol'],
+          size: '5oz glass',
+          sortOrder: 6
+        }
+      ]
+    });
+  }
+  
+  const menu = stmts.getMenu.get(id);
   if (!menu) return res.status(404).json({ error: 'Menu not found.' });
   const rawItems = stmts.getItems.all(req.params.id);
   res.json({
