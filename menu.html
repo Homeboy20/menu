@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
-<meta name="theme-color" content="#fdf9f4"/>
+<meta name="theme-color" content="#FFF4E6"/>
 <title>Menu</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -15,22 +15,23 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/*  Design tokens — light (pale white + dark charcoal)  */
+/*  Design tokens — Pastry shop warm theme  */
 :root {
-  --brand:  #222222;
-  --bg:     #fafafa;
-  --surf:   #eeeeee;
-  --text:   #595959;
-  --head:   #1a1a1a;
-  --price:  #222222;
-  --border: rgba(0,0,0,.1);
-  --shadow: rgba(0,0,0,.07);
+  --brand:  #FF9800;
+  --bg:     #FFF4E6;
+  --surf:   #FFFFFF;
+  --text:   #757575;
+  --head:   #212121;
+  --price:  #FF9800;
+  --border: rgba(0,0,0,.08);
+  --shadow: rgba(255, 152, 0, .08);
   --safe-t: env(safe-area-inset-top,    0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
-  --topbar-bg: rgba(250,250,250,.97);
-  --hero-grad: #e4e4e4;
-  --sk-mid: #d8d8d8;
-  --outside-bg: #dcdcdc;
+  --topbar-bg: rgba(255,244,230,.97);
+  --hero-grad: #FFE5CC;
+  --sk-mid: #FFE0B2;
+  --outside-bg: #FFECB3;
+  --accent-light: #FFF3E0;
 }
 
 /* Base dark-mode vars — dark (dark grey + pale white)  */
@@ -206,7 +207,7 @@ body   {
 
 /*  Items container  */
 #items-container {
-  padding-bottom: calc(48px + var(--safe-b));
+  padding-bottom: calc(100px + var(--safe-b));
 }
 
 /*  Category section  */
@@ -214,78 +215,100 @@ body   {
 
 .cat-header {
   display: flex; align-items: center; gap: 10px;
-  padding: 22px 16px 10px;
+  padding: 24px 16px 12px;
 }
 .cat-icon {
-  width: 34px; height: 34px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 0; height: 0; display: none;
 }
 .cat-label {
-  flex: 1; font-size: 11px; font-weight: 800;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: var(--head);
+  flex: 1; font-size: 11px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: #9E9E9E;
 }
 .cat-count {
-  font-size: 10px; font-weight: 700;
-  padding: 3px 10px; border-radius: 50px;
+  display: none;
 }
 
 /*  Items group card  */
 .items-group {
-  margin: 0 12px 4px;
-  border-radius: 16px; overflow: hidden;
-  border: 1px solid rgba(0,0,0,.07);
+  margin: 0 16px 12px;
+  border-radius: 20px;
   background: var(--surf);
-  box-shadow: 0 1px 4px rgba(0,0,0,.05), 0 4px 20px rgba(0,0,0,.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
+  overflow: hidden;
 }
 
 /*  Item row  */
 .item-row {
-  display: flex; align-items: flex-start;
-  padding: 14px 16px 14px 20px;
-  border-bottom: 1px solid rgba(0,0,0,.06);
-  position: relative; min-height: 60px;
-  transition: background .1s;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(0,0,0,.05);
+  position: relative;
+  transition: background .15s;
 }
 .item-row:last-child { border-bottom: none; }
-.item-row:hover   { background: rgba(0,0,0,.018); }
-.item-row:active  { background: rgba(0,0,0,.032); }
+.item-row:hover   { background: rgba(255, 152, 0, .02); }
+.item-row:active  { background: rgba(255, 152, 0, .04); }
 
-/* Colored left bar */
-.item-accent {
-  position: absolute; left: 0; top: 11px; bottom: 11px;
-  width: 3px; border-radius: 0 3px 3px 0;
-}
 .item-body { flex: 1; min-width: 0; }
+
 .item-top  {
   display: flex; align-items: flex-start;
-  justify-content: space-between; gap: 10px;
+  justify-content: space-between; gap: 8px;
+  margin-bottom: 4px;
 }
 .item-name {
   flex: 1; min-width: 0;
-  font-size: 15px; font-weight: 700;
-  color: var(--head); line-height: 1.3; word-break: break-word;
+  font-size: 16px; font-weight: 600;
+  color: var(--head); line-height: 1.3;
 }
 .item-price {
-  flex-shrink: 0; font-size: 13px; font-weight: 800;
-  padding: 3px 10px; border-radius: 8px;
-  white-space: nowrap; letter-spacing: -.2px;
-  font-variant-numeric: tabular-nums; align-self: flex-start;
-}
-.item-size {
-  display: inline-block; font-size: 10px; font-weight: 700;
-  padding: 2px 8px; border-radius: 5px; margin-top: 5px;
+  flex-shrink: 0; font-size: 14px; font-weight: 700;
+  color: var(--price);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .item-desc {
-  font-size: 12.5px; line-height: 1.55; color: var(--text); margin-top: 5px;
+  font-size: 13px; line-height: 1.4; color: var(--text); 
+  margin-bottom: 2px;
   display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
 }
-.item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.item-quantity {
+  font-size: 14px; font-weight: 600;
+  color: var(--head);
+  margin-bottom: 2px;
+}
+.item-image {
+  width: 72px; height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--accent-light);
+}
+.item-image-placeholder {
+  width: 72px; height: 72px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.item-image-placeholder span {
+  font-size: 32px;
+  color: rgba(255, 152, 0, .5);
+}
+
+/* Size and tags (kept for compatibility but less prominent) */
+.item-size {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px; margin-top: 4px;
+  background: var(--accent-light); color: var(--price);
+}
+.item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .tag-chip  {
-  font-size: 10px; font-weight: 700;
-  padding: 2px 8px; border-radius: 50px;
+  font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+  background: var(--accent-light); color: var(--price);
 }
 
 /*  Skeleton  */
@@ -309,6 +332,46 @@ body   {
   0%   { box-shadow: 0 0 0 0    rgba(0,0,0,.3); }
   70%  { box-shadow: 0 0 0 12px rgba(0,0,0,0); }
   100% { box-shadow: 0 0 0 0    rgba(0,0,0,0); }
+}
+
+/*  Checkout Button  */
+#checkout-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  padding-bottom: calc(16px + var(--safe-b));
+  background: var(--bg);
+  box-shadow: 0 -4px 12px rgba(0,0,0,.08);
+  z-index: 50;
+}
+#checkout-btn {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, .3);
+  transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
+}
+#checkout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, .4);
+}
+#checkout-btn:active {
+  transform: translateY(0);
 }
 
 /*  Footer  */
@@ -423,6 +486,14 @@ body   {
 
   <!--  Items  -->
   <div id="items-container"></div>
+
+  <!--  Checkout Bar  -->
+  <div id="checkout-bar">
+    <button id="checkout-btn">
+      <span>CHECKOUT</span>
+      <span>•2,20€</span>
+    </button>
+  </div>
 
   <!--  Footer  -->
   <div id="footer">
@@ -803,11 +874,7 @@ function buildSection(cat, items, idx) {
   return `
     <div class="cat-section" style="animation-delay:${idx * 45}ms">
       <div class="cat-header">
-        <div class="cat-icon" style="background:${c.hex}18">
-          <span class="material-symbols-outlined" style="color:${c.hex};font-size:18px">${c.icon}</span>
-        </div>
         <span class="cat-label">${esc(cat)}</span>
-        <span class="cat-count" style="background:${c.hex}15;color:${c.hex}">${items.length}</span>
       </div>
       <div class="items-group">${items.map(it => buildItem(it, c)).join('')}</div>
     </div>`;
@@ -817,22 +884,22 @@ function buildSection(cat, items, idx) {
 function buildItem(item, c) {
   const price = parseFloat(item.price);
   const hasPx = !isNaN(price) && price > 0;
-  const pxStr = hasPx ? menuCurrency + price.toFixed(2) : '';
-  const tags  = Array.isArray(item.tags) ? item.tags.slice(0, 4) : [];
+  const pxStr = hasPx ? 'from ' + menuCurrency + price.toFixed(2).replace('.00', '') : '';
   const desc  = (item.description || '').trim();
-  const size  = (item.size || '').trim();
-  const alpha = c.hex + '16';
+  
+  // Get item icon based on category
+  let itemIcon = 'restaurant';
+  if (c.icon) itemIcon = c.icon;
+  
   return `
     <div class="item-row">
-      <div class="item-accent" style="background:${c.hex}"></div>
       <div class="item-body">
-        <div class="item-top">
-          <span class="item-name">${esc(item.name)}</span>
-          ${hasPx ? `<span class="item-price" style="background:${alpha};color:${c.hex}">${esc(pxStr)}</span>` : ''}
-        </div>
-        ${size ? `<div class="item-size" style="background:${alpha};color:${c.hex}">${esc(size)}</div>` : ''}
+        <div class="item-name">${esc(item.name)}</div>
         ${desc ? `<div class="item-desc">${esc(desc)}</div>` : ''}
-        ${tags.length ? `<div class="item-tags">${tags.map(t => `<span class="tag-chip" style="background:${alpha};color:${c.hex}">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${hasPx ? `<div class="item-price">${esc(pxStr)}</div>` : ''}
+      </div>
+      <div class="item-image-placeholder">
+        <span class="material-symbols-outlined">${itemIcon}</span>
       </div>
     </div>`;
 }
@@ -842,22 +909,17 @@ function showSkeleton() {
   document.getElementById('items-container').innerHTML = [0, 1, 2].map(i => `
     <div class="cat-section" style="animation-delay:${i * 80}ms">
       <div class="cat-header">
-        <div class="sk" style="width:34px;height:34px;border-radius:10px;flex-shrink:0"></div>
-        <div class="sk" style="height:11px;width:90px;border-radius:4px;flex:1;margin-left:10px"></div>
-        <div class="sk" style="height:22px;width:28px;border-radius:50px"></div>
+        <div class="sk" style="height:11px;width:90px;border-radius:4px"></div>
       </div>
       <div class="items-group">
         ${[0, 1, 2].map(() => `
           <div class="item-row">
-            <div style="position:absolute;left:0;top:11px;bottom:11px;width:3px;
-                        border-radius:0 3px 3px 0;background:rgba(0,0,0,.06)"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-                <div class="sk" style="height:15px;width:50%;border-radius:5px"></div>
-                <div class="sk" style="height:26px;width:58px;border-radius:8px;flex-shrink:0"></div>
-              </div>
-              <div class="sk" style="height:12px;width:70%;border-radius:4px"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+              <div class="sk" style="height:16px;width:60%;border-radius:5px"></div>
+              <div class="sk" style="height:13px;width:80%;border-radius:4px"></div>
+              <div class="sk" style="height:14px;width:40%;border-radius:4px"></div>
             </div>
+            <div class="sk" style="width:72px;height:72px;border-radius:12px;flex-shrink:0"></div>
           </div>`).join('')}
       </div>
     </div>`).join('');
