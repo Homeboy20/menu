@@ -434,6 +434,17 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 // ── Static routes ──────────────────────────────────────────────────────────────
 
+// Health check endpoint for deployment platforms
+app.get('/health', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+    version: '1.3.1'
+  });
+});
+
 // GET /  – serve landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
