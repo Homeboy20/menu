@@ -55,7 +55,8 @@ html[data-theme="light"] {
 
 /* Smooth theme transitions */
 body, #app, #topbar, #search-drawer, #hero, #cat-nav,
-.items-group, .item-row, .tab-pill, .icon-btn, #footer {
+.items-group, .item-row, .tab-pill, .icon-btn, #footer,
+#bottom-nav, .bnav-item, #cat-sheet {
   transition: background-color .25s, border-color .2s, color .18s, box-shadow .2s;
 }
 
@@ -327,9 +328,132 @@ html[data-theme="light"] .tab-active { color: #121212; }
   gap: 16px; padding: 32px; text-align: center;
 }
 
+/*  Bottom Navigation Bar (mobile app)  */
+@keyframes slideUpNav {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+#bottom-nav {
+  display: flex;
+  position: fixed;
+  bottom: calc(12px + var(--safe-b));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: rgba(20,20,20,.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 28px;
+  border: 1px solid rgba(201,162,39,.12);
+  padding: 4px 6px;
+  gap: 2px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  animation: slideUpNav .45s cubic-bezier(.32,.72,0,1) .3s both;
+}
+html[data-theme="light"] #bottom-nav {
+  background: rgba(255,255,255,.92);
+  border-color: rgba(0,0,0,.06);
+  box-shadow: 0 4px 24px rgba(0,0,0,.1);
+}
+
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 7px 14px 5px;
+  border: none;
+  background: transparent;
+  border-radius: 22px;
+  cursor: pointer;
+  color: #666666;
+  font-family: inherit;
+  transition: background .2s, color .2s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bnav-item .material-symbols-outlined { font-size: 22px; }
+.bnav-label { font-size: 9px; font-weight: 600; letter-spacing: .03em; }
+.bnav-item:active { transform: scale(.88); }
+.bnav-active {
+  color: var(--brand);
+  background: rgba(201,162,39,.12);
+}
+html[data-theme="light"] .bnav-item { color: #aaaaaa; }
+html[data-theme="light"] .bnav-active { color: var(--brand); background: rgba(201,162,39,.1); }
+
+/*  Category Bottom Sheet  */
+#cat-sheet-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(0,0,0,.6);
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+#cat-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+
+#cat-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 71;
+  background: var(--surf);
+  border-radius: 20px 20px 0 0;
+  padding: 8px 16px calc(20px + var(--safe-b));
+  max-height: 65vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform .38s cubic-bezier(.32,.72,0,1);
+  box-shadow: 0 -4px 32px rgba(0,0,0,.3);
+}
+#cat-sheet.open { transform: translateY(0); }
+#cat-sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,.15);
+  border-radius: 2px;
+  margin: 4px auto 14px;
+}
+html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
+#cat-sheet-title {
+  font-size: 15px; font-weight: 700;
+  color: var(--head);
+  padding: 0 4px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.cat-sheet-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s;
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-sheet-item:active { background: rgba(201,162,39,.08); }
+.cs-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cs-name { font-size: 15px; font-weight: 600; color: var(--head); flex: 1; }
+.cs-count {
+  font-size: 12px; font-weight: 500; color: var(--text);
+  background: var(--accent-light); padding: 2px 8px; border-radius: 10px;
+}
+.cs-active { background: rgba(201,162,39,.08); }
+.cs-active .cs-name { color: var(--brand); }
+.cs-active .cs-count { background: rgba(201,162,39,.15); color: var(--brand); }
+
 /* 
    RESPONSIVE LAYOUT
  */
+
+/* Mobile app: <768px */
+@media (max-width: 767px) {
+  #topbar .icon-btn { display: none; }
+  #topbar-name { font-size: 16px; font-weight: 800; }
+  #items-container { padding-bottom: calc(100px + var(--safe-b)); }
+  #footer { padding-bottom: calc(90px + var(--safe-b)); }
+}
 
 /* Desktop: 768px+  */
 @media (min-width: 768px) {
@@ -341,6 +465,7 @@ html[data-theme="light"] .tab-active { color: #121212; }
   .cat-header  { padding: 20px 24px 8px; }
   .item-row    { padding: 14px 24px; }
   .items-group { border-radius: 0; }
+  #bottom-nav, #cat-sheet-overlay, #cat-sheet { display: none !important; }
 }
 
 /* Large desktop: 1024px+  */
@@ -419,6 +544,34 @@ html[data-theme="light"] .tab-active { color: #121212; }
   </div>
 
 </div><!-- #app -->
+
+<!-- Bottom Navigation (mobile) -->
+<nav id="bottom-nav">
+  <button class="bnav-item bnav-active" data-nav="menu" onclick="navTo('menu')">
+    <span class="material-symbols-outlined">restaurant_menu</span>
+    <span class="bnav-label">Menu</span>
+  </button>
+  <button class="bnav-item" data-nav="categories" onclick="navTo('categories')">
+    <span class="material-symbols-outlined">category</span>
+    <span class="bnav-label">Categories</span>
+  </button>
+  <button class="bnav-item" data-nav="search" onclick="navTo('search')">
+    <span class="material-symbols-outlined">search</span>
+    <span class="bnav-label">Search</span>
+  </button>
+  <button class="bnav-item" data-nav="theme" onclick="navTo('theme')">
+    <span class="material-symbols-outlined" id="bnav-theme-icon">light_mode</span>
+    <span class="bnav-label">Theme</span>
+  </button>
+</nav>
+
+<!-- Category Bottom Sheet -->
+<div id="cat-sheet-overlay" onclick="closeCatSheet();updateNavActive('menu')"></div>
+<div id="cat-sheet">
+  <div id="cat-sheet-handle"></div>
+  <div id="cat-sheet-title">Categories</div>
+  <div id="cat-sheet-list"></div>
+</div>
 
 <!--  Error state  -->
 <div id="error-state">
@@ -520,6 +673,7 @@ function toggleSearch() {
   document.documentElement.dataset.theme = userTheme;
   const icon = document.getElementById('theme-icon');
   if (icon) icon.textContent = userTheme === 'dark' ? 'light_mode' : 'dark_mode';
+  syncBnavThemeIcon();
 })();
 
 //  Boot 
@@ -552,6 +706,7 @@ function toggleTheme() {
     document.documentElement.dataset.theme = userTheme;
     const icon = document.getElementById('theme-icon');
     if (icon) icon.textContent = userTheme === 'dark' ? 'light_mode' : 'dark_mode';
+    syncBnavThemeIcon();
   }
 }
 
@@ -606,6 +761,7 @@ function applyBranding(data) {
   document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
   const themeIcon = document.getElementById('theme-icon');
   if (themeIcon) themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+  syncBnavThemeIcon();
 
   const color    = data.brandColor   || '#C9A227';
   const bgCol    = data.bgColor      || pal.bg;
@@ -660,6 +816,10 @@ function applyBranding(data) {
     #footer{color:${isDark?'#555555':'#999999'}!important;border-top-color:${dvL}!important;}
     @media(min-width:768px){body{background:${bodyOutside}!important;}}
     html{--topbar-bg:${topBg};--hero-grad:${heroCol};--sk-mid:${skMid};--outside-bg:${bodyOutside};}
+    #bottom-nav{background:${isDark?'rgba(20,20,20,.88)':'rgba(255,255,255,.92)'}!important;border-color:${color}18!important;}
+    .bnav-active{color:${color}!important;background:${color}15!important;}
+    #cat-sheet{background:${surfCol}!important;}
+    #cat-sheet-handle{background:${isDark?'rgba(255,255,255,.15)':'rgba(0,0,0,.12)'}!important;}
   `;
 
   if (fontKey !== 'modern') {
@@ -840,8 +1000,71 @@ function showSkeleton() {
 //  Error 
 function showError(msg) {
   document.getElementById('app').style.display = 'none';
+  const bnav = document.getElementById('bottom-nav');
+  if (bnav) bnav.style.display = 'none';
   document.getElementById('error-msg').textContent = msg;
   document.getElementById('error-state').style.display = 'flex';
+}
+
+//  Bottom Navigation 
+function navTo(tab) {
+  if (tab === 'menu') {
+    closeCatSheet();
+    if (searchOpen) toggleSearch();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateNavActive('menu');
+  } else if (tab === 'categories') {
+    if (searchOpen) toggleSearch();
+    openCatSheet();
+    updateNavActive('categories');
+  } else if (tab === 'search') {
+    closeCatSheet();
+    toggleSearch();
+    updateNavActive(searchOpen ? 'search' : 'menu');
+  } else if (tab === 'theme') {
+    toggleTheme();
+  }
+}
+
+function updateNavActive(tab) {
+  document.querySelectorAll('.bnav-item').forEach(b => {
+    b.classList.toggle('bnav-active', b.dataset.nav === tab);
+  });
+}
+
+function syncBnavThemeIcon() {
+  const i = document.getElementById('bnav-theme-icon');
+  if (i) i.textContent = document.documentElement.dataset.theme === 'dark' ? 'light_mode' : 'dark_mode';
+}
+
+function openCatSheet() {
+  const cats = ['All', ...new Set(allItems.map(it => it.category || 'Other'))];
+  const list = document.getElementById('cat-sheet-list');
+  if (list) {
+    list.innerHTML = cats.map(c => {
+      const col = c === 'All' ? null : catColor(c);
+      const count = c === 'All' ? allItems.length : allItems.filter(it => (it.category || 'Other') === c).length;
+      const isActive = c === activeCategory;
+      return `<button class="cat-sheet-item${isActive?' cs-active':''}" onclick="selectSheetCat('${esc(c)}')">
+        <span class="cs-dot" style="background:${col ? col.hex : 'var(--brand)'}"></span>
+        <span class="cs-name">${esc(c)}</span>
+        <span class="cs-count">${count}</span>
+      </button>`;
+    }).join('');
+  }
+  document.getElementById('cat-sheet-overlay')?.classList.add('open');
+  document.getElementById('cat-sheet')?.classList.add('open');
+}
+
+function closeCatSheet() {
+  document.getElementById('cat-sheet-overlay')?.classList.remove('open');
+  document.getElementById('cat-sheet')?.classList.remove('open');
+}
+
+function selectSheetCat(cat) {
+  setCategory(cat);
+  closeCatSheet();
+  updateNavActive('menu');
 }
 </script>
 </body>
