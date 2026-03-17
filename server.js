@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express      = require('express');
+const compression  = require('compression');
 const multer       = require('multer');
 const path         = require('path');
 const fs           = require('fs');
@@ -99,6 +100,56 @@ const loginLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
+// ── Performance & Compression Middleware ──────────────────────────────────────
+// High-performance compression with optimal settings
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  level: 6,           // Good balance of compression vs CPU
+  threshold: 1024,    // Only compress files > 1KB
+  memLevel: 8         // Higher memory for better compression
+}));
+
+// Performance monitoring middleware
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  
+  res.on('finish', () => {
+    const end = process.hrtime.bigint();
+    const responseTime = Number(end - start) / 1000000; // Convert to ms
+    
+    if (responseTime > 100) { // Log slow requests
+      console.log(`⚠️  Slow request: ${req.method} ${req.path} - ${responseTime.toFixed(2)}ms`);
+    }
+  });
+  
+  next();
+});
+
+// Static file caching and optimization
+app.use(express.static('.', {
+  maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0', // 1 year cache in production
+  etag: true,
+  lastModified: true,
+  immutable: true,
+  setHeaders: (res, path) => {
+    // Cache HTML files for shorter periods
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+    }
+    // Cache CSS/JS for longer
+    if (path.endsWith('.css') || path.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+    }
+    // Enable compression for text files
+    if (path.match(/\.(html|css|js|json|svg)$/)) {
+      res.setHeader('Content-Encoding', 'gzip');
+    }
+  }
+}));
+
 app.use('/api/', apiLimiter);
 
 // ── Auth middleware (protects write routes) ────────────────────────────────────
@@ -114,11 +165,54 @@ const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const DATA_DIR    = path.join(__dirname, 'data');
 [UPLOADS_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
 
-// ── SQLite database ───────────────────────────────────────────────────────────
+// ── Optimized SQLite database ────────────────────────────────────────────────
 const DB_PATH = path.join(DATA_DIR, 'menus.db');
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');   // better concurrent read performance
+const db = new Database(DB_PATH, { 
+  verbose: process.env.NODE_ENV === 'development' ? console.log : null 
+});
+
+// Performance optimizations
+db.pragma('journal_mode = WAL');        // Better concurrent read performance
+db.pragma('synchronous = NORMAL');      // Faster writes with reasonable safety
+db.pragma('cache_size = 10000');        // 10MB cache for better performance  
+db.pragma('temp_store = memory');       // Store temp data in memory
+db.pragma('mmap_size = 134217728');     // 128MB memory-mapped I/O
 db.pragma('foreign_keys = ON');
+
+// Prepared statements for better performance
+const prepared = {
+  getMenu: db.prepare('SELECT * FROM menus WHERE id = ?'),
+  getMenuItems: db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY sort_order ASC, name ASC'),
+  getAllMenus: db.prepare('SELECT id, restaurant_name, created_at, currency FROM menus ORDER BY created_at DESC'),
+  insertMenu: db.prepare('INSERT INTO menus (id, restaurant_name, created_at, currency, brand_color, logo_url, tagline, font_style, bg_style) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+  updateMenu: db.prepare('UPDATE menus SET restaurant_name = ?, currency = ?, brand_color = ?, logo_url = ?, tagline = ?, font_style = ?, bg_style = ? WHERE id = ?'),
+  deleteMenu: db.prepare('DELETE FROM menus WHERE id = ?'),
+  insertItem: db.prepare('INSERT INTO menu_items (id, menu_id, name, category, price, description, tags, sort_order, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
+  updateItem: db.prepare('UPDATE menu_items SET name = ?, category = ?, price = ?, description = ?, tags = ?, sort_order = ?, size = ? WHERE id = ?'),
+  deleteItem: db.prepare('DELETE FROM menu_items WHERE id = ?')
+};
+
+// Cache frequently accessed data
+const menuCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCachedMenu(menuId) {
+  const cached = menuCache.get(menuId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedMenu(menuId, data) {
+  menuCache.set(menuId, { data, timestamp: Date.now() });
+  // Cleanup old cache entries
+  if (menuCache.size > 100) {
+    const oldest = Array.from(menuCache.entries())
+      .sort(([,a], [,b]) => a.timestamp - b.timestamp)[0];
+    menuCache.delete(oldest[0]);
+  }
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS menus (
@@ -994,21 +1088,37 @@ app.post('/api/menus', requireAuth, async (req, res) => {
 
 // GET /api/menus  – list all saved menus
 app.get('/api/menus', (_req, res) => {
-  const rows = stmts.listMenus.all();
-  res.json(rows.map(r => ({
-    id:             r.id,
-    restaurantName: r.restaurant_name,
-    itemCount:      r.item_count,
-    createdAt:      r.created_at,
-  })));
+  const start = performance.now();
+  
+  try {
+    const rows = stmts.listMenus.all();
+    const responseTime = performance.now() - start;
+    
+    if (responseTime > 50) {
+      console.log(`⚡ Slow query - getAllMenus: ${responseTime.toFixed(2)}ms`);
+    }
+    
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.json(rows.map(r => ({
+      id:             r.id,
+      restaurantName: r.restaurant_name,
+      itemCount:      r.item_count || 0,
+      createdAt:      r.created_at,
+    })));
+  } catch (error) {
+    console.error('❌ Error fetching menus:', error);
+    res.status(500).json({ error: 'Failed to fetch menus' });
+  }
 });
 
-// GET /api/menus/:id  – get a single menu (used by customer page)
+// GET /api/menus/:id  – get a single menu (optimized with caching)
 app.get('/api/menus/:id', (req, res) => {
   const { id } = req.params;
+  const start = performance.now();
   
   // Handle demo menu - no database lookup needed
   if (id === 'demo') {
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hour cache for demo
     return res.json({
       id: 'demo',
       restaurantName: 'Bella Vista Restaurant',
@@ -1092,22 +1202,41 @@ app.get('/api/menus/:id', (req, res) => {
     });
   }
   
-  const menu = stmts.getMenu.get(id);
-  if (!menu) return res.status(404).json({ error: 'Menu not found.' });
-  const rawItems = stmts.getItems.all(req.params.id);
-  res.json({
-    id:             menu.id,
-    restaurantName: menu.restaurant_name,
-    currency:       menu.currency || 'USD',
-    brandColor:     menu.brand_color || '#2dd4bf',
-    logoUrl:        menu.logo_url || '',
-    tagline:        menu.tagline || '',
-    fontStyle:      menu.font_style || 'modern',
-    bgStyle:        menu.bg_style || 'dark',
-    showLogo:       menu.show_logo     !== null ? menu.show_logo     : 1,
-    showName:       menu.show_name     !== null ? menu.show_name     : 1,
-    headerLayout:   menu.header_layout || 'logo-left',
-    textColor:      menu.text_color    || '',
+  try {
+    // Check cache first
+    const cached = getCachedMenu(id);
+    if (cached) {
+      console.log(`🎯 Cache hit for menu: ${id}`);
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      return res.json(cached);
+    }
+    
+    // Database lookup with optimized prepared statements
+    const menu = stmts.getMenu.get(id);
+    if (!menu) {
+      return res.status(404).json({ error: 'Menu not found.' });
+    }
+    
+    const rawItems = stmts.getItems.all(id);
+    const responseTime = performance.now() - start;
+    
+    if (responseTime > 100) {
+      console.log(`⚡ Slow menu query for ${id}: ${responseTime.toFixed(2)}ms`);
+    }
+    
+    const menuData = {
+      id:             menu.id,
+      restaurantName: menu.restaurant_name,
+      currency:       menu.currency || 'USD',
+      brandColor:     menu.brand_color || '#2dd4bf',
+      logoUrl:        menu.logo_url || '',
+      tagline:        menu.tagline || '',
+      fontStyle:      menu.font_style || 'modern',
+      bgStyle:        menu.bg_style || 'dark',
+      showLogo:       menu.show_logo     !== null ? menu.show_logo     : 1,
+      showName:       menu.show_name     !== null ? menu.show_name     : 1,
+      headerLayout:   menu.header_layout || 'logo-left',
+      textColor:      menu.text_color    || '',
     headingColor:   menu.heading_color || '',
     bgColor:        menu.bg_color      || '',
     cardBg:         menu.card_bg       || '',
@@ -1121,8 +1250,19 @@ app.get('/api/menus/:id', (req, res) => {
       description: it.description,
       tags:        JSON.parse(it.tags || '[]'),
       size:        it.size || '',
-    })),
-  });
+    }))
+    };
+    
+    // Cache the result
+    setCachedMenu(id, menuData);
+    
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.json(menuData);
+    
+  } catch (error) {
+    console.error(`❌ Error fetching menu ${id}:`, error);
+    res.status(500).json({ error: 'Failed to fetch menu' });
+  }
 });
 
 // PUT /api/menus/:id  – update an existing menu (items + branding)

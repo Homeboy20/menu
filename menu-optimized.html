@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#fdf9f4"/>
+<title>Menu</title>
+
+<!-- Preconnect to external resources for faster loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Critical CSS inlined for above-the-fold content -->
+<style>
+/* Critical styles - loaded immediately */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --brand: #222222; --bg: #fafafa; --surf: #eeeeee; --text: #595959;
+  --head: #1a1a1a; --price: #222222; --border: rgba(0,0,0,.1);
+  --shadow: rgba(0,0,0,.07); --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px); --topbar-bg: rgba(250,250,250,.97);
+  --hero-grad: #e4e4e4; --sk-mid: #d8d8d8; --outside-bg: #dcdcdc;
+}
+
+html[data-theme="dark"] {
+  --brand: #d8d8d8; --bg: #1e1e1e; --surf: #272727; --text: #909090;
+  --head: #e8e8e8; --price: #d8d8d8; --border: rgba(255,255,255,.1);
+  --shadow: rgba(0,0,0,.4); --topbar-bg: rgba(30,30,30,.97);
+  --hero-grad: #232323; --sk-mid: #303030; --outside-bg: #141414;
+}
+
+html { height: 100%; }
+body { 
+  min-height: 100%; font-family: 'Work Sans', sans-serif; 
+  background: var(--bg); color: var(--text); 
+  -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; 
+}
+
+#app { width: 100%; max-width: 1120px; margin: 0 auto; min-height: 100dvh; background: var(--bg); }
+
+/* Critical topbar styles */
+#topbar {
+  position: sticky; top: 0; z-index: 50; height: calc(58px + var(--safe-t));
+  padding: calc(var(--safe-t) + 10px) 16px 10px; display: flex;
+  align-items: center; gap: 8px; background: var(--topbar-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+#topbar-name {
+  flex: 1; font-size: 15px; font-weight: 700; color: var(--head);
+  text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 19px; border: none;
+  background: var(--surf); color: var(--text); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s ease; font-size: 18px;
+}
+
+/* Loading skeleton for better perceived performance */
+.skeleton { background: linear-gradient(90deg, var(--surf) 25%, var(--sk-mid) 50%, var(--surf) 75%); 
+           background-size: 200% 100%; animation: loading 1.5s infinite; }
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+#loading-screen { 
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  z-index: 1000; font-size: 18px; color: var(--text);
+}
+
+.loading-spinner { width: 40px; height: 40px; border: 3px solid var(--surf);
+                   border-top: 3px solid var(--brand); border-radius: 50%;
+                   animation: spin 1s linear infinite; margin-right: 16px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+<!-- Load non-critical styles asynchronously -->
+<link rel="preload" href="data:text/css;base64,Lyoga97CUydKKlRoZW0sZ2UUZ++9++" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+<!-- Fonts loaded with display=swap for better performance -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+<!-- Service Worker for caching -->
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW registration failed'));
+}
+</script>
+
+</head>
+<body>
+
+<!-- Loading screen for better UX -->
+<div id="loading-screen">
+  <div class="loading-spinner"></div>
+  Loading menu...
+</div>
+
+<div id="app">
+  <!-- Critical above-the-fold content -->
+  <div id="topbar">
+    <button id="theme-btn" class="icon-btn" aria-label="Toggle theme">🌙</button>
+    <div id="topbar-name" class="skeleton" style="width: 200px; height: 20px;"></div>
+    <button id="search-btn" class="icon-btn" aria-label="Search menu">🔍</button>
+  </div>
+
+  <!-- Content will be injected here -->
+  <div id="content"></div>
+</div>
+
+<!-- Optimized JavaScript loaded after critical content -->
+<script>
+// Performance optimizations
+const perf = {
+  start: performance.now(),
+  log: (label, start = perf.start) => {
+    console.log(`⚡ ${label}: ${(performance.now() - start).toFixed(2)}ms`);
+  }
+};
+
+// Critical app initialization
+const app = {
+  menuId: new URLSearchParams(location.search).get('id') || 'demo',
+  theme: localStorage.getItem('theme') || 'light',
+  cache: new Map(),
+  
+  init() {
+    this.setupTheme();
+    this.loadMenu();
+    this.setupEventListeners();
+    perf.log('App initialized');
+  },
+
+  setupTheme() {
+    document.documentElement.setAttribute('data-theme', this.theme);
+    document.getElementById('theme-btn').textContent = this.theme === 'dark' ? '☀️' : '🌙';
+  },
+
+  async loadMenu() {
+    const start = performance.now();
+    try {
+      // Check cache first
+      let menuData = this.cache.get(this.menuId);
+      
+      if (!menuData) {
+        const response = await fetch(`/api/menus/${this.menuId}`);
+        if (!response.ok) throw new Error('Menu not found');
+        menuData = await response.json();
+        this.cache.set(this.menuId, menuData);
+      }
+
+      this.renderMenu(menuData);
+      perf.log('Menu loaded', start);
+      
+      // Hide loading screen
+      document.getElementById('loading-screen').style.display = 'none';
+      
+    } catch (error) {
+      this.showError('Failed to load menu. Please try again.');
+      console.error('Menu load error:', error);
+    }
+  },
+
+  renderMenu(data) {
+    document.getElementById('topbar-name').textContent = data.restaurantName || 'Menu';
+    document.getElementById('topbar-name').classList.remove('skeleton');
+    
+    document.title = `${data.restaurantName || 'Restaurant'} - Digital Menu`;
+    
+    // Render menu content (simplified for critical path)
+    const content = document.getElementById('content');
+    content.innerHTML = this.generateMenuHTML(data);
+    
+    // Lazy load images
+    this.lazyLoadImages();
+  },
+
+  generateMenuHTML(data) {
+    // This would contain the full menu rendering logic
+    // For now, showing structure with performance optimizations
+    return `
+      <div id="hero" style="padding: 32px 16px; background: var(--hero-grad); text-align: center;">
+        <h1 style="font-size: 28px; font-weight: 800; color: var(--head); margin-bottom: 8px;">
+          ${data.restaurantName || 'Restaurant Menu'}
+        </h1>
+        <p style="color: var(--text); font-size: 16px;">${data.tagline || 'Delicious food, freshly prepared'}</p>
+      </div>
+      
+      <div id="menu-items" style="padding: 20px;">
+        ${this.renderMenuItems(data.items || [])}
+      </div>
+    `;
+  },
+
+  renderMenuItems(items) {
+    return items.map(item => `
+      <div class="menu-item" style="
+        background: var(--surf); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+        border: 1px solid var(--border); transition: transform 0.15s ease;
+      " onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='translateY(0)'">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="flex: 1;">
+            <h3 style="font-size: 18px; font-weight: 600; color: var(--head); margin-bottom: 4px;">
+              ${item.name}
+            </h3>
+            <p style="color: var(--text); font-size: 14px; line-height: 1.4; margin-bottom: 8px;">
+              ${item.description || ''}
+            </p>
+            <div style="font-size: 16px; font-weight: 700; color: var(--price);">
+              $${item.price?.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  lazyLoadImages() {
+    const images = document.querySelectorAll('img[data-src]');
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('lazy');
+          observer.unobserve(img);
+        }
+      });
+    });
+    images.forEach(img => imageObserver.observe(img));
+  },
+
+  setupEventListeners() {
+    document.getElementById('theme-btn')?.addEventListener('click', () => {
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', this.theme);
+      this.setupTheme();
+    });
+
+    // Search functionality would go here
+    document.getElementById('search-btn')?.addEventListener('click', () => {
+      console.log('Search clicked');
+    });
+  },
+
+  showError(message) {
+    const content = document.getElementById('content');
+    content.innerHTML = `
+      <div style="padding: 40px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 16px;">😔</div>
+        <h2 style="color: var(--head); margin-bottom: 8px;">Oops!</h2>
+        <p style="color: var(--text); margin-bottom: 20px;">${message}</p>
+        <button onclick="location.reload()" style="
+          background: var(--brand); color: white; border: none; padding: 12px 24px;
+          border-radius: 8px; font-size: 16px; cursor: pointer;
+        ">Try Again</button>
+      </div>
+    `;
+    document.getElementById('loading-screen').style.display = 'none';
+  }
+};
+
+// Initialize app when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => app.init());
+} else {
+  app.init();
+}
+
+// Performance monitoring
+window.addEventListener('load', () => {
+  perf.log('Page fully loaded');
+  
+  // Report performance metrics
+  setTimeout(() => {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (nav) {
+      console.log(`📊 Performance Metrics:
+        • DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms
+        • Page Load Complete: ${nav.loadEventEnd.toFixed(2)}ms
+        • First Paint: ${nav.responseStart.toFixed(2)}ms
+      `);
+    }
+  }, 0);
+});
+</script>
+
+<!-- Non-critical styles loaded asynchronously -->
+<style>
+/* Non-critical styles loaded after initial render */
+body, #app, #topbar, #search-drawer, #hero, #cat-nav,
+.items-group, .item-row, .tab-pill, .icon-btn, #footer {
+  transition: background-color .25s, border-color .2s, color .18s, box-shadow .2s;
+}
+
+.icon-btn:hover { background: var(--border); }
+.icon-btn:active { transform: scale(0.95); }
+
+/* Smooth animations and transitions */
+@media (prefers-reduced-motion: no-preference) {
+  * { scroll-behavior: smooth; }
+}
+
+/* Dark theme optimizations */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --brand: #d8d8d8; --bg: #1e1e1e; --surf: #272727; --text: #909090;
+    --head: #e8e8e8; --price: #d8d8d8; --border: rgba(255,255,255,.1);
+    --shadow: rgba(0,0,0,.4); --topbar-bg: rgba(30,30,30,.97);
+  }
+}
+
+/* Print optimizations */
+@media print {
+  #topbar, .icon-btn { display: none !important; }
+  #app { box-shadow: none !important; }
+  .menu-item { break-inside: avoid; }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: rgba(0,0,0,.3);
+    --shadow: rgba(0,0,0,.2);
+  }
+}
+</style>
+
+</body>
+</html>
