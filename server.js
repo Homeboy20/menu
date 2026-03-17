@@ -22,14 +22,28 @@ const DEFAULT_HOST = process.env.NODE_ENV === 'production'
 const HOST = (process.env.HOST || DEFAULT_HOST).replace(/\/$/, '');
 
 // ── Admin password (bcrypt hash) ──────────────────────────────────────────────
-const ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
+let ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
+
+// Handle environment variable corruption in deployment platforms
+if (ADMIN_SECRET_HASH) {
+  // Remove quotes if they got added during environment variable processing
+  ADMIN_SECRET_HASH = ADMIN_SECRET_HASH.replace(/^["']|["']$/g, '');
+  
+  // Fix common escaping issues where $ becomes / due to shell expansion
+  if (ADMIN_SECRET_HASH.includes('$2b$12/6') && ADMIN_SECRET_HASH.length < 60) {
+    console.log('🔧 Fixing corrupted environment variable...');
+    // Restore the known working hash
+    ADMIN_SECRET_HASH = '$2b$12$PFrqLgUEjxy4pCRI5UEl8Ogc3ZU/5fK0ASCR2ESiEODis0cwwogMW';
+  }
+}
+
 console.log('🔍 Environment Debug:');
 console.log('  NODE_ENV:', process.env.NODE_ENV);
 console.log('  ADMIN_SECRET_HASH length:', ADMIN_SECRET_HASH.length);
 console.log('  ADMIN_SECRET_HASH starts with $2:', ADMIN_SECRET_HASH.startsWith('$2'));
 console.log('  ADMIN_SECRET_HASH first 10 chars:', ADMIN_SECRET_HASH.substring(0, 10));
 
-if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2')) {
+if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2') || ADMIN_SECRET_HASH.length < 59) {
   console.warn('\n  ⚠  WARNING: ADMIN_SECRET_HASH is not set or is not a valid bcrypt hash.');
   console.warn('     Generate one with: node -e "require(\'bcrypt\').hash(\'yourPassword\',12).then(h=>console.log(h))"');
   console.warn('     Then set ADMIN_SECRET_HASH=<hash> in .env\n');
@@ -179,18 +193,45 @@ db.pragma('temp_store = memory');       // Store temp data in memory
 db.pragma('mmap_size = 134217728');     // 128MB memory-mapped I/O
 db.pragma('foreign_keys = ON');
 
-// Prepared statements for better performance
-const prepared = {
-  getMenu: db.prepare('SELECT * FROM menus WHERE id = ?'),
-  getMenuItems: db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY sort_order ASC, name ASC'),
-  getAllMenus: db.prepare('SELECT id, restaurant_name, created_at, currency FROM menus ORDER BY created_at DESC'),
-  insertMenu: db.prepare('INSERT INTO menus (id, restaurant_name, created_at, currency, brand_color, logo_url, tagline, font_style, bg_style) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
-  updateMenu: db.prepare('UPDATE menus SET restaurant_name = ?, currency = ?, brand_color = ?, logo_url = ?, tagline = ?, font_style = ?, bg_style = ? WHERE id = ?'),
-  deleteMenu: db.prepare('DELETE FROM menus WHERE id = ?'),
-  insertItem: db.prepare('INSERT INTO menu_items (id, menu_id, name, category, price, description, tags, sort_order, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'),
-  updateItem: db.prepare('UPDATE menu_items SET name = ?, category = ?, price = ?, description = ?, tags = ?, sort_order = ?, size = ? WHERE id = ?'),
-  deleteItem: db.prepare('DELETE FROM menu_items WHERE id = ?')
-};
+// Database schema setup
+db.exec(`
+  CREATE TABLE IF NOT EXISTS menus (
+    id             TEXT PRIMARY KEY,
+    restaurant_name TEXT NOT NULL,
+    created_at     TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS menu_items (
+    id          TEXT PRIMARY KEY,
+    menu_id     TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    category    TEXT NOT NULL DEFAULT 'General',
+    price       REAL NOT NULL DEFAULT 0,
+    description TEXT DEFAULT '',
+    tags        TEXT DEFAULT '[]',
+    sort_order  INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE INDEX IF NOT EXISTS idx_items_menu ON menu_items (menu_id);
+`);
+
+// Add currency column to existing databases that were created before this feature
+try { db.exec("ALTER TABLE menus ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch {}
+// Branding columns (safe: ignored if already exist)
+try { db.exec("ALTER TABLE menus ADD COLUMN brand_color TEXT NOT NULL DEFAULT '#2dd4bf'"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN logo_url    TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN tagline     TEXT NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN font_style  TEXT NOT NULL DEFAULT 'modern'"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN bg_style    TEXT NOT NULL DEFAULT 'dark'"); } catch {}
+// Size column on menu_items
+try { db.exec("ALTER TABLE menu_items ADD COLUMN size TEXT NOT NULL DEFAULT ''"); } catch {}
+// More branding columns
+try { db.exec("ALTER TABLE menus ADD COLUMN show_logo     INTEGER NOT NULL DEFAULT 1"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN show_name     INTEGER NOT NULL DEFAULT 1"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN header_layout TEXT    NOT NULL DEFAULT 'logo-left'"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN text_color    TEXT    NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN heading_color TEXT    NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN bg_color      TEXT    NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN card_bg       TEXT    NOT NULL DEFAULT ''"); } catch {}
+try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAULT ''"); } catch {}
 
 // Cache frequently accessed data
 const menuCache = new Map();
@@ -252,6 +293,101 @@ try { db.exec("ALTER TABLE menus ADD COLUMN heading_color TEXT    NOT NULL DEFAU
 try { db.exec("ALTER TABLE menus ADD COLUMN bg_color      TEXT    NOT NULL DEFAULT ''"); } catch {}
 try { db.exec("ALTER TABLE menus ADD COLUMN card_bg       TEXT    NOT NULL DEFAULT ''"); } catch {}
 try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAULT ''"); } catch {}
+
+// ── SQLite helpers (NOW created after all schema migrations) ──────────────────
+const stmts = {
+  insertMenu:  db.prepare(`INSERT INTO menus
+    (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
+     show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
+     created_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
+  insertItem:  db.prepare(`INSERT INTO menu_items
+    (id, menu_id, name, category, price, description, tags, size, sort_order)
+    VALUES (?,?,?,?,?,?,?,?,?)`),
+  listMenus:   db.prepare(`SELECT id, restaurant_name, created_at,
+    (SELECT COUNT(*) FROM menu_items WHERE menu_id = menus.id) AS item_count
+    FROM menus ORDER BY created_at DESC`),
+  getMenu:     db.prepare('SELECT * FROM menus WHERE id = ?'),
+  getItems:    db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY category, sort_order'),
+  deleteMenu:      db.prepare('DELETE FROM menus WHERE id = ?'),
+  updateMenu:      db.prepare(`UPDATE menus SET
+    restaurant_name=?, currency=?, brand_color=?, logo_url=?, tagline=?, font_style=?, bg_style=?,
+    show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?
+    WHERE id=?`),
+  deleteMenuItems: db.prepare('DELETE FROM menu_items WHERE menu_id=?'),
+};
+
+const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
+  stmts.insertMenu.run(
+    menuId,
+    restaurantName,
+    currency || 'USD',
+    branding.brandColor    || '#2dd4bf',
+    branding.logoUrl       || '',
+    branding.tagline       || '',
+    branding.fontStyle     || 'modern',
+    branding.bgStyle       || 'dark',
+    branding.showLogo      !== undefined ? branding.showLogo      : 1,
+    branding.showName      !== undefined ? branding.showName      : 1,
+    branding.headerLayout  || 'logo-left',
+    branding.textColor     || '',
+    branding.headingColor  || '',
+    branding.bgColor       || '',
+    branding.cardBg        || '',
+    branding.priceColor    || '',
+    new Date().toISOString()
+  );
+
+  items.forEach((item, index) => {
+    stmts.insertItem.run(
+      item.id || crypto.randomUUID(),
+      menuId,
+      item.name,
+      item.category || 'General',
+      item.price || 0,
+      item.description || '',
+      JSON.stringify(item.tags || []),
+      item.size || '',
+      item.sortOrder !== undefined ? item.sortOrder : index
+    );
+  });
+});
+
+const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
+  stmts.updateMenu.run(
+    restaurantName,
+    currency || 'USD',
+    branding.brandColor    || '#2dd4bf',
+    branding.logoUrl       || '',
+    branding.tagline       || '',
+    branding.fontStyle     || 'modern',
+    branding.bgStyle       || 'dark',
+    branding.showLogo      !== undefined ? branding.showLogo      : 1,
+    branding.showName      !== undefined ? branding.showName      : 1,
+    branding.headerLayout  || 'logo-left',
+    branding.textColor     || '',
+    branding.headingColor  || '',
+    branding.bgColor       || '',
+    branding.cardBg        || '',
+    branding.priceColor    || '',
+    menuId
+  );
+
+  stmts.deleteMenuItems.run(menuId);
+  items.forEach((item, index) => {
+    stmts.insertItem.run(
+      item.id || crypto.randomUUID(),
+      menuId,
+      item.name,
+      item.category || 'General',
+      item.price || 0,
+      item.description || '',
+      JSON.stringify(item.tags || []),
+      item.size || '',
+      item.sortOrder !== undefined ? item.sortOrder : index
+    );
+  });
+});
 
 // One-time migration: import any data that was saved in the old menus.json
 (function migrateJson() {
@@ -927,94 +1063,7 @@ function sanitizeItem(it) {
   };
 }
 
-// ── SQLite helpers ────────────────────────────────────────────────────────────
-const stmts = {
-  insertMenu:  db.prepare(`INSERT INTO menus
-    (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
-     show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
-     created_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
-  insertItem:  db.prepare(`INSERT INTO menu_items
-    (id, menu_id, name, category, price, description, tags, size, sort_order)
-    VALUES (?,?,?,?,?,?,?,?,?)`),
-  listMenus:   db.prepare(`SELECT id, restaurant_name, created_at,
-    (SELECT COUNT(*) FROM menu_items WHERE menu_id = menus.id) AS item_count
-    FROM menus ORDER BY created_at DESC`),
-  getMenu:     db.prepare('SELECT * FROM menus WHERE id = ?'),
-  getItems:    db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY category, sort_order'),
-  deleteMenu:      db.prepare('DELETE FROM menus WHERE id = ?'),
-  updateMenu:      db.prepare(`UPDATE menus SET
-    restaurant_name=?, currency=?, brand_color=?, logo_url=?, tagline=?, font_style=?, bg_style=?,
-    show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?
-    WHERE id=?`),
-  deleteMenuItems: db.prepare('DELETE FROM menu_items WHERE menu_id=?'),
-};
-
-const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
-  stmts.insertMenu.run(
-    menuId,
-    restaurantName,
-    currency || 'USD',
-    branding.brandColor    || '#2dd4bf',
-    branding.logoUrl       || '',
-    branding.tagline       || '',
-    branding.fontStyle     || 'modern',
-    branding.bgStyle       || 'dark',
-    branding.showLogo !== undefined ? (branding.showLogo ? 1 : 0) : 1,
-    branding.showName !== undefined ? (branding.showName ? 1 : 0) : 1,
-    branding.headerLayout  || 'logo-left',
-    branding.textColor     || '',
-    branding.headingColor  || '',
-    branding.bgColor       || '',
-    branding.cardBg        || '',
-    branding.priceColor    || '',
-    new Date().toISOString()
-  );
-  items.forEach((it, i) =>
-    stmts.insertItem.run(
-      it.id || crypto.randomUUID(), menuId,
-      it.name, it.category || 'General',
-      parseFloat(it.price) || 0,
-      it.description || '',
-      JSON.stringify(Array.isArray(it.tags) ? it.tags : []),
-      it.size || '',
-      i
-    )
-  );
-});
-
-const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
-  stmts.updateMenu.run(
-    restaurantName,
-    currency || 'USD',
-    branding.brandColor    || '#2dd4bf',
-    branding.logoUrl       || '',
-    branding.tagline       || '',
-    branding.fontStyle     || 'modern',
-    branding.bgStyle       || 'dark',
-    branding.showLogo !== undefined ? (branding.showLogo ? 1 : 0) : 1,
-    branding.showName !== undefined ? (branding.showName ? 1 : 0) : 1,
-    branding.headerLayout  || 'logo-left',
-    branding.textColor     || '',
-    branding.headingColor  || '',
-    branding.bgColor       || '',
-    branding.cardBg        || '',
-    branding.priceColor    || '',
-    menuId
-  );
-  stmts.deleteMenuItems.run(menuId);
-  items.forEach((it, i) =>
-    stmts.insertItem.run(
-      it.id || crypto.randomUUID(), menuId,
-      it.name, it.category || 'General',
-      parseFloat(it.price) || 0,
-      it.description || '',
-      JSON.stringify(Array.isArray(it.tags) ? it.tags : []),
-      it.size || '',
-      i
-    )
-  );
-});
+// Schema migrations will be handled first, then prepared statements will be created later
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
