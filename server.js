@@ -4,7 +4,6 @@ const multer       = require('multer');
 const path         = require('path');
 const fs           = require('fs');
 const crypto       = require('crypto');
-const { v4: uuidv4 } = require('uuid');
 const QRCode       = require('qrcode');
 const csvParser    = require('csv-parser');
 const ExcelJS      = require('exceljs');
@@ -151,7 +150,7 @@ try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAU
       for (const m of Object.values(existing)) {
         ins.run(m.id, m.restaurantName, m.createdAt);
         (m.items || []).forEach((it, i) =>
-          insi.run(it.id || uuidv4(), m.id, it.name, it.category || 'General',
+          insi.run(it.id || crypto.randomUUID(), m.id, it.name, it.category || 'General',
             it.price || 0, it.description || '', JSON.stringify(it.tags || []), i));
       }
     })();
@@ -411,7 +410,7 @@ function parseTextToItems(text) {
         const price     = parseFloat(priceMatch[1].replace(',', '.'));
         const hasExplicitCat = parts.length >= 3;
         items.push({
-          id:          uuidv4(),
+          id:          crypto.randomUUID(),
           name:        parts[0],
           category:    hasExplicitCat ? toTitleCase(parts[1]) : currentCategory,
           price,
@@ -438,7 +437,7 @@ function parseTextToItems(text) {
           ? nextLine : lastDesc;
 
         items.push({
-          id:          uuidv4(),
+          id:          crypto.randomUUID(),
           name:        rawName,
           category:    currentCategory,
           price,
@@ -493,7 +492,7 @@ function parseCsvFile(filePath) {
           const price = parseFloat((rawPriceStr || '0').replace(/[^0-9.]/g, '')) || 0;
 
           items.push({
-            id:          uuidv4(),
+            id:          crypto.randomUUID(),
             name,
             category:    catRaw ? toTitleCase(catRaw) : 'General',
             price,
@@ -669,7 +668,7 @@ async function parseXlsxFile(filePath) {
         rawPrices.push(priceRaw);
 
         items.push({
-          id:          uuidv4(),
+          id:          crypto.randomUUID(),
           name:        nameVal,
           category:    catRaw ? toTitleCase(catRaw) : currentCategory,
           price,
@@ -763,7 +762,7 @@ function sanitizeBranding(body) {
 /** Sanitize a single menu item from user input */
 function sanitizeItem(it) {
   return {
-    id:          sanitizeStr(it.id, 36) || uuidv4(),
+    id:          sanitizeStr(it.id, 36) || crypto.randomUUID(),
     name:        sanitizeStr(it.name, 200),
     category:    sanitizeStr(it.category, 100) || 'General',
     price:       Math.max(0, parseFloat(it.price) || 0),
@@ -818,7 +817,7 @@ const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, i
   );
   items.forEach((it, i) =>
     stmts.insertItem.run(
-      it.id || uuidv4(), menuId,
+      it.id || crypto.randomUUID(), menuId,
       it.name, it.category || 'General',
       parseFloat(it.price) || 0,
       it.description || '',
@@ -851,7 +850,7 @@ const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding,
   stmts.deleteMenuItems.run(menuId);
   items.forEach((it, i) =>
     stmts.insertItem.run(
-      it.id || uuidv4(), menuId,
+      it.id || crypto.randomUUID(), menuId,
       it.name, it.category || 'General',
       parseFloat(it.price) || 0,
       it.description || '',
@@ -916,7 +915,7 @@ app.post('/api/menus', requireAuth, async (req, res) => {
     const branding     = sanitizeBranding(req.body);
     const safeItems    = items.map(sanitizeItem).filter(it => it.name.length >= 2);
 
-    const menuId = uuidv4();
+    const menuId = crypto.randomUUID();
     saveMenuTx(menuId, safeName, safeCurrency, branding, safeItems);
 
     const menuUrl   = `${HOST}/menu.html?id=${menuId}`;
