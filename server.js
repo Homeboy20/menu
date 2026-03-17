@@ -148,24 +148,27 @@ app.get('/menu.html', (req, res, next) => {
   
   if (menuId) {
     try {
-      // Record scan event
       const now = new Date().toISOString();
+      const rawIp = req.ip || req.connection.remoteAddress || '';
+      // Hash IP for privacy (GDPR/CCPA)
+      const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
       const userAgent = req.headers['user-agent'] || '';
-      const ipAddress = req.ip || req.connection.remoteAddress || '';
       const referrer = req.headers['referer'] || req.headers['referrer'] || '';
-      
-      stmts.recordScan.run(
-        String(menuId),
-        String(now),
-        String(userAgent),
-        String(ipAddress),
-        String(referrer)
-      );
-      
-      // Increment total scan count
-      stmts.incrementScans.run(String(now), String(menuId));
+
+      // Deduplicate: skip if same IP+menu scanned within last 5 minutes
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const recent = stmts.lastScanFrom.get(String(menuId), String(ipHash), String(fiveMinAgo));
+      if (!recent) {
+        stmts.recordScan.run(
+          String(menuId),
+          String(now),
+          String(userAgent),
+          String(ipHash),
+          String(referrer)
+        );
+        stmts.incrementScans.run(String(now), String(menuId));
+      }
     } catch (err) {
-      // Log error but don't block menu display
       console.error('Failed to record scan:', err);
     }
   }
@@ -369,9 +372,10 @@ const stmts = {
   insertItem:  db.prepare(`INSERT INTO menu_items
     (id, menu_id, name, category, price, description, tags, size, sort_order)
     VALUES (?,?,?,?,?,?,?,?,?)`),
-  listMenus:   db.prepare(`SELECT id, restaurant_name, created_at,
+  listMenus:   db.prepare(`SELECT id, restaurant_name, created_at, total_scans, qr_version, last_scan_at,
     (SELECT COUNT(*) FROM menu_items WHERE menu_id = menus.id) AS item_count
     FROM menus ORDER BY created_at DESC`),
+  lastScanFrom: db.prepare(`SELECT id FROM menu_scans WHERE menu_id = ? AND ip_address = ? AND scanned_at > ? LIMIT 1`),
   getMenu:     db.prepare('SELECT * FROM menus WHERE id = ?'),
   getItems:    db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY category, sort_order'),
   deleteMenu:      db.prepare('DELETE FROM menus WHERE id = ?'),
@@ -520,7 +524,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.7.1'
+    version: '1.8.0'
   });
 });
 
@@ -1264,6 +1268,9 @@ app.get('/api/menus', (_req, res) => {
       restaurantName: r.restaurant_name,
       itemCount:      r.item_count || 0,
       createdAt:      r.created_at,
+      totalScans:     r.total_scans || 0,
+      qrVersion:      r.qr_version || 1,
+      lastScanAt:     r.last_scan_at || null,
     })));
   } catch (error) {
     console.error('❌ Error fetching menus:', error);
@@ -1487,7 +1494,6 @@ app.get('/api/menus/:id/analytics', requireAuth, (req, res) => {
       recentScans: recentScans.map(scan => ({
         scannedAt: scan.scanned_at,
         userAgent: scan.user_agent,
-        ipAddress: scan.ip_address,
         referrer: scan.referrer
       })),
       dailyStats: scansStats.map(stat => ({

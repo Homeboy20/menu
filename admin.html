@@ -1314,30 +1314,161 @@ async function loadPublished() {
       return;
     }
     el.innerHTML = list.map(m => `
-      <div class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-primary/10 shadow-sm">
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-slate-100 truncate">${esc(m.restaurantName)}</p>
-          <p class="text-xs text-slate-400 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
-          <a href="/menu.html?id=${m.id}" target="_blank"
-             class="text-primary text-xs hover:underline truncate block mt-1">/menu.html?id=${m.id}</a>
+      <div class="p-4 bg-surface rounded-xl border border-primary/10 shadow-sm space-y-3">
+        <div class="flex items-center gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-slate-100 truncate">${esc(m.restaurantName)}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
+            <a href="/menu.html?id=${m.id}" target="_blank"
+               class="text-primary text-xs hover:underline truncate block mt-1">/menu.html?id=${m.id}</a>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button onclick="loadMenuForEditing('${m.id}')" title="Edit menu"
+                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 transition-colors">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <button onclick="previewMenu('${m.id}')" title="Open menu"
+                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+              <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+            </button>
+            <button onclick="deleteMenu('${m.id}', this)" title="Delete menu"
+                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
         </div>
-        <div class="flex gap-2 shrink-0">
-          <button onclick="loadMenuForEditing('${m.id}')" title="Edit menu"
-                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 transition-colors">
-            <span class="material-symbols-outlined text-[18px]">edit</span>
+        <!-- Analytics row -->
+        <div class="flex items-center gap-4 pt-2 border-t border-primary/5">
+          <div class="flex items-center gap-1.5 text-xs text-slate-400">
+            <span class="material-symbols-outlined text-[15px]">visibility</span>
+            <span>${m.totalScans || 0} scans</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs text-slate-400">
+            <span class="material-symbols-outlined text-[15px]">qr_code_2</span>
+            <span>QR v${m.qrVersion || 1}</span>
+          </div>
+          ${m.lastScanAt ? `<div class="text-xs text-slate-500">Last scan: ${new Date(m.lastScanAt).toLocaleString()}</div>` : ''}
+          <div class="flex-1"></div>
+          <button onclick="showAnalytics('${m.id}')" title="View analytics"
+                  class="text-xs text-primary hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">analytics</span> Analytics
           </button>
-          <button onclick="previewMenu('${m.id}')" title="Open menu"
-                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
-            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
-          </button>
-          <button onclick="deleteMenu('${m.id}', this)" title="Delete menu"
-                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
-            <span class="material-symbols-outlined text-[18px]">delete</span>
+          <button onclick="regenerateQR('${m.id}')" title="Regenerate QR code"
+                  class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">refresh</span> New QR
           </button>
         </div>
       </div>`).join('');
   } catch {
     el.innerHTML = '<p class="text-red-400 text-sm">Failed to load menus.</p>';
+  }
+}
+
+// ── Analytics modal ──────────────────────────────────────────────────────────
+async function showAnalytics(menuId) {
+  showLoading('Loading analytics…');
+  try {
+    const res  = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/analytics', {
+      headers: { 'X-Admin-Token': sessionToken }
+    });
+    if (!res.ok) throw new Error('Failed to load analytics');
+    const data = await res.json();
+    hideLoading();
+
+    const dailyHtml = data.dailyStats.length
+      ? data.dailyStats.map(d => `
+          <div class="flex justify-between text-xs py-1.5 border-b border-primary/5">
+            <span class="text-slate-300">${d.date}</span>
+            <span class="text-primary font-semibold">${d.scans} scan${d.scans !== 1 ? 's' : ''}</span>
+          </div>`).join('')
+      : '<p class="text-slate-500 text-xs">No scans recorded yet.</p>';
+
+    const recentHtml = data.recentScans.length
+      ? data.recentScans.map(s => {
+          const ua = s.userAgent || '';
+          const device = /Mobile|Android|iPhone/i.test(ua) ? 'phone_iphone' : 'computer';
+          const time = new Date(s.scannedAt).toLocaleString();
+          return `
+            <div class="flex items-center gap-2 text-xs py-1.5 border-b border-primary/5">
+              <span class="material-symbols-outlined text-[14px] text-slate-500">${device}</span>
+              <span class="text-slate-300 flex-1">${time}</span>
+              ${s.referrer ? `<span class="text-slate-500 truncate max-w-[120px]">${esc(s.referrer)}</span>` : ''}
+            </div>`;
+        }).join('')
+      : '<p class="text-slate-500 text-xs">No recent scans.</p>';
+
+    // Show a dialog overlay
+    let dlg = document.getElementById('analytics-dialog');
+    if (!dlg) {
+      dlg = document.createElement('div');
+      dlg.id = 'analytics-dialog';
+      dlg.className = 'fixed inset-0 z-50 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center p-4';
+      document.body.appendChild(dlg);
+    }
+    dlg.classList.remove('hidden');
+    dlg.innerHTML = `
+      <div class="bg-surface border border-primary/20 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl space-y-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">analytics</span> Scan Analytics
+          </h3>
+          <button onclick="document.getElementById('analytics-dialog').classList.add('hidden')"
+                  class="text-slate-400 hover:text-slate-100 transition-colors">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-bg-dark rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-primary">${data.totalScans}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Total Scans</p>
+          </div>
+          <div class="bg-bg-dark rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-amber-400">v${data.qrVersion}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">QR Version</p>
+          </div>
+          <div class="bg-bg-dark rounded-xl p-3 text-center">
+            <p class="text-2xl font-bold text-green-400">${data.dailyStats.length ? data.dailyStats[0].scans : 0}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Today</p>
+          </div>
+        </div>
+
+        <!-- Daily stats -->
+        <div>
+          <p class="text-xs font-semibold text-slate-300 mb-2">Last 30 Days</p>
+          <div class="bg-bg-dark rounded-xl p-3 max-h-48 overflow-y-auto">${dailyHtml}</div>
+        </div>
+
+        <!-- Recent scans -->
+        <div>
+          <p class="text-xs font-semibold text-slate-300 mb-2">Recent Scans</p>
+          <div class="bg-bg-dark rounded-xl p-3 max-h-48 overflow-y-auto">${recentHtml}</div>
+        </div>
+      </div>`;
+  } catch (err) {
+    hideLoading();
+    showStatusBadge('Failed to load analytics', 'yellow');
+  }
+}
+
+// ── Regenerate QR code ──────────────────────────────────────────────────────
+async function regenerateQR(menuId) {
+  if (!confirm('Generate a new QR code? The old QR code will still work, but a new version will be created.')) return;
+  showLoading('Regenerating QR code…');
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/regenerate-qr', {
+      method: 'POST',
+      headers: { 'X-Admin-Token': sessionToken }
+    });
+    if (!res.ok) throw new Error('Failed to regenerate QR');
+    const data = await res.json();
+    hideLoading();
+    showStatusBadge('QR v' + data.qrVersion + ' generated!', 'green');
+    loadPublished();
+  } catch (err) {
+    hideLoading();
+    showStatusBadge('QR regeneration failed', 'yellow');
   }
 }
 
