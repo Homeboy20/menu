@@ -1,0 +1,184 @@
+<!-- Admin Menu Dashboard (Mobile) -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Menu Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#ee9d2b",
+          "background-light": "#f8f7f6",
+          "background-dark": "#221a10",
+        },
+        fontFamily: {
+          "display": ["Work Sans", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen antialiased overflow-x-hidden">
+<div class="relative flex min-h-screen w-full flex-col group/design-root">
+<div class="flex items-center p-4 pb-2 justify-between sticky top-0 z-10 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
+<div class="flex size-12 shrink-0 items-center justify-center text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Dashboard</h2>
+<div class="flex size-12 shrink-0 items-center justify-center text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-2xl relative">
+        notifications
+        <span class="absolute top-0 right-0 size-2.5 bg-primary rounded-full border border-background-light dark:border-background-dark"></span>
+</span>
+</div>
+</div>
+<div class="flex flex-col flex-1 overflow-y-auto pb-20">
+<div class="px-4 pt-6 pb-2">
+<h1 class="text-2xl font-bold tracking-tight">Overview</h1>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Quick stats for your restaurant menu.</p>
+</div>
+<div class="flex gap-4 p-4 overflow-x-auto snap-x hide-scrollbar">
+<div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
+<div class="flex items-center justify-between">
+<p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Total Items</p>
+<span class="material-symbols-outlined text-primary/80 text-lg">restaurant_menu</span>
+</div>
+<p class="tracking-tight text-3xl font-bold leading-tight mt-1">142</p>
+</div>
+<div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
+<div class="flex items-center justify-between">
+<p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Categories</p>
+<span class="material-symbols-outlined text-primary/80 text-lg">category</span>
+</div>
+<p class="tracking-tight text-3xl font-bold leading-tight mt-1">12</p>
+</div>
+<div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
+<div class="flex items-center justify-between">
+<p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Recent</p>
+<span class="material-symbols-outlined text-primary/80 text-lg">update</span>
+</div>
+<p class="tracking-tight text-3xl font-bold leading-tight mt-1">5</p>
+</div>
+</div>
+<div class="px-4 pt-6 pb-2">
+<h3 class="text-lg font-bold leading-tight tracking-[-0.015em]">Menu Management</h3>
+</div>
+<div class="px-4 py-2">
+<button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-12 px-4 bg-primary text-background-dark text-base font-semibold leading-normal tracking-wide shadow-md shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]">file_upload</span>
+<span>Import Menu</span>
+</button>
+</div>
+<div class="flex gap-3 px-4 py-2">
+<button class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl h-11 px-3 bg-white dark:bg-primary/10 border border-primary/20 text-slate-800 dark:text-primary text-sm font-semibold leading-normal hover:bg-primary/5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Add Item</span>
+</button>
+<button class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl h-11 px-3 bg-white dark:bg-primary/10 border border-primary/20 text-slate-800 dark:text-primary text-sm font-semibold leading-normal hover:bg-primary/5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px]">folder_managed</span>
+<span>Categories</span>
+</button>
+</div>
+<div class="px-4 pt-8 pb-3 flex justify-between items-end">
+<h3 class="text-lg font-bold leading-tight tracking-[-0.015em]">Recent Items</h3>
+<button class="text-sm font-medium text-primary hover:underline">View All</button>
+</div>
+<div class="px-4 flex flex-col gap-3">
+<div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-[#2a2115] border border-primary/5 shadow-sm">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0" data-alt="Gourmet burger with fries" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKekz4uE1UqbXfMEnnl-roasj4aAzTGpCB3dbtYBbk_fPcaUeLTeG6MHtpjiOh3xnPDluJBs04Njihcqh-p0qLHJOnxmwD_fe_iCeFcgfotbFjqEvJDW2H1XRZ9UIdoT-oXldPe8r4ulDwdPxedSKYNzCHLTLrd2xL-vFish8TveYrGGHM23o8pp6Ipm-wJb_tihwuISi2FzjVylMsxkwZXAI8YspA2bm3nPLASbwQkN7z0ZJCB1tyDCzsBq21xL2_eF7KdxZ76sfw'); background-size: cover; background-position: center;"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">Truffle Burger</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">Mains • $18.50</p>
+</div>
+<div class="flex gap-1 shrink-0">
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-[#2a2115] border border-primary/5 shadow-sm">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0" data-alt="Healthy salad bowl" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBn1uF9DPGDbouD2vOb1xW_z-r3ynLBLqRDc3rIfWvxzusz8s-B6N1IKaXgmW0Jy9u0Pd_2wtM8sKxQkV_OtaHB350t1NSgdL9bAI1E-qvDYkQWpLo5GRLNDC9pG3jPv9t-MDaodAe9Z2Zx9qbpB0oIMszHcGRW1mgRLm7R1jAstJfax8_E7ATIXh3iD-aP8DABh5iruKH7wlxGH4isYac-UOfA3wyAIpHbJZE-oOT2t-sR5TrUousYakA4XFE-FyHvxPlGyw8B1AP1'); background-size: cover; background-position: center;"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">Quinoa Bowl</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">Salads • $14.00</p>
+</div>
+<div class="flex gap-1 shrink-0">
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-[#2a2115] border border-primary/5 shadow-sm">
+<div class="size-12 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0" data-alt="Fruit smoothie drink" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA99n1ZosoeL8RSFzNVKYr9M5kB-aJP-heOXk4wj_VBC6or-SGJSzs3kzfTZDQVQ3A599ZygF9Jts395sSYbJic9CE5kBQ0jBGYEhZmRg4BraWOQqwgLu_Gg6PVFZUvqQVOJ-4LbPxgaqU3MwjZ7HATcMqtcps7kyjSmCN3st3QsF2NcxrTZMiDGIVro01G59u7g5uzg4hiw8bgq5-rEEPbauRS_IdAjB2GDi2VGQ30B3hoUdxsKTy6B0ZO0OGJd_x-jwNtH6c7PPBL'); background-size: cover; background-position: center;"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">Berry Smoothie</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">Drinks • $6.50</p>
+</div>
+<div class="flex gap-1 shrink-0">
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 w-full bg-background-light dark:bg-background-dark border-t border-primary/10 pb-safe">
+<div class="flex justify-around items-center h-16 px-2">
+<button class="flex flex-col items-center justify-center w-16 h-full text-primary">
+<span class="material-symbols-outlined text-2xl">dashboard</span>
+<span class="text-[10px] font-medium mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">restaurant_menu</span>
+<span class="text-[10px] font-medium mt-1">Menu</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+<span class="text-[10px] font-medium mt-1">Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="text-[10px] font-medium mt-1">Settings</span>
+</button>
+</div>
+</div>
+</div>
+<style>
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+</style>
+</body></html>

@@ -1,0 +1,19 @@
+# Env / secrets
+.env
+
+# Uploaded files (no need to commit)
+uploads/
+
+# SQLite DB (no need to commit, or keep — your choice)
+# data/
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

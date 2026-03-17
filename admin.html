@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MenuAdmin – Upload &amp; Publish</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  /* drag-over highlight */
+  .drag-over { border-color: #2dd4bf !important; background: rgba(45,212,191,.12) !important; }
+  /* layout picker */
+  .layout-opt  { border-color: rgba(255,255,255,.1); color:#64748b; }
+  .layout-opt:hover { border-color: rgba(45,212,191,.4); color:#94a3b8; }
+  .layout-active { border-color:#2dd4bf !important; background:rgba(45,212,191,.1); color:#2dd4bf !important; }
+  /* toggle switches */
+  .tog-track { width:36px; height:20px; background:#334155; border-radius:10px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; flex-shrink:0; }
+  .tog-track::after { content:''; position:absolute; width:16px; height:16px; background:#fff; border-radius:50%; top:2px; left:2px; transition:transform .2s; }
+  .tog-track.on { background:#2dd4bf; }
+  .tog-track.on::after { transform:translateX(16px); }
+  .adv-color-input { height:32px; width:40px; padding:2px; border-radius:8px; cursor:pointer; background:transparent; }
+  .adv-reset-btn { font-size:11px; color:#475569; padding:3px 7px; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:all .15s; flex-shrink:0; }
+  .adv-reset-btn:hover { color:#f87171; border-color:rgba(248,113,113,.35); background:rgba(248,113,113,.06); }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- ── Login Overlay ──────────────────────────────────────────────────────── -->
+<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">lock</span>
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">Admin Access</h2>
+        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
+      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
+             class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"
+             onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <p id="login-error" class="text-red-400 text-sm hidden"></p>
+    <button onclick="doLogin()"
+            class="w-full bg-primary text-bg-dark font-bold py-3 rounded-xl hover:bg-primary/90 active:scale-[.98] transition-all flex items-center justify-center gap-2">
+      <span class="material-symbols-outlined text-[18px]">login</span> Sign In
+    </button>
+  </div>
+</div>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<aside class="w-60 shrink-0 border-r border-primary/10 bg-surface hidden md:flex flex-col h-screen sticky top-0">
+  <div class="h-16 flex items-center px-5 border-b border-primary/10 gap-3">
+    <div class="size-8 rounded bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[20px]">restaurant</span>
+    </div>
+    <span class="text-base font-bold tracking-tight">MenuAdmin</span>
+  </div>
+  <nav class="flex-1 px-3 py-5 space-y-1">
+    <a id="nav-upload"    href="#upload"   onclick="showSection('upload')"   class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors">
+      <span class="material-symbols-outlined text-[20px]">file_upload</span> Upload Menu
+    </a>
+    <a id="nav-preview"   href="#preview"  onclick="showSection('preview')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+      <span class="material-symbols-outlined text-[20px]">table_view</span> Preview &amp; Edit
+    </a>
+    <a id="nav-publish"   href="#publish"  onclick="showSection('publish')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+      <span class="material-symbols-outlined text-[20px]">qr_code_2</span> QR &amp; Publish
+    </a>
+    <a id="nav-published" href="#published" onclick="showSection('published')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+      <span class="material-symbols-outlined text-[20px]">format_list_bulleted</span> Published Menus
+    </a>
+  </nav>
+</aside>
+
+<!-- ── Main ────────────────────────────────────────────────────────────────── -->
+<div class="flex-1 flex flex-col min-w-0">
+
+  <!-- topbar -->
+  <header class="h-16 border-b border-primary/10 flex items-center px-6 justify-between bg-bg-dark/80 backdrop-blur sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <!-- mobile menu icon -->
+      <button class="md:hidden text-slate-400 hover:text-slate-100" onclick="document.querySelector('aside').classList.toggle('hidden')">
+        <span class="material-symbols-outlined text-2xl">menu</span>
+      </button>
+      <h1 id="page-title" class="text-lg font-bold">Upload Menu</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="status-badge" class="hidden text-xs font-medium px-3 py-1 rounded-full bg-primary/20 text-primary"></span>
+      <button id="logout-btn" onclick="doLogout()" title="Log out"
+              class="hidden text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 border border-transparent hover:border-red-400/20">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+        <span class="hidden md:inline">Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto p-6 md:p-8">
+
+    <!-- ═══════════════════ STEP 1 – UPLOAD ═══════════════════ -->
+    <section id="section-upload" class="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h2 class="text-2xl font-bold">Upload Your Menu File</h2>
+        <p class="text-slate-400 text-sm mt-1">Supports PDF, CSV, XLSX, TXT. Items are extracted automatically.</p>
+      </div>
+
+      <!-- drop zone -->
+      <div id="drop-zone"
+           class="border-2 border-dashed border-primary/30 rounded-2xl p-12 flex flex-col items-center gap-5 text-center bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all cursor-pointer"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <div id="drop-icon" class="size-20 rounded-full bg-primary/10 flex items-center justify-center transition-transform">
+          <span class="material-symbols-outlined text-5xl text-primary">cloud_upload</span>
+        </div>
+        <div>
+          <p class="text-xl font-bold text-slate-100">Drag &amp; drop or click to browse</p>
+          <p class="text-slate-400 text-sm mt-1">PDF, CSV, XLSX or TXT – max 10 MB</p>
+        </div>
+        <div class="flex gap-4 text-sm font-medium text-slate-400 bg-surface px-4 py-2 rounded-lg border border-primary/10">
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-red-400">picture_as_pdf</span>PDF</span>
+          <span class="text-slate-600">|</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-400">table_chart</span>CSV</span>
+          <span class="text-slate-600">|</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-500">grid_on</span>XLSX</span>
+          <span class="text-slate-600">|</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-blue-400">description</span>TXT</span>
+        </div>
+        <input id="file-input" type="file" accept=".pdf,.csv,.xlsx,.xls,.txt" class="hidden" onchange="handleFileSelect(event)"/>
+      </div>
+
+      <!-- selected file info -->
+      <div id="file-info" class="hidden flex items-center gap-4 p-4 bg-surface rounded-xl border border-primary/10">
+        <span id="file-icon" class="material-symbols-outlined text-3xl text-primary">description</span>
+        <div class="flex-1 min-w-0">
+          <p id="file-name" class="font-semibold truncate"></p>
+          <p id="file-size" class="text-xs text-slate-400 mt-0.5"></p>
+        </div>
+        <button onclick="clearFile()" class="text-slate-500 hover:text-red-400 transition-colors p-1">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <!-- restaurant name -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Restaurant Name</label>
+        <input id="rest-name" type="text" value="The Rusty Spoon"
+               oninput="updateBrandPreview()"
+               class="w-full bg-surface border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"/>
+      </div>
+
+      <!-- currency selector -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">
+          Currency
+          <span class="ml-2 text-xs text-slate-500 font-normal">(auto-detected from file after upload)</span>
+        </label>
+        <div class="flex gap-2">
+          <select id="currency-select" onchange="setCurrency(this.value)"
+                  class="flex-1 bg-surface border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+          </select>
+          <div id="currency-badge"
+               class="shrink-0 w-16 flex items-center justify-center bg-primary/10 border border-primary/20 rounded-xl text-lg font-bold text-primary">
+            $
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Menu Branding ──────────────────────────────────────────────── -->
+      <div class="space-y-5 p-4 bg-surface rounded-xl border border-primary/10">
+        <p class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px] text-primary">palette</span>
+          Menu Branding
+        </p>
+
+        <!-- ── Visibility toggles ──────────────────────────────────── -->
+        <div class="flex gap-5">
+          <label class="flex items-center gap-2.5 cursor-pointer select-none" onclick="togClick('show-logo')">
+            <span id="tog-show-logo" class="tog-track on"></span>
+            <input type="checkbox" id="show-logo" checked class="sr-only"/>
+            <span class="text-sm text-slate-300">Show Logo</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer select-none" onclick="togClick('show-name')">
+            <span id="tog-show-name" class="tog-track on"></span>
+            <input type="checkbox" id="show-name" checked class="sr-only"/>
+            <span class="text-sm text-slate-300">Show Name &amp; Tagline</span>
+          </label>
+        </div>
+
+        <!-- ── Header Layout ───────────────────────────────────────── -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Header Layout</label>
+          <div class="grid grid-cols-3 gap-1.5" id="layout-picker">
+            <button onclick="setLayout('logo-left')" data-layout="logo-left"
+                    class="layout-opt layout-active p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="flex items-center gap-1 w-full">
+                <div class="w-4 h-4 rounded bg-current opacity-70 shrink-0"></div>
+                <div class="flex-1 space-y-0.5">
+                  <div class="h-1.5 bg-current opacity-50 rounded-full w-full"></div>
+                  <div class="h-1 bg-current opacity-30 rounded-full w-3/4"></div>
+                </div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Logo Left</span>
+            </button>
+            <button onclick="setLayout('stacked')" data-layout="stacked"
+                    class="layout-opt p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="flex flex-col items-center gap-0.5 w-full">
+                <div class="w-4 h-4 rounded bg-current opacity-50 mx-auto"></div>
+                <div class="h-1.5 bg-current opacity-50 rounded-full w-5/6 mx-auto"></div>
+                <div class="h-1 bg-current opacity-30 rounded-full w-3/4 mx-auto"></div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Stacked</span>
+            </button>
+            <button onclick="setLayout('logo-right')" data-layout="logo-right"
+                    class="layout-opt p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="flex items-center gap-1 w-full">
+                <div class="flex-1 space-y-0.5">
+                  <div class="h-1.5 bg-current opacity-50 rounded-full w-full"></div>
+                  <div class="h-1 bg-current opacity-30 rounded-full w-3/4"></div>
+                </div>
+                <div class="w-4 h-4 rounded bg-current opacity-70 shrink-0"></div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Logo Right</span>
+            </button>
+            <button onclick="setLayout('logo-only')" data-layout="logo-only"
+                    class="layout-opt p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="flex justify-center w-full">
+                <div class="w-5 h-5 rounded-full bg-current opacity-50"></div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Logo Only</span>
+            </button>
+            <button onclick="setLayout('name-only')" data-layout="name-only"
+                    class="layout-opt p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="space-y-0.5 w-full">
+                <div class="h-1.5 bg-current opacity-50 rounded-full w-full"></div>
+                <div class="h-1 bg-current opacity-30 rounded-full w-4/5"></div>
+                <div class="h-1 bg-current opacity-20 rounded-full w-3/5"></div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Name Only</span>
+            </button>
+            <button onclick="setLayout('logo-center')" data-layout="logo-center"
+                    class="layout-opt p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
+              <div class="flex flex-col items-center gap-0.5 w-full">
+                <div class="w-5 h-5 rounded-full bg-current opacity-50 mx-auto"></div>
+                <div class="h-1.5 bg-current opacity-50 rounded-full w-3/4 mx-auto"></div>
+              </div>
+              <span class="text-[9px] font-bold uppercase tracking-wide">Centered</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Accent color ────────────────────────────────────────── -->
+        <div class="flex items-center gap-3">
+          <label class="text-sm text-slate-400 flex-1">Accent Color</label>
+          <input type="color" id="brand-color" value="#2dd4bf"
+                 oninput="onAccentChange()"
+                 class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-primary/20 p-1"/>
+          <span id="brand-color-hex" class="text-xs font-mono text-slate-500 w-16">#2dd4bf</span>
+        </div>
+
+        <!-- ── Logo ───────────────────────────────────────────────── -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-1.5">
+            Logo <span class="text-slate-600 text-xs">(optional)</span>
+          </label>
+          <div class="flex items-start gap-3">
+            <div id="logo-preview-wrap"
+                 class="shrink-0 size-[60px] rounded-xl border border-primary/20 bg-bg-dark
+                        flex items-center justify-center overflow-hidden">
+              <span id="logo-preview-ph" class="material-symbols-outlined text-2xl text-slate-600">image</span>
+              <img id="logo-preview-img" src="" alt="" class="hidden size-full object-cover"/>
+            </div>
+            <div class="flex-1 space-y-2">
+              <button type="button" onclick="document.getElementById('logo-file-input').click()"
+                      class="w-full flex items-center justify-center gap-2 h-9 rounded-xl
+                             border border-primary/20 text-sm text-slate-300
+                             hover:border-primary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[16px]">upload</span>
+                Upload from device
+              </button>
+              <input id="logo-file-input" type="file" accept="image/*" class="hidden"
+                     onchange="handleLogoFile(event)"/>
+              <input id="logo-url" type="url" placeholder="…or paste image URL"
+                     oninput="handleLogoUrl()"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm
+                            text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary
+                            outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1.5 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[12px]">info</span>
+            Recommended: square image, 256 × 256 px or larger (max 2 MB)
+          </p>
+          <button id="logo-clear-btn" onclick="clearLogo()"
+                  class="hidden mt-1.5 text-xs text-slate-600 hover:text-red-400 transition-colors
+                         flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px]">close</span> Remove logo
+          </button>
+        </div>
+
+        <!-- ── Tagline ─────────────────────────────────────────────── -->
+        <div id="tagline-wrap">
+          <label class="block text-sm text-slate-400 mb-1.5">
+            Tagline <span class="text-slate-600 text-xs">(optional)</span>
+            <span id="tagline-hidden-note" class="hidden text-[10px] text-amber-500/70 ml-1">— hidden (name is off)</span>
+          </label>
+          <input id="tagline" type="text" placeholder="Fresh food, great vibes"
+                 oninput="updateBrandPreview()"
+                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+        </div>
+
+        <!-- ── Font & Background ───────────────────────────────────── -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Font Style</label>
+            <select id="font-style" onchange="updateBrandPreview()"
+                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+              <option value="modern">Modern (Work Sans)</option>
+              <option value="elegant">Elegant (Playfair)</option>
+              <option value="casual">Casual (Poppins)</option>
+              <option value="bold">Bold (Oswald)</option>
+              <option value="minimal">Minimal (Inter)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Background Preset</label>
+            <select id="bg-style" onchange="onBgStyleChange()"
+                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+              <option value="dark">Dark Navy</option>
+              <option value="darker">Deep Black</option>
+              <option value="warm">Warm Dark</option>
+              <option value="light">Light</option>
+              <option value="cafe">Café Brown</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── Advanced Colors (collapsible) ──────────────────────── -->
+        <div>
+          <button onclick="toggleAdvancedColors()"
+                  class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors w-full text-left">
+            <span id="adv-colors-arrow" class="material-symbols-outlined text-[14px] transition-transform">expand_more</span>
+            Advanced Colors
+            <span class="flex-1 h-px bg-slate-800 ml-1"></span>
+          </button>
+          <div id="advanced-colors" class="hidden mt-3 space-y-3">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+
+              <!-- Page Background -->
+              <div>
+                <label class="text-xs text-slate-500 mb-1.5 block">Page Background</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="bg-color-custom" value="#0d1b2a"
+                         oninput="onAdvColorInput('bg-color-custom')"
+                         class="adv-color-input border border-primary/20"/>
+                  <button onclick="resetAdvColor('bg-color-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <span id="bg-color-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
+                </div>
+              </div>
+
+              <!-- Card / Surface -->
+              <div>
+                <label class="text-xs text-slate-500 mb-1.5 block">Card / Surface</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="card-bg-custom" value="#132639"
+                         oninput="onAdvColorInput('card-bg-custom')"
+                         class="adv-color-input border border-primary/20"/>
+                  <button onclick="resetAdvColor('card-bg-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <span id="card-bg-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
+                </div>
+              </div>
+
+              <!-- Heading Color -->
+              <div>
+                <label class="text-xs text-slate-500 mb-1.5 block">Headings &amp; Name</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="heading-color" value="#ffffff"
+                         oninput="onAdvColorInput('heading-color')"
+                         class="adv-color-input border border-primary/20"/>
+                  <button onclick="resetAdvColor('heading-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <span id="heading-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
+                </div>
+              </div>
+
+              <!-- Body Text -->
+              <div>
+                <label class="text-xs text-slate-500 mb-1.5 block">Body Text</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="text-color" value="#94a3b8"
+                         oninput="onAdvColorInput('text-color')"
+                         class="adv-color-input border border-primary/20"/>
+                  <button onclick="resetAdvColor('text-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <span id="text-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
+                </div>
+              </div>
+
+              <!-- Price Badge Color -->
+              <div class="col-span-2">
+                <label class="text-xs text-slate-500 mb-1.5 block">
+                  Price Badge Color
+                  <span class="text-[10px] text-slate-600 ml-1">(defaults to accent)</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="price-color" value="#2dd4bf"
+                         oninput="onAdvColorInput('price-color')"
+                         class="adv-color-input border border-primary/20"/>
+                  <button onclick="resetAdvColor('price-color')" class="adv-reset-btn" title="Reset to accent">↺ Reset</button>
+                  <span id="price-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Live preview strip ──────────────────────────────────── -->
+        <div id="brand-preview"
+             class="rounded-xl px-3 py-2.5 border border-white/10 flex items-center gap-3 transition-all overflow-hidden"
+             style="background:#132639">
+          <div id="prev-logo"
+               class="shrink-0 size-10 rounded-xl flex items-center justify-center text-sm font-bold overflow-hidden"
+               style="background:rgba(45,212,191,.15); color:#2dd4bf">RS</div>
+          <div class="min-w-0 flex-1">
+            <p id="prev-name" class="font-bold text-white text-sm truncate">The Rusty Spoon</p>
+            <p id="prev-tagline" class="text-xs truncate" style="color:#2dd4bf">Your tagline here</p>
+          </div>
+          <div class="shrink-0 flex flex-col items-end gap-1">
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                  style="background:rgba(45,212,191,.2); color:#2dd4bf; white-space:nowrap">Preview</span>
+            <span id="prev-layout-label" class="text-[9px] text-slate-600">Logo Left</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- upload btn -->
+      <button id="upload-btn" onclick="uploadFile()"
+              class="w-full h-12 bg-primary text-bg-dark font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span class="material-symbols-outlined text-[20px]">upload</span>
+        Upload &amp; Extract Items
+      </button>
+
+      <div id="upload-error" class="hidden text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3"></div>
+    </section>
+
+    <!-- ═══════════════════ STEP 2 – PREVIEW / EDIT ═══════════ -->
+    <section id="section-preview" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h2 id="preview-heading" class="text-2xl font-bold">Review Extracted Items</h2>
+          <p id="preview-subtext" class="text-slate-400 text-sm mt-1">Edit, uncheck, or delete rows before publishing.</p>
+        </div>
+        <button onclick="addRow()" class="flex items-center gap-1.5 text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary/5 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">add</span> Add Row
+        </button>
+      </div>
+
+      <!-- summary chips -->
+      <div class="flex gap-3 flex-wrap text-sm">
+        <span id="chip-total"   class="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium"></span>
+        <span id="chip-selected" class="px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-medium"></span>
+      </div>
+
+      <div class="bg-surface border border-primary/10 rounded-xl overflow-x-auto shadow-lg">
+        <table class="w-full text-left min-w-[1020px]">
+          <thead>
+            <tr class="border-b border-primary/10 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th class="p-4 w-10 text-center">
+                <input type="checkbox" id="check-all" onchange="toggleAll(this.checked)"
+                       class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4 cursor-pointer"/>
+              </th>
+              <th class="p-4">Name</th>
+              <th class="p-4 w-40">Category</th>
+              <th class="p-4 w-28" id="price-col-header">Price ($)</th>
+              <th class="p-4 w-28">Size</th>
+              <th class="p-4">Description</th>
+              <th class="p-4 w-10 text-center">Del</th>
+            </tr>
+          </thead>
+          <tbody id="items-body" class="divide-y divide-primary/5 text-sm text-slate-200"></tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button onclick="showSection('upload')" class="px-5 py-2.5 rounded-xl border border-primary/20 text-slate-300 hover:bg-primary/5 transition-colors font-medium">
+          ← Back
+        </button>
+        <button id="proceed-btn" onclick="proceedToPublish()"
+                class="px-6 py-2.5 rounded-xl bg-primary text-bg-dark font-bold hover:opacity-90 active:scale-[0.98] transition-all shadow-md shadow-primary/20 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
+          Generate QR Code
+        </button>
+      </div>
+    </section>
+
+    <!-- ═══════════════════ STEP 3 – QR / PUBLISH ════════════= -->
+    <section id="section-publish" class="hidden max-w-xl mx-auto space-y-6 text-center">
+      <div>
+        <h2 id="publish-heading" class="text-2xl font-bold">Your Menu is Live! 🎉</h2>
+        <p id="publish-subtext" class="text-slate-400 text-sm mt-1">Print or display this QR code for customers to scan.</p>
+      </div>
+
+      <div class="bg-surface rounded-2xl border border-primary/10 p-8 flex flex-col items-center gap-6 shadow-lg">
+        <img id="qr-img" src="" alt="QR Code" class="rounded-xl size-52 bg-bg-dark p-2"/>
+        <div class="space-y-1">
+          <p class="text-lg font-bold" id="qr-rest-name"></p>
+          <a id="qr-link" href="#" target="_blank"
+             class="text-primary text-sm hover:underline break-all"></a>
+        </div>
+        <div class="flex gap-3 w-full">
+          <button onclick="downloadQR()"
+                  class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-primary text-bg-dark font-bold hover:opacity-90 active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined text-[18px]">download</span> Download QR
+          </button>
+          <button onclick="copyLink()"
+                  class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">content_copy</span>
+            <span id="copy-btn-text">Copy Link</span>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="showSection('upload'); clearAll()"
+              class="text-slate-400 hover:text-slate-200 text-sm underline underline-offset-2 transition-colors">
+        Upload another menu →
+      </button>
+    </section>
+
+    <!-- ═══════════════════ STEP 4 – PUBLISHED MENUS ══════════ -->
+    <section id="section-published" class="hidden max-w-4xl mx-auto space-y-6">
+      <div class="flex items-end justify-between">
+        <div>
+          <h2 class="text-2xl font-bold">Published Menus</h2>
+          <p class="text-slate-400 text-sm mt-1">All menus available to customers.</p>
+        </div>
+        <button onclick="loadPublished()" class="text-primary text-sm hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+        </button>
+      </div>
+
+      <div id="published-list" class="space-y-3">
+        <p class="text-slate-400 text-sm">Loading…</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Loading overlay ──────────────────────────────────────────────────────── -->
+<div id="loading-overlay" class="hidden fixed inset-0 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center z-50">
+  <div class="flex flex-col items-center gap-4">
+    <span class="material-symbols-outlined text-5xl text-primary spin">sync</span>
+    <p id="loading-text" class="text-slate-300 font-medium">Processing…</p>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let sessionToken   = localStorage.getItem('adminToken') || '';
+let extractedItems = [];
+let currentMenuUrl = '';
+let currentQrDataUrl = '';
+let restaurantName = 'The Rusty Spoon';
+let selectedFile   = null;
+let currency       = 'USD';
+let editingMenuId  = null;
+let currentLogoSrc = ''; // data-URL (uploaded) or http URL (pasted)
+let currentHeaderLayout = 'logo-left';
+// Track which advanced colors have been manually set by user
+const advColorCustom = {
+  'bg-color-custom': false,
+  'card-bg-custom':  false,
+  'heading-color':   false,
+  'text-color':      false,
+  'price-color':     false,
+};
+
+const CURRENCIES = {
+  // ─ Americas ──────────────────────────────────────────────────────────────────────
+  USD: { symbol: '$',     name: 'US Dollar' },
+  CAD: { symbol: 'CA$',   name: 'Canadian Dollar' },
+  BRL: { symbol: 'R$',    name: 'Brazilian Real' },
+  AUD: { symbol: 'A$',    name: 'Australian Dollar' },
+  // ─ Europe ────────────────────────────────────────────────────────────────────────
+  EUR: { symbol: '€',     name: 'Euro' },
+  GBP: { symbol: '£',     name: 'British Pound' },
+  TRY: { symbol: '₺',     name: 'Turkish Lira' },
+  // ─ Middle East ───────────────────────────────────────────────────────────────
+  AED: { symbol: 'AED ',  name: 'UAE Dirham' },
+  SAR: { symbol: 'SAR ',  name: 'Saudi Riyal' },
+  QAR: { symbol: 'QR ',   name: 'Qatari Riyal' },
+  KWD: { symbol: 'KD ',   name: 'Kuwaiti Dinar' },
+  BHD: { symbol: 'BD ',   name: 'Bahraini Dinar' },
+  OMR: { symbol: 'OMR ',  name: 'Omani Rial' },
+  // ─ Asia ──────────────────────────────────────────────────────────────────────────
+  INR: { symbol: '₹',     name: 'Indian Rupee' },
+  PKR: { symbol: '₨',     name: 'Pakistani Rupee' },
+  BDT: { symbol: '৳',     name: 'Bangladeshi Taka' },
+  JPY: { symbol: '¥',     name: 'Japanese Yen' },
+  CNY: { symbol: '¥',     name: 'Chinese Yuan' },
+  KRW: { symbol: '₩',     name: 'Korean Won' },
+  MYR: { symbol: 'RM',    name: 'Malaysian Ringgit' },
+  SGD: { symbol: 'S$',    name: 'Singapore Dollar' },
+  THB: { symbol: '฿',     name: 'Thai Baht' },
+  PHP: { symbol: '₱',     name: 'Philippine Peso' },
+  IDR: { symbol: 'Rp',    name: 'Indonesian Rupiah' },
+  // ─ Africa – West ─────────────────────────────────────────────────────────────────
+  NGN: { symbol: '₦',     name: 'Nigerian Naira' },
+  GHS: { symbol: '₵',     name: 'Ghanaian Cedi' },
+  XOF: { symbol: 'CFA',   name: 'West African CFA Franc' },
+  XAF: { symbol: 'FCFA',  name: 'Central African CFA Franc' },
+  GMD: { symbol: 'D',     name: 'Gambian Dalasi' },
+  GNF: { symbol: 'FG',    name: 'Guinean Franc' },
+  SLE: { symbol: 'Le',    name: 'Sierra Leonean Leone' },
+  LRD: { symbol: 'L$',    name: 'Liberian Dollar' },
+  CVE: { symbol: 'CV$',   name: 'Cape Verdean Escudo' },
+  // ─ Africa – East ──────────────────────────────────────────────────────────────────
+  KES: { symbol: 'KSh',   name: 'Kenyan Shilling' },
+  ETB: { symbol: 'Br',    name: 'Ethiopian Birr' },
+  TZS: { symbol: 'TSh',   name: 'Tanzanian Shilling' },
+  UGX: { symbol: 'USh',   name: 'Ugandan Shilling' },
+  RWF: { symbol: 'RF',    name: 'Rwandan Franc' },
+  BIF: { symbol: 'Fr',    name: 'Burundian Franc' },
+  SOS: { symbol: 'Sh.So', name: 'Somali Shilling' },
+  SSP: { symbol: 'SS£',   name: 'South Sudanese Pound' },
+  ERN: { symbol: 'Nfk',   name: 'Eritrean Nakfa' },
+  DJF: { symbol: 'Fdj',   name: 'Djiboutian Franc' },
+  KMF: { symbol: 'CF',    name: 'Comorian Franc' },
+  SCR: { symbol: '₨',     name: 'Seychellois Rupee' },
+  MUR: { symbol: 'Rs',    name: 'Mauritian Rupee' },
+  MGA: { symbol: 'Ar',    name: 'Malagasy Ariary' },
+  // ─ Africa – North ─────────────────────────────────────────────────────────────────
+  EGP: { symbol: 'E£',    name: 'Egyptian Pound' },
+  MAD: { symbol: 'MAD',   name: 'Moroccan Dirham' },
+  DZD: { symbol: 'DA',    name: 'Algerian Dinar' },
+  TND: { symbol: 'DT',    name: 'Tunisian Dinar' },
+  LYD: { symbol: 'LD',    name: 'Libyan Dinar' },
+  SDG: { symbol: 'SDG',   name: 'Sudanese Pound' },
+  // ─ Africa – Southern ──────────────────────────────────────────────────────────────
+  ZAR: { symbol: 'R',     name: 'South African Rand' },
+  NAD: { symbol: 'N$',    name: 'Namibian Dollar' },
+  BWP: { symbol: 'P',     name: 'Botswana Pula' },
+  LSL: { symbol: 'L',     name: 'Lesotho Loti' },
+  SZL: { symbol: 'L',     name: 'Swazi Lilangeni' },
+  ZWL: { symbol: 'Z$',    name: 'Zimbabwean Dollar' },
+  ZMW: { symbol: 'K',     name: 'Zambian Kwacha' },
+  MWK: { symbol: 'MK',    name: 'Malawian Kwacha' },
+  MZN: { symbol: 'MT',    name: 'Mozambican Metical' },
+  AOA: { symbol: 'Kz',    name: 'Angolan Kwanza' },
+  CDF: { symbol: 'FC',    name: 'Congolese Franc' },
+  STN: { symbol: 'Db',    name: 'São Tomé Dobra' },
+};
+
+function getCurrencySymbol() { return (CURRENCIES[currency] || CURRENCIES.USD).symbol; }
+
+function setCurrency(code) {
+  currency = code;
+  const sym = getCurrencySymbol();
+  // update all price-prefix badges already rendered in the table
+  document.querySelectorAll('.currency-sym').forEach(el => el.textContent = sym);
+  // update price column header
+  const th = document.getElementById('price-col-header');
+  if (th) th.textContent = 'Price (' + sym.trim() + ')';
+  // update the preview badge
+  const badge = document.getElementById('currency-badge');
+  if (badge) badge.textContent = sym;
+}
+
+function initCurrencySelect() {
+  const sel = document.getElementById('currency-select');
+  if (!sel) return;
+  sel.innerHTML = Object.entries(CURRENCIES)
+    .map(([code, { symbol, name }]) =>
+      `<option value="${code}" ${code === currency ? 'selected' : ''}>${code} – ${symbol} ${name}</option>`)
+    .join('');
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+const SECTIONS = ['upload', 'preview', 'publish', 'published'];
+const TITLES   = { upload: 'Upload Menu', preview: 'Preview & Edit', publish: 'QR & Publish', published: 'Published Menus' };
+
+function showSection(name) {
+  SECTIONS.forEach(s => {
+    document.getElementById('section-' + s).classList.toggle('hidden', s !== name);
+    const link = document.getElementById('nav-' + s);
+    if (link) {
+      link.classList.toggle('bg-primary/10', s === name);
+      link.classList.toggle('text-primary',   s === name);
+      link.classList.toggle('text-slate-400',  s !== name);
+      link.classList.toggle('hover:text-slate-100', s !== name);
+      link.classList.toggle('hover:bg-white/5',     s !== name);
+    }
+  });
+  document.getElementById('page-title').textContent = TITLES[name] || '';
+  if (name === 'published') loadPublished();
+  if (name === 'upload') initCurrencySelect();
+  // close mobile sidebar
+  document.querySelector('aside').classList.add('hidden', 'md:flex');
+  document.querySelector('aside').classList.remove('hidden');
+}
+
+// ── Drag & Drop ───────────────────────────────────────────────────────────────
+function handleDragOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) applyFile(file);
+}
+function handleFileSelect(e) { if (e.target.files[0]) applyFile(e.target.files[0]); }
+
+function applyFile(file) {
+  selectedFile = file;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icons = { pdf: 'picture_as_pdf', csv: 'table_chart', xlsx: 'grid_on', xls: 'grid_on', txt: 'description' };
+  document.getElementById('file-icon').textContent = icons[ext] || 'description';
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = formatBytes(file.size);
+  document.getElementById('file-info').classList.remove('hidden');
+}
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('file-input').value = '';
+  document.getElementById('file-info').classList.add('hidden');
+}
+function clearAll() {
+  clearFile();
+  extractedItems   = [];
+  currentMenuUrl   = '';
+  currentQrDataUrl = '';
+  editingMenuId    = null;
+  currentLogoSrc   = '';
+  currentHeaderLayout = 'logo-left';
+  applyLogoPreview('');
+  // Reset show/hide toggles
+  ['show-logo','show-name'].forEach(id => {
+    document.getElementById(id).checked = true;
+    document.getElementById('tog-' + id).classList.add('on');
+  });
+  syncNameVisibility();
+  // Reset layout picker
+  document.querySelectorAll('.layout-opt').forEach(btn => {
+    btn.classList.toggle('layout-active', btn.dataset.layout === 'logo-left');
+  });
+  // Reset advanced colors
+  for (const id of Object.keys(advColorCustom)) {
+    advColorCustom[id] = false;
+    const flag = document.getElementById(id + '-flag');
+    if (flag) flag.classList.add('hidden');
+  }
+  // Reset preview section to upload-new state
+  const btn = document.getElementById('proceed-btn');
+  if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">qr_code_2</span> Generate QR Code';
+  const ph = document.getElementById('preview-heading');
+  if (ph) ph.textContent = 'Review Extracted Items';
+  const ps = document.getElementById('preview-subtext');
+  if (ps) ps.textContent = 'Edit, uncheck, or delete rows before publishing.';
+}
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/(1024*1024)).toFixed(1) + ' MB';
+}
+
+// ── Upload ────────────────────────────────────────────────────────────────────
+async function uploadFile() {
+  const errEl = document.getElementById('upload-error');
+  errEl.classList.add('hidden');
+
+  if (!selectedFile) {
+    errEl.textContent = 'Please select a file first.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  // Always treat an upload as a new menu, never an update
+  editingMenuId = null;
+  const btn = document.getElementById('proceed-btn');
+  if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">qr_code_2</span> Generate QR Code';
+  const ph = document.getElementById('preview-heading');
+  if (ph) ph.textContent = 'Review Extracted Items';
+  const ps = document.getElementById('preview-subtext');
+  if (ps) ps.textContent = 'Edit, uncheck, or delete rows before publishing.';
+
+  restaurantName = document.getElementById('rest-name').value.trim() || 'The Rusty Spoon';
+
+  showLoading('Uploading & extracting items…');
+  const fd = new FormData();
+  fd.append('menuFile', selectedFile);
+
+  try {
+    const res  = await fetch('/api/upload', { method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+    extractedItems = data.items.map(item => ({ ...item, _selected: true }));
+
+    // Auto-apply detected currency from the uploaded file
+    if (data.detectedCurrency && CURRENCIES[data.detectedCurrency]) {
+      document.getElementById('currency-select').value = data.detectedCurrency;
+      setCurrency(data.detectedCurrency);
+      showStatusBadge(`Detected currency: ${data.detectedCurrency}`, 'green');
+    }
+
+    // If no items were auto-extracted, add one blank row so user can fill manually
+    if (extractedItems.length === 0) {
+      extractedItems.push(blankRow());
+      showStatusBadge('No items auto-detected – add them manually', 'yellow');
+    } else {
+      showStatusBadge(`${extractedItems.length} items extracted`, 'green');
+    }
+
+    renderTable();
+    showSection('preview');
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── Table rendering ───────────────────────────────────────────────────────────
+function blankRow() {
+  return { id: crypto.randomUUID(), name: '', category: 'General', price: '', description: '', size: '', tags: [], _selected: true };
+}
+
+function renderTable() {
+  const tbody = document.getElementById('items-body');
+  tbody.innerHTML = '';
+  extractedItems.forEach((item, i) => tbody.appendChild(buildRow(item, i)));
+  updateChips();
+}
+
+function buildRow(item, i) {
+  const tr = document.createElement('tr');
+  tr.className = 'hover:bg-white/[0.02] transition-colors group align-top';
+  tr.dataset.index = i;
+  tr.innerHTML = `
+    <td class="p-3 text-center">
+      <input type="checkbox" ${item._selected ? 'checked' : ''} onchange="toggleRow(${i}, this.checked)"
+             class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4 cursor-pointer mt-0.5"/>
+    </td>
+    <td class="p-3">
+      <input type="text" value="${esc(item.name)}" placeholder="Item name"
+             oninput="updateItem(${i},'name',this.value)"
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+    </td>
+    <td class="p-3">
+      <input type="text" value="${esc(item.category)}" placeholder="Category"
+             oninput="updateItem(${i},'category',this.value)"
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+    </td>
+    <td class="p-3">
+      <div class="relative">
+        <span class="currency-sym absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">${getCurrencySymbol()}</span>
+        <input type="number" value="${item.price}" placeholder="0.00" step="0.01" min="0"
+               oninput="updateItem(${i},'price',parseFloat(this.value)||0)"
+               class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg pl-6 pr-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+      </div>
+    </td>
+    <td class="p-3">
+      <input type="text" value="${esc(item.size||'')}" placeholder="e.g. 250ml"
+             oninput="updateItem(${i},'size',this.value)"
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+    </td>
+    <td class="p-3">
+      <input type="text" value="${esc(item.description)}" placeholder="Description (optional)"
+             oninput="updateItem(${i},'description',this.value)"
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+    </td>
+    <td class="p-3 text-center">
+      <button onclick="deleteRow(${i})"
+              class="text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+        <span class="material-symbols-outlined text-[18px]">delete</span>
+      </button>
+    </td>`;
+  return tr;
+}
+
+function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateItem(i, key, val) { extractedItems[i][key] = val; updateChips(); }
+function deleteRow(i)   { extractedItems.splice(i, 1); renderTable(); }
+function toggleRow(i, v){ extractedItems[i]._selected = v; updateChips(); }
+function addRow()        { extractedItems.push(blankRow()); renderTable(); }
+function toggleAll(v)    { extractedItems.forEach(it => it._selected = v); renderTable(); }
+
+function updateChips() {
+  const sel = extractedItems.filter(it => it._selected).length;
+  document.getElementById('chip-total').textContent    = `${extractedItems.length} total`;
+  document.getElementById('chip-selected').textContent = `${sel} selected`;
+  document.getElementById('check-all').checked         = sel === extractedItems.length && extractedItems.length > 0;
+  document.getElementById('check-all').indeterminate   = sel > 0 && sel < extractedItems.length;
+}
+
+// ── Branding ──────────────────────────────────────────────────────────────────
+function getBranding() {
+  return {
+    brandColor:   document.getElementById('brand-color').value || '#2dd4bf',
+    logoUrl:      currentLogoSrc,
+    tagline:      document.getElementById('tagline').value.trim(),
+    fontStyle:    document.getElementById('font-style').value,
+    bgStyle:      document.getElementById('bg-style').value,
+    showLogo:     document.getElementById('show-logo').checked ? 1 : 0,
+    showName:     document.getElementById('show-name').checked ? 1 : 0,
+    headerLayout: currentHeaderLayout,
+    textColor:    advColorCustom['text-color']      ? document.getElementById('text-color').value      : '',
+    headingColor: advColorCustom['heading-color']   ? document.getElementById('heading-color').value   : '',
+    bgColor:      advColorCustom['bg-color-custom'] ? document.getElementById('bg-color-custom').value : '',
+    cardBg:       advColorCustom['card-bg-custom']  ? document.getElementById('card-bg-custom').value  : '',
+    priceColor:   advColorCustom['price-color']     ? document.getElementById('price-color').value     : '',
+  };
+}
+
+// ── Logo helpers ──────────────────────────────────────────────────────────────
+function handleLogoFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  resizeAndCompressLogo(file, 256, 0.82).then(dataUrl => {
+    currentLogoSrc = dataUrl;
+    document.getElementById('logo-url').value = '';
+    applyLogoPreview(dataUrl);
+    updateBrandPreview();
+  }).catch(() => alert('Could not process image.'));
+}
+
+function handleLogoUrl() {
+  currentLogoSrc = document.getElementById('logo-url').value.trim();
+  applyLogoPreview(currentLogoSrc);
+  updateBrandPreview();
+}
+
+function applyLogoPreview(src) {
+  const img  = document.getElementById('logo-preview-img');
+  const ph   = document.getElementById('logo-preview-ph');
+  const clr  = document.getElementById('logo-clear-btn');
+  if (src) {
+    img.src = src;
+    img.classList.remove('hidden');
+    ph.classList.add('hidden');
+    clr.classList.remove('hidden');
+  } else {
+    img.src = '';
+    img.classList.add('hidden');
+    ph.classList.remove('hidden');
+    clr.classList.add('hidden');
+  }
+}
+
+function clearLogo() {
+  currentLogoSrc = '';
+  document.getElementById('logo-url').value = '';
+  document.getElementById('logo-file-input').value = '';
+  applyLogoPreview('');
+  updateBrandPreview();
+}
+
+function resizeAndCompressLogo(file, maxPx, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+        const w = Math.round(img.width  * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width  = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateBrandPreview() {
+  const color    = document.getElementById('brand-color').value || '#2dd4bf';
+  const tagline  = document.getElementById('tagline').value.trim();
+  const logoUrl  = currentLogoSrc;
+  const bgStyle  = document.getElementById('bg-style').value;
+  const showName = document.getElementById('show-name').checked;
+  const name     = document.getElementById('rest-name').value.trim() || 'The Rusty Spoon';
+
+  document.getElementById('brand-color-hex').textContent = color;
+
+  // Sync price-color to accent if not customised
+  if (!advColorCustom['price-color']) {
+    document.getElementById('price-color').value = color;
+  }
+
+  const BG_SURFACE = { dark: '#132639', darker: '#0d1726', warm: '#241808', light: '#f1f5f9', cafe: '#2a1a0e' };
+  const bgSurface  = advColorCustom['card-bg-custom']
+    ? document.getElementById('card-bg-custom').value
+    : (BG_SURFACE[bgStyle] || '#132639');
+  const isDark = bgStyle !== 'light';
+
+  const prevBg = advColorCustom['bg-color-custom']
+    ? document.getElementById('bg-color-custom').value
+    : bgSurface;
+
+  const preview = document.getElementById('brand-preview');
+  preview.style.background = bgSurface;
+
+  // Logo/initials in preview
+  const prevLogo = document.getElementById('prev-logo');
+  if (logoUrl) {
+    prevLogo.innerHTML = `<img src="${logoUrl.replace(/"/g,'')}" alt=""
+      class="size-full object-cover rounded-xl"
+      onerror="this.parentElement.innerHTML=getInitials('${name.replace(/'/g,"\\'")}')"/>`;
+    prevLogo.style.background = '';
+  } else {
+    prevLogo.textContent = getInitials(name);
+    prevLogo.style.background = hexAlpha(color, 0.15);
+  }
+  prevLogo.style.color = color;
+
+  // Show/hide logo in preview
+  prevLogo.style.display = document.getElementById('show-logo').checked ? '' : 'none';
+
+  document.getElementById('prev-name').textContent  = name;
+  document.getElementById('prev-name').style.color  = isDark ? '#fff' : '#1e293b';
+  document.getElementById('prev-tagline').textContent = showName ? (tagline || 'Your tagline here') : '(Name & tagline hidden)';
+  document.getElementById('prev-tagline').style.color = showName ? (color + 'cc') : '#475569';
+
+  const LAYOUT_LABELS = {
+    'logo-left': 'Logo Left', 'stacked': 'Stacked', 'logo-right': 'Logo Right',
+    'logo-only': 'Logo Only', 'name-only': 'Name Only', 'logo-center': 'Centered',
+  };
+  const lbl = document.getElementById('prev-layout-label');
+  if (lbl) lbl.textContent = LAYOUT_LABELS[currentHeaderLayout] || currentHeaderLayout;
+}
+
+// ── Layout picker ─────────────────────────────────────────────────────────────
+function setLayout(layout) {
+  currentHeaderLayout = layout;
+  document.querySelectorAll('.layout-opt').forEach(btn => {
+    const active = btn.dataset.layout === layout;
+    btn.classList.toggle('layout-active', active);
+  });
+  updateBrandPreview();
+}
+
+// ── Toggle switches ───────────────────────────────────────────────────────────
+function togClick(id) {
+  const checkbox = document.getElementById(id);
+  checkbox.checked = !checkbox.checked;
+  document.getElementById('tog-' + id).classList.toggle('on', checkbox.checked);
+  if (id === 'show-name') syncNameVisibility();
+  else updateBrandPreview();
+}
+
+function syncNameVisibility() {
+  const showName = document.getElementById('show-name').checked;
+  const note = document.getElementById('tagline-hidden-note');
+  if (note) note.classList.toggle('hidden', showName);
+  updateBrandPreview();
+}
+
+// ── Advanced colors ───────────────────────────────────────────────────────────
+const ADV_BG      = { dark: '#0d1b2a', darker: '#080e18', warm: '#1a1008', light: '#f1f5f9', cafe: '#1c1108' };
+const ADV_SURFACE = { dark: '#132639', darker: '#0d1726', warm: '#241808', light: '#ffffff', cafe: '#2a1a0e' };
+
+function getThemeDefaults() {
+  const bgStyle = document.getElementById('bg-style').value;
+  const isDark  = bgStyle !== 'light';
+  const accent  = document.getElementById('brand-color').value || '#2dd4bf';
+  return {
+    'bg-color-custom': ADV_BG[bgStyle]      || '#0d1b2a',
+    'card-bg-custom':  ADV_SURFACE[bgStyle] || '#132639',
+    'heading-color':   isDark ? '#ffffff' : '#0f172a',
+    'text-color':      isDark ? '#94a3b8' : '#475569',
+    'price-color':     accent,
+  };
+}
+
+function onAdvColorInput(id) {
+  advColorCustom[id] = true;
+  const flag = document.getElementById(id + '-flag');
+  if (flag) flag.classList.remove('hidden');
+  updateBrandPreview();
+}
+
+function resetAdvColor(id) {
+  const defaults = getThemeDefaults();
+  const picker = document.getElementById(id);
+  if (picker && defaults[id]) picker.value = defaults[id];
+  advColorCustom[id] = false;
+  const flag = document.getElementById(id + '-flag');
+  if (flag) flag.classList.add('hidden');
+  updateBrandPreview();
+}
+
+function toggleAdvancedColors() {
+  const panel = document.getElementById('advanced-colors');
+  const arrow = document.getElementById('adv-colors-arrow');
+  const nowHidden = panel.classList.toggle('hidden');
+  arrow.style.transform = nowHidden ? '' : 'rotate(180deg)';
+}
+
+function onAccentChange() {
+  if (!advColorCustom['price-color']) {
+    document.getElementById('price-color').value = document.getElementById('brand-color').value;
+  }
+  updateBrandPreview();
+}
+
+function onBgStyleChange() {
+  const defaults = getThemeDefaults();
+  ['bg-color-custom', 'card-bg-custom', 'heading-color', 'text-color'].forEach(id => {
+    if (!advColorCustom[id]) {
+      const picker = document.getElementById(id);
+      if (picker && defaults[id]) picker.value = defaults[id];
+    }
+  });
+  updateBrandPreview();
+}
+
+function getInitials(name) {
+  const words = name.trim().split(/\s+/);
+  return words.length >= 2
+    ? (words[0][0] + words[1][0]).toUpperCase()
+    : name.substring(0, 2).toUpperCase();
+}
+
+function hexAlpha(hex, alpha) {
+  // Convert #rrggbb to rgba(r,g,b,alpha)
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ── Edit existing menu ───────────────────────────────────────────────────────────────────
+async function loadMenuForEditing(id) {
+  showLoading('Loading menu…');
+  try {
+    const res  = await fetch('/api/menus/' + encodeURIComponent(id));
+    if (!res.ok) throw new Error('Failed to load menu');
+    const data = await res.json();
+
+    editingMenuId  = id;
+    restaurantName = data.restaurantName;
+
+    // Populate form fields
+    document.getElementById('rest-name').value = data.restaurantName;
+    currency = data.currency || 'USD';
+    initCurrencySelect();
+    setCurrency(currency);
+
+    // Branding
+    document.getElementById('brand-color').value = data.brandColor || '#2dd4bf';
+    document.getElementById('brand-color-hex').textContent = data.brandColor || '#2dd4bf';
+    currentLogoSrc = data.logoUrl || '';
+    document.getElementById('logo-url').value = currentLogoSrc.startsWith('data:') ? '' : currentLogoSrc;
+    applyLogoPreview(currentLogoSrc);
+    document.getElementById('tagline').value    = data.tagline   || '';
+    document.getElementById('font-style').value = data.fontStyle || 'modern';
+    document.getElementById('bg-style').value   = data.bgStyle   || 'dark';
+
+    // Show/hide toggles
+    const sl = data.showLogo !== 0;
+    const sn = data.showName !== 0;
+    document.getElementById('show-logo').checked = sl;
+    document.getElementById('tog-show-logo').classList.toggle('on', sl);
+    document.getElementById('show-name').checked = sn;
+    document.getElementById('tog-show-name').classList.toggle('on', sn);
+    syncNameVisibility();
+
+    // Header layout
+    currentHeaderLayout = data.headerLayout || 'logo-left';
+    document.querySelectorAll('.layout-opt').forEach(btn => {
+      btn.classList.toggle('layout-active', btn.dataset.layout === currentHeaderLayout);
+    });
+
+    // Advanced colors
+    const thDef = getThemeDefaults();
+    const colorMap = {
+      'bg-color-custom': data.bgColor,
+      'card-bg-custom':  data.cardBg,
+      'heading-color':   data.headingColor,
+      'text-color':      data.textColor,
+      'price-color':     data.priceColor,
+    };
+    for (const [id, val] of Object.entries(colorMap)) {
+      const isCustom = !!(val);
+      advColorCustom[id] = isCustom;
+      document.getElementById(id).value = val || thDef[id] || '#000000';
+      const flag = document.getElementById(id + '-flag');
+      if (flag) flag.classList.toggle('hidden', !isCustom);
+    }
+
+    updateBrandPreview();
+
+    // Items
+    extractedItems = data.items.map(it => ({
+      ...it,
+      tags:      Array.isArray(it.tags) ? it.tags : [],
+      _selected: true,
+    }));
+
+    // Update preview section labels
+    document.getElementById('preview-heading').textContent = `Editing: ${data.restaurantName}`;
+    document.getElementById('preview-subtext').textContent = 'Changes will update the live menu instantly.';
+    const btn = document.getElementById('proceed-btn');
+    if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">save</span> Save Changes';
+
+    renderTable();
+    showSection('preview');
+    showStatusBadge(`Editing: ${data.restaurantName}`, 'green');
+  } catch (err) {
+    alert('Could not load menu: ' + err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── Publish ───────────────────────────────────────────────────────────────────
+async function proceedToPublish() {
+  const items = extractedItems.filter(it => it._selected && it.name.trim());
+  if (items.length === 0) {
+    alert('Please select at least one item with a name before publishing.');
+    return;
+  }
+
+  const isEditing = !!editingMenuId;
+  showLoading(isEditing ? 'Saving changes…' : 'Saving menu & generating QR…');
+  try {
+    const url    = isEditing ? '/api/menus/' + editingMenuId : '/api/menus';
+    const method = isEditing ? 'PUT' : 'POST';
+    const res    = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      body:    JSON.stringify({ restaurantName, currency, ...getBranding(), items }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || (isEditing ? 'Update failed' : 'Publish failed'));
+
+    currentMenuUrl   = data.menuUrl;
+    currentQrDataUrl = data.qrDataUrl;
+
+    document.getElementById('qr-img').src              = data.qrDataUrl;
+    document.getElementById('qr-rest-name').textContent = restaurantName;
+    document.getElementById('qr-link').textContent      = data.menuUrl;
+    document.getElementById('qr-link').href             = data.menuUrl;
+
+    document.getElementById('publish-heading').textContent = isEditing ? 'Menu Updated! ✏️' : 'Your Menu is Live! 🎉';
+    document.getElementById('publish-subtext').textContent = isEditing
+      ? 'Changes are live. Your QR code remains the same.'
+      : 'Print or display this QR code for customers to scan.';
+
+    showSection('publish');
+    showStatusBadge(isEditing ? 'Updated!' : 'Published!', 'green');
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── QR utilities ──────────────────────────────────────────────────────────────
+function downloadQR() {
+  if (!currentQrDataUrl) return;
+  const a = document.createElement('a');
+  a.download = 'menu-qr.png';
+  a.href = currentQrDataUrl;
+  a.click();
+}
+function copyLink() {
+  if (!currentMenuUrl) return;
+  navigator.clipboard.writeText(currentMenuUrl).then(() => {
+    const el = document.getElementById('copy-btn-text');
+    el.textContent = 'Copied!';
+    setTimeout(() => el.textContent = 'Copy Link', 2000);
+  });
+}
+
+// ── Published menus list ──────────────────────────────────────────────────────
+async function loadPublished() {
+  const el = document.getElementById('published-list');
+  el.innerHTML = '<p class="text-slate-400 text-sm">Loading…</p>';
+  try {
+    const res  = await fetch('/api/menus');
+    const list = await res.json();
+    if (!list.length) {
+      el.innerHTML = '<p class="text-slate-400 text-sm">No published menus yet.</p>';
+      return;
+    }
+    el.innerHTML = list.map(m => `
+      <div class="flex items-center gap-4 p-4 bg-surface rounded-xl border border-primary/10 shadow-sm">
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-slate-100 truncate">${esc(m.restaurantName)}</p>
+          <p class="text-xs text-slate-400 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
+          <a href="/menu.html?id=${m.id}" target="_blank"
+             class="text-primary text-xs hover:underline truncate block mt-1">/menu.html?id=${m.id}</a>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <button onclick="loadMenuForEditing('${m.id}')" title="Edit menu"
+                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="previewMenu('${m.id}')" title="Open menu"
+                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+          </button>
+          <button onclick="deleteMenu('${m.id}', this)" title="Delete menu"
+                  class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div>`).join('');
+  } catch {
+    el.innerHTML = '<p class="text-red-400 text-sm">Failed to load menus.</p>';
+  }
+}
+
+function previewMenu(id) { window.open('/menu.html?id=' + id, '_blank'); }
+
+async function deleteMenu(id, btn) {
+  if (!confirm('Delete this menu? Customers will no longer be able to view it.')) return;
+  btn.disabled = true;
+  try {
+    await fetch('/api/menus/' + id, { method: 'DELETE', headers: { 'X-Admin-Token': sessionToken } });
+    loadPublished();
+  } catch {
+    btn.disabled = false;
+  }
+}
+
+// ── Misc UI ───────────────────────────────────────────────────────────────────
+function showLoading(msg) {
+  document.getElementById('loading-text').textContent = msg || 'Processing…';
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
+
+function showStatusBadge(msg, color) {
+  const el = document.getElementById('status-badge');
+  el.textContent = msg;
+  el.className = `text-xs font-medium px-3 py-1 rounded-full ${
+    color === 'green'  ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+    color === 'yellow' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                         'bg-primary/20 text-primary'}`;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function initAuth() {
+  if (sessionToken) {
+    try {
+      const res  = await fetch('/api/auth/check', { headers: { 'X-Admin-Token': sessionToken } });
+      const data = await res.json();
+      if (data.authenticated) { showApp(); return; }
+    } catch { /* fall through to login */ }
+  }
+  sessionToken = '';
+  localStorage.removeItem('adminToken');
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('logout-btn').classList.add('hidden');
+  setTimeout(() => document.getElementById('login-secret')?.focus(), 150);
+}
+
+function showApp() {
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('logout-btn').classList.remove('hidden');
+}
+
+async function doLogin() {
+  const errEl  = document.getElementById('login-error');
+  const secret = document.getElementById('login-secret').value;
+  errEl.classList.add('hidden');
+  if (!secret) {
+    errEl.textContent = 'Please enter your admin secret.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  try {
+    const res  = await fetch('/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ secret }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    sessionToken = data.token;
+    localStorage.setItem('adminToken', sessionToken);
+    document.getElementById('login-secret').value = '';
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function doLogout() {
+  try {
+    await fetch('/api/auth/logout', {
+      method:  'POST',
+      headers: { 'X-Admin-Token': sessionToken },
+    });
+  } catch { /* ignore */ }
+  sessionToken = '';
+  localStorage.removeItem('adminToken');
+  showLogin();
+}
+
+// init
+initAuth();
+showSection('upload');
+initCurrencySelect();
+</script>
+</body>
+</html>

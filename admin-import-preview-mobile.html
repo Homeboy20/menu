@@ -1,0 +1,143 @@
+<!-- Import Data Preview & Edit (Mobile) -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import Data Preview &amp; Edit</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ee9d2b",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221a10",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-slate-200 dark:border-primary/20">
+<button class="flex size-10 shrink-0 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Import Preview</h2>
+<button class="flex items-center justify-end text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                Cancel
+            </button>
+</div>
+<!-- Header Content -->
+<div class="px-4 py-4">
+<h3 class="text-xl font-bold leading-tight tracking-tight">Extracted Data</h3>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal mt-1">Review and edit the extracted menu items before saving.</p>
+</div>
+<!-- List Items -->
+<div class="flex flex-col flex-1 pb-24">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark/50 px-4 min-h-[80px] py-3 justify-between border-b border-slate-100 dark:border-primary/10">
+<div class="flex items-start gap-3 flex-1">
+<div class="flex size-6 mt-0.5 items-center justify-center">
+<input checked="" class="h-5 w-5 rounded border-slate-300 dark:border-primary/40 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary focus:ring-offset-0 focus:outline-none dark:focus:ring-offset-background-dark" type="checkbox"/>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-base font-medium leading-normal line-clamp-1">Classic Burger</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal mt-0.5">Category: Mains</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Price: $12.99</p>
+<div class="flex gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">Beef</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Popular</span>
+</div>
+</div>
+</div>
+<button class="shrink-0 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark/50 px-4 min-h-[80px] py-3 justify-between border-b border-slate-100 dark:border-primary/10">
+<div class="flex items-start gap-3 flex-1">
+<div class="flex size-6 mt-0.5 items-center justify-center">
+<input checked="" class="h-5 w-5 rounded border-slate-300 dark:border-primary/40 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary focus:ring-offset-0 focus:outline-none dark:focus:ring-offset-background-dark" type="checkbox"/>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-base font-medium leading-normal line-clamp-1">French Fries</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal mt-0.5">Category: Sides</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Price: $4.99</p>
+<div class="flex gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">Vegan</span>
+</div>
+</div>
+</div>
+<button class="shrink-0 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark/50 px-4 min-h-[80px] py-3 justify-between border-b border-slate-100 dark:border-primary/10">
+<div class="flex items-start gap-3 flex-1">
+<div class="flex size-6 mt-0.5 items-center justify-center">
+<input checked="" class="h-5 w-5 rounded border-slate-300 dark:border-primary/40 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary focus:ring-offset-0 focus:outline-none dark:focus:ring-offset-background-dark" type="checkbox"/>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-base font-medium leading-normal line-clamp-1">Caesar Salad</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal mt-0.5">Category: Starters</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal">Price: $8.50</p>
+<div class="flex gap-2 mt-1.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">Vegetarian</span>
+</div>
+</div>
+</div>
+<button class="shrink-0 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+<!-- Item 4 (Unchecked to show state) -->
+<div class="flex items-center gap-4 bg-white dark:bg-background-dark/50 px-4 min-h-[80px] py-3 justify-between border-b border-slate-100 dark:border-primary/10 opacity-70">
+<div class="flex items-start gap-3 flex-1">
+<div class="flex size-6 mt-0.5 items-center justify-center">
+<input class="h-5 w-5 rounded border-slate-300 dark:border-primary/40 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-primary focus:ring-offset-0 focus:outline-none dark:focus:ring-offset-background-dark" type="checkbox"/>
+</div>
+<div class="flex flex-col justify-center flex-1">
+<p class="text-base font-medium leading-normal line-clamp-1 text-slate-500">Iced Tea</p>
+<p class="text-slate-400 dark:text-slate-500 text-sm font-normal mt-0.5">Category: Drinks</p>
+<p class="text-slate-400 dark:text-slate-500 text-sm font-normal">Price: $2.99</p>
+</div>
+</div>
+<button class="shrink-0 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</div>
+</div>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 w-full bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-primary/20 p-4 pb-safe flex flex-col gap-3">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+                Confirm and Save (3)
+            </button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,160 @@
+<!-- Customer Digital Menu Page -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Digital Menu Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ee9d2b",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#221a10",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col mx-auto max-w-md overflow-x-hidden pb-6">
+<!-- Header -->
+<div class="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md">
+<div class="flex items-center p-4 pb-2 justify-between">
+<div class="flex size-12 shrink-0 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Restaurant logo graphic" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC4shM4G31O-YI9KA0KNf9IPI66zGNXMVV6hsbQdQFKGXl8GN9bRmfmGZisvQUNijc1TzWG98T4hYnaJzVCyXNR5lbb2PlLLlvBa8YpALsMNM_rh8njWMdkesmdKmNBhTkuNyl8bh2RE4GK0gqfGm4WS7fypVzTxHk09Yhx35IeJHlgx672_AMwgah191fWNQ0giJ2W2I0jR1tU7BVtlZjRRPhqlV5breJ7Yl1yNu3Z72qxhVXHXzHCf0hp-apclaHWg_aWbIGgpbeH");'></div>
+</div>
+<h1 class="text-xl font-bold leading-tight tracking-tight flex-1 text-center pr-12 text-primary">The Rusty Spoon</h1>
+</div>
+<!-- Search -->
+<div class="px-4 py-3">
+<label class="flex flex-col h-12 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-sm">
+<div class="flex border-none bg-primary/10 items-center justify-center pl-4 rounded-l-xl border-r-0 text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl focus:outline-0 focus:ring-0 border-none bg-primary/10 focus:border-none h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal text-slate-900 dark:text-slate-100" placeholder="Search menu items..." value=""/>
+</div>
+</label>
+</div>
+<!-- Categories -->
+<div class="flex gap-3 px-4 py-3 overflow-x-auto no-scrollbar scroll-smooth">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary pl-5 pr-5 shadow-sm transition-colors hover:bg-primary/90">
+<p class="text-white text-sm font-semibold leading-normal">Pizza</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-5 pr-5 transition-colors hover:bg-primary/20 dark:hover:bg-primary/30">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">Burgers</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-5 pr-5 transition-colors hover:bg-primary/20 dark:hover:bg-primary/30">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">Drinks</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-5 pr-5 transition-colors hover:bg-primary/20 dark:hover:bg-primary/30">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">Desserts</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/10 dark:bg-primary/20 pl-5 pr-5 transition-colors hover:bg-primary/20 dark:hover:bg-primary/30">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">Salads</p>
+</button>
+</div>
+<!-- Category Title -->
+<div class="px-4 pt-2 pb-1">
+<h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">Wood-Fired Pizza</h2>
+</div>
+</div>
+<!-- Menu List -->
+<div class="flex flex-col px-4 gap-4 mt-2">
+<!-- Item 1 -->
+<div class="flex gap-4 p-4 bg-white dark:bg-primary/5 rounded-2xl shadow-sm border border-slate-100 dark:border-primary/10">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-[88px] shrink-0" data-alt="Margherita Pizza close up" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2uIr0izhr0Ia-Qa4NhSQbHgxE9bE73P6O0dtfxJIRQzyDj4IHL-KmwjZnOOcyu_PpoAgLRrXxxt9oSr9Fu0LceOj2WReTGKM1kcBaVMFcXs-YPmL5ADXjpNvDTVzXJ4JkdXvJ5Pz1A-_LUC59-VbWVC0-_L6xXcQRL0gA6B-2qlaNo_VU4Vp01pFP3paKBbikggVZZFmV5xXtT9cYFgyn4Mj1cntSMevhiEsRGahlEvEo35ypQ-1PK1dRhyowMuMsvX_XPWlH0yDy");'></div>
+<div class="flex flex-1 flex-col justify-between py-0.5">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100 mb-1">Margherita</h3>
+<span class="font-bold text-primary whitespace-nowrap ml-2">$12.99</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-snug line-clamp-2">Classic cheese and tomato with fresh basil on sourdough crust</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            Vegetarian
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 p-4 bg-white dark:bg-primary/5 rounded-2xl shadow-sm border border-slate-100 dark:border-primary/10">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-[88px] shrink-0" data-alt="Spicy Pepperoni Pizza" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA6rR2jdzJA66HMK080CEhJwMcHtNWHfMr5y6bO6U45nQFORBXTJPDJArsbWr68XU24zkwTvq1Pkg9eqqi42jne_u5d_r1oOEYhBIrQV843Q-4h5s3P0luO4f0kfGxdHRjjyMJHgczwbvF26db3L49PEeFt_SBpQuvuF0r6OfEz8BxtZH9zPcArlO6I_rXWHE9-0IXTI4cWE_ungoNcSTjWyaNb-fQcGvVb-FFh18hcotaneDMSj3swOM4cs61f611pnvfxGiADdY-Y");'></div>
+<div class="flex flex-1 flex-col justify-between py-0.5">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100 mb-1">Spicy Pepperoni</h3>
+<span class="font-bold text-primary whitespace-nowrap ml-2">$14.99</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-snug line-clamp-2">Spicy pepperoni slices with double mozzarella and hot honey drizzle</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                            Spicy
+                        </span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
+                            Popular
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex gap-4 p-4 bg-white dark:bg-primary/5 rounded-2xl shadow-sm border border-slate-100 dark:border-primary/10">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-[88px] shrink-0" data-alt="Truffle Mushroom Pizza" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAV4AyRMf0fLtbTzW8i1ah549nm1W2CyJXry6rd-0s0oKbLS41yCzjhzJ2qWDvhJjSzk3zFQVH5mNI-JXuTWbvKKeocHDoFcLuzVmtEVwbkcEsBeI71upFxh19xQ3sk30_RBDdVHMnKIk9X4R9-BUQe98zQMbTfXk9V83lQOz_zwoCAEusDjw_bxOP9dejmufMbNaWZbEtOgTu-EkLeZaBKpaC2zeCmdb8pMd3Ij2LV_BcLYeDJgpEeKYZy86wTsLsQHR3U1pNiTFJH");'></div>
+<div class="flex flex-1 flex-col justify-between py-0.5">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100 mb-1">Truffle Mushroom</h3>
+<span class="font-bold text-primary whitespace-nowrap ml-2">$16.50</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-snug line-clamp-2">Wild mushrooms, truffle oil, roasted garlic, and fontina cheese</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            Vegetarian
+                        </span>
+</div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex gap-4 p-4 bg-white dark:bg-primary/5 rounded-2xl shadow-sm border border-slate-100 dark:border-primary/10">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl size-[88px] shrink-0" data-alt="BBQ Chicken Pizza" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAgjbfibCSOpTjrS2iHz3qJwrzGrhEEPb-ZOBkomC2s7kulDOmgNTnC43WkhimuwSU4ROV8-nAZpszL67sWMAImMITNsYKz-cbIFc0VNTPoEXq4mZHRPmMN0ADP-12bDf0buWjYo4p-UcHhncIm3w1uTzoKtzuAJFdwCbLZ0cCYhO3wQNqrYWxtGSDnnAceAv5U1TYvwqCNWc755NVj-UYXjuHXM_cZl-2i1oE9pIiTWpEK64wZ9LOJeVXmz1hQdRlh-sJXKlC_6MwY");'></div>
+<div class="flex flex-1 flex-col justify-between py-0.5">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100 mb-1">BBQ Chicken</h3>
+<span class="font-bold text-primary whitespace-nowrap ml-2">$15.99</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-snug line-clamp-2">Grilled chicken, red onions, cilantro, and tangy BBQ sauce base</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom padding for mobile -->
+<div class="h-10"></div>
+</div>
+</body></html>
