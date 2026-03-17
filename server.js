@@ -14,7 +14,11 @@ const bcrypt       = require('bcrypt');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const HOST = (process.env.HOST || `http://localhost:${PORT}`).replace(/\/$/, '');
+// Auto-detect HTTPS in production, default to HTTP in development
+const DEFAULT_HOST = process.env.NODE_ENV === 'production' 
+  ? `https://localhost:${PORT}` 
+  : `http://localhost:${PORT}`;
+const HOST = (process.env.HOST || DEFAULT_HOST).replace(/\/$/, '');
 
 // ── Admin password (bcrypt hash) ──────────────────────────────────────────────
 const ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
@@ -50,6 +54,17 @@ function isValidSession(token) {
 }
 
 // ── Security middleware ────────────────────────────────────────────────────────
+
+// Force HTTPS in production (Coolify/Docker deployments)
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+    const httpsUrl = `https://${req.headers.host}${req.url}`;
+    console.log(`🔒 Redirecting HTTP to HTTPS: ${httpsUrl}`);
+    return res.redirect(301, httpsUrl);
+  }
+  next();
+});
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
