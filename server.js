@@ -18,6 +18,12 @@ const HOST = (process.env.HOST || `http://localhost:${PORT}`).replace(/\/$/, '')
 
 // ── Admin password (bcrypt hash) ──────────────────────────────────────────────
 const ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
+console.log('🔍 Environment Debug:');
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  ADMIN_SECRET_HASH length:', ADMIN_SECRET_HASH.length);
+console.log('  ADMIN_SECRET_HASH starts with $2:', ADMIN_SECRET_HASH.startsWith('$2'));
+console.log('  ADMIN_SECRET_HASH first 10 chars:', ADMIN_SECRET_HASH.substring(0, 10));
+
 if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2')) {
   console.warn('\n  ⚠  WARNING: ADMIN_SECRET_HASH is not set or is not a valid bcrypt hash.');
   console.warn('     Generate one with: node -e "require(\'bcrypt\').hash(\'yourPassword\',12).then(h=>console.log(h))"');
@@ -186,16 +192,33 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 // POST /api/auth/login  { secret } → { token }
 app.post('/api/auth/login', loginLimiter, async (req, res) => {
   const { secret } = req.body || {};
+  console.log('🔐 Login attempt:', {
+    hasSecret: !!secret,
+    secretType: typeof secret,
+    secretLength: secret?.length || 0,
+    hasAdminHash: !!ADMIN_SECRET_HASH,
+    adminHashLength: ADMIN_SECRET_HASH.length,
+    adminHashPrefix: ADMIN_SECRET_HASH.substring(0, 10)
+  });
+  
   if (!secret || typeof secret !== 'string') {
+    console.log('❌ Login failed: No secret provided');
     return res.status(400).json({ error: 'Password is required.' });
   }
+  
   // bcrypt.compare is constant-time and resistant to timing attacks
   const match = ADMIN_SECRET_HASH
     ? await bcrypt.compare(secret, ADMIN_SECRET_HASH)
     : false;
+    
+  console.log('🔍 Bcrypt comparison result:', match);
+  
   if (!match) {
+    console.log('❌ Login failed: Password mismatch');
     return res.status(401).json({ error: 'Invalid password.' });
   }
+  
+  console.log('✅ Login successful');
   const token = createSession();
   res.json({ token, expiresIn: SESSION_TTL });
 });
@@ -230,6 +253,22 @@ app.get('/api/health', (_req, res) => {
       timestamp: new Date().toISOString() 
     });
   }
+});
+
+// GET /api/debug/env  – debug environment configuration (safe for production)
+app.get('/api/debug/env', (_req, res) => {
+  res.json({
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT,
+    host: process.env.HOST,
+    hasAdminHash: !!process.env.ADMIN_SECRET_HASH,
+    adminHashLength: process.env.ADMIN_SECRET_HASH?.length || 0,
+    adminHashPrefix: process.env.ADMIN_SECRET_HASH?.substring(0, 10) || 'none',
+    adminHashValidFormat: process.env.ADMIN_SECRET_HASH?.startsWith('$2b$') || false,
+    sessionTtl: process.env.SESSION_TTL_MS,
+    rateLimit: process.env.LOGIN_RATE_LIMIT,
+    timestamp: new Date().toISOString()
+  });
 });
 
 
