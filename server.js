@@ -188,10 +188,8 @@ app.use(express.static('.', {
     if (path.endsWith('.css') || path.endsWith('.js')) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
     }
-    // Enable compression for text files
-    if (path.match(/\.(html|css|js|json|svg)$/)) {
-      res.setHeader('Content-Encoding', 'gzip');
-    }
+    // Note: compression is handled by the compression() middleware above.
+    // Do NOT set Content-Encoding manually — the files are not pre-compressed.
   }
 }));
 
@@ -522,7 +520,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.7.0'
+    version: '1.7.1'
   });
 });
 
