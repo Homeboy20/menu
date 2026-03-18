@@ -1425,18 +1425,25 @@ async function proceedToPublish() {
     currentMenuUrl   = data.menuUrl;
     currentQrDataUrl = data.qrDataUrl;
 
-    document.getElementById('qr-img').src              = data.qrDataUrl;
-    document.getElementById('qr-rest-name').textContent = restaurantName;
-    document.getElementById('qr-link').textContent      = data.menuUrl;
-    document.getElementById('qr-link').href             = data.menuUrl;
+    if (isEditing) {
+      // Editing: go to published list — QR code is unchanged
+      editingMenuId = null;
+      showSection('published');
+      loadPublished();
+      showStatusBadge('Menu updated — QR unchanged ✓', 'green');
+    } else {
+      // New publish: show QR code
+      document.getElementById('qr-img').src              = data.qrDataUrl;
+      document.getElementById('qr-rest-name').textContent = restaurantName;
+      document.getElementById('qr-link').textContent      = data.menuUrl;
+      document.getElementById('qr-link').href             = data.menuUrl;
 
-    document.getElementById('publish-heading').textContent = isEditing ? 'Menu Updated! ✏️' : 'Your Menu is Live! 🎉';
-    document.getElementById('publish-subtext').textContent = isEditing
-      ? 'Changes are live. Your QR code remains the same.'
-      : 'Print or display this QR code for customers to scan.';
+      document.getElementById('publish-heading').textContent = 'Your Menu is Live! 🎉';
+      document.getElementById('publish-subtext').textContent = 'Print or display this QR code for customers to scan.';
 
-    showSection('publish');
-    showStatusBadge(isEditing ? 'Updated!' : 'Published!', 'green');
+      showSection('publish');
+      showStatusBadge('Published!', 'green');
+    }
   } catch (err) {
     alert(err.message);
   } finally {
