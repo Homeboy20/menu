@@ -564,6 +564,23 @@
         </button>
       </div>
 
+      <!-- re-upload zone (visible when editing) -->
+      <div id="reupload-zone" class="hidden">
+        <div class="border border-dashed border-primary/20 rounded-xl p-4 bg-primary/5 flex items-center gap-4">
+          <span class="material-symbols-outlined text-2xl text-primary/60">upload_file</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-200">Replace menu items from file</p>
+            <p class="text-xs text-slate-500">Upload a new PDF, CSV, XLSX or TXT to replace current items</p>
+          </div>
+          <button onclick="document.getElementById('reupload-file-input').click()"
+                  class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg border border-primary/30 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
+            Choose File
+          </button>
+          <input id="reupload-file-input" type="file" accept=".pdf,.csv,.xlsx,.xls,.txt" class="hidden" onchange="handleReupload(event)"/>
+        </div>
+      </div>
+
       <!-- summary chips -->
       <div class="flex gap-3 flex-wrap text-sm">
         <span id="chip-total"   class="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium"></span>
@@ -884,6 +901,8 @@ function clearAll() {
   currentLogoSrc   = '';
   currentHeaderLayout = 'logo-left';
   applyLogoPreview('');
+  // Hide re-upload zone
+  document.getElementById('reupload-zone').classList.add('hidden');
   // Reset show/hide toggles
   ['show-logo','show-name'].forEach(id => {
     document.getElementById(id).checked = true;
@@ -967,6 +986,48 @@ async function uploadFile() {
   } catch (err) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ── Re-upload file while editing ──────────────────────────────────────────────
+async function handleReupload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';  // allow re-selecting same file
+
+  const choice = confirm(
+    'Replace all current menu items with items from this file?\n\n' +
+    'OK = Replace all items\nCancel = Keep current items (upload cancelled)'
+  );
+  if (!choice) return;
+
+  showLoading('Uploading & extracting items…');
+  const fd = new FormData();
+  fd.append('menuFile', file);
+
+  try {
+    const res  = await fetch('/api/upload', { method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+    extractedItems = data.items.map(item => ({ ...item, _selected: true }));
+
+    if (data.detectedCurrency && CURRENCIES[data.detectedCurrency]) {
+      setCurrency(data.detectedCurrency);
+    }
+
+    if (extractedItems.length === 0) {
+      extractedItems.push(blankRow());
+      showStatusBadge('No items auto-detected – add them manually', 'yellow');
+    } else {
+      showStatusBadge(`${extractedItems.length} items imported from file`, 'green');
+    }
+
+    renderTable();
+  } catch (err) {
+    alert('Re-upload failed: ' + err.message);
   } finally {
     hideLoading();
   }
@@ -1393,6 +1454,8 @@ async function loadMenuForEditing(id) {
 
     renderTable();
     showSection('preview');
+    // Show re-upload zone when editing
+    document.getElementById('reupload-zone').classList.remove('hidden');
     showStatusBadge(`Editing: ${data.restaurantName}`, 'green');
   } catch (err) {
     alert('Could not load menu: ' + err.message);
