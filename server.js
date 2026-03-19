@@ -204,14 +204,20 @@ const DATA_DIR    = path.join(__dirname, 'data');
 [UPLOADS_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
 
 // ── PostgreSQL database ──────────────────────────────────────────────────────
+// Strip sslmode from URL so pg-connection-string doesn't override our ssl config
+let _pgConnStr = process.env.DATABASE_URL || '';
+try {
+  const _u = new URL(_pgConnStr);
+  _u.searchParams.delete('sslmode');
+  _pgConnStr = _u.toString();
+} catch (_) { /* use as-is if not a valid URL */ }
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: _pgConnStr,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
-  ssl: process.env.DATABASE_URL?.includes('sslmode=disable')
-    ? false
-    : { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false },
 });
 
 pool.on('error', (err) => {
