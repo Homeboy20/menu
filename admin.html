@@ -613,6 +613,7 @@
               <th class="p-4 w-28" id="price-col-header">Price ($)</th>
               <th class="p-4 w-28">Size</th>
               <th class="p-4">Description</th>
+              <th class="p-4 w-20 text-center">Image</th>
               <th class="p-4 w-10 text-center">Del</th>
             </tr>
           </thead>
@@ -1256,7 +1257,7 @@ async function handleReupload(e) {
 
 // ── Table rendering ───────────────────────────────────────────────────────────
 function blankRow() {
-  return { id: crypto.randomUUID(), name: '', category: 'General', price: '', description: '', size: '', tags: [], _selected: true };
+  return { id: crypto.randomUUID(), name: '', category: 'General', price: '', description: '', size: '', tags: [], imageUrl: '', _selected: true };
 }
 
 function renderTable() {
@@ -1314,6 +1315,16 @@ function buildRow(item, i) {
              class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
     </td>
     <td class="p-3 text-center">
+      <div class="flex flex-col items-center gap-1">
+        ${item.imageUrl ? `<img src="${esc(item.imageUrl)}" class="w-10 h-10 rounded object-cover" alt=""/>` : ''}
+        <label class="cursor-pointer text-xs text-primary hover:underline">
+          ${item.imageUrl ? 'Change' : 'Upload'}
+          <input type="file" accept="image/*" class="hidden" onchange="uploadItemImage(${i}, this)"/>
+        </label>
+        ${item.imageUrl ? `<button onclick="updateItem(${i},'imageUrl','');renderTable()" class="text-xs text-red-400 hover:underline">Remove</button>` : ''}
+      </div>
+    </td>
+    <td class="p-3 text-center">
       <button onclick="deleteRow(${i})"
               class="text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
         <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -1329,6 +1340,24 @@ function deleteRow(i)   { extractedItems.splice(i, 1); renderTable(); }
 function toggleRow(i, v){ extractedItems[i]._selected = v; updateChips(); }
 function addRow()        { extractedItems.push(blankRow()); renderTable(); }
 function toggleAll(v)    { extractedItems.forEach(it => it._selected = v); renderTable(); }
+
+async function uploadItemImage(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('image', file);
+  try {
+    const res = await fetch('/api/upload-item-image', {
+      method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd
+    });
+    if (!res.ok) throw new Error('Upload failed');
+    const { imageUrl } = await res.json();
+    extractedItems[idx].imageUrl = imageUrl;
+    renderTable();
+  } catch (err) {
+    alert('Image upload failed: ' + err.message);
+  }
+}
 
 function updateChips() {
   const sel = extractedItems.filter(it => it._selected).length;
@@ -1674,6 +1703,7 @@ async function loadMenuForEditing(id) {
     extractedItems = data.items.map(it => ({
       ...it,
       tags:      Array.isArray(it.tags) ? it.tags : [],
+      imageUrl:  it.imageUrl || '',
       _selected: true,
     }));
 

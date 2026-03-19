@@ -12,6 +12,7 @@ const { Pool }     = require('pg');
 const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const bcrypt       = require('bcrypt');
+const sharp        = require('sharp');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -275,6 +276,7 @@ async function initDB() {
         description TEXT DEFAULT '',
         tags        TEXT DEFAULT '[]',
         size        TEXT NOT NULL DEFAULT '',
+        image_url   TEXT NOT NULL DEFAULT '',
         sort_order  INTEGER NOT NULL DEFAULT 0
       );
     `);
@@ -293,6 +295,9 @@ async function initDB() {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_menu ON menu_scans (menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_date ON menu_scans (scanned_at)`);
+
+    // Migration: add image_url column if missing (for existing DBs)
+    await client.query(`ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''`).catch(() => {});
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS qr_redirects (
@@ -431,6 +436,7 @@ function buildMenuResponse(menu, rawItems) {
       description: it.description,
       tags:        JSON.parse(it.tags || '[]'),
       size:        it.size || '',
+      imageUrl:    it.image_url || '',
     }))
   };
 }
@@ -485,8 +491,8 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        (id, menu_id, name, category, price, description, tags, size, image_url, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
@@ -496,6 +502,7 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
           String(item.description || ''),
           JSON.stringify(tags),
           String(item.size || ''),
+          String(item.imageUrl || ''),
           item.sortOrder !== undefined ? Number(item.sortOrder) : i
         ]);
     }
@@ -554,8 +561,8 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        (id, menu_id, name, category, price, description, tags, size, image_url, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
@@ -565,6 +572,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
           String(item.description || ''),
           JSON.stringify(tags),
           String(item.size || ''),
+          String(item.imageUrl || ''),
           item.sortOrder !== undefined ? Number(item.sortOrder) : i
         ]);
     }
@@ -597,6 +605,36 @@ const upload = multer({
 app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8–10 MB encoded)
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(UPLOADS_DIR));
+
+// ── Item image upload (auto-resize & optimize) ────────────────────────────────
+const ITEM_IMG_DIR = path.join(UPLOADS_DIR, 'items');
+if (!fs.existsSync(ITEM_IMG_DIR)) fs.mkdirSync(ITEM_IMG_DIR, { recursive: true });
+
+const imgUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) return cb(null, true);
+    cb(new Error('Only JPEG, PNG, WebP and GIF images are allowed.'));
+  },
+});
+
+app.post('/api/upload-item-image', requireAuth, imgUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image file provided.' });
+    const filename = crypto.randomUUID() + '.webp';
+    const outPath  = path.join(ITEM_IMG_DIR, filename);
+    await sharp(req.file.buffer)
+      .resize(400, 400, { fit: 'cover', withoutEnlargement: true })
+      .webp({ quality: 78 })
+      .toFile(outPath);
+    const imageUrl = '/uploads/items/' + filename;
+    res.json({ imageUrl });
+  } catch (err) {
+    console.error('Image upload error:', err);
+    res.status(500).json({ error: 'Failed to process image.' });
+  }
+});
 
 // ── Static routes ──────────────────────────────────────────────────────────────
 
@@ -1292,6 +1330,7 @@ function sanitizeItem(it) {
     description: sanitizeStr(it.description, 500),
     tags:        Array.isArray(it.tags) ? it.tags.map(t => sanitizeStr(t, 50)).filter(Boolean).slice(0, 20) : [],
     size:        sanitizeStr(it.size, 100),
+    imageUrl:    sanitizeStr(it.imageUrl, 2000),
   };
 }
 

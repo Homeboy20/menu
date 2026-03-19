@@ -54,7 +54,7 @@ html[data-theme="light"] {
 }
 
 /* Smooth theme transitions */
-body, #app, #topbar, #search-drawer, #hero, #cat-nav,
+body, #app, #topbar, #search-drawer, #cat-nav,
 .items-group, .item-row, .tab-pill, .icon-btn, #footer,
 #bottom-nav, .bnav-item, #cat-sheet {
   transition: background-color .25s, border-color .2s, color .18s, box-shadow .2s;
@@ -258,24 +258,6 @@ body   {
   pointer-events: none;
 }
 
-/*  Hero — slim tagline bar  */
-#hero {
-  padding: 0;
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height .3s ease, padding .3s ease;
-}
-#hero.has-tagline {
-  max-height: 60px;
-  padding: 10px 16px 8px;
-  background: linear-gradient(160deg, var(--hero-grad) 0%, var(--bg) 100%);
-}
-#hero .hero-tagline {
-  font-size: 13px; font-weight: 500;
-  color: var(--text); opacity: .7;
-  text-align: center; line-height: 1.4;
-}
-
 /*  Category nav  */
 #cat-nav {
   position: sticky;
@@ -310,6 +292,7 @@ html[data-theme="light"] .tab-active { color: #121212; }
 .tab-inactive { background: transparent; color: #999999; border: 1px solid var(--border); }
 .tab-inactive:hover { background: rgba(201,162,39,.08); }
 .t-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tab-count { font-size: 11px; font-weight: 500; opacity: .6; margin-left: 1px; }
 
 /*  Count bar  */
 #count-bar {
@@ -597,7 +580,6 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
   #topbar-logo .topbar-initials { font-size: 16px; }
   #topbar-name { font-size: 17px; }
   #topbar-tagline { font-size: 11px; }
-  #hero.has-tagline { padding: 10px 24px 8px; }
   #cat-tabs  { padding: 12px 24px; gap: 8px; }
   #count-bar { padding: 12px 24px 0; }
   .cat-header  { padding: 20px 24px 8px; }
@@ -614,7 +596,6 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
   #topbar-logo { width: 44px; height: 44px; border-radius: 14px; }
   #topbar-name { font-size: 18px; }
   #contact-bar { padding: 6px 28px; }
-  #hero.has-tagline { padding: 12px 28px 8px; }
   #cat-tabs  { padding: 12px 28px; }
   #count-bar { padding: 12px 28px 0; }
   .cat-header { padding: 20px 28px 8px; }
@@ -654,11 +635,6 @@ html[data-theme="light"] #cat-sheet-handle { background: rgba(0,0,0,.12); }
       <input id="search-input" type="search" placeholder="Search items..."
              autocomplete="off" spellcheck="false" oninput="renderItems()"/>
     </div>
-  </div>
-
-  <!--  Hero (slim tagline bar) -->
-  <div id="hero">
-    <p class="hero-tagline" id="hero-tagline"></p>
   </div>
 
   <!--  Category nav  -->
@@ -946,7 +922,6 @@ function applyBranding(data) {
     #search-drawer{background:${topBg}!important;border-bottom-color:${dv}!important;}
     #search-input{background:${surfCol}!important;color:${headCol}!important;border-color:${dv}!important;}
     #search-input:focus{border-color:${color}!important;box-shadow:0 0 0 3px ${color}30!important;}
-    #hero.has-tagline{background:linear-gradient(160deg,${heroCol} 0%,${bgCol} 100%)!important;}
     #cat-nav{background:${bgCol}!important;border-bottom-color:${dv}!important;}
     .tab-active{background:${color}!important;color:#121212!important;box-shadow:none!important;}
     .tab-inactive{background:transparent!important;color:${inactiveCol}!important;border-color:${dv}!important;}
@@ -979,7 +954,6 @@ function applyBranding(data) {
   }
   document.body.style.fontFamily = FONT_FAMILY[fontKey] || FONT_FAMILY.modern;
   document.querySelector('meta[name=theme-color]').content = bgCol;
-  buildHeader(data, color, headCol);
   document.getElementById('topbar-name').textContent = data.restaurantName || '';
 
   // Populate topbar tagline
@@ -1013,20 +987,6 @@ function applyBranding(data) {
 
   // Rebuild category tabs and items so accent colours flip for the new theme
   if (allItems.length) { buildTabs(); renderItems(); }
-}
-
-//  Header builder — slim tagline bar (logo+name now in topbar)
-function buildHeader(data, color, headCol) {
-  const hero = document.getElementById('hero');
-  const tagEl = document.getElementById('hero-tagline');
-  if (!hero || !tagEl) return;
-  if (data.tagline) {
-    tagEl.textContent = data.tagline;
-    tagEl.style.color = headCol + 'aa';
-    hero.classList.add('has-tagline');
-  } else {
-    hero.classList.remove('has-tagline');
-  }
 }
 
 //  Contact / Social bar builder
@@ -1080,10 +1040,11 @@ function buildTabs() {
   const cats = ['All', ...new Set(allItems.map(it => it.category || 'Other'))];
   document.getElementById('cat-tabs').innerHTML = cats.map((c, i) => {
     const col = c === 'All' ? null : catColor(c);
+    const count = c === 'All' ? allItems.length : allItems.filter(it => (it.category || 'Other') === c).length;
     return `<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}"
               class="tab-pill ${i === 0 ? 'tab-active' : 'tab-inactive'}">
         ${col ? `<span class="t-dot" style="background:${col.hex}"></span>` : ''}
-        ${esc(c)}</button>`;
+        ${esc(c)} <span class="tab-count">${count}</span></button>`;
   }).join('');
 }
 
@@ -1160,15 +1121,21 @@ function buildItem(item, c) {
   const hasPx = !isNaN(price) && price > 0;
   const pxStr = hasPx ? menuCurrency + price.toFixed(2).replace('.00', '') : '';
   const desc  = (item.description || '').trim();
-  
+  const size  = (item.size || '').trim();
+  const tags  = Array.isArray(item.tags) ? item.tags : [];
+  const img   = (item.imageUrl || '').trim();
+
   return `
     <div class="item-row">
+      ${img ? `<img class="item-image" src="${esc(img)}" alt="${esc(item.name)}" loading="lazy"/>` : ''}
       <div class="item-body">
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
           <div class="item-name">${esc(item.name)}</div>
           ${hasPx ? `<div class="item-price">${esc(pxStr)}</div>` : ''}
         </div>
         ${desc ? `<div class="item-desc">${esc(desc)}</div>` : ''}
+        ${size ? `<span class="item-size">${esc(size)}</span>` : ''}
+        ${tags.length ? `<div class="item-tags">${tags.map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')}</div>` : ''}
       </div>
     </div>`;
 }
