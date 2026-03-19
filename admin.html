@@ -587,6 +587,18 @@
         <span id="chip-selected" class="px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-medium"></span>
       </div>
 
+      <!-- search bar -->
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[18px]">search</span>
+        <input id="items-search" type="text" placeholder="Search items by name, category, or description…"
+               oninput="renderTable()"
+               class="w-full bg-surface border border-primary/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+        <button id="items-search-clear" onclick="document.getElementById('items-search').value=''; renderTable();"
+                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
       <div class="bg-surface border border-primary/10 rounded-xl overflow-x-auto shadow-lg">
         <table class="w-full text-left min-w-[1020px]">
           <thead>
@@ -1041,7 +1053,17 @@ function blankRow() {
 function renderTable() {
   const tbody = document.getElementById('items-body');
   tbody.innerHTML = '';
-  extractedItems.forEach((item, i) => tbody.appendChild(buildRow(item, i)));
+  const q = (document.getElementById('items-search')?.value || '').trim().toLowerCase();
+  const clearBtn = document.getElementById('items-search-clear');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !q);
+  extractedItems.forEach((item, i) => {
+    if (q && !(
+      (item.name || '').toLowerCase().includes(q) ||
+      (item.category || '').toLowerCase().includes(q) ||
+      (item.description || '').toLowerCase().includes(q)
+    )) return;
+    tbody.appendChild(buildRow(item, i));
+  });
   updateChips();
 }
 
