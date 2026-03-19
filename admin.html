@@ -696,7 +696,204 @@
     <section id="section-settings" class="hidden max-w-lg mx-auto space-y-6">
       <div>
         <h2 class="text-2xl font-bold">Settings</h2>
-        <p class="text-slate-400 text-sm mt-1">Manage your admin account.</p>
+        <p class="text-slate-400 text-sm mt-1">Manage your account and business branding.</p>
+      </div>
+
+      <!-- ── Business & Branding ──────────────────────────────────── -->
+      <div class="bg-surface rounded-2xl border border-primary/10 p-6 space-y-5">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-primary">palette</span>
+          Business &amp; Branding
+        </h3>
+        <p class="text-xs text-slate-500">Edit your restaurant details, logo, theme, and contact info without touching menu items.</p>
+
+        <!-- Menu selector -->
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Select Menu</label>
+          <select id="settings-menu-select" onchange="loadSettingsBranding(this.value)"
+                  class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+            <option value="">— Choose a menu to edit —</option>
+          </select>
+        </div>
+
+        <div id="settings-branding-form" class="hidden space-y-5">
+          <!-- Restaurant name -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Restaurant Name</label>
+            <input id="s-rest-name" type="text"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"/>
+          </div>
+
+          <!-- Currency -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Currency</label>
+            <select id="s-currency"
+                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+            </select>
+          </div>
+
+          <!-- Logo -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Logo</label>
+            <div class="flex items-start gap-3">
+              <div id="s-logo-preview-wrap"
+                   class="shrink-0 size-[60px] rounded-xl border border-primary/20 bg-bg-dark flex items-center justify-center overflow-hidden">
+                <span id="s-logo-ph" class="material-symbols-outlined text-2xl text-slate-600">image</span>
+                <img id="s-logo-img" src="" alt="" class="hidden size-full object-cover"/>
+              </div>
+              <div class="flex-1 space-y-2">
+                <button type="button" onclick="document.getElementById('s-logo-file').click()"
+                        class="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-primary/20 text-sm text-slate-300 hover:border-primary hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">upload</span> Upload
+                </button>
+                <input id="s-logo-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsLogoFile(event)"/>
+                <input id="s-logo-url" type="url" placeholder="…or paste image URL" oninput="handleSettingsLogoUrl()"
+                       class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+              </div>
+            </div>
+            <button id="s-logo-clear" onclick="clearSettingsLogo()"
+                    class="hidden mt-1.5 text-xs text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">close</span> Remove logo
+            </button>
+          </div>
+
+          <!-- Tagline -->
+          <div>
+            <label class="block text-sm text-slate-400 mb-1.5">Tagline</label>
+            <input id="s-tagline" type="text" placeholder="Fresh food, great vibes"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+          </div>
+
+          <!-- Accent color -->
+          <div class="flex items-center gap-3">
+            <label class="text-sm text-slate-400 flex-1">Accent Color</label>
+            <input type="color" id="s-brand-color" value="#2dd4bf"
+                   class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-primary/20 p-1"/>
+            <span id="s-brand-color-hex" class="text-xs font-mono text-slate-500 w-16">#2dd4bf</span>
+          </div>
+
+          <!-- Font & Background -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm text-slate-400 mb-1.5">Font Style</label>
+              <select id="s-font-style"
+                      class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                <option value="modern">Modern (Work Sans)</option>
+                <option value="elegant">Elegant (Playfair)</option>
+                <option value="casual">Casual (Poppins)</option>
+                <option value="bold">Bold (Oswald)</option>
+                <option value="minimal">Minimal (Inter)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-slate-400 mb-1.5">Background Preset</label>
+              <select id="s-bg-style"
+                      class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                <option value="dark">Dark Navy</option>
+                <option value="darker">Deep Black</option>
+                <option value="warm">Warm Dark</option>
+                <option value="light">Light</option>
+                <option value="cafe">Café Brown</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Show/hide toggles -->
+          <div class="flex gap-5">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="s-show-logo" checked class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4"/>
+              <span class="text-sm text-slate-300">Show Logo</span>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="s-show-name" checked class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4"/>
+              <span class="text-sm text-slate-300">Show Name &amp; Tagline</span>
+            </label>
+          </div>
+
+          <!-- Header layout -->
+          <div>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Header Layout</label>
+            <div class="grid grid-cols-3 gap-1.5" id="s-layout-picker">
+              <button onclick="sSetLayout('logo-left')" data-layout="logo-left"  class="s-layout-opt s-layout-active p-2 rounded-lg border border-primary/30 bg-primary/10 text-primary flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide">Logo Left</button>
+              <button onclick="sSetLayout('stacked')"   data-layout="stacked"    class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Stacked</button>
+              <button onclick="sSetLayout('logo-right')" data-layout="logo-right" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Right</button>
+              <button onclick="sSetLayout('logo-only')"  data-layout="logo-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Only</button>
+              <button onclick="sSetLayout('name-only')"  data-layout="name-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Name Only</button>
+              <button onclick="sSetLayout('logo-center')" data-layout="logo-center" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Centered</button>
+            </div>
+          </div>
+
+          <hr class="border-slate-800"/>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Contact &amp; Social</p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Phone</label>
+              <input id="s-phone" type="text" placeholder="+1 555-123-4567"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Email</label>
+              <input id="s-email" type="email" placeholder="hello@restaurant.com"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Address</label>
+            <input id="s-address" type="text" placeholder="123 Main St, City"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Website</label>
+            <input id="s-website" type="url" placeholder="https://myrestaurant.com"
+                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+          </div>
+
+          <hr class="border-slate-800"/>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Social Media</p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Instagram</label>
+              <input id="s-instagram" type="url" placeholder="https://instagram.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Facebook</label>
+              <input id="s-facebook" type="url" placeholder="https://facebook.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">Twitter / X</label>
+              <input id="s-twitter" type="url" placeholder="https://x.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">WhatsApp</label>
+              <input id="s-whatsapp" type="text" placeholder="https://wa.me/15551234567"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">TikTok</label>
+              <input id="s-tiktok" type="url" placeholder="https://tiktok.com/@…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">YouTube</label>
+              <input id="s-youtube" type="url" placeholder="https://youtube.com/…"
+                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+            </div>
+          </div>
+
+          <p id="s-branding-error" class="hidden text-sm text-red-400"></p>
+          <p id="s-branding-success" class="hidden text-sm text-green-400"></p>
+
+          <button onclick="saveSettingsBranding()"
+                  class="w-full py-3 rounded-xl bg-primary text-bg-dark font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Save Branding
+          </button>
+        </div>
       </div>
 
       <div class="bg-surface rounded-2xl border border-primary/10 p-6 space-y-5">
@@ -884,6 +1081,7 @@ function showSection(name) {
   });
   document.getElementById('page-title').textContent = TITLES[name] || '';
   if (name === 'published') loadPublished();
+  if (name === 'settings') loadSettingsMenuList();
   if (name === 'upload') initCurrencySelect();
   // close mobile sidebar
   document.querySelector('aside').classList.add('hidden', 'md:flex');
@@ -2065,10 +2263,210 @@ async function changePassword() {
   }
 }
 
+// ── Settings Branding ──────────────────────────────────────────────────────────
+let settingsLogoSrc = '';
+let settingsLayout = 'logo-left';
+let settingsMenuData = null; // full menu data for the currently selected menu
+
+async function loadSettingsMenuList() {
+  try {
+    const res  = await fetch('/api/menus');
+    const list = await res.json();
+    const sel  = document.getElementById('settings-menu-select');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— Choose a menu to edit —</option>';
+    list.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.restaurantName + ' (' + m.itemCount + ' items)';
+      sel.appendChild(opt);
+    });
+    // Populate currency options
+    const curSel = document.getElementById('s-currency');
+    if (curSel.options.length <= 1) {
+      curSel.innerHTML = '';
+      for (const [code, info] of Object.entries(CURRENCIES)) {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = info.symbol + ' – ' + info.name + ' (' + code + ')';
+        curSel.appendChild(opt);
+      }
+    }
+    if (current) { sel.value = current; }
+  } catch (_) {}
+}
+
+async function loadSettingsBranding(menuId) {
+  const form = document.getElementById('settings-branding-form');
+  document.getElementById('s-branding-error').classList.add('hidden');
+  document.getElementById('s-branding-success').classList.add('hidden');
+  if (!menuId) { form.classList.add('hidden'); settingsMenuData = null; return; }
+
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(menuId));
+    if (!res.ok) throw new Error('Failed to load menu');
+    const d = await res.json();
+    settingsMenuData = d;
+
+    document.getElementById('s-rest-name').value   = d.restaurantName || '';
+    document.getElementById('s-currency').value     = d.currency || 'USD';
+    document.getElementById('s-tagline').value       = d.tagline || '';
+    document.getElementById('s-brand-color').value   = d.brandColor || '#2dd4bf';
+    document.getElementById('s-brand-color-hex').textContent = d.brandColor || '#2dd4bf';
+    document.getElementById('s-font-style').value    = d.fontStyle || 'modern';
+    document.getElementById('s-bg-style').value      = d.bgStyle || 'dark';
+    document.getElementById('s-show-logo').checked   = d.showLogo !== 0;
+    document.getElementById('s-show-name').checked   = d.showName !== 0;
+
+    // Logo
+    settingsLogoSrc = d.logoUrl || '';
+    applySettingsLogo(settingsLogoSrc);
+    document.getElementById('s-logo-url').value = settingsLogoSrc.startsWith('data:') ? '' : settingsLogoSrc;
+
+    // Layout
+    settingsLayout = d.headerLayout || 'logo-left';
+    document.querySelectorAll('.s-layout-opt').forEach(btn => {
+      const active = btn.dataset.layout === settingsLayout;
+      btn.classList.toggle('s-layout-active', active);
+      btn.classList.toggle('border-primary/30', active);
+      btn.classList.toggle('bg-primary/10', active);
+      btn.classList.toggle('text-primary', active);
+      btn.classList.toggle('border-slate-700', !active);
+      btn.classList.toggle('text-slate-500', !active);
+    });
+
+    // Contact
+    document.getElementById('s-phone').value     = d.phone || '';
+    document.getElementById('s-email').value     = d.email || '';
+    document.getElementById('s-address').value   = d.address || '';
+    document.getElementById('s-website').value   = d.website || '';
+
+    // Social
+    document.getElementById('s-instagram').value = d.socialInstagram || '';
+    document.getElementById('s-facebook').value  = d.socialFacebook || '';
+    document.getElementById('s-twitter').value   = d.socialTwitter || '';
+    document.getElementById('s-whatsapp').value  = d.socialWhatsapp || '';
+    document.getElementById('s-tiktok').value    = d.socialTiktok || '';
+    document.getElementById('s-youtube').value   = d.socialYoutube || '';
+
+    form.classList.remove('hidden');
+  } catch (err) {
+    form.classList.add('hidden');
+    alert('Could not load menu: ' + err.message);
+  }
+}
+
+function sSetLayout(layout) {
+  settingsLayout = layout;
+  document.querySelectorAll('.s-layout-opt').forEach(btn => {
+    const active = btn.dataset.layout === layout;
+    btn.classList.toggle('s-layout-active', active);
+    btn.classList.toggle('border-primary/30', active);
+    btn.classList.toggle('bg-primary/10', active);
+    btn.classList.toggle('text-primary', active);
+    btn.classList.toggle('border-slate-700', !active);
+    btn.classList.toggle('text-slate-500', !active);
+  });
+}
+
+function applySettingsLogo(src) {
+  const img = document.getElementById('s-logo-img');
+  const ph  = document.getElementById('s-logo-ph');
+  const clr = document.getElementById('s-logo-clear');
+  if (src) {
+    img.src = src; img.classList.remove('hidden'); ph.classList.add('hidden'); clr.classList.remove('hidden');
+  } else {
+    img.src = ''; img.classList.add('hidden'); ph.classList.remove('hidden'); clr.classList.add('hidden');
+  }
+}
+
+function handleSettingsLogoFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  resizeAndCompressLogo(file, 256, 0.82).then(dataUrl => {
+    settingsLogoSrc = dataUrl;
+    document.getElementById('s-logo-url').value = '';
+    applySettingsLogo(dataUrl);
+  }).catch(() => alert('Could not process image.'));
+}
+
+function handleSettingsLogoUrl() {
+  settingsLogoSrc = document.getElementById('s-logo-url').value.trim();
+  applySettingsLogo(settingsLogoSrc);
+}
+
+function clearSettingsLogo() {
+  settingsLogoSrc = '';
+  document.getElementById('s-logo-url').value = '';
+  document.getElementById('s-logo-file').value = '';
+  applySettingsLogo('');
+}
+
+async function saveSettingsBranding() {
+  const errEl = document.getElementById('s-branding-error');
+  const okEl  = document.getElementById('s-branding-success');
+  errEl.classList.add('hidden');
+  okEl.classList.add('hidden');
+
+  const menuId = document.getElementById('settings-menu-select').value;
+  if (!menuId || !settingsMenuData) {
+    errEl.textContent = 'No menu selected.'; errEl.classList.remove('hidden'); return;
+  }
+
+  const restName = document.getElementById('s-rest-name').value.trim();
+  if (!restName) {
+    errEl.textContent = 'Restaurant name is required.'; errEl.classList.remove('hidden'); return;
+  }
+
+  const payload = {
+    restaurantName: restName,
+    currency:       document.getElementById('s-currency').value,
+    brandColor:     document.getElementById('s-brand-color').value,
+    logoUrl:        settingsLogoSrc,
+    tagline:        document.getElementById('s-tagline').value.trim(),
+    fontStyle:      document.getElementById('s-font-style').value,
+    bgStyle:        document.getElementById('s-bg-style').value,
+    showLogo:       document.getElementById('s-show-logo').checked ? 1 : 0,
+    showName:       document.getElementById('s-show-name').checked ? 1 : 0,
+    headerLayout:   settingsLayout,
+    phone:           document.getElementById('s-phone').value.trim(),
+    email:           document.getElementById('s-email').value.trim(),
+    address:         document.getElementById('s-address').value.trim(),
+    website:         document.getElementById('s-website').value.trim(),
+    socialInstagram: document.getElementById('s-instagram').value.trim(),
+    socialFacebook:  document.getElementById('s-facebook').value.trim(),
+    socialTwitter:   document.getElementById('s-twitter').value.trim(),
+    socialWhatsapp:  document.getElementById('s-whatsapp').value.trim(),
+    socialTiktok:    document.getElementById('s-tiktok').value.trim(),
+    socialYoutube:   document.getElementById('s-youtube').value.trim(),
+    // Pass existing items so the PUT doesn't fail the items validation
+    items:           settingsMenuData.items,
+  };
+
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(menuId), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    okEl.textContent = 'Branding saved successfully!';
+    okEl.classList.remove('hidden');
+    showStatusBadge('Branding updated', 'green');
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
 // init
 initAuth();
 showSection('upload');
 initCurrencySelect();
+document.getElementById('s-brand-color').addEventListener('input', function() {
+  document.getElementById('s-brand-color-hex').textContent = this.value;
+});
 </script>
 </body>
 </html>
