@@ -8,7 +8,7 @@ const crypto       = require('crypto');
 const QRCode       = require('qrcode');
 const csvParser    = require('csv-parser');
 const ExcelJS      = require('exceljs');
-const Database     = require('better-sqlite3');
+const { Pool }     = require('pg');
 const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const bcrypt       = require('bcrypt');
@@ -143,30 +143,22 @@ app.use((req, res, next) => {
 });
 
 // Record menu scans before serving menu.html
-app.get('/menu.html', (req, res, next) => {
+app.get('/menu.html', async (req, res, next) => {
   const menuId = req.query.id;
   
   if (menuId) {
     try {
       const now = new Date().toISOString();
       const rawIp = req.ip || req.connection.remoteAddress || '';
-      // Hash IP for privacy (GDPR/CCPA)
       const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
       const userAgent = req.headers['user-agent'] || '';
       const referrer = req.headers['referer'] || req.headers['referrer'] || '';
 
-      // Deduplicate: skip if same IP+menu scanned within last 5 minutes
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const recent = stmts.lastScanFrom.get(String(menuId), String(ipHash), String(fiveMinAgo));
+      const recent = await dbLastScanFrom(String(menuId), String(ipHash), String(fiveMinAgo));
       if (!recent) {
-        stmts.recordScan.run(
-          String(menuId),
-          String(now),
-          String(userAgent),
-          String(ipHash),
-          String(referrer)
-        );
-        stmts.incrementScans.run(String(now), String(menuId));
+        await dbRecordScan(String(menuId), String(now), String(userAgent), String(ipHash), String(referrer));
+        await dbIncrementScans(String(now), String(menuId));
       }
     } catch (err) {
       console.error('Failed to record scan:', err);
@@ -211,92 +203,93 @@ const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const DATA_DIR    = path.join(__dirname, 'data');
 [UPLOADS_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
 
-// ── Optimized SQLite database ────────────────────────────────────────────────
-const DB_PATH = path.join(DATA_DIR, 'menus.db');
-const db = new Database(DB_PATH, { 
-  verbose: process.env.NODE_ENV === 'development' ? console.log : null 
+// ── PostgreSQL database ──────────────────────────────────────────────────────
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
-// Performance optimizations
-db.pragma('journal_mode = WAL');        // Better concurrent read performance
-db.pragma('synchronous = NORMAL');      // Faster writes with reasonable safety
-db.pragma('cache_size = 10000');        // 10MB cache for better performance  
-db.pragma('temp_store = memory');       // Store temp data in memory
-db.pragma('mmap_size = 134217728');     // 128MB memory-mapped I/O
-db.pragma('foreign_keys = ON');
+pool.on('error', (err) => {
+  console.error('Unexpected PG pool error:', err);
+});
 
-// Database schema setup
-db.exec(`
-  CREATE TABLE IF NOT EXISTS menus (
-    id             TEXT PRIMARY KEY,
-    restaurant_name TEXT NOT NULL,
-    created_at     TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS menu_items (
-    id          TEXT PRIMARY KEY,
-    menu_id     TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
-    name        TEXT NOT NULL,
-    category    TEXT NOT NULL DEFAULT 'General',
-    price       REAL NOT NULL DEFAULT 0,
-    description TEXT DEFAULT '',
-    tags        TEXT DEFAULT '[]',
-    sort_order  INTEGER NOT NULL DEFAULT 0
-  );
-  CREATE INDEX IF NOT EXISTS idx_items_menu ON menu_items (menu_id);
-`);
+// ── Schema setup (runs once on startup) ──────────────────────────────────────
+async function initDB() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS menus (
+        id               TEXT PRIMARY KEY,
+        restaurant_name  TEXT NOT NULL,
+        currency         TEXT NOT NULL DEFAULT 'USD',
+        brand_color      TEXT NOT NULL DEFAULT '#2dd4bf',
+        logo_url         TEXT NOT NULL DEFAULT '',
+        tagline          TEXT NOT NULL DEFAULT '',
+        font_style       TEXT NOT NULL DEFAULT 'modern',
+        bg_style         TEXT NOT NULL DEFAULT 'dark',
+        show_logo        INTEGER NOT NULL DEFAULT 1,
+        show_name        INTEGER NOT NULL DEFAULT 1,
+        header_layout    TEXT NOT NULL DEFAULT 'logo-left',
+        text_color       TEXT NOT NULL DEFAULT '',
+        heading_color    TEXT NOT NULL DEFAULT '',
+        bg_color         TEXT NOT NULL DEFAULT '',
+        card_bg          TEXT NOT NULL DEFAULT '',
+        price_color      TEXT NOT NULL DEFAULT '',
+        phone            TEXT NOT NULL DEFAULT '',
+        email            TEXT NOT NULL DEFAULT '',
+        address          TEXT NOT NULL DEFAULT '',
+        website          TEXT NOT NULL DEFAULT '',
+        social_instagram TEXT NOT NULL DEFAULT '',
+        social_facebook  TEXT NOT NULL DEFAULT '',
+        social_twitter   TEXT NOT NULL DEFAULT '',
+        social_whatsapp  TEXT NOT NULL DEFAULT '',
+        social_tiktok    TEXT NOT NULL DEFAULT '',
+        social_youtube   TEXT NOT NULL DEFAULT '',
+        qr_version       INTEGER NOT NULL DEFAULT 1,
+        qr_code          TEXT NOT NULL DEFAULT '',
+        total_scans      INTEGER NOT NULL DEFAULT 0,
+        last_scan_at     TEXT,
+        updated_at       TEXT,
+        created_at       TEXT NOT NULL
+      );
+    `);
 
-// Add currency column to existing databases that were created before this feature
-try { db.exec("ALTER TABLE menus ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch {}
-// Branding columns (safe: ignored if already exist)
-try { db.exec("ALTER TABLE menus ADD COLUMN brand_color TEXT NOT NULL DEFAULT '#2dd4bf'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN logo_url    TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN tagline     TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN font_style  TEXT NOT NULL DEFAULT 'modern'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN bg_style    TEXT NOT NULL DEFAULT 'dark'"); } catch {}
-// Size column on menu_items
-try { db.exec("ALTER TABLE menu_items ADD COLUMN size TEXT NOT NULL DEFAULT ''"); } catch {}
-// More branding columns
-try { db.exec("ALTER TABLE menus ADD COLUMN show_logo     INTEGER NOT NULL DEFAULT 1"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN show_name     INTEGER NOT NULL DEFAULT 1"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN header_layout TEXT    NOT NULL DEFAULT 'logo-left'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN text_color    TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN heading_color TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN bg_color      TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN card_bg       TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAULT ''"); } catch {}
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS menu_items (
+        id          TEXT PRIMARY KEY,
+        menu_id     TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        name        TEXT NOT NULL,
+        category    TEXT NOT NULL DEFAULT 'General',
+        price       REAL NOT NULL DEFAULT 0,
+        description TEXT DEFAULT '',
+        tags        TEXT DEFAULT '[]',
+        size        TEXT NOT NULL DEFAULT '',
+        sort_order  INTEGER NOT NULL DEFAULT 0
+      );
+    `);
 
-// QR Code and Analytics columns
-try { db.exec("ALTER TABLE menus ADD COLUMN qr_version INTEGER NOT NULL DEFAULT 1"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN qr_code TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN total_scans INTEGER NOT NULL DEFAULT 0"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN last_scan_at TEXT"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN updated_at TEXT"); } catch {}
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_items_menu ON menu_items (menu_id)`);
 
-// Contact & Social columns
-try { db.exec("ALTER TABLE menus ADD COLUMN phone            TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN email            TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN address          TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN website          TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_instagram TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_facebook  TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_twitter   TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_whatsapp  TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_tiktok    TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN social_youtube   TEXT NOT NULL DEFAULT ''"); } catch {}
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS menu_scans (
+        id         SERIAL PRIMARY KEY,
+        menu_id    TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        scanned_at TEXT NOT NULL,
+        user_agent TEXT,
+        ip_address TEXT,
+        referrer   TEXT
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_menu ON menu_scans (menu_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_date ON menu_scans (scanned_at)`);
 
-// Create scans analytics table
-db.exec(`
-  CREATE TABLE IF NOT EXISTS menu_scans (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    menu_id TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
-    scanned_at TEXT NOT NULL,
-    user_agent TEXT,
-    ip_address TEXT,
-    referrer TEXT
-  );
-  CREATE INDEX IF NOT EXISTS idx_scans_menu ON menu_scans (menu_id);
-  CREATE INDEX IF NOT EXISTS idx_scans_date ON menu_scans (scanned_at);
-`);
+    console.log('  ✓ PostgreSQL schema ready');
+  } finally {
+    client.release();
+  }
+}
 
 // Cache frequently accessed data
 const menuCache = new Map();
@@ -312,7 +305,6 @@ function getCachedMenu(menuId) {
 
 function setCachedMenu(menuId, data) {
   menuCache.set(menuId, { data, timestamp: Date.now() });
-  // Cleanup old cache entries
   if (menuCache.size > 100) {
     const oldest = Array.from(menuCache.entries())
       .sort(([,a], [,b]) => a.timestamp - b.timestamp)[0];
@@ -320,216 +312,211 @@ function setCachedMenu(menuId, data) {
   }
 }
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS menus (
-    id             TEXT PRIMARY KEY,
-    restaurant_name TEXT NOT NULL,
-    created_at     TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS menu_items (
-    id          TEXT PRIMARY KEY,
-    menu_id     TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
-    name        TEXT NOT NULL,
-    category    TEXT NOT NULL DEFAULT 'General',
-    price       REAL NOT NULL DEFAULT 0,
-    description TEXT DEFAULT '',
-    tags        TEXT DEFAULT '[]',
-    sort_order  INTEGER NOT NULL DEFAULT 0
-  );
-  CREATE INDEX IF NOT EXISTS idx_items_menu ON menu_items (menu_id);
-`);
+// ── DB helper functions ──────────────────────────────────────────────────────
 
-// Add currency column to existing databases that were created before this feature
-try { db.exec("ALTER TABLE menus ADD COLUMN currency TEXT NOT NULL DEFAULT 'USD'"); } catch {}
-// Branding columns (safe: ignored if already exist)
-try { db.exec("ALTER TABLE menus ADD COLUMN brand_color TEXT NOT NULL DEFAULT '#2dd4bf'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN logo_url    TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN tagline     TEXT NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN font_style  TEXT NOT NULL DEFAULT 'modern'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN bg_style    TEXT NOT NULL DEFAULT 'dark'"); } catch {}
-// Size column on menu_items
-try { db.exec("ALTER TABLE menu_items ADD COLUMN size TEXT NOT NULL DEFAULT ''"); } catch {}
-// Header / visibility / color customisation
-try { db.exec("ALTER TABLE menus ADD COLUMN show_logo     INTEGER NOT NULL DEFAULT 1"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN show_name     INTEGER NOT NULL DEFAULT 1"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN header_layout TEXT    NOT NULL DEFAULT 'logo-left'"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN text_color    TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN heading_color TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN bg_color      TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN card_bg       TEXT    NOT NULL DEFAULT ''"); } catch {}
-try { db.exec("ALTER TABLE menus ADD COLUMN price_color   TEXT    NOT NULL DEFAULT ''"); } catch {}
+async function dbGetMenu(id) {
+  const { rows } = await pool.query('SELECT * FROM menus WHERE id = $1', [id]);
+  return rows[0] || null;
+}
 
-// ── SQLite helpers (NOW created after all schema migrations) ──────────────────
-const stmts = {
-  insertMenu:  db.prepare(`INSERT INTO menus
-    (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
-     show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
-     phone, email, address, website,
-     social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-     qr_version, qr_code, total_scans, created_at, updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
-  recordScan:  db.prepare(`INSERT INTO menu_scans (menu_id, scanned_at, user_agent, ip_address, referrer)
-    VALUES (?,?,?,?,?)`),
-  incrementScans: db.prepare(`UPDATE menus SET total_scans = total_scans + 1, last_scan_at = ? WHERE id = ?`),
-  getMenuScans: db.prepare(`SELECT COUNT(*) as total FROM menu_scans WHERE menu_id = ?`),
-  getRecentScans: db.prepare(`SELECT * FROM menu_scans WHERE menu_id = ? ORDER BY scanned_at DESC LIMIT ?`),
-  getScansStats: db.prepare(`
-    SELECT 
-      DATE(scanned_at) as date,
-      COUNT(*) as scans
-    FROM menu_scans 
-    WHERE menu_id = ? AND scanned_at >= datetime('now', '-30 days')
-    GROUP BY DATE(scanned_at)
-    ORDER BY date DESC
-  `),
-  regenerateQR: db.prepare(`UPDATE menus SET qr_version = qr_version + 1, qr_code = ?, updated_at = ? WHERE id = ?`),
-  insertItem:  db.prepare(`INSERT INTO menu_items
-    (id, menu_id, name, category, price, description, tags, size, sort_order)
-    VALUES (?,?,?,?,?,?,?,?,?)`),
-  listMenus:   db.prepare(`SELECT id, restaurant_name, created_at, total_scans, qr_version, last_scan_at,
-    (SELECT COUNT(*) FROM menu_items WHERE menu_id = menus.id) AS item_count
-    FROM menus ORDER BY created_at DESC`),
-  lastScanFrom: db.prepare(`SELECT id FROM menu_scans WHERE menu_id = ? AND ip_address = ? AND scanned_at > ? LIMIT 1`),
-  getMenu:     db.prepare('SELECT * FROM menus WHERE id = ?'),
-  getItems:    db.prepare('SELECT * FROM menu_items WHERE menu_id = ? ORDER BY category, sort_order'),
-  deleteMenu:      db.prepare('DELETE FROM menus WHERE id = ?'),
-  updateMenu:      db.prepare(`UPDATE menus SET
-    restaurant_name=?, currency=?, brand_color=?, logo_url=?, tagline=?, font_style=?, bg_style=?,
-    show_logo=?, show_name=?, header_layout=?, text_color=?, heading_color=?, bg_color=?, card_bg=?, price_color=?,
-    phone=?, email=?, address=?, website=?,
-    social_instagram=?, social_facebook=?, social_twitter=?, social_whatsapp=?, social_tiktok=?, social_youtube=?,
-    updated_at=?
-    WHERE id=?`),
-  deleteMenuItems: db.prepare('DELETE FROM menu_items WHERE menu_id=?'),
-};
+async function dbGetItems(menuId) {
+  const { rows } = await pool.query(
+    'SELECT * FROM menu_items WHERE menu_id = $1 ORDER BY category, sort_order', [menuId]);
+  return rows;
+}
 
-const saveMenuTx = db.transaction((menuId, restaurantName, currency, branding, items, qrCode) => {
-  const now = new Date().toISOString();
-  stmts.insertMenu.run(
-    String(menuId),
-    String(restaurantName),
-    String(currency || 'USD'),
-    String(branding.brandColor    || '#2dd4bf'),
-    String(branding.logoUrl       || ''),
-    String(branding.tagline       || ''),
-    String(branding.fontStyle     || 'modern'),
-    String(branding.bgStyle       || 'dark'),
-    Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
-    Number(branding.showName      !== undefined ? branding.showName      : 1),
-    String(branding.headerLayout  || 'logo-left'),
-    String(branding.textColor     || ''),
-    String(branding.headingColor  || ''),
-    String(branding.bgColor       || ''),
-    String(branding.cardBg        || ''),
-    String(branding.priceColor    || ''),
-    String(branding.phone           || ''),
-    String(branding.email           || ''),
-    String(branding.address         || ''),
-    String(branding.website         || ''),
-    String(branding.socialInstagram || ''),
-    String(branding.socialFacebook  || ''),
-    String(branding.socialTwitter   || ''),
-    String(branding.socialWhatsapp  || ''),
-    String(branding.socialTiktok    || ''),
-    String(branding.socialYoutube   || ''),
-    Number(1),                                          // qr_version (starts at 1)
-    String(qrCode || ''),                               // qr_code
-    Number(0),                                          // total_scans (starts at 0)
-    String(now),                                        // created_at
-    String(now)                                         // updated_at
-  );
+async function dbListMenus() {
+  const { rows } = await pool.query(`
+    SELECT id, restaurant_name, created_at, total_scans, qr_version, last_scan_at,
+      (SELECT COUNT(*) FROM menu_items WHERE menu_id = menus.id) AS item_count
+    FROM menus ORDER BY created_at DESC`);
+  return rows;
+}
 
-  items.forEach((item, index) => {
-    // Ensure all values are SQLite-compatible types
-    const tags = Array.isArray(item.tags) ? item.tags : [];
-    stmts.insertItem.run(
-      String(item.id || crypto.randomUUID()),             // TEXT
-      String(menuId),                                     // TEXT
-      String(item.name),                                  // TEXT
-      String(item.category || 'General'),                 // TEXT
-      Number(item.price || 0),                            // REAL
-      String(item.description || ''),                     // TEXT
-      String(JSON.stringify(tags)),                       // TEXT (JSON)
-      String(item.size || ''),                            // TEXT
-      Number(item.sortOrder !== undefined ? item.sortOrder : index) // INTEGER
-    );
-  });
-});
+async function dbRecordScan(menuId, scannedAt, userAgent, ipHash, referrer) {
+  await pool.query(
+    'INSERT INTO menu_scans (menu_id, scanned_at, user_agent, ip_address, referrer) VALUES ($1,$2,$3,$4,$5)',
+    [menuId, scannedAt, userAgent, ipHash, referrer]);
+}
 
-const updateMenuTx = db.transaction((menuId, restaurantName, currency, branding, items) => {
-  stmts.updateMenu.run(
-    String(restaurantName),
-    String(currency || 'USD'),
-    String(branding.brandColor    || '#2dd4bf'),
-    String(branding.logoUrl       || ''),
-    String(branding.tagline       || ''),
-    String(branding.fontStyle     || 'modern'),
-    String(branding.bgStyle       || 'dark'),
-    Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
-    Number(branding.showName      !== undefined ? branding.showName      : 1),
-    String(branding.headerLayout  || 'logo-left'),
-    String(branding.textColor     || ''),
-    String(branding.headingColor  || ''),
-    String(branding.bgColor       || ''),
-    String(branding.cardBg        || ''),
-    String(branding.priceColor    || ''),
-    String(branding.phone           || ''),
-    String(branding.email           || ''),
-    String(branding.address         || ''),
-    String(branding.website         || ''),
-    String(branding.socialInstagram || ''),
-    String(branding.socialFacebook  || ''),
-    String(branding.socialTwitter   || ''),
-    String(branding.socialWhatsapp  || ''),
-    String(branding.socialTiktok    || ''),
-    String(branding.socialYoutube   || ''),
-    String(new Date().toISOString()),                    // updated_at
-    String(menuId)
-  );
+async function dbIncrementScans(now, menuId) {
+  await pool.query(
+    'UPDATE menus SET total_scans = total_scans + 1, last_scan_at = $1 WHERE id = $2',
+    [now, menuId]);
+}
 
-  stmts.deleteMenuItems.run(String(menuId));
-  items.forEach((item, index) => {
-    // Ensure all values are SQLite-compatible types
-    const tags = Array.isArray(item.tags) ? item.tags : [];
-    stmts.insertItem.run(
-      String(item.id || crypto.randomUUID()),             // TEXT
-      String(menuId),                                     // TEXT
-      String(item.name),                                  // TEXT
-      String(item.category || 'General'),                 // TEXT
-      Number(item.price || 0),                            // REAL
-      String(item.description || ''),                     // TEXT
-      String(JSON.stringify(tags)),                       // TEXT (JSON)
-      String(item.size || ''),                            // TEXT
-      Number(item.sortOrder !== undefined ? item.sortOrder : index) // INTEGER
-    );
-  });
-  
-  // Clear cache for updated menu
-  menuCache.delete(menuId);
-});
+async function dbLastScanFrom(menuId, ipHash, since) {
+  const { rows } = await pool.query(
+    'SELECT id FROM menu_scans WHERE menu_id = $1 AND ip_address = $2 AND scanned_at > $3 LIMIT 1',
+    [menuId, ipHash, since]);
+  return rows[0] || null;
+}
 
-// One-time migration: import any data that was saved in the old menus.json
-(function migrateJson() {
-  const jsonFile = path.join(DATA_DIR, 'menus.json');
-  if (!fs.existsSync(jsonFile)) return;
+async function dbRegenerateQR(qrDataUrl, now, menuId) {
+  await pool.query(
+    'UPDATE menus SET qr_version = qr_version + 1, qr_code = $1, updated_at = $2 WHERE id = $3',
+    [qrDataUrl, now, menuId]);
+}
+
+async function dbGetRecentScans(menuId, limit) {
+  const { rows } = await pool.query(
+    'SELECT * FROM menu_scans WHERE menu_id = $1 ORDER BY scanned_at DESC LIMIT $2',
+    [menuId, limit]);
+  return rows;
+}
+
+async function dbGetScansStats(menuId) {
+  const { rows } = await pool.query(`
+    SELECT DATE(scanned_at::timestamp) as date, COUNT(*) as scans
+    FROM menu_scans
+    WHERE menu_id = $1 AND scanned_at >= (NOW() - INTERVAL '30 days')::text
+    GROUP BY DATE(scanned_at::timestamp)
+    ORDER BY date DESC`, [menuId]);
+  return rows;
+}
+
+async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrCode) {
+  const client = await pool.connect();
   try {
-    const existing = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
-    const ins  = db.prepare('INSERT OR IGNORE INTO menus (id, restaurant_name, created_at) VALUES (?,?,?)');
-    const insi = db.prepare('INSERT OR IGNORE INTO menu_items (id,menu_id,name,category,price,description,tags,sort_order) VALUES (?,?,?,?,?,?,?,?)');
-    db.transaction(() => {
-      for (const m of Object.values(existing)) {
-        ins.run(m.id, m.restaurantName, m.createdAt);
-        (m.items || []).forEach((it, i) =>
-          insi.run(it.id || crypto.randomUUID(), m.id, it.name, it.category || 'General',
-            it.price || 0, it.description || '', JSON.stringify(it.tags || []), i));
-      }
-    })();
-    fs.renameSync(jsonFile, jsonFile + '.migrated');
-    console.log('  ✓ Migrated existing menus from JSON → SQLite');
-  } catch (e) {
-    console.error('JSON migration skipped:', e.message);
+    await client.query('BEGIN');
+    const now = new Date().toISOString();
+    await client.query(`INSERT INTO menus
+      (id, restaurant_name, currency, brand_color, logo_url, tagline, font_style, bg_style,
+       show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
+       phone, email, address, website,
+       social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
+       qr_version, qr_code, total_scans, created_at, updated_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)`,
+      [
+        String(menuId),
+        String(restaurantName),
+        String(currency || 'USD'),
+        String(branding.brandColor    || '#2dd4bf'),
+        String(branding.logoUrl       || ''),
+        String(branding.tagline       || ''),
+        String(branding.fontStyle     || 'modern'),
+        String(branding.bgStyle       || 'dark'),
+        Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
+        Number(branding.showName      !== undefined ? branding.showName      : 1),
+        String(branding.headerLayout  || 'logo-left'),
+        String(branding.textColor     || ''),
+        String(branding.headingColor  || ''),
+        String(branding.bgColor       || ''),
+        String(branding.cardBg        || ''),
+        String(branding.priceColor    || ''),
+        String(branding.phone           || ''),
+        String(branding.email           || ''),
+        String(branding.address         || ''),
+        String(branding.website         || ''),
+        String(branding.socialInstagram || ''),
+        String(branding.socialFacebook  || ''),
+        String(branding.socialTwitter   || ''),
+        String(branding.socialWhatsapp  || ''),
+        String(branding.socialTiktok    || ''),
+        String(branding.socialYoutube   || ''),
+        1,                            // qr_version
+        String(qrCode || ''),         // qr_code
+        0,                            // total_scans
+        now,                          // created_at
+        now                           // updated_at
+      ]);
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const tags = Array.isArray(item.tags) ? item.tags : [];
+      await client.query(`INSERT INTO menu_items
+        (id, menu_id, name, category, price, description, tags, size, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        [
+          String(item.id || crypto.randomUUID()),
+          String(menuId),
+          String(item.name),
+          String(item.category || 'General'),
+          Number(item.price || 0),
+          String(item.description || ''),
+          JSON.stringify(tags),
+          String(item.size || ''),
+          item.sortOrder !== undefined ? Number(item.sortOrder) : i
+        ]);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
   }
-})();
+}
+
+async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(`UPDATE menus SET
+      restaurant_name=$1, currency=$2, brand_color=$3, logo_url=$4, tagline=$5, font_style=$6, bg_style=$7,
+      show_logo=$8, show_name=$9, header_layout=$10, text_color=$11, heading_color=$12, bg_color=$13, card_bg=$14, price_color=$15,
+      phone=$16, email=$17, address=$18, website=$19,
+      social_instagram=$20, social_facebook=$21, social_twitter=$22, social_whatsapp=$23, social_tiktok=$24, social_youtube=$25,
+      updated_at=$26
+      WHERE id=$27`,
+      [
+        String(restaurantName),
+        String(currency || 'USD'),
+        String(branding.brandColor    || '#2dd4bf'),
+        String(branding.logoUrl       || ''),
+        String(branding.tagline       || ''),
+        String(branding.fontStyle     || 'modern'),
+        String(branding.bgStyle       || 'dark'),
+        Number(branding.showLogo      !== undefined ? branding.showLogo      : 1),
+        Number(branding.showName      !== undefined ? branding.showName      : 1),
+        String(branding.headerLayout  || 'logo-left'),
+        String(branding.textColor     || ''),
+        String(branding.headingColor  || ''),
+        String(branding.bgColor       || ''),
+        String(branding.cardBg        || ''),
+        String(branding.priceColor    || ''),
+        String(branding.phone           || ''),
+        String(branding.email           || ''),
+        String(branding.address         || ''),
+        String(branding.website         || ''),
+        String(branding.socialInstagram || ''),
+        String(branding.socialFacebook  || ''),
+        String(branding.socialTwitter   || ''),
+        String(branding.socialWhatsapp  || ''),
+        String(branding.socialTiktok    || ''),
+        String(branding.socialYoutube   || ''),
+        new Date().toISOString(),
+        String(menuId)
+      ]);
+
+    await client.query('DELETE FROM menu_items WHERE menu_id=$1', [menuId]);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const tags = Array.isArray(item.tags) ? item.tags : [];
+      await client.query(`INSERT INTO menu_items
+        (id, menu_id, name, category, price, description, tags, size, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        [
+          String(item.id || crypto.randomUUID()),
+          String(menuId),
+          String(item.name),
+          String(item.category || 'General'),
+          Number(item.price || 0),
+          String(item.description || ''),
+          JSON.stringify(tags),
+          String(item.size || ''),
+          item.sortOrder !== undefined ? Number(item.sortOrder) : i
+        ]);
+    }
+    await client.query('COMMIT');
+    menuCache.delete(menuId);
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
@@ -658,10 +645,9 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
 });
 
 // GET /api/health  – health check for containers/monitoring
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
   try {
-    // Check database connectivity
-    db.prepare('SELECT 1').get();
+    await pool.query('SELECT 1');
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
@@ -958,7 +944,7 @@ function parseCsvFile(filePath) {
             tags = tagsRaw.split(/[,;|]/).map(t => String(t).trim()).filter(Boolean);
           }
 
-          // Ensure all values are SQLite-compatible types (string, number, null)
+          // Ensure all values are DB-compatible types (string, number, null)
           items.push({
             id:          String(crypto.randomUUID()),                    // TEXT
             name:        String(name),                                   // TEXT
@@ -1324,7 +1310,7 @@ app.post('/api/menus', requireAuth, async (req, res) => {
     const qrDataUrl = await generateQRCode(menuId, 1);
     
     // Save menu with QR code
-    saveMenuTx(menuId, safeName, safeCurrency, branding, safeItems, qrDataUrl);
+    await saveMenuTx(menuId, safeName, safeCurrency, branding, safeItems, qrDataUrl);
 
     const menuUrl = `${HOST}/menu.html?id=${menuId}&v=1`;
 
@@ -1336,18 +1322,18 @@ app.post('/api/menus', requireAuth, async (req, res) => {
 });
 
 // GET /api/menus  – list all saved menus
-app.get('/api/menus', (_req, res) => {
+app.get('/api/menus', async (_req, res) => {
   const start = performance.now();
   
   try {
-    const rows = stmts.listMenus.all();
+    const rows = await dbListMenus();
     const responseTime = performance.now() - start;
     
     if (responseTime > 50) {
       console.log(`⚡ Slow query - getAllMenus: ${responseTime.toFixed(2)}ms`);
     }
     
-    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.setHeader('Cache-Control', 'public, max-age=300');
     res.json(rows.map(r => ({
       id:             r.id,
       restaurantName: r.restaurant_name,
@@ -1364,7 +1350,7 @@ app.get('/api/menus', (_req, res) => {
 });
 
 // GET /api/menus/:id  – get a single menu (optimized with caching)
-app.get('/api/menus/:id', (req, res) => {
+app.get('/api/menus/:id', async (req, res) => {
   const { id } = req.params;
   const start = performance.now();
   
@@ -1474,12 +1460,12 @@ app.get('/api/menus/:id', (req, res) => {
     }
     
     // Database lookup with optimized prepared statements
-    const menu = stmts.getMenu.get(id);
+    const menu = await dbGetMenu(id);
     if (!menu) {
       return res.status(404).json({ error: 'Menu not found.' });
     }
     
-    const rawItems = stmts.getItems.all(id);
+    const rawItems = await dbGetItems(id);
     const responseTime = performance.now() - start;
     
     if (responseTime > 100) {
@@ -1540,7 +1526,7 @@ app.get('/api/menus/:id', (req, res) => {
 // PUT /api/menus/:id  – update an existing menu (items + branding)
 app.put('/api/menus/:id', requireAuth, async (req, res) => {
   try {
-    const menu = stmts.getMenu.get(req.params.id);
+    const menu = await dbGetMenu(req.params.id);
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
 
     const { restaurantName, items, currency } = req.body;
@@ -1551,7 +1537,7 @@ app.put('/api/menus/:id', requireAuth, async (req, res) => {
     const safeCurrency = VALID_CURRENCIES.includes(currency) ? currency : (menu.currency || 'USD');
     const branding     = sanitizeBranding(req.body);
     const safeItems    = items.map(sanitizeItem).filter(it => it.name.length >= 2);
-    updateMenuTx(req.params.id, safeName, safeCurrency, branding, safeItems);
+    await updateMenuTx(req.params.id, safeName, safeCurrency, branding, safeItems);
 
     // Use existing QR code and version (don't auto-regenerate on updates)
     const qrVersion = menu.qr_version || 1;
@@ -1571,24 +1557,24 @@ app.put('/api/menus/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/menus/:id
-app.delete('/api/menus/:id', requireAuth, (req, res) => {
-  const menu = stmts.getMenu.get(req.params.id);
+app.delete('/api/menus/:id', requireAuth, async (req, res) => {
+  const menu = await dbGetMenu(req.params.id);
   if (!menu) return res.status(404).json({ error: 'Menu not found.' });
-  stmts.deleteMenu.run(req.params.id);
+  await pool.query('DELETE FROM menus WHERE id = $1', [req.params.id]);
   res.json({ success: true });
 });
 
 // GET /api/menus/:id/analytics - Get scan analytics for a menu
-app.get('/api/menus/:id/analytics', requireAuth, (req, res) => {
+app.get('/api/menus/:id/analytics', requireAuth, async (req, res) => {
   try {
     const menuId = req.params.id;
-    const menu = stmts.getMenu.get(menuId);
+    const menu = await dbGetMenu(menuId);
     
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
     
     // Get scan statistics
-    const recentScans = stmts.getRecentScans.all(String(menuId), 10);
-    const scansStats = stmts.getScansStats.all(String(menuId));
+    const recentScans = await dbGetRecentScans(String(menuId), 10);
+    const scansStats = await dbGetScansStats(String(menuId));
     
     res.json({
       menuId,
@@ -1616,7 +1602,7 @@ app.get('/api/menus/:id/analytics', requireAuth, (req, res) => {
 app.post('/api/menus/:id/regenerate-qr', requireAuth, async (req, res) => {
   try {
     const menuId = req.params.id;
-    const menu = stmts.getMenu.get(menuId);
+    const menu = await dbGetMenu(menuId);
     
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
     
@@ -1624,7 +1610,7 @@ app.post('/api/menus/:id/regenerate-qr', requireAuth, async (req, res) => {
     const qrDataUrl = await generateQRCode(menuId, newVersion);
     const now = new Date().toISOString();
     
-    stmts.regenerateQR.run(
+    await dbRegenerateQR(
       String(qrDataUrl),
       String(now),
       String(menuId)
@@ -1645,9 +1631,12 @@ app.post('/api/menus/:id/regenerate-qr', requireAuth, async (req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n  MenuAdmin MVP running at http://localhost:${PORT}`);
-  console.log(`  Admin panel   : http://localhost:${PORT}/admin.html`);
-  console.log(`  Customer menu : http://localhost:${PORT}/menu.html?id=<menuId>`);
-  console.log(`  Database      : ${DB_PATH}\n`);
-});
+(async () => {
+  await initDB();
+  app.listen(PORT, () => {
+    console.log(`\n  MenuAdmin MVP running at http://localhost:${PORT}`);
+    console.log(`  Admin panel   : http://localhost:${PORT}/admin.html`);
+    console.log(`  Customer menu : http://localhost:${PORT}/menu.html?id=<menuId>`);
+    console.log(`  Database      : PostgreSQL (${process.env.DATABASE_URL ? 'connected' : 'no DATABASE_URL'})\n`);
+  });
+})();
