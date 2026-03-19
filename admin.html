@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
   tailwind.config = {
     darkMode: "class",
@@ -678,6 +679,16 @@
 
       <div id="published-list" class="space-y-3">
         <p class="text-slate-400 text-sm">Loading…</p>
+      </div>
+
+      <!-- Linked QR codes -->
+      <div id="linked-qr-section" class="hidden space-y-3 mt-8">
+        <h3 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-violet-400">link</span>
+          Linked QR Codes
+        </h3>
+        <p class="text-xs text-slate-500">External QR codes that have been reprogrammed to serve your menus.</p>
+        <div id="linked-qr-list" class="space-y-2"></div>
       </div>
     </section>
 
@@ -1608,8 +1619,13 @@ async function loadPublished() {
                   class="text-xs text-amber-400 hover:underline flex items-center gap-1">
             <span class="material-symbols-outlined text-[14px]">refresh</span> New QR
           </button>
+          <button onclick="showLinkQR('${m.id}', '${esc(m.restaurantName)}')" title="Link external QR code"
+                  class="text-xs text-violet-400 hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">qr_code_scanner</span> Link QR
+          </button>
         </div>
       </div>`).join('');
+    loadLinkedQRs();
   } catch {
     el.innerHTML = '<p class="text-red-400 text-sm">Failed to load menus.</p>';
   }
@@ -1734,6 +1750,189 @@ async function deleteMenu(id, btn) {
   } catch {
     btn.disabled = false;
   }
+}
+
+// ── Link / Reprogram QR Code ────────────────────────────────────────────────
+function showLinkQR(targetMenuId, targetName) {
+  let dlg = document.getElementById('link-qr-dialog');
+  if (!dlg) {
+    dlg = document.createElement('div');
+    dlg.id = 'link-qr-dialog';
+    dlg.className = 'fixed inset-0 z-50 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center p-4';
+    document.body.appendChild(dlg);
+  }
+  dlg.classList.remove('hidden');
+  dlg.innerHTML = `
+    <div class="bg-surface border border-primary/20 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <span class="material-symbols-outlined text-violet-400">qr_code_scanner</span> Link QR Code
+        </h3>
+        <button onclick="document.getElementById('link-qr-dialog').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-100 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <p class="text-sm text-slate-400">Upload an existing QR code image. The system will decode it and reprogram it to serve <strong class="text-slate-200">${esc(targetName)}</strong>.</p>
+
+      <div id="link-qr-upload" class="border-2 border-dashed border-violet-500/30 rounded-xl p-8 flex flex-col items-center gap-3 text-center cursor-pointer hover:bg-violet-500/5 hover:border-violet-500/50 transition-all"
+           onclick="document.getElementById('link-qr-file').click()">
+        <span class="material-symbols-outlined text-4xl text-violet-400/60">qr_code_scanner</span>
+        <p class="text-sm text-slate-300 font-medium">Drop or click to upload QR image</p>
+        <p class="text-xs text-slate-500">PNG, JPG, or SVG</p>
+        <input id="link-qr-file" type="file" accept="image/*" class="hidden"
+               onchange="decodeQRFile(event, '${targetMenuId}', '${esc(targetName)}')"/>
+      </div>
+
+      <div id="link-qr-result" class="hidden space-y-4">
+        <div class="bg-bg-dark rounded-xl p-4 space-y-2">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Decoded QR Content</p>
+          <p id="link-qr-decoded" class="text-sm text-slate-200 break-all font-mono"></p>
+          <p id="link-qr-source-id" class="hidden"></p>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-400 mb-1.5">Label <span class="text-slate-600 text-xs">(optional)</span></label>
+          <input id="link-qr-label" type="text" placeholder="e.g. Table 5, Front door"
+                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+        </div>
+        <button id="link-qr-save-btn" onclick="saveLinkQR('${targetMenuId}')"
+                class="w-full h-11 bg-violet-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-[18px]">link</span> Link This QR
+        </button>
+      </div>
+
+      <div id="link-qr-error" class="hidden text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3"></div>
+    </div>`;
+}
+
+async function decodeQRFile(event, targetMenuId, targetName) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const errEl = document.getElementById('link-qr-error');
+  const resultEl = document.getElementById('link-qr-result');
+  errEl.classList.add('hidden');
+  resultEl.classList.add('hidden');
+
+  try {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    const code = jsQR(imageData.data, canvas.width, canvas.height);
+    URL.revokeObjectURL(img.src);
+
+    if (!code) {
+      errEl.textContent = 'Could not decode QR code from this image. Try a clearer photo.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    const decoded = code.data;
+    document.getElementById('link-qr-decoded').textContent = decoded;
+
+    // Extract menu ID if it's a URL from our system
+    let sourceId = null;
+    try {
+      const u = new URL(decoded);
+      sourceId = u.searchParams.get('id');
+    } catch (_) {
+      // Not a URL — use the raw content as the source ID
+      sourceId = decoded;
+    }
+
+    if (!sourceId) {
+      errEl.textContent = 'Could not extract a menu ID from this QR code.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+
+    document.getElementById('link-qr-source-id').textContent = sourceId;
+    resultEl.classList.remove('hidden');
+
+    // Update upload zone to show the decoded image
+    const uploadZone = document.getElementById('link-qr-upload');
+    uploadZone.innerHTML = `
+      <img src="${canvas.toDataURL()}" alt="Decoded QR" class="size-24 rounded-lg"/>
+      <p class="text-xs text-green-400 font-medium flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">check_circle</span> QR decoded successfully
+      </p>`;
+  } catch (err) {
+    errEl.textContent = 'Error reading image: ' + err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function saveLinkQR(targetMenuId) {
+  const sourceMenuId = document.getElementById('link-qr-source-id').textContent;
+  const label = document.getElementById('link-qr-label').value.trim();
+  const errEl = document.getElementById('link-qr-error');
+  const btn = document.getElementById('link-qr-save-btn');
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined text-[18px] spin">progress_activity</span> Saving…';
+
+  try {
+    const res = await fetch('/api/qr-redirects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      body: JSON.stringify({ sourceMenuId, targetMenuId, label })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to link QR');
+
+    document.getElementById('link-qr-dialog').classList.add('hidden');
+    showStatusBadge('QR code linked successfully!', 'green');
+    loadLinkedQRs();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">link</span> Link This QR';
+  }
+}
+
+async function loadLinkedQRs() {
+  try {
+    const res = await fetch('/api/qr-redirects', { headers: { 'X-Admin-Token': sessionToken } });
+    const list = await res.json();
+    const section = document.getElementById('linked-qr-section');
+    const el = document.getElementById('linked-qr-list');
+    if (!list.length) {
+      section.classList.add('hidden');
+      return;
+    }
+    section.classList.remove('hidden');
+    el.innerHTML = list.map(r => `
+      <div class="flex items-center gap-3 p-3 bg-bg-dark rounded-xl border border-primary/5">
+        <span class="material-symbols-outlined text-violet-400/60 text-[20px]">qr_code_2</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-slate-200 truncate">${esc(r.label || r.source_menu_id)}</p>
+          <p class="text-xs text-slate-500 truncate">→ ${esc(r.target_name || r.target_menu_id)}</p>
+        </div>
+        <button onclick="unlinkQR(${r.id})" title="Remove link"
+                class="text-slate-600 hover:text-red-400 transition-colors p-1">
+          <span class="material-symbols-outlined text-[16px]">link_off</span>
+        </button>
+      </div>`).join('');
+  } catch (_) {}
+}
+
+async function unlinkQR(id) {
+  if (!confirm('Remove this QR link? The QR code will no longer serve the menu.')) return;
+  try {
+    await fetch('/api/qr-redirects/' + id, { method: 'DELETE', headers: { 'X-Admin-Token': sessionToken } });
+    showStatusBadge('QR link removed', 'green');
+    loadLinkedQRs();
+  } catch (_) {}
 }
 
 // ── Misc UI ───────────────────────────────────────────────────────────────────

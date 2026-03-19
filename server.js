@@ -294,6 +294,16 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_menu ON menu_scans (menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_scans_date ON menu_scans (scanned_at)`);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS qr_redirects (
+        id              SERIAL PRIMARY KEY,
+        source_menu_id  TEXT NOT NULL UNIQUE,
+        target_menu_id  TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        label           TEXT NOT NULL DEFAULT '',
+        created_at      TEXT NOT NULL
+      );
+    `);
+
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
     client.release();
@@ -382,6 +392,47 @@ async function dbGetScansStats(menuId) {
     GROUP BY DATE(scanned_at::timestamp)
     ORDER BY date DESC`, [menuId]);
   return rows;
+}
+
+function buildMenuResponse(menu, rawItems) {
+  return {
+    id:             menu.id,
+    restaurantName: menu.restaurant_name,
+    currency:       menu.currency || 'USD',
+    brandColor:     menu.brand_color || '#2dd4bf',
+    logoUrl:        menu.logo_url || '',
+    tagline:        menu.tagline || '',
+    fontStyle:      menu.font_style || 'modern',
+    bgStyle:        menu.bg_style || 'dark',
+    showLogo:       menu.show_logo     !== null ? menu.show_logo     : 1,
+    showName:       menu.show_name     !== null ? menu.show_name     : 1,
+    headerLayout:   menu.header_layout || 'logo-left',
+    textColor:      menu.text_color    || '',
+    headingColor:   menu.heading_color || '',
+    bgColor:        menu.bg_color      || '',
+    cardBg:         menu.card_bg       || '',
+    priceColor:     menu.price_color   || '',
+    phone:           menu.phone            || '',
+    email:           menu.email            || '',
+    address:         menu.address          || '',
+    website:         menu.website          || '',
+    socialInstagram: menu.social_instagram || '',
+    socialFacebook:  menu.social_facebook  || '',
+    socialTwitter:   menu.social_twitter   || '',
+    socialWhatsapp:  menu.social_whatsapp  || '',
+    socialTiktok:    menu.social_tiktok    || '',
+    socialYoutube:   menu.social_youtube   || '',
+    createdAt:      menu.created_at,
+    items: rawItems.map(it => ({
+      id:          it.id,
+      name:        it.name,
+      category:    it.category,
+      price:       it.price,
+      description: it.description,
+      tags:        JSON.parse(it.tags || '[]'),
+      size:        it.size || '',
+    }))
+  };
 }
 
 async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrCode) {
@@ -1471,6 +1522,22 @@ app.get('/api/menus/:id', async (req, res) => {
     // Database lookup with optimized prepared statements
     const menu = await dbGetMenu(id);
     if (!menu) {
+      // Check for QR redirect
+      const redir = await pool.query(
+        'SELECT target_menu_id FROM qr_redirects WHERE source_menu_id = $1',
+        [id]
+      );
+      if (redir.rows.length > 0) {
+        const targetId = redir.rows[0].target_menu_id;
+        const targetMenu = await dbGetMenu(targetId);
+        if (targetMenu) {
+          const targetItems = await dbGetItems(targetId);
+          const menuData = buildMenuResponse(targetMenu, targetItems);
+          setCachedMenu(id, menuData);
+          res.setHeader('Cache-Control', 'public, max-age=300');
+          return res.json(menuData);
+        }
+      }
       return res.status(404).json({ error: 'Menu not found.' });
     }
     
@@ -1481,44 +1548,7 @@ app.get('/api/menus/:id', async (req, res) => {
       console.log(`⚡ Slow menu query for ${id}: ${responseTime.toFixed(2)}ms`);
     }
     
-    const menuData = {
-      id:             menu.id,
-      restaurantName: menu.restaurant_name,
-      currency:       menu.currency || 'USD',
-      brandColor:     menu.brand_color || '#2dd4bf',
-      logoUrl:        menu.logo_url || '',
-      tagline:        menu.tagline || '',
-      fontStyle:      menu.font_style || 'modern',
-      bgStyle:        menu.bg_style || 'dark',
-      showLogo:       menu.show_logo     !== null ? menu.show_logo     : 1,
-      showName:       menu.show_name     !== null ? menu.show_name     : 1,
-      headerLayout:   menu.header_layout || 'logo-left',
-      textColor:      menu.text_color    || '',
-    headingColor:   menu.heading_color || '',
-    bgColor:        menu.bg_color      || '',
-    cardBg:         menu.card_bg       || '',
-    priceColor:     menu.price_color   || '',
-    phone:           menu.phone            || '',
-    email:           menu.email            || '',
-    address:         menu.address          || '',
-    website:         menu.website          || '',
-    socialInstagram: menu.social_instagram || '',
-    socialFacebook:  menu.social_facebook  || '',
-    socialTwitter:   menu.social_twitter   || '',
-    socialWhatsapp:  menu.social_whatsapp  || '',
-    socialTiktok:    menu.social_tiktok    || '',
-    socialYoutube:   menu.social_youtube   || '',
-    createdAt:      menu.created_at,
-    items: rawItems.map(it => ({
-      id:          it.id,
-      name:        it.name,
-      category:    it.category,
-      price:       it.price,
-      description: it.description,
-      tags:        JSON.parse(it.tags || '[]'),
-      size:        it.size || '',
-    }))
-    };
+    const menuData = buildMenuResponse(menu, rawItems);
     
     // Cache the result
     setCachedMenu(id, menuData);
@@ -1635,6 +1665,69 @@ app.post('/api/menus/:id/regenerate-qr', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('QR regeneration error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── QR Redirect (Link / Reprogram) ─────────────────────────────────────────
+
+// POST /api/qr-redirects - Create a redirect from a decoded QR menu ID to a target menu
+app.post('/api/qr-redirects', requireAuth, async (req, res) => {
+  try {
+    const { sourceMenuId, targetMenuId, label } = req.body;
+    if (!sourceMenuId || !targetMenuId) {
+      return res.status(400).json({ error: 'sourceMenuId and targetMenuId are required.' });
+    }
+    if (sourceMenuId === targetMenuId) {
+      return res.status(400).json({ error: 'Source and target cannot be the same.' });
+    }
+    // Verify target menu exists
+    const target = await dbGetMenu(targetMenuId);
+    if (!target) return res.status(404).json({ error: 'Target menu not found.' });
+
+    const now = new Date().toISOString();
+    await pool.query(
+      `INSERT INTO qr_redirects (source_menu_id, target_menu_id, label, created_at)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (source_menu_id) DO UPDATE SET target_menu_id = $2, label = $3`,
+      [String(sourceMenuId), String(targetMenuId), String(label || ''), now]
+    );
+
+    // Clear cache for the source ID so redirect takes effect
+    menuCache.delete(sourceMenuId);
+
+    res.json({ success: true, sourceMenuId, targetMenuId });
+  } catch (err) {
+    console.error('QR redirect error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/qr-redirects - List all QR redirects
+app.get('/api/qr-redirects', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT r.*, m.restaurant_name AS target_name
+       FROM qr_redirects r
+       LEFT JOIN menus m ON r.target_menu_id = m.id
+       ORDER BY r.created_at DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/qr-redirects/:id - Remove a redirect
+app.delete('/api/qr-redirects/:id', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'DELETE FROM qr_redirects WHERE id = $1 RETURNING source_menu_id',
+      [req.params.id]
+    );
+    if (rows.length > 0) menuCache.delete(rows[0].source_menu_id);
+    res.json({ success: true });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
