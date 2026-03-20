@@ -791,6 +791,275 @@
       font-size: 14px;
     }
     
+    /* Demo Section */
+    .demo-section {
+      background: linear-gradient(180deg, white 0%, #fef3c7 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .demo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .demo-content h2 {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      letter-spacing: -1px;
+    }
+    
+    .demo-content p {
+      font-size: 18px;
+      color: var(--text-light);
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    
+    .demo-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    
+    .demo-features li {
+      padding: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .demo-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .location-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(194,65,12,0.1);
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    /* Phone Mockup */
+    .phone-mockup {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+      filter: drop-shadow(0 20px 60px rgba(0,0,0,0.15));
+    }
+    
+    .phone-frame {
+      background: #1c1917;
+      border-radius: 48px;
+      padding: 12px;
+      position: relative;
+    }
+    
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 28px;
+      background: #1c1917;
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+    
+    .phone-screen {
+      background: #fafaf9;
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+      height: 720px;
+    }
+    
+    /* Menu Preview Styles */
+    .menu-preview {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .menu-preview::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    .menu-preview::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+    
+    .menu-header {
+      background: white;
+      padding: 16px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    
+    .menu-logo {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .menu-title {
+      flex: 1;
+    }
+    
+    .menu-title h3 {
+      font-size: 19px;
+      font-weight: 900;
+      margin: 0;
+    }
+    
+    .menu-title p {
+      font-size: 12px;
+      color: var(--text-light);
+      margin: 0;
+    }
+    
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 16px;
+      background: white;
+      overflow-x: auto;
+      position: sticky;
+      top: 80px;
+      z-index: 4;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .category-tab {
+      flex-shrink: 0;
+      padding: 10px 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-tab.active {
+      background: var(--gradient-1);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .menu-items {
+      padding: 16px;
+    }
+    
+    .menu-item {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    
+    .menu-item:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    
+    .item-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    
+    .item-price {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    
+    .item-description {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    
+    .item-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .item-tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(77,124,95,0.1);
+      color: var(--accent);
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    
+    .item-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    
+    .stars {
+      color: #f59e0b;
+    }
+    
+    .rating-count {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -803,6 +1072,10 @@
       .footer-grid { grid-template-columns: 1fr; text-align: center; }
       .footer-brand { max-width: 100%; }
       .section-title { font-size: 32px; }
+      .demo-container { grid-template-columns: 1fr; gap: 40px; }
+      .demo-content { order: 2; }
+      .phone-mockup { order: 1; max-width: 320px; }
+      .phone-screen { height: 600px; }
     }
   </style>
 </head>
@@ -818,9 +1091,9 @@
       
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
+        <li><a href="#demo">Demo</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#testimonials">Testimonials</a></li>
-        <li><a href="#faq">FAQ</a></li>
         <li><a href="/admin.html" class="btn-nav">Start Free Trial</a></li>
       </ul>
       
@@ -892,7 +1165,7 @@
   </div>
 
   <!-- Features Section -->
-  <section id="features">
+  <section id="features" style="padding: 80px 0 60px;">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Complete Solution</span>
@@ -1018,8 +1291,70 @@
     </div>
   </section>
 
+  <!-- Interactive Demo Section -->
+  <section id="demo" class="demo-section">
+    <div class="container">
+      <div class="demo-container">
+        <div class="demo-content">
+          <div class="location-badge">
+            <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span>
+            <span id="user-location">Detecting location...</span>
+          </div>
+          
+          <h2>See It In Action</h2>
+          <p>
+            Experience the actual menu your customers will see. Try scrolling, switching categories, 
+            and see how beautiful your menu looks on mobile devices.
+          </p>
+          
+          <ul class="demo-features">
+            <li>Real-time menu preview</li>
+            <li>Dynamic pricing for your region</li>
+            <li>Fully interactive experience</li>
+            <li>Responsive on all devices</li>
+          </ul>
+          
+          <div class="hero-cta">
+            <a href="/admin.html" class="btn-primary">
+              <span class="material-symbols-outlined">add_circle</span>
+              Create Your Menu
+            </a>
+          </div>
+        </div>
+        
+        <div class="phone-mockup">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="menu-preview">
+                <div class="menu-header">
+                  <div class="menu-logo">🍽️</div>
+                  <div class="menu-title">
+                    <h3>RestOrder Demo</h3>
+                    <p id="menu-location">Loading...</p>
+                  </div>
+                </div>
+                
+                <div class="category-tabs">
+                  <div class="category-tab active" data-category="pizza">🍕 Pizza</div>
+                  <div class="category-tab" data-category="appetizers">🥗 Appetizers</div>
+                  <div class="category-tab" data-category="drinks">🥤 Drinks</div>
+                  <div class="category-tab" data-category="desserts">🍰 Desserts</div>
+                </div>
+                
+                <div class="menu-items" id="menu-items">
+                  <!-- Items will be populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Pricing Section -->
-  <section id="pricing" class="pricing">
+  <section id="pricing" class="pricing" style="padding: 80px 0;">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Simple Pricing</span>
@@ -1129,7 +1464,7 @@
   </section>
 
   <!-- Testimonials -->
-  <section id="testimonials" class="testimonials">
+  <section id="testimonials" class="testimonials" style="padding: 80px 0;">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Success Stories</span>
@@ -1189,7 +1524,7 @@
   </section>
 
   <!-- CTA Section -->
-  <section class="cta-section">
+  <section class="cta-section" style="padding: 80px 0;">
     <div class="container cta-content">
       <h2>Ready to Transform Your Restaurant?</h2>
       <p>Join 10,000+ restaurants already succeeding with RestOrder</p>
@@ -1261,6 +1596,294 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // Geolocation and Dynamic Pricing System
+    const currencyData = {
+      'US': { symbol: '$', rate: 1, name: 'USD' },
+      'GB': { symbol: '£', rate: 0.79, name: 'GBP' },
+      'EU': { symbol: '€', rate: 0.92, name: 'EUR' },
+      'CA': { symbol: 'C$', rate: 1.35, name: 'CAD' },
+      'AU': { symbol: 'A$', rate: 1.52, name: 'AUD' },
+      'IN': { symbol: '₹', rate: 83, name: 'INR' },
+      'JP': { symbol: '¥', rate: 149, name: 'JPY' },
+      'CN': { symbol: '¥', rate: 7.24, name: 'CNY' },
+      'MX': { symbol: 'MX$', rate: 17, name: 'MXN' },
+      'BR': { symbol: 'R$', rate: 5, name: 'BRL' },
+      'AE': { symbol: 'AED', rate: 3.67, name: 'AED' },
+      'SG': { symbol: 'S$', rate: 1.34, name: 'SGD' },
+      'HK': { symbol: 'HK$', rate: 7.83, name: 'HKD' },
+      'DEFAULT': { symbol: '$', rate: 1, name: 'USD' }
+    };
+    
+    const countryNames = {
+      'US': 'United States',
+      'GB': 'United Kingdom',
+      'CA': 'Canada',
+      'AU': 'Australia',
+      'IN': 'India',
+      'JP': 'Japan',
+      'CN': 'China',
+      'MX': 'Mexico',
+      'BR': 'Brazil',
+      'AE': 'UAE',
+      'SG': 'Singapore',
+      'HK': 'Hong Kong',
+      'DE': 'Germany',
+      'FR': 'France',
+      'ES': 'Spain',
+      'IT': 'Italy',
+      'NL': 'Netherlands'
+    };
+    
+    // Menu data with base prices in USD
+    const menuData = {
+      pizza: [
+        {
+          name: 'Margherita Pizza',
+          price: 18,
+          description: 'Fresh mozzarella, basil, and San Marzano tomato sauce on wood-fired crust',
+          tags: ['vegetarian', 'classic'],
+          rating: 4.8,
+          reviews: 124
+        },
+        {
+          name: 'Pepperoni Classic',
+          price: 22,
+          description: 'Premium pepperoni, mozzarella, and our signature tomato sauce',
+          tags: ['popular', 'spicy'],
+          rating: 4.9,
+          reviews: 189
+        },
+        {
+          name: 'Quattro Formaggi',
+          price: 24,
+          description: 'Four cheese blend: mozzarella, gorgonzola, parmesan, and fontina',
+          tags: ['vegetarian', 'premium'],
+          rating: 4.7,
+          reviews: 95
+        },
+        {
+          name: 'Prosciutto & Arugula',
+          price: 26,
+          description: 'Prosciutto di Parma, fresh arugula, shaved parmesan, and balsamic glaze',
+          tags: ['premium', 'gourmet'],
+          rating: 4.9,
+          reviews: 152
+        }
+      ],
+      appetizers: [
+        {
+          name: 'Bruschetta',
+          price: 9,
+          description: 'Toasted bread with fresh tomatoes, garlic, basil, and extra virgin olive oil',
+          tags: ['vegan', 'light'],
+          rating: 4.6,
+          reviews: 87
+        },
+        {
+          name: 'Mozzarella Sticks',
+          price: 11,
+          description: 'Crispy breaded mozzarella served with marinara sauce',
+          tags: ['vegetarian', 'popular'],
+          rating: 4.5,
+          reviews: 203
+        },
+        {
+          name: 'Calamari Fritti',
+          price: 14,
+          description: 'Lightly fried calamari rings with lemon aioli',
+          tags: ['seafood'],
+          rating: 4.7,
+          reviews: 112
+        },
+        {
+          name: 'Caesar Salad',
+          price: 12,
+          description: 'Crisp romaine, parmesan, croutons, and classic Caesar dressing',
+          tags: ['vegetarian', 'healthy'],
+          rating: 4.4,
+          reviews: 76
+        }
+      ],
+      drinks: [
+        {
+          name: 'Coca-Cola',
+          price: 3,
+          description: 'Classic Coca-Cola, ice cold',
+          tags: ['soft drink'],
+          rating: 4.5,
+          reviews: 345
+        },
+        {
+          name: 'Fresh Lemonade',
+          price: 5,
+          description: 'House-made lemonade with fresh lemons and mint',
+          tags: ['refreshing', 'homemade'],
+          rating: 4.7,
+          reviews: 156
+        },
+        {
+          name: 'Italian Coffee',
+          price: 4,
+          description: 'Authentic Italian espresso or cappuccino',
+          tags: ['hot', 'coffee'],
+          rating: 4.9,
+          reviews: 289
+        },
+        {
+          name: 'House Wine',
+          price: 8,
+          description: 'Red or white wine selection from our cellar',
+          tags: ['alcoholic'],
+          rating: 4.6,
+          reviews: 134
+        }
+      ],
+      desserts: [
+        {
+          name: 'Tiramisu',
+          price: 8,
+          description: 'Classic Italian dessert with espresso-soaked ladyfingers and mascarpone',
+          tags: ['classic', 'popular'],
+          rating: 4.9,
+          reviews: 267
+        },
+        {
+          name: 'Panna Cotta',
+          price: 7,
+          description: 'Creamy vanilla custard with berry compote',
+          tags: ['light', 'gluten-free'],
+          rating: 4.7,
+          reviews: 145
+        },
+        {
+          name: 'Gelato',
+          price: 6,
+          description: 'Italian ice cream - choice of vanilla, chocolate, or strawberry',
+          tags: ['cold', 'vegetarian'],
+          rating: 4.8,
+          reviews: 198
+        },
+        {
+          name: 'Cannoli',
+          price: 7,
+          description: 'Crispy pastry shells filled with sweet ricotta and chocolate chips',
+          tags: ['traditional'],
+          rating: 4.6,
+          reviews: 167
+        }
+      ]
+    };
+    
+    let currentCurrency = currencyData.DEFAULT;
+    let currentCountry = 'Unknown';
+    
+    // Get user's location and currency
+    async function getUserLocation() {
+      try {
+        // Try IP-based geolocation first
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        const countryCode = data.country_code;
+        currentCountry = countryNames[countryCode] || data.country_name || countryCode;
+        
+        // Determine currency based on country
+        if (currencyData[countryCode]) {
+          currentCurrency = currencyData[countryCode];
+        } else if (['DE', 'FR', 'ES', 'IT', 'NL', 'BE', 'AT', 'PT', 'IE', 'GR'].includes(countryCode)) {
+          currentCurrency = currencyData.EU;
+        } else {
+          currentCurrency = currencyData.DEFAULT;
+        }
+        
+        updateLocationDisplay();
+        renderMenuItems('pizza');
+      } catch (error) {
+        console.log('Geolocation failed, using default currency');
+        currentCountry = 'Global';
+        currentCurrency = currencyData.DEFAULT;
+        updateLocationDisplay();
+        renderMenuItems('pizza');
+      }
+    }
+    
+    function updateLocationDisplay() {
+      const locationBadge = document.getElementById('user-location');
+      const menuLocation = document.getElementById('menu-location');
+      
+      if (locationBadge) {
+        locationBadge.textContent = `Prices in ${currentCurrency.name} for ${currentCountry}`;
+      }
+      if (menuLocation) {
+        menuLocation.textContent = `${currentCountry} • ${currentCurrency.name}`;
+      }
+    }
+    
+    function formatPrice(priceUSD) {
+      const converted = priceUSD * currentCurrency.rate;
+      
+      // Handle decimal places based on currency
+      let decimals = 2;
+      if (['JPY', 'CNY'].includes(currentCurrency.name)) {
+        decimals = 0;
+      }
+      
+      const formatted = converted.toFixed(decimals);
+      return `${currentCurrency.symbol}${formatted}`;
+    }
+    
+    function renderMenuItems(category) {
+      const container = document.getElementById('menu-items');
+      const items = menuData[category] || [];
+      
+      container.innerHTML = items.map(item => `
+        <div class="menu-item">
+          <div class="item-header">
+            <div>
+              <div class="item-name">${item.name}</div>
+              <div class="item-description">${item.description}</div>
+            </div>
+            <div class="item-price">${formatPrice(item.price)}</div>
+          </div>
+          ${item.tags ? `
+            <div class="item-tags">
+              ${item.tags.map(tag => `<span class="item-tag">${tag}</span>`).join('')}
+            </div>
+          ` : ''}
+          ${item.rating ? `
+            <div class="item-rating">
+              <span class="stars">${'★'.repeat(Math.floor(item.rating))}${'☆'.repeat(5 - Math.floor(item.rating))}</span>
+              <span class="rating-count">${item.rating} (${item.reviews} reviews)</span>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    // Category tab switching
+    function setupCategoryTabs() {
+      const tabs = document.querySelectorAll('.category-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          // Remove active class from all tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          // Add active class to clicked tab
+          this.classList.add('active');
+          // Render items for selected category
+          const category = this.getAttribute('data-category');
+          renderMenuItems(category);
+        });
+      });
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      getUserLocation();
+      setupCategoryTabs();
+    });
+  </script>
 
 </body>
 </html>
