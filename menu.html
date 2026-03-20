@@ -283,10 +283,10 @@ html[data-theme="dark"] #topbar {
 }
 #cat-nav.s-open { top: calc(var(--topbar-h) + var(--safe-t) + 68px); }
 
-/* Main tab strip */
+/* Main tab strip — large card-style tabs */
 #cat-tabs {
-  display: flex; gap: 6px;
-  overflow-x: auto; padding: 10px 14px 0;
+  display: flex; gap: 8px;
+  overflow-x: auto; padding: 12px 14px 6px;
   -ms-overflow-style: none; scrollbar-width: none;
   scroll-snap-type: x proximity;
 }
@@ -294,62 +294,73 @@ html[data-theme="dark"] #topbar {
 
 .tab-pill {
   flex-shrink: 0; scroll-snap-align: start;
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 14px 7px 10px;
-  border-radius: 50px; border: none;
-  font-size: 13px; font-weight: 600; letter-spacing: -.1px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  min-width: 72px; padding: 10px 14px 8px;
+  border-radius: var(--r-md); border: 1.5px solid transparent;
+  font-size: 11px; font-weight: 700; letter-spacing: .02em;
   font-family: var(--font); cursor: pointer; white-space: nowrap;
-  transition: all .18s var(--ease-out), transform .08s;
+  transition: all .2s var(--ease-out), transform .08s;
   position: relative; overflow: hidden;
+  text-transform: uppercase;
 }
 .tab-pill::after {
   content: ''; position: absolute; inset: 0;
   background: currentColor; opacity: 0;
   transition: opacity .15s; border-radius: inherit;
 }
-.tab-pill:active::after { opacity: .1; }
+.tab-pill:active::after { opacity: .08; }
 .tab-pill:active { transform: scale(.94); }
-.tab-active   { background: var(--brand); color: #fff; box-shadow: 0 3px 10px rgba(var(--brand-rgb),.35); }
-.tab-inactive { background: var(--surf); color: var(--text); border: 1px solid var(--border); }
-.tab-icon { font-size: 15px; line-height: 1; }
-
-/* Indicator line */
-#cat-indicator {
-  height: 2px; background: transparent;
-  margin: 8px 14px 0;
-  border-radius: 1px; overflow: visible;
-  position: relative;
+.tab-active {
+  background: var(--brand); color: #fff;
+  border-color: var(--brand);
+  box-shadow: 0 3px 12px rgba(var(--brand-rgb),.35);
 }
-#cat-indicator-bar {
-  height: 2px; background: var(--brand);
-  border-radius: 1px;
-  position: absolute; bottom: 0; left: 0;
-  transition: transform .28s var(--ease-spring), width .28s var(--ease-spring);
-  display: none;
+.tab-inactive {
+  background: var(--surf); color: var(--text);
+  border-color: var(--border);
+}
+.tab-inactive:hover { border-color: rgba(var(--brand-rgb),.25); }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-count {
+  font-size: 9px; font-weight: 600; opacity: .6;
+  letter-spacing: 0; text-transform: none;
 }
 
-/* Subcategory pills */
+/* Subcategory row — slides in below main tabs */
 #subcat-tabs {
-  display: none; gap: 6px;
-  overflow-x: auto; padding: 8px 14px 10px;
+  display: flex; gap: 6px;
+  overflow-x: auto; padding: 0 14px 10px;
   -ms-overflow-style: none; scrollbar-width: none;
   scroll-snap-type: x proximity;
+  max-height: 0; opacity: 0;
+  transition: max-height .28s var(--ease-spring), opacity .2s, padding .28s;
 }
 #subcat-tabs::-webkit-scrollbar { display: none; }
-#subcat-tabs.visible { display: flex; }
+#subcat-tabs.visible {
+  max-height: 50px; opacity: 1;
+  padding: 6px 14px 10px;
+}
 
 .subcat-pill {
   flex-shrink: 0; scroll-snap-align: start;
   display: inline-flex; align-items: center;
-  padding: 5px 13px; border-radius: 50px;
+  padding: 6px 14px; border-radius: 50px;
   font-size: 12px; font-weight: 600;
-  border: none; cursor: pointer;
+  border: 1.5px solid transparent; cursor: pointer;
   font-family: var(--font); white-space: nowrap;
   transition: all .15s, transform .08s;
 }
 .subcat-pill:active { transform: scale(.92); }
-.subcat-active   { background: var(--brand); color: #fff; box-shadow: 0 2px 8px rgba(var(--brand-rgb),.3); }
-.subcat-inactive { background: var(--surf); color: var(--text); border: 1px solid var(--border); }
+.subcat-active {
+  background: rgba(var(--brand-rgb),.12); color: var(--brand);
+  border-color: var(--brand);
+}
+.subcat-inactive {
+  background: transparent; color: var(--text);
+  border-color: var(--border);
+}
+.subcat-inactive:hover { border-color: rgba(var(--brand-rgb),.2); }
 
 /* ─── COUNT BAR ─── */
 #count-bar {
@@ -862,7 +873,8 @@ html[data-theme="dark"] #bottom-nav {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 480px) {
-  .tab-pill { font-size: 12px; padding: 6px 12px 6px 9px; }
+  .tab-pill { min-width: 64px; padding: 8px 10px 6px; font-size: 10px; }
+  .tab-icon { font-size: 20px; }
   .bnav-item { padding: 5px 0 2px; }
   .bnav-label { font-size: 9px; }
   .items-group { margin: 0 8px; }
@@ -1255,10 +1267,10 @@ function applyBranding(data) {
     #search-drawer{background:${surfCol}!important;}
     #search-input{background:${surf2}!important;color:${headCol}!important;border-color:${dv}!important;}
     #cat-nav{background:${bgCol}!important;}
-    .tab-active{background:${color}!important;box-shadow:0 3px 10px ${color}55!important;}
+    .tab-active{background:${color}!important;color:#fff!important;border-color:${color}!important;box-shadow:0 3px 12px ${color}55!important;}
     .tab-inactive{background:${surfCol}!important;color:${textCol}!important;border-color:${dv}!important;}
-    .subcat-active{background:${color}!important;box-shadow:0 2px 8px ${color}44!important;}
-    .subcat-inactive{background:${surf2}!important;color:${textCol}!important;border-color:${dv}!important;}
+    .subcat-active{background:${color}1a!important;color:${color}!important;border-color:${color}!important;}
+    .subcat-inactive{background:transparent!important;color:${textCol}!important;border-color:${dv}!important;}
     .items-group{background:${surfCol}!important;}
     .item-row:active{background:${color}08!important;}
     .sk{background:linear-gradient(90deg,${surfCol} 25%,${surf2} 50%,${surfCol} 75%)!important;background-size:1600px!important;}
@@ -1342,12 +1354,16 @@ function buildContactBar(data) {
 function buildTabs() {
   const cats = [...new Set(allItems.map(it => it.category || 'Other'))];
   if (!cats.length) return;
+  const allCount = allItems.length;
   let html = `<button onclick="setCategory('All')" data-cat="All" class="tab-pill ${activeCategory==='All'?'tab-active':'tab-inactive'}">
-    <span class="material-symbols-outlined tab-icon">restaurant</span>All</button>`;
+    <span class="material-symbols-outlined tab-icon">restaurant</span>All
+    <span class="tab-count">${allCount}</span></button>`;
   html += cats.map(c => {
     const on = c === activeCategory;
+    const cnt = allItems.filter(it => (it.category||'Other') === c).length;
     return `<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}" class="tab-pill ${on?'tab-active':'tab-inactive'}">
-      <span class="material-symbols-outlined tab-icon">${getCatIcon(c)}</span>${esc(c)}</button>`;
+      <span class="material-symbols-outlined tab-icon">${getCatIcon(c)}</span>${esc(c)}
+      <span class="tab-count">${cnt}</span></button>`;
   }).join('');
   document.getElementById('cat-tabs').innerHTML = html;
   buildSubcatPills();
