@@ -1115,6 +1115,16 @@ html[data-theme="dark"] #cart-sheet-handle { background: rgba(255,255,255,.15); 
       <span id="cart-total-label">Total</span>
       <span id="cart-total-value"></span>
     </div>
+    <div id="cart-customer-fields" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px">
+      <input id="cart-cust-name" type="text" placeholder="Your name *" autocomplete="name"
+        style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--head);font-size:14px;font-family:inherit;outline:none;">
+      <div style="position:relative">
+        <input id="cart-cust-phone" type="tel" placeholder="Phone number *" autocomplete="tel"
+          style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--head);font-size:14px;font-family:inherit;outline:none;">
+        <span id="cart-phone-status" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px;display:none"></span>
+      </div>
+      <span id="cart-phone-error" style="display:none;color:#ef4444;font-size:12px;margin-top:-4px"></span>
+    </div>
     <button id="checkout-order-btn" onclick="placeOrder()">
       <span class="material-symbols-outlined" style="font-size:20px">receipt_long</span>
       Place Order
@@ -1940,6 +1950,39 @@ function clearCart() {
 
 function placeOrder() {
   if (!cart.length) return;
+
+  // Validate customer name & phone
+  var custName = (document.getElementById('cart-cust-name').value || '').trim();
+  var custPhone = (document.getElementById('cart-cust-phone').value || '').trim();
+  var phoneErr = document.getElementById('cart-phone-error');
+  var phoneStat = document.getElementById('cart-phone-status');
+
+  if (!custName) {
+    document.getElementById('cart-cust-name').style.borderColor = '#ef4444';
+    document.getElementById('cart-cust-name').focus();
+    return;
+  }
+  document.getElementById('cart-cust-name').style.borderColor = '';
+
+  // Phone validation: must be digits (with optional leading +), 7-15 digits
+  var phoneDigits = custPhone.replace(/[\s\-().]/g, '');
+  var phoneValid = /^\+?\d{7,15}$/.test(phoneDigits);
+  if (!custPhone || !phoneValid) {
+    document.getElementById('cart-cust-phone').style.borderColor = '#ef4444';
+    phoneErr.textContent = !custPhone ? 'Phone number is required' : 'Enter a valid phone number (7-15 digits)';
+    phoneErr.style.display = 'block';
+    phoneStat.textContent = '✗';
+    phoneStat.style.color = '#ef4444';
+    phoneStat.style.display = 'inline';
+    document.getElementById('cart-cust-phone').focus();
+    return;
+  }
+  document.getElementById('cart-cust-phone').style.borderColor = '';
+  phoneErr.style.display = 'none';
+  phoneStat.textContent = '✓';
+  phoneStat.style.color = '#22c55e';
+  phoneStat.style.display = 'inline';
+
   var lines = [];
   cart.forEach(function(c) {
     var p = (parseFloat(c.price) || 0) * c.qty;
@@ -1949,7 +1992,7 @@ function placeOrder() {
   cart.forEach(function(c) { total += (parseFloat(c.price) || 0) * c.qty; });
   var rname = (menuData && menuData.restaurantName) || '';
   var tableNote = currentTableLabel ? '\nTable: ' + currentTableLabel : '';
-  var msg = (rname ? 'Order from ' + rname + ':\n' : 'Order:\n') + lines.join('\n') + tableNote + '\n\nTotal: ' + menuCurrency + total.toFixed(2);
+  var msg = (rname ? 'Order from ' + rname + ':\n' : 'Order:\n') + 'Customer: ' + custName + ' (' + phoneDigits + ')\n' + lines.join('\n') + tableNote + '\n\nTotal: ' + menuCurrency + total.toFixed(2);
 
   // Submit order to server for admin/print tracking
   var orderItems = cart.map(function(c) {
@@ -1958,7 +2001,7 @@ function placeOrder() {
   fetch('/api/menus/' + encodeURIComponent(menuData.id) + '/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items: orderItems, table: currentTableLabel, currency: menuData.currency || 'USD' }),
+    body: JSON.stringify({ items: orderItems, table: currentTableLabel, currency: menuData.currency || 'USD', customer_name: custName, customer_phone: phoneDigits }),
   }).catch(function() {});
 
   var phone = menuData && menuData.phone ? menuData.phone.replace(/[^\d+]/g, '') : '';
@@ -1968,6 +2011,26 @@ function placeOrder() {
     alert(msg);
   }
 }
+
+// Real-time phone validation
+document.addEventListener('DOMContentLoaded', function() {
+  var phoneInput = document.getElementById('cart-cust-phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+      var val = this.value.replace(/[\s\-().]/g, '');
+      var phoneStat = document.getElementById('cart-phone-status');
+      var phoneErr = document.getElementById('cart-phone-error');
+      if (!val) { phoneStat.style.display = 'none'; phoneErr.style.display = 'none'; this.style.borderColor = ''; return; }
+      var valid = /^\+?\d{7,15}$/.test(val);
+      phoneStat.textContent = valid ? '✓' : '✗';
+      phoneStat.style.color = valid ? '#22c55e' : '#ef4444';
+      phoneStat.style.display = 'inline';
+      this.style.borderColor = valid ? '#22c55e' : '#ef4444';
+      phoneErr.style.display = valid ? 'none' : 'block';
+      phoneErr.textContent = valid ? '' : 'Enter a valid phone number (7-15 digits)';
+    });
+  }
+});
 
 async function callWaiter() {
   if (!menuData || !currentTableLabel) return;

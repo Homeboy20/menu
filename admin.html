@@ -2829,6 +2829,7 @@ async function loadOrders() {
             <div>
               <span class="text-sm font-semibold text-slate-200">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : ''}</span>
               <span class="text-xs text-slate-600 ml-2">${new Date(r.created_at).toLocaleString()}</span>
+              ${r.customer_name ? '<br/><span class="text-xs text-slate-400">' + esc(r.customer_name) + (r.customer_phone ? ' &mdash; ' + esc(r.customer_phone) : '') + '</span>' : ''}
             </div>
             <span class="text-xs font-bold ${status === 'pending' ? 'text-amber-400' : 'text-emerald-400'}">${esc(status.toUpperCase())}</span>
           </div>
@@ -2882,6 +2883,7 @@ async function printOrderBill(orderId) {
     items.forEach(function(it) {
       itemsHtml += '<tr><td style="text-align:left">' + esc(it.name) + '</td><td style="text-align:center">' + it.qty + '</td><td style="text-align:right">' + sym + (it.price * it.qty).toFixed(2) + '</td></tr>';
     });
+    const customerInfo = order.customer_name ? '<div class="center" style="margin-top:4px">' + esc(order.customer_name) + (order.customer_phone ? ' &mdash; ' + esc(order.customer_phone) : '') + '</div>' : '';
     const html = '<!DOCTYPE html><html><head><title>Receipt #' + order.id + '</title>' +
       '<style>' +
       '*{margin:0;padding:0;box-sizing:border-box}' +
@@ -2898,6 +2900,7 @@ async function printOrderBill(orderId) {
       '<div class="center bold" style="font-size:16px">' + esc(rname) + '</div>' +
       '<div class="center" style="margin-top:2px;font-size:11px">Order #' + order.id + '</div>' +
       (tableNote ? '<div class="center" style="margin-top:4px">' + tableNote + '</div>' : '') +
+      customerInfo +
       '<div class="center" style="margin-top:2px;font-size:11px">' + dateStr + '</div>' +
       '<div class="line"></div>' +
       '<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th></tr></thead>' +
@@ -2907,10 +2910,20 @@ async function printOrderBill(orderId) {
       '<div class="line"></div>' +
       '<div class="center" style="margin-top:10px">Thank you!</div>' +
       '<div class="center" style="font-size:10px;color:#666;margin-top:6px">Powered by MenuAdmin</div>' +
-      '<script>window.onload=function(){window.print()}<\/script>' +
       '</body></html>';
-    const w = window.open('', '_blank', 'width=320,height=600');
-    if (w) { w.document.write(html); w.document.close(); }
+    // Auto-print via hidden iframe (sends directly to thermal printer without dialog)
+    let printFrame = document.getElementById('print-frame');
+    if (!printFrame) {
+      printFrame = document.createElement('iframe');
+      printFrame.id = 'print-frame';
+      printFrame.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:0;height:0;border:none;';
+      document.body.appendChild(printFrame);
+    }
+    const fd = printFrame.contentDocument || printFrame.contentWindow.document;
+    fd.open(); fd.write(html); fd.close();
+    printFrame.onload = function() {
+      try { printFrame.contentWindow.print(); } catch(_) {}
+    };
   } catch (err) { alert(err.message); }
 }
 

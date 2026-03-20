@@ -365,11 +365,16 @@ async function initDB() {
         total      REAL NOT NULL DEFAULT 0,
         currency   TEXT NOT NULL DEFAULT 'USD',
         status     TEXT NOT NULL DEFAULT 'pending',
+        customer_name  TEXT NOT NULL DEFAULT '',
+        customer_phone TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL
       );
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_menu ON orders (menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)`);
+    // Migration: add customer columns if missing
+    await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT ''`);
+    await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT ''`);
 
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
@@ -1970,11 +1975,13 @@ app.post('/api/menus/:id/orders', async (req, res) => {
     const tableLabel = sanitizeStr(req.body.table, 100) || '';
     const total = items.reduce((s, it) => s + it.price * it.qty, 0);
     const currency = sanitizeStr(req.body.currency, 10) || menu.currency || 'USD';
+    const customerName = sanitizeStr(req.body.customer_name, 200) || '';
+    const customerPhone = sanitizeStr(req.body.customer_phone, 20) || '';
 
     const { rows } = await pool.query(
-      `INSERT INTO orders (menu_id, table_label, items, total, currency, status, created_at)
-       VALUES ($1, $2, $3, $4, $5, 'pending', $6) RETURNING *`,
-      [menuId, tableLabel, JSON.stringify(items), total, currency, new Date().toISOString()]
+      `INSERT INTO orders (menu_id, table_label, items, total, currency, status, customer_name, customer_phone, created_at)
+       VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8) RETURNING *`,
+      [menuId, tableLabel, JSON.stringify(items), total, currency, customerName, customerPhone, new Date().toISOString()]
     );
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
