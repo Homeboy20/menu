@@ -1442,12 +1442,16 @@ function buildContactBar(data) {
 
 //  Category tabs 
 function buildTabs() {
-  const cats = ['All', ...new Set(allItems.map(it => it.category || 'Other'))];
+  const cats = [...new Set(allItems.map(it => it.category || 'Other'))];
+  // If no items or only one category, set first as active
+  if (!cats.length) return;
+  if (activeCategory === 'All') activeCategory = cats[0];
   document.getElementById('cat-tabs').innerHTML = cats.map((c, i) => {
-    const col = c === 'All' ? null : catColor(c);
-    const count = c === 'All' ? allItems.length : allItems.filter(it => (it.category || 'Other') === c).length;
+    const col = catColor(c);
+    const count = allItems.filter(it => (it.category || 'Other') === c).length;
+    const isActive = c === activeCategory;
     return `<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}"
-              class="tab-pill ${i === 0 ? 'tab-active' : 'tab-inactive'}">
+              class="tab-pill ${isActive ? 'tab-active' : 'tab-inactive'}">
         ${col ? `<span class="t-dot" style="background:${col.hex}"></span>` : ''}
         ${esc(c)} <span class="tab-count">${count}</span></button>`;
   }).join('');
@@ -1471,11 +1475,13 @@ function renderItems() {
   const filtered = [];
   allItems.forEach(function(it, i) {
     const cat   = it.category || 'Other';
-    const inCat = activeCategory === 'All' || cat === activeCategory;
+    const sub   = it.subcategory || '';
+    const inCat = cat === activeCategory;
     const inQ   = !q
       || (it.name        || '').toLowerCase().includes(q)
       || (it.description || '').toLowerCase().includes(q)
-      || cat.toLowerCase().includes(q);
+      || cat.toLowerCase().includes(q)
+      || sub.toLowerCase().includes(q);
     if (inCat && inQ) filtered.push(Object.assign({}, it, {_idx: i}));
   });
 
@@ -1499,24 +1505,27 @@ function renderItems() {
     return;
   }
 
-  const groups = {};
+  // Group by subcategory (empty subcategory comes first as ungrouped)
+  const subGroups = {};
   for (const it of filtered) {
-    const cat = it.category || 'Other';
-    (groups[cat] = groups[cat] || []).push(it);
+    const sub = it.subcategory || '';
+    (subGroups[sub] = subGroups[sub] || []).push(it);
   }
-  container.innerHTML = Object.entries(groups)
-    .map(([cat, items], i) => buildSection(cat, items, i))
+  container.innerHTML = Object.entries(subGroups)
+    .map(([sub, items], i) => buildSection(sub, items, i))
     .join('');
 }
 
 //  Section 
-function buildSection(cat, items, idx) {
-  const c = catColor(cat);
+function buildSection(sub, items, idx) {
+  const c = catColor(activeCategory);
+  // If subcategory is empty, render items without a section header
+  const header = sub
+    ? `<div class="cat-header"><span class="cat-label">${esc(sub)}</span></div>`
+    : '';
   return `
     <div class="cat-section" style="animation-delay:${idx * 45}ms">
-      <div class="cat-header">
-        <span class="cat-label">${esc(cat)}</span>
-      </div>
+      ${header}
       <div class="items-group">${items.map(it => buildItem(it, c)).join('')}</div>
     </div>`;
 }
@@ -1623,12 +1632,12 @@ function syncBnavThemeIcon() {
 }
 
 function openCatSheet() {
-  const cats = ['All', ...new Set(allItems.map(it => it.category || 'Other'))];
+  const cats = [...new Set(allItems.map(it => it.category || 'Other'))];
   const list = document.getElementById('cat-sheet-list');
   if (list) {
     list.innerHTML = cats.map(c => {
-      const col = c === 'All' ? null : catColor(c);
-      const count = c === 'All' ? allItems.length : allItems.filter(it => (it.category || 'Other') === c).length;
+      const col = catColor(c);
+      const count = allItems.filter(it => (it.category || 'Other') === c).length;
       const isActive = c === activeCategory;
       return `<button class="cat-sheet-item${isActive?' cs-active':''}" onclick="selectSheetCat('${esc(c)}')">
         <span class="cs-dot" style="background:${col ? col.hex : 'var(--brand)'}"></span>

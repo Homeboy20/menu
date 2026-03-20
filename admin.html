@@ -613,6 +613,7 @@
               </th>
               <th class="p-4">Name</th>
               <th class="p-4 w-40">Category</th>
+              <th class="p-4 w-36">Subcategory</th>
               <th class="p-4 w-28" id="price-col-header">Price ($)</th>
               <th class="p-4 w-28">Size</th>
               <th class="p-4">Description</th>
@@ -1329,7 +1330,7 @@ async function handleReupload(e) {
 
 // ── Table rendering ───────────────────────────────────────────────────────────
 function blankRow() {
-  return { id: crypto.randomUUID(), name: '', category: 'General', price: '', description: '', size: '', tags: [], imageUrl: '', _selected: true };
+  return { id: crypto.randomUUID(), name: '', category: 'General', subcategory: '', price: '', description: '', size: '', tags: [], imageUrl: '', _selected: true };
 }
 
 function renderTable() {
@@ -1366,6 +1367,11 @@ function buildRow(item, i) {
     <td class="p-3">
       <input type="text" value="${esc(item.category)}" placeholder="Category"
              oninput="updateItem(${i},'category',this.value)"
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+    </td>
+    <td class="p-3">
+      <input type="text" value="${esc(item.subcategory||'')}" placeholder="Subcategory"
+             oninput="updateItem(${i},'subcategory',this.value)"
              class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
     </td>
     <td class="p-3">

@@ -315,6 +315,9 @@ async function initDB() {
     // Migration: add rating column to menu_items
     await client.query(`ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS rating REAL NOT NULL DEFAULT 0`).catch(() => {});
 
+    // Migration: add subcategory column to menu_items
+    await client.query(`ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS subcategory TEXT NOT NULL DEFAULT ''`).catch(() => {});
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS menu_tables (
         id        SERIAL PRIMARY KEY,
@@ -476,6 +479,7 @@ function buildMenuResponse(menu, rawItems) {
       id:          it.id,
       name:        it.name,
       category:    it.category,
+      subcategory: it.subcategory || '',
       price:       it.price,
       description: it.description,
       tags:        JSON.parse(it.tags || '[]'),
@@ -538,13 +542,14 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, image_url, rating, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        (id, menu_id, name, category, subcategory, price, description, tags, size, image_url, rating, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
           String(item.name),
           String(item.category || 'General'),
+          String(item.subcategory || ''),
           Number(item.price || 0),
           String(item.description || ''),
           JSON.stringify(tags),
@@ -610,13 +615,14 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, image_url, rating, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        (id, menu_id, name, category, subcategory, price, description, tags, size, image_url, rating, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
           String(item.name),
           String(item.category || 'General'),
+          String(item.subcategory || ''),
           Number(item.price || 0),
           String(item.description || ''),
           JSON.stringify(tags),
@@ -1367,6 +1373,7 @@ function sanitizeBranding(body) {
     socialWhatsapp:  sanitizeStr(body.socialWhatsapp, 500),
     socialTiktok:    sanitizeStr(body.socialTiktok, 500),
     socialYoutube:   sanitizeStr(body.socialYoutube, 500),
+    tablesEnabled:   Number(body.tablesEnabled || 0),
   };
 }
 
@@ -1376,6 +1383,7 @@ function sanitizeItem(it) {
     id:          sanitizeStr(it.id, 36) || crypto.randomUUID(),
     name:        sanitizeStr(it.name, 200),
     category:    sanitizeStr(it.category, 100) || 'General',
+    subcategory: sanitizeStr(it.subcategory, 100) || '',
     price:       Math.max(0, parseFloat(it.price) || 0),
     description: sanitizeStr(it.description, 500),
     tags:        Array.isArray(it.tags) ? it.tags.map(t => sanitizeStr(t, 50)).filter(Boolean).slice(0, 20) : [],
