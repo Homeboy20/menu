@@ -309,6 +309,49 @@ async function initDB() {
       );
     `);
 
+    // Migration: add tables_enabled column
+    await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS tables_enabled INTEGER NOT NULL DEFAULT 0`).catch(() => {});
+
+    // Migration: add rating column to menu_items
+    await client.query(`ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS rating REAL NOT NULL DEFAULT 0`).catch(() => {});
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS menu_tables (
+        id        SERIAL PRIMARY KEY,
+        menu_id   TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        label     TEXT NOT NULL DEFAULT '',
+        qr_code   TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_tables_menu ON menu_tables (menu_id)`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS table_alerts (
+        id         SERIAL PRIMARY KEY,
+        menu_id    TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        table_label TEXT NOT NULL,
+        message    TEXT NOT NULL DEFAULT 'Service requested',
+        status     TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_alerts_menu ON table_alerts (menu_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_alerts_status ON table_alerts (status)`);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS item_ratings (
+        id        SERIAL PRIMARY KEY,
+        item_id   TEXT NOT NULL REFERENCES menu_items(id) ON DELETE CASCADE,
+        menu_id   TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        rating    INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        ip_hash   TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ratings_item ON item_ratings (item_id)`);
+    await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_ratings_unique ON item_ratings (item_id, ip_hash)`);
+
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
     client.release();
@@ -427,6 +470,7 @@ function buildMenuResponse(menu, rawItems) {
     socialWhatsapp:  menu.social_whatsapp  || '',
     socialTiktok:    menu.social_tiktok    || '',
     socialYoutube:   menu.social_youtube   || '',
+    tablesEnabled:  menu.tables_enabled   || 0,
     createdAt:      menu.created_at,
     items: rawItems.map(it => ({
       id:          it.id,
@@ -437,6 +481,7 @@ function buildMenuResponse(menu, rawItems) {
       tags:        JSON.parse(it.tags || '[]'),
       size:        it.size || '',
       imageUrl:    it.image_url || '',
+      rating:      it.rating || 0,
     }))
   };
 }
@@ -451,8 +496,9 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
        show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
        phone, email, address, website,
        social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
+       tables_enabled,
        qr_version, qr_code, total_scans, created_at, updated_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31)`,
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32)`,
       [
         String(menuId),
         String(restaurantName),
@@ -480,6 +526,7 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
         String(branding.socialWhatsapp  || ''),
         String(branding.socialTiktok    || ''),
         String(branding.socialYoutube   || ''),
+        Number(branding.tablesEnabled   || 0),
         1,                            // qr_version
         String(qrCode || ''),         // qr_code
         0,                            // total_scans
@@ -491,8 +538,8 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, image_url, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        (id, menu_id, name, category, price, description, tags, size, image_url, rating, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
@@ -503,6 +550,7 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
           JSON.stringify(tags),
           String(item.size || ''),
           String(item.imageUrl || ''),
+          Number(item.rating || 0),
           item.sortOrder !== undefined ? Number(item.sortOrder) : i
         ]);
     }
@@ -524,8 +572,8 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       show_logo=$8, show_name=$9, header_layout=$10, text_color=$11, heading_color=$12, bg_color=$13, card_bg=$14, price_color=$15,
       phone=$16, email=$17, address=$18, website=$19,
       social_instagram=$20, social_facebook=$21, social_twitter=$22, social_whatsapp=$23, social_tiktok=$24, social_youtube=$25,
-      updated_at=$26
-      WHERE id=$27`,
+      tables_enabled=$26, updated_at=$27
+      WHERE id=$28`,
       [
         String(restaurantName),
         String(currency || 'USD'),
@@ -552,6 +600,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
         String(branding.socialWhatsapp  || ''),
         String(branding.socialTiktok    || ''),
         String(branding.socialYoutube   || ''),
+        Number(branding.tablesEnabled   || 0),
         new Date().toISOString(),
         String(menuId)
       ]);
@@ -561,8 +610,8 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       const item = items[i];
       const tags = Array.isArray(item.tags) ? item.tags : [];
       await client.query(`INSERT INTO menu_items
-        (id, menu_id, name, category, price, description, tags, size, image_url, sort_order)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        (id, menu_id, name, category, price, description, tags, size, image_url, rating, sort_order)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
         [
           String(item.id || crypto.randomUUID()),
           String(menuId),
@@ -573,6 +622,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
           JSON.stringify(tags),
           String(item.size || ''),
           String(item.imageUrl || ''),
+          Number(item.rating || 0),
           item.sortOrder !== undefined ? Number(item.sortOrder) : i
         ]);
     }
@@ -1331,6 +1381,7 @@ function sanitizeItem(it) {
     tags:        Array.isArray(it.tags) ? it.tags.map(t => sanitizeStr(t, 50)).filter(Boolean).slice(0, 20) : [],
     size:        sanitizeStr(it.size, 100),
     imageUrl:    sanitizeStr(it.imageUrl, 2000),
+    rating:      Math.max(0, Math.min(5, parseFloat(it.rating) || 0)),
   };
 }
 
@@ -1769,6 +1820,139 @@ app.delete('/api/qr-redirects/:id', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ── Table Management ──────────────────────────────────────────────────────────
+
+// GET /api/menus/:id/tables - List tables for a menu
+app.get('/api/menus/:id/tables', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM menu_tables WHERE menu_id = $1 ORDER BY id',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/menus/:id/tables - Create a table + generate its QR
+app.post('/api/menus/:id/tables', requireAuth, async (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const label = sanitizeStr(req.body.label, 100) || 'Table';
+    const menu = await dbGetMenu(menuId);
+    if (!menu) return res.status(404).json({ error: 'Menu not found.' });
+
+    const QRCode = require('qrcode');
+    const HOST = process.env.HOST || `http://localhost:${PORT}`;
+    const tableUrl = `${HOST}/menu.html?id=${menuId}&table=${encodeURIComponent(label)}`;
+    const qrCode = await QRCode.toDataURL(tableUrl, {
+      width: 512, margin: 2,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+
+    const { rows } = await pool.query(
+      `INSERT INTO menu_tables (menu_id, label, qr_code, created_at)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [menuId, label, qrCode, new Date().toISOString()]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/menus/:id/tables/:tableId - Delete a table
+app.delete('/api/menus/:id/tables/:tableId', requireAuth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM menu_tables WHERE id = $1 AND menu_id = $2',
+      [req.params.tableId, req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Table Alerts ──────────────────────────────────────────────────────────────
+
+// POST /api/menus/:id/alerts - Customer sends alert from table
+app.post('/api/menus/:id/alerts', async (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const tableLabel = sanitizeStr(req.body.table, 100);
+    const message = sanitizeStr(req.body.message, 300) || 'Service requested';
+    if (!tableLabel) return res.status(400).json({ error: 'Table label required.' });
+
+    // Check tables are enabled for this menu
+    const menu = await dbGetMenu(menuId);
+    if (!menu || !menu.tables_enabled) return res.status(403).json({ error: 'Table alerts not enabled.' });
+
+    const { rows } = await pool.query(
+      `INSERT INTO table_alerts (menu_id, table_label, message, status, created_at)
+       VALUES ($1, $2, $3, 'pending', $4) RETURNING *`,
+      [menuId, tableLabel, message, new Date().toISOString()]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/menus/:id/alerts - Admin views alerts
+app.get('/api/menus/:id/alerts', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM table_alerts WHERE menu_id = $1 ORDER BY created_at DESC LIMIT 100`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/alerts/:id/dismiss - Admin dismisses an alert
+app.put('/api/alerts/:id/dismiss', requireAuth, async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE table_alerts SET status = 'dismissed' WHERE id = $1`,
+      [req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Item Ratings ──────────────────────────────────────────────────────────────
+
+// POST /api/items/:itemId/rate - Customer rates an item
+app.post('/api/items/:itemId/rate', async (req, res) => {
+  try {
+    const itemId = req.params.itemId;
+    const rating = Math.max(1, Math.min(5, parseInt(req.body.rating) || 0));
+    if (!rating) return res.status(400).json({ error: 'Rating 1-5 required.' });
+
+    const rawIp = req.ip || req.connection.remoteAddress || '';
+    const ipHash = crypto.createHash('sha256').update(rawIp + 'rating-salt').digest('hex').slice(0, 16);
+
+    // Get the menu_id from menu_items
+    const itemRow = await pool.query('SELECT menu_id FROM menu_items WHERE id = $1', [itemId]);
+    if (!itemRow.rows.length) return res.status(404).json({ error: 'Item not found.' });
+    const menuId = itemRow.rows[0].menu_id;
+
+    // Upsert rating (one per IP per item)
+    await pool.query(
+      `INSERT INTO item_ratings (item_id, menu_id, rating, ip_hash, created_at)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (item_id, ip_hash) DO UPDATE SET rating = $3, created_at = $5`,
+      [itemId, menuId, rating, ipHash, new Date().toISOString()]
+    );
+
+    // Calculate new average
+    const avg = await pool.query(
+      'SELECT ROUND(AVG(rating)::numeric, 1) as avg, COUNT(*) as cnt FROM item_ratings WHERE item_id = $1',
+      [itemId]
+    );
+    const newAvg = parseFloat(avg.rows[0].avg) || 0;
+    const count = parseInt(avg.rows[0].cnt) || 0;
+
+    // Update denormalized rating on menu_items
+    await pool.query('UPDATE menu_items SET rating = $1 WHERE id = $2', [newAvg, itemId]);
+    menuCache.delete(menuId);
+
+    res.json({ avgRating: newAvg, ratingCount: count });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────

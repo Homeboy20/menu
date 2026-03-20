@@ -853,7 +853,69 @@ html[data-theme="dark"] #cart-sheet-handle { background: rgba(255,255,255,.15); 
 @media (min-width: 768px) {
   #cart-fab { bottom: 24px; right: 24px; }
 }
-</style>
+
+/* === STAR RATINGS === */
+.item-stars {
+  display: flex; align-items: center; gap: 2px;
+  margin-top: 4px;
+}
+.star-icon {
+  font-size: 13px; line-height: 1;
+  color: #d1c4a0;
+  font-variation-settings: 'FILL' 0;
+}
+.star-icon.filled {
+  color: var(--brand);
+  font-variation-settings: 'FILL' 1;
+}
+.star-score {
+  font-size: 11px; font-weight: 600; color: var(--text);
+  margin-left: 3px; opacity: .7;
+}
+/* Modal rating */
+#item-modal-stars { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+.modal-star-btn {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: #d1c4a0; line-height: 1;
+  font-variation-settings: 'FILL' 0;
+  transition: transform .1s;
+}
+.modal-star-btn.selected {
+  color: var(--brand);
+  font-variation-settings: 'FILL' 1;
+}
+.modal-star-btn:active { transform: scale(1.3); }
+#rate-feedback {
+  font-size: 12px; color: var(--text); opacity: .7; margin-top: 4px;
+  min-height: 16px;
+}
+
+/* === TABLE ALERT BANNER === */
+#table-banner {
+  display: none;
+  margin: 0 12px 4px;
+  padding: 10px 14px;
+  background: var(--brand); color: #121212;
+  border-radius: 12px; font-size: 13px; font-weight: 600;
+  align-items: center; gap: 8px;
+  position: sticky; top: calc(60px + var(--safe-t) + 2px); z-index: 40;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  animation: fadeUp .3s ease both;
+}
+#table-banner.visible { display: flex; }
+#table-banner-label { flex: 1; }
+#call-waiter-btn {
+  background: rgba(0,0,0,.2); border: none; border-radius: 8px;
+  padding: 5px 10px; font-size: 12px; font-weight: 700;
+  color: #121212; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 4px; white-space: nowrap;
+  transition: background .15s;
+}
+#call-waiter-btn:active { background: rgba(0,0,0,.35); }
+#waiter-sent-msg {
+  font-size: 11px; margin-top: 2px; display: none;
+  color: rgba(0,0,0,.6); text-align: center; width: 100%;
+}</style>
 </head>
 <body>
 <div id="app">
@@ -879,6 +941,17 @@ html[data-theme="dark"] #cart-sheet-handle { background: rgba(255,255,255,.15); 
 
   <!--  Contact / Social bar  -->
   <div id="contact-bar"></div>
+
+  <!-- Table banner (shown when ?table= param present and tablesEnabled) -->
+  <div id="table-banner">
+    <span class="material-symbols-outlined" style="font-size:18px;flex-shrink:0">table_restaurant</span>
+    <span id="table-banner-label">Table —</span>
+    <button id="call-waiter-btn" onclick="callWaiter()">
+      <span class="material-symbols-outlined" style="font-size:15px">notifications</span>
+      Call Waiter
+    </button>
+    <span id="waiter-sent-msg">✓ Staff notified!</span>
+  </div>
 
   <!--  Search drawer  -->
   <div id="search-drawer">
@@ -1083,6 +1156,7 @@ let userTheme = null;  // 'light' | 'dark' | null (follow server setting)
 let viewMode = localStorage.getItem('menuViewMode') || 'grid';
 let cart = [];
 let modalItem = null, modalQty = 1;
+let currentTableLabel = '';  // table from ?table= URL param
 
 //  XSS-safe escape 
 function esc(s) {
@@ -1122,7 +1196,9 @@ function toggleSearch() {
 
 //  Boot 
 (async () => {
-  const id = new URLSearchParams(location.search).get('id');
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  currentTableLabel = params.get('table') || '';
   if (!id) { showError('No menu ID provided in the URL.'); return; }
   showSkeleton();
   try {
@@ -1136,6 +1212,12 @@ function toggleSearch() {
     buildTabs();
     renderItems();
     setView(viewMode);
+    // Show table banner if table QR codes are enabled and we have a table param
+    if (currentTableLabel && data.tablesEnabled) {
+      const banner = document.getElementById('table-banner');
+      document.getElementById('table-banner-label').textContent = '\uD83D\uDCCD ' + currentTableLabel;
+      banner.classList.add('visible');
+    }
   } catch (err) { showError(err.message); }
 })();
 
@@ -1449,6 +1531,17 @@ function buildItem(item, c) {
   const size  = (item.size || '').trim();
   const tags  = Array.isArray(item.tags) ? item.tags : [];
   const img   = (item.imageUrl || '').trim();
+  const rating = parseFloat(item.rating) || 0;
+
+  // Build star strip (read-only, 1 decimal shown)
+  let starsHtml = '';
+  if (rating > 0) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      stars += '<span class="material-symbols-outlined star-icon' + (i <= Math.round(rating) ? ' filled' : '') + '" aria-hidden="true">star</span>';
+    }
+    starsHtml = '<div class="item-stars">' + stars + '<span class="star-score">' + rating.toFixed(1) + '</span></div>';
+  }
 
   return `
     <div class="item-row" onclick="openItemDetail(${idx})">
@@ -1462,6 +1555,7 @@ function buildItem(item, c) {
         ${desc ? `<div class="item-desc">${esc(desc)}</div>` : ''}
         ${size ? `<span class="item-size">${esc(size)}</span>` : ''}
         ${tags.length ? `<div class="item-tags">${tags.map(t => `<span class="tag-chip">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${starsHtml}
       </div>
     </div>`;
 }
@@ -1588,8 +1682,59 @@ function openItemDetail(idx) {
   tags.forEach(function(t) { metaHtml += '<span class="modal-tag">' + esc(t) + '</span>'; });
   document.getElementById('item-modal-meta').innerHTML = metaHtml;
   document.getElementById('qty-count').textContent = '1';
+
+  // Star rating UI
+  var existingStars = document.getElementById('item-modal-stars');
+  if (existingStars) existingStars.remove();
+  var rateFeedback = document.getElementById('rate-feedback');
+  if (rateFeedback) rateFeedback.remove();
+  var starsEl = document.createElement('div');
+  starsEl.id = 'item-modal-stars';
+  var currentRating = parseFloat(item.rating) || 0;
+  for (var s = 1; s <= 5; s++) {
+    var btn = document.createElement('button');
+    btn.className = 'modal-star-btn material-symbols-outlined' + (s <= Math.round(currentRating) ? ' selected' : '');
+    btn.dataset.star = s;
+    btn.textContent = 'star';
+    btn.setAttribute('aria-label', s + ' star');
+    btn.addEventListener('click', (function(star) {
+      return function(e) { e.stopPropagation(); submitRating(star); };
+    })(s));
+    starsEl.appendChild(btn);
+  }
+  var feedbackEl = document.createElement('div');
+  feedbackEl.id = 'rate-feedback';
+  feedbackEl.textContent = currentRating > 0 ? 'Avg: ' + currentRating.toFixed(1) + ' ★' : 'Tap to rate';
+  var modalBody = document.getElementById('item-modal-body');
+  var priceEl = document.getElementById('item-modal-price');
+  modalBody.insertBefore(feedbackEl, priceEl);
+  modalBody.insertBefore(starsEl, feedbackEl);
+
   document.getElementById('item-modal-overlay').classList.add('open');
   document.getElementById('item-modal').classList.add('open');
+}
+
+async function submitRating(stars) {
+  if (!modalItem) return;
+  var feedbackEl = document.getElementById('rate-feedback');
+  try {
+    var res = await fetch('/api/items/' + encodeURIComponent(modalItem.id) + '/rate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: stars }),
+    });
+    var d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Failed');
+    // Update local data and star UI
+    allItems[modalItem._idx].rating = d.avgRating;
+    modalItem.rating = d.avgRating;
+    document.querySelectorAll('#item-modal-stars .modal-star-btn').forEach(function(btn) {
+      btn.classList.toggle('selected', parseInt(btn.dataset.star) <= stars);
+    });
+    if (feedbackEl) feedbackEl.textContent = 'Avg: ' + d.avgRating.toFixed(1) + ' ★  (' + d.ratingCount + ' votes)';
+  } catch (err) {
+    if (feedbackEl) feedbackEl.textContent = 'Could not submit rating.';
+  }
 }
 
 function closeItemDetail() {
@@ -1705,12 +1850,37 @@ function placeOrder() {
   var total = 0;
   cart.forEach(function(c) { total += (parseFloat(c.price) || 0) * c.qty; });
   var rname = (menuData && menuData.restaurantName) || '';
-  var msg = (rname ? 'Order from ' + rname + ':\n' : 'Order:\n') + lines.join('\n') + '\n\nTotal: ' + menuCurrency + total.toFixed(2);
+  var tableNote = currentTableLabel ? '\nTable: ' + currentTableLabel : '';
+  var msg = (rname ? 'Order from ' + rname + ':\n' : 'Order:\n') + lines.join('\n') + tableNote + '\n\nTotal: ' + menuCurrency + total.toFixed(2);
   var phone = menuData && menuData.phone ? menuData.phone.replace(/[^\d+]/g, '') : '';
   if (phone) {
     window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
   } else {
     alert(msg);
+  }
+}
+
+async function callWaiter() {
+  if (!menuData || !currentTableLabel) return;
+  var btn = document.getElementById('call-waiter-btn');
+  var sentMsg = document.getElementById('waiter-sent-msg');
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/menus/' + encodeURIComponent(menuData.id) + '/alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table: currentTableLabel, message: 'Service requested at ' + currentTableLabel }),
+    });
+    if (!res.ok) throw new Error('Failed');
+    btn.style.display = 'none';
+    sentMsg.style.display = 'block';
+    setTimeout(function() {
+      btn.style.display = '';
+      sentMsg.style.display = 'none';
+      btn.disabled = false;
+    }, 8000);
+  } catch (_) {
+    btn.disabled = false;
   }
 }
 </script>
