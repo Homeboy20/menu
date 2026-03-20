@@ -1137,7 +1137,7 @@ function showToast(msg) {
 }
 
 /* ─── STATE ─── */
-let allItems = [], activeCategory = 'All', activeSubcategory = 'All';
+let allItems = [], activeCategory = '', activeSubcategory = 'All';
 let menuCurrency = '$', searchOpen = false;
 let menuData = null, userTheme = null, viewMode = localStorage.getItem('menuViewMode') || 'list';
 let cart = [], modalItem = null, modalQty = 1;
@@ -1354,11 +1354,12 @@ function buildContactBar(data) {
 function buildTabs() {
   const cats = [...new Set(allItems.map(it => it.category || 'Other'))];
   if (!cats.length) return;
-  const allCount = allItems.length;
-  let html = `<button onclick="setCategory('All')" data-cat="All" class="tab-pill ${activeCategory==='All'?'tab-active':'tab-inactive'}">
-    <span class="material-symbols-outlined tab-icon">restaurant</span>All
-    <span class="tab-count">${allCount}</span></button>`;
-  html += cats.map(c => {
+  // Set first category as default if not set or was 'All'
+  if (!activeCategory || activeCategory === 'All' || !cats.includes(activeCategory)) {
+    activeCategory = cats[0];
+    activeSubcategory = 'All';
+  }
+  const html = cats.map(c => {
     const on = c === activeCategory;
     const cnt = allItems.filter(it => (it.category||'Other') === c).length;
     return `<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}" class="tab-pill ${on?'tab-active':'tab-inactive'}">
@@ -1385,7 +1386,6 @@ function setCategory(cat) {
 
 function buildSubcatPills() {
   const sd = document.getElementById('subcat-tabs');
-  if (activeCategory === 'All') { sd.classList.remove('visible'); return; }
   const catItems = allItems.filter(it => (it.category||'Other') === activeCategory);
   const subs = [...new Set(catItems.map(it => it.subcategory||'').filter(Boolean))];
   if (!subs.length) { sd.classList.remove('visible'); return; }
@@ -1409,7 +1409,7 @@ function renderItems() {
   const filtered = [];
   allItems.forEach((it, i) => {
     const cat = it.category||'Other', sub = it.subcategory||'';
-    const inCat = activeCategory==='All' || cat===activeCategory;
+    const inCat = cat===activeCategory;
     const inSub = activeSubcategory==='All' || sub===activeSubcategory;
     const inQ = !q || (it.name||'').toLowerCase().includes(q)
               || (it.description||'').toLowerCase().includes(q)
@@ -1531,9 +1531,7 @@ function updateNavActive(tab) {
 function openCatSheet() {
   const cats = [...new Set(allItems.map(it => it.category||'Other'))];
   const list = document.getElementById('cat-sheet-list');
-  let html = `<button class="cat-sheet-item${activeCategory==='All'?' cs-active':''}" onclick="selectSheetCat('All')">
-    <span class="cs-dot" style="background:var(--brand)"></span><span class="cs-name">All</span><span class="cs-count">${allItems.length}</span></button>`;
-  html += cats.map(c => {
+  const html = cats.map(c => {
     const col = catColor(c); const cnt = allItems.filter(it=>(it.category||'Other')===c).length;
     return `<button class="cat-sheet-item${c===activeCategory?' cs-active':''}" onclick="selectSheetCat('${esc(c)}')">
       <span class="cs-dot" style="background:${col?col.hex:'var(--brand)'}"></span>
