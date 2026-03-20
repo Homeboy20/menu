@@ -790,6 +790,27 @@
         </div>
         <div id="alerts-list"><p class="text-slate-500 text-sm">No alerts.</p></div>
       </div>
+
+      <!-- Orders panel -->
+      <div id="orders-panel" class="hidden bg-surface rounded-2xl border border-primary/10 p-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-emerald-400">receipt_long</span>
+            Orders
+          </h3>
+          <div class="flex items-center gap-2">
+            <select id="orders-status-filter" onchange="loadOrders()"
+                    class="text-xs bg-bg-dark border border-primary/20 rounded-lg px-2 py-1 text-slate-300 outline-none">
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button onclick="loadOrders()" class="text-primary text-xs hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">refresh</span> Refresh
+            </button>
+          </div>
+        </div>
+        <div id="orders-list"><p class="text-slate-500 text-sm">No orders.</p></div>
+      </div>
     </section>
 
     <!-- ═══════════════════ STEP 5 – SETTINGS ═══════════════════ -->
@@ -2641,12 +2662,14 @@ async function loadTablesForMenu(menuId) {
   const addForm  = document.getElementById('tables-add-form');
   const tablesList = document.getElementById('tables-list');
   const alertsPanel = document.getElementById('alerts-panel');
+  const ordersPanel = document.getElementById('orders-panel');
 
   if (!menuId) {
     notice.classList.add('hidden');
     addForm.classList.add('hidden');
     tablesList.classList.add('hidden');
     alertsPanel.classList.add('hidden');
+    ordersPanel.classList.add('hidden');
     return;
   }
 
@@ -2660,6 +2683,7 @@ async function loadTablesForMenu(menuId) {
       addForm.classList.add('hidden');
       tablesList.classList.add('hidden');
       alertsPanel.classList.add('hidden');
+      ordersPanel.classList.add('hidden');
       return;
     }
 
@@ -2667,9 +2691,11 @@ async function loadTablesForMenu(menuId) {
     addForm.classList.remove('hidden');
     tablesList.classList.remove('hidden');
     alertsPanel.classList.remove('hidden');
+    ordersPanel.classList.remove('hidden');
 
     await renderTables();
     await loadAlerts();
+    await loadOrders();
   } catch (err) {
     alert('Could not load menu: ' + err.message);
   }
@@ -2775,6 +2801,116 @@ async function dismissAlert(alertId) {
     knownAlertIds.delete(alertId);
     await loadAlerts();
     pollAlerts();
+  } catch (err) { alert(err.message); }
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────────
+const CURR_MAP = {USD:'$',EUR:'€',GBP:'£',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'₹',JPY:'¥',CNY:'¥',NGN:'₦',GHS:'₵',KES:'KSh',ZAR:'R',EGP:'E£',MAD:'MAD',TRY:'₺',MYR:'RM',SGD:'S$',PHP:'₱',IDR:'Rp',THB:'฿',KRW:'₩',PKR:'₨',BDT:'৳'};
+
+async function loadOrders() {
+  if (!tablesMenuId) return;
+  const el = document.getElementById('orders-list');
+  el.innerHTML = '<p class="text-slate-500 text-sm">Loading…</p>';
+  const status = document.getElementById('orders-status-filter').value || 'pending';
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: { 'X-Admin-Token': sessionToken } });
+    const rows = await res.json();
+    if (!rows.length) {
+      el.innerHTML = '<p class="text-slate-500 text-sm">No ' + esc(status) + ' orders.</p>';
+      return;
+    }
+    el.innerHTML = rows.map(r => {
+      const items = typeof r.items === 'string' ? JSON.parse(r.items) : (r.items || []);
+      const sym = CURR_MAP[r.currency] || r.currency + ' ';
+      const itemLines = items.map(it => '<span class="text-slate-400">' + esc(it.name) + ' x' + it.qty + ' &mdash; ' + sym + (it.price * it.qty).toFixed(2) + '</span>').join('<br/>');
+      return `
+        <div class="bg-bg-dark/50 border border-primary/10 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-semibold text-slate-200">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : ''}</span>
+              <span class="text-xs text-slate-600 ml-2">${new Date(r.created_at).toLocaleString()}</span>
+            </div>
+            <span class="text-xs font-bold ${status === 'pending' ? 'text-amber-400' : 'text-emerald-400'}">${esc(status.toUpperCase())}</span>
+          </div>
+          <div class="text-xs leading-relaxed">${itemLines}</div>
+          <div class="flex items-center justify-between pt-1 border-t border-primary/10">
+            <span class="text-sm font-bold text-slate-100">Total: ${sym}${parseFloat(r.total).toFixed(2)}</span>
+            <div class="flex gap-2">
+              <button onclick="printOrderBill(${r.id})" class="text-xs text-primary hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">print</span> Print Bill
+              </button>
+              ${status === 'pending' ? `<button onclick="completeOrder(${r.id})" class="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span> Complete
+              </button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (err) {
+    el.innerHTML = '<p class="text-red-400 text-sm">' + err.message + '</p>';
+  }
+}
+
+async function completeOrder(orderId) {
+  try {
+    await fetch('/api/orders/' + orderId + '/status', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      body: JSON.stringify({ status: 'completed' }),
+    });
+    await loadOrders();
+  } catch (err) { alert(err.message); }
+}
+
+async function printOrderBill(orderId) {
+  // Fetch all orders for this menu and find the one we want
+  try {
+    const allRes = await Promise.all([
+      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=pending', { headers: { 'X-Admin-Token': sessionToken } }),
+      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=completed', { headers: { 'X-Admin-Token': sessionToken } }),
+    ]);
+    const all = [...await allRes[0].json(), ...await allRes[1].json()];
+    const order = all.find(o => o.id === orderId);
+    if (!order) { alert('Order not found'); return; }
+
+    const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+    const sym = CURR_MAP[order.currency] || order.currency + ' ';
+    const rname = document.querySelector('#tables-menu-select option:checked')?.textContent?.split(' (')[0] || 'Restaurant';
+    const tableNote = order.table_label ? 'Table: ' + esc(order.table_label) : '';
+    const dateStr = new Date(order.created_at).toLocaleString();
+    let itemsHtml = '';
+    items.forEach(function(it) {
+      itemsHtml += '<tr><td style="text-align:left">' + esc(it.name) + '</td><td style="text-align:center">' + it.qty + '</td><td style="text-align:right">' + sym + (it.price * it.qty).toFixed(2) + '</td></tr>';
+    });
+    const html = '<!DOCTYPE html><html><head><title>Receipt #' + order.id + '</title>' +
+      '<style>' +
+      '*{margin:0;padding:0;box-sizing:border-box}' +
+      'body{font-family:"Courier New",monospace;width:280px;margin:0 auto;padding:12px;font-size:12px;color:#000}' +
+      '.center{text-align:center}' +
+      '.bold{font-weight:bold}' +
+      '.line{border-top:1px dashed #000;margin:8px 0}' +
+      'table{width:100%;border-collapse:collapse}' +
+      'th,td{padding:3px 0;font-size:12px}' +
+      'th{border-bottom:1px solid #000;text-align:left}' +
+      '.total{font-size:14px;font-weight:bold;display:flex;justify-content:space-between}' +
+      '@media print{@page{size:80mm auto;margin:2mm}body{width:auto;padding:0}}' +
+      '</style></head><body>' +
+      '<div class="center bold" style="font-size:16px">' + esc(rname) + '</div>' +
+      '<div class="center" style="margin-top:2px;font-size:11px">Order #' + order.id + '</div>' +
+      (tableNote ? '<div class="center" style="margin-top:4px">' + tableNote + '</div>' : '') +
+      '<div class="center" style="margin-top:2px;font-size:11px">' + dateStr + '</div>' +
+      '<div class="line"></div>' +
+      '<table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Price</th></tr></thead>' +
+      '<tbody>' + itemsHtml + '</tbody></table>' +
+      '<div class="line"></div>' +
+      '<div class="total"><span>TOTAL</span><span>' + sym + parseFloat(order.total).toFixed(2) + '</span></div>' +
+      '<div class="line"></div>' +
+      '<div class="center" style="margin-top:10px">Thank you!</div>' +
+      '<div class="center" style="font-size:10px;color:#666;margin-top:6px">Powered by MenuAdmin</div>' +
+      '<script>window.onload=function(){window.print()}<\/script>' +
+      '</body></html>';
+    const w = window.open('', '_blank', 'width=320,height=600');
+    if (w) { w.document.write(html); w.document.close(); }
   } catch (err) { alert(err.message); }
 }
 

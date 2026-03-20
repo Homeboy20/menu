@@ -355,6 +355,22 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_ratings_item ON item_ratings (item_id)`);
     await client.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_ratings_unique ON item_ratings (item_id, ip_hash)`);
 
+    // Orders table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id         SERIAL PRIMARY KEY,
+        menu_id    TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+        table_label TEXT NOT NULL DEFAULT '',
+        items      JSONB NOT NULL DEFAULT '[]',
+        total      REAL NOT NULL DEFAULT 0,
+        currency   TEXT NOT NULL DEFAULT 'USD',
+        status     TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_menu ON orders (menu_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)`);
+
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
     client.release();
@@ -1932,6 +1948,59 @@ app.get('/api/alerts/pending', requireAuth, async (req, res) => {
        ORDER BY ta.created_at DESC LIMIT 50`
     );
     res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+
+// POST /api/menus/:id/orders - Customer submits an order
+app.post('/api/menus/:id/orders', async (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const menu = await dbGetMenu(menuId);
+    if (!menu) return res.status(404).json({ error: 'Menu not found.' });
+
+    const items = Array.isArray(req.body.items) ? req.body.items.map(it => ({
+      name: sanitizeStr(it.name, 200),
+      qty: Math.max(1, Math.min(100, parseInt(it.qty) || 1)),
+      price: Math.max(0, parseFloat(it.price) || 0),
+    })) : [];
+    if (!items.length) return res.status(400).json({ error: 'No items.' });
+
+    const tableLabel = sanitizeStr(req.body.table, 100) || '';
+    const total = items.reduce((s, it) => s + it.price * it.qty, 0);
+    const currency = sanitizeStr(req.body.currency, 10) || menu.currency || 'USD';
+
+    const { rows } = await pool.query(
+      `INSERT INTO orders (menu_id, table_label, items, total, currency, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, 'pending', $6) RETURNING *`,
+      [menuId, tableLabel, JSON.stringify(items), total, currency, new Date().toISOString()]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/menus/:id/orders - Admin views orders
+app.get('/api/menus/:id/orders', requireAuth, async (req, res) => {
+  try {
+    const status = req.query.status || 'pending';
+    const { rows } = await pool.query(
+      `SELECT * FROM orders WHERE menu_id = $1 AND status = $2 ORDER BY created_at DESC LIMIT 100`,
+      [req.params.id, status]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/orders/:id/status - Admin updates order status
+app.put('/api/orders/:id/status', requireAuth, async (req, res) => {
+  try {
+    const newStatus = sanitizeStr(req.body.status, 20) || 'completed';
+    await pool.query(
+      `UPDATE orders SET status = $1 WHERE id = $2`,
+      [newStatus, req.params.id]
+    );
+    res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
