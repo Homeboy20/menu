@@ -1107,7 +1107,8 @@ function parseCsvFile(filePath) {
             'item_name', 'food name', 'title', 'label');
           if (!name) continue;
 
-          const catRaw      = get(row, 'category', 'cat', 'section', 'type', 'course', 'group', 'subcategory');
+          const catRaw      = get(row, 'category', 'cat', 'section', 'type', 'course', 'group');
+          const subcatRaw   = get(row, 'subcategory', 'sub category', 'sub_category', 'subcat', 'sub');
           const rawPriceStr = get(row, 'price', 'cost', 'amount', 'rate', 'unit price', 'selling price', 'sell price', 'mrp');
           rawPrices.push(rawPriceStr);
           const price = parseFloat((rawPriceStr || '0').replace(/[^0-9.]/g, '')) || 0;
@@ -1124,6 +1125,7 @@ function parseCsvFile(filePath) {
             id:          String(crypto.randomUUID()),                    // TEXT
             name:        String(name),                                   // TEXT
             category:    String(catRaw ? toTitleCase(catRaw) : 'General'), // TEXT
+            subcategory: String(subcatRaw ? toTitleCase(subcatRaw) : ''), // TEXT
             price:       Number(price) || 0,                             // REAL (number)
             description: String(get(row, 'description', 'desc', 'details', 'notes', 'ingredients') || ''), // TEXT
             tags:        tags,                                           // Array of strings (will be JSON.stringify'd)
@@ -1186,8 +1188,8 @@ async function parseXlsxFile(filePath) {
     const NAME_KEYS  = ['name','item','item name','item_name','dish','dish name','food',
                          'food item','food name','product','product name','menu item',
                          'title','label','menu_item'];
-    const CAT_KEYS   = ['category','cat','section','type','course','group',
-                         'subcategory','sub category','sub-category','division'];
+    const CAT_KEYS   = ['category','cat','section','type','course','group','division'];
+    const SUBCAT_KEYS= ['subcategory','sub category','sub-category','sub_category','subcat','sub'];
     const PRICE_KEYS = ['price','cost','amount','rate','unit price','selling price',
                          'sell price','mrp','unit_price','item price','list price',
                          'menu price','unit cost','selling_price','price each','sale price'];
@@ -1211,7 +1213,7 @@ async function parseXlsxFile(filePath) {
 
       // ── Step 1: find header row ─────────────────────────────────────────
       let headerIdx = -1;
-      let colMap    = { name: -1, category: -1, price: -1, description: -1, tags: -1, size: -1 };
+      let colMap    = { name: -1, category: -1, subcategory: -1, price: -1, description: -1, tags: -1, size: -1 };
 
       for (let ri = 0; ri < Math.min(10, rawRows.length); ri++) {
         const lrow      = rawRows[ri].map(c => c.toLowerCase());
@@ -1226,6 +1228,8 @@ async function parseXlsxFile(filePath) {
               colMap.name = ci;
             if (colMap.category < 0 && (CAT_KEYS.includes(cell) || cell.includes('categor') || cell.includes('section') || cell.includes('group')))
               colMap.category = ci;
+            if (colMap.subcategory < 0 && (SUBCAT_KEYS.includes(cell) || cell.includes('subcategor')))
+              colMap.subcategory = ci;
             if (colMap.price < 0 && (PRICE_KEYS.includes(cc) || cell.includes('price') || cell.includes('cost')))
               colMap.price = ci;
             if (colMap.description < 0 && (DESC_KEYS.includes(cell) || cell.includes('descri') || cell.includes('note') || cell.includes('ingred')))
@@ -1286,11 +1290,12 @@ async function parseXlsxFile(filePath) {
         const nameVal = (colMap.name >= 0 ? row[colMap.name] : row[0]) || '';
         if (nameVal.length < 2 || !isPrintable(nameVal)) continue;
 
-        const catRaw   = colMap.category    >= 0 ? row[colMap.category]    : '';
-        const priceRaw = colMap.price       >= 0 ? row[colMap.price]       : '';
-        const descRaw  = colMap.description >= 0 ? row[colMap.description] : '';
-        const tagsRaw  = colMap.tags        >= 0 ? row[colMap.tags]        : '';
-        const sizeRaw  = colMap.size        >= 0 ? row[colMap.size]        : '';
+        const catRaw    = colMap.category    >= 0 ? row[colMap.category]    : '';
+        const subcatRaw = colMap.subcategory >= 0 ? row[colMap.subcategory] : '';
+        const priceRaw  = colMap.price       >= 0 ? row[colMap.price]       : '';
+        const descRaw   = colMap.description >= 0 ? row[colMap.description] : '';
+        const tagsRaw   = colMap.tags        >= 0 ? row[colMap.tags]        : '';
+        const sizeRaw   = colMap.size        >= 0 ? row[colMap.size]        : '';
 
         const price = parseFloat((priceRaw || '0').replace(/[^0-9.]/g, '')) || 0;
         rawPrices.push(priceRaw);
@@ -1299,6 +1304,7 @@ async function parseXlsxFile(filePath) {
           id:          crypto.randomUUID(),
           name:        nameVal,
           category:    catRaw ? toTitleCase(catRaw) : currentCategory,
+          subcategory: subcatRaw ? toTitleCase(subcatRaw) : '',
           price,
           description: isPrintable(descRaw) ? descRaw : '',
           tags:        tagsRaw.split(/[,;|]/).map(t => t.trim()).filter(Boolean),
