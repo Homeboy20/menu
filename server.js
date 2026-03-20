@@ -1922,6 +1922,19 @@ app.put('/api/alerts/:id/dismiss', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// GET /api/alerts/pending - All pending alerts across all menus (for polling)
+app.get('/api/alerts/pending', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT ta.*, m.restaurant_name FROM table_alerts ta
+       LEFT JOIN menus m ON m.id = ta.menu_id
+       WHERE ta.status = 'pending'
+       ORDER BY ta.created_at DESC LIMIT 50`
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── Item Ratings ──────────────────────────────────────────────────────────────
 
 // POST /api/items/:itemId/rate - Customer rates an item
