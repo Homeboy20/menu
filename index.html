@@ -3,57 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RestOrder - Transform Your Restaurant with Digital Menus</title>
-  <meta name="description" content="Increase sales by 23% with beautiful, contactless digital menus. QR code access, real-time updates, and complete menu management. Get started in minutes.">
-  <meta name="keywords" content="digital menu, restaurant technology, QR code menu, contactless dining, menu management, restaurant software">
-  <meta name="author" content="RestOrder">
-  
-  <!-- Open Graph / Social Media -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="RestOrder - Digital Menu Revolution for Restaurants">
-  <meta property="og:description" content="Join 10,000+ restaurants increasing sales with our digital menu platform. Easy setup, beautiful design, proven results.">
-  <meta property="og:url" content="https://restorder.online">
-  <meta property="og:image" content="https://restorder.online/og-image.jpg">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
-  
-  <!-- Preconnect to external resources -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator && location.protocol === 'https:') {
-      navigator.serviceWorker.register('/sw.js')
-        .then(() => console.log('✅ SW registered'))
-        .catch(e => console.log('❌ SW failed:', e.message));
-    }
-  </script>
+  <title>RestOrder - Professional Digital Menu Platform for Restaurants</title>
+  <meta name="description" content="Complete digital menu solution with QR codes, real-time updates, analytics, table management, and orders. Boost sales by 30%. Start free trial today.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https="fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
   
   <style>
-    /* Critical CSS for above-the-fold content */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
-      line-height: 1.6;
-      color: #1a1a1a;
-      background: #ffffff;
+    :root {
+      --primary: #c2410c;
+      --primary-dark: #9a3412;
+      --primary-light: #ea580c;
+      --accent: #4d7c5f;
+      --bg: #fafaf9;
+      --text: #1c1917;
+      --text-light: #78716c;
+      --border: #e7e5e4;
+      --surface: #ffffff;
+      --gradient-1: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      --gradient-2: linear-gradient(135deg, #4d7c5f 0%, #6aaa82 100%);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+      --shadow-xl: 0 20px 50px rgba(0,0,0,0.15);
     }
     
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    .container-wide { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    .container-wide { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
     
     /* Header */
     header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0,0,0,0.1);
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       z-index: 1000;
       transition: all 0.3s ease;
     }
@@ -62,68 +59,78 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 0;
+      padding: 16px 0;
     }
     
     .logo {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #222;
+      gap: 10px;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--primary);
       text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;filter: drop-shadow(0 2px 8px rgba(194,65,12,0.3));
     }
     
     .nav-links {
       display: flex;
-      gap: 2rem;
+      gap: 32px;
       list-style: none;
       align-items: center;
     }
     
     .nav-links a {
-      color: #555;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-      padding: 0.5rem 0;
-    }
-    
-    .nav-links a:hover { color: #007bff; }
-    
-    .cta-header {
-      background: #007bff;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
+      color: var(--text-light);
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+      font-size: 15px;
+      transition: color 0.2s;
     }
     
-    .cta-header:hover {
-      background: #0056b3;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+    .nav-links a:hover { color: var(--primary); }
+    
+    .btn-nav {
+      background: var(--gradient-1);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(194,65,12,0.25);
     }
     
-    /* Mobile menu */
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(194,65,12,0.35);
+    }
+    
     .mobile-menu-btn {
       display: none;
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 28px;
       cursor: pointer;
-      color: #222;
+      color: var(--text);
     }
     
-    /* Hero Section */
+    /* Hero */
     .hero {
-      background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
-      padding: 120px 0 80px;
-      text-align: center;
+      padding: 140px 0 100px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fecaca 100%);
       position: relative;
       overflow: hidden;
     }
@@ -135,304 +142,667 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23007bff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-      opacity: 0.3;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="%23c2410c" opacity="0.15"/></svg>');
+      background-size: 40px 40px;
+      opacity: 0.4;
     }
     
     .hero-content {
       position: relative;
       z-index: 2;
+      text-align: center;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.9);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
     }
     
     .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-size: clamp(42px, 6vw, 72px);
       font-weight: 900;
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #222 0%, #007bff 100%);
+      line-height: 1.1;
+      margin-bottom: 24px;
+      letter-spacing: -1.5px;
+      color: var(--text);
+    }
+    
+    .hero h1 .highlight {
+      background: var(--gradient-1);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     
     .hero .subtitle {
-      font-size: 1.25rem;
-      color: #555;
-      margin-bottom: 2rem;
-      max-width: 600px;
+      font-size: 20px;
+      color: var(--text-light);
+      margin-bottom: 40px;
+      line-height: 1.6;
+      max-width: 680px;
       margin-left: auto;
       margin-right: auto;
+      font-weight: 500;
     }
     
-    .hero-stats {
+    .hero-cta {
       display: flex;
+      gap: 16px;
       justify-content: center;
-      gap: 2rem;
-      margin: 3rem 0;
       flex-wrap: wrap;
-    }
-    
-    .stat-item {
-      text-align: center;
-      padding: 1rem;
-      background: rgba(255,255,255,0.8);
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-    }
-    
-    .stat-number {
-      display: block;
-      font-size: 2rem;
-      font-weight: 800;
-      color: #007bff;
-    }
-    
-    .stat-label {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 0.25rem;
-    }
-    
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-      flex-wrap: wrap;
+      margin-bottom: 48px;
     }
     
     .btn-primary, .btn-secondary {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 2rem;
-      border-radius: 10px;
+      gap: 10px;
+      padding: 16px 32px;
+      border-radius: 12px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 1.1rem;
-      transition: all 0.3s ease;
+      font-weight: 700;
+      font-size: 16px;
+      transition: all 0.3s;
       border: none;
       cursor: pointer;
     }
     
     .btn-primary {
-      background: #007bff;
+      background: var(--gradient-1);
       color: white;
-      box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+      box-shadow: 0 6px 24px rgba(194,65,12,0.3);
     }
     
     .btn-primary:hover {
-      background: #0056b3;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(194,65,12,0.4);
     }
     
     .btn-secondary {
       background: white;
-      color: #007bff;
-      border: 2px solid #007bff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      box-shadow: var(--shadow-md);
     }
     
     .btn-secondary:hover {
-      background: #007bff;
+      background: var(--primary);
       color: white;
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
     }
     
-    /* Problem-Solution Section */
-    .problem-solution {
-      padding: 80px 0;
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .stat-card {
+      background: rgba(255,255,255,0.9);
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+    }
+    
+    .stat-number {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--primary);
+      display: block;
+      margin-bottom: 4px;
+      letter-spacing: -1px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    
+    /* Trust Bar */
+    .trust-bar {
       background: white;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .trust-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .trust-text {
+      font-size: 14px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    
+    .trust-logos {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    
+    /* Section Styles */
+    section {
+      padding: 100px 0;
     }
     
     .section-header {
       text-align: center;
-      margin-bottom: 4rem;
+      max-width: 720px;
+      margin: 0 auto 64px;
+    }
+    
+    .section-label {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
     }
     
     .section-title {
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 800;
-      margin-bottom: 1rem;
-      color: #222;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 900;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+      color: var(--text);
+      line-height: 1.2;
     }
     
     .section-subtitle {
-      font-size: 1.2rem;
-      color: #666;
-      max-width: 600px;
-      margin: 0 auto;
+      font-size: 18px;
+      color: var(--text-light);
+      line-height: 1.7;
+      font-weight: 500;
     }
     
-    .problem-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin: 3rem 0;
-    }
-    
-    .problem-card {
-      padding: 2rem;
-      background: #f8f9fa;
-      border-radius: 16px;
-      text-align: center;
-      border: 1px solid #e9ecef;
-    }
-    
-    .problem-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-    
-    .problem-card h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #dc3545;
-    }
-    
-    .solution-card {
-      padding: 2rem;
-      background: white;
-      border-radius: 16px;
-      text-align: center;
-      border: 2px solid #007bff;
-      box-shadow: 0 8px 32px rgba(0,123,255,0.1);
-    }
-    
-    .solution-card h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: #007bff;
-    }
-    
-    /* Features Section */
-    .features {
-      padding: 80px 0;
-      background: #f8f9ff;
-    }
-    
+    /* Features Grid */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
+      gap: 32px;
     }
     
     .feature-card {
       background: white;
-      padding: 2.5rem 2rem;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      border: 1px solid rgba(0,123,255,0.1);
-    }
-    
-    .feature-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(0,123,255,0.15);
-      border-color: #007bff;
-    }
-    
-    .feature-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #007bff, #0056b3);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      font-size: 2rem;
-      color: white;
-    }
-    
-    .feature-card h3 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: #222;
-    }
-    
-    .feature-card p {
-      color: #666;
-      line-height: 1.7;
-    }
-    
-    /* Social Proof Ticker */
-    .social-proof {
-      background: #007bff;
-      color: white;
-      padding: 1.5rem 0;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    
-    .ticker {
-      display: inline-block;
-      animation: scroll 30s linear infinite;
-    }
-    
-    @keyframes scroll {
-      0% { transform: translate3d(100%, 0, 0); }
-      100% { transform: translate3d(-100%, 0, 0); }
-    }
-    
-    /* Demo Section */
-    .demo {
-      padding: 80px 0;
-      background: white;
-    }
-    
-    .demo-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-    
-    .demo-content h2 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      color: #222;
-    }
-    
-    .demo-preview {
-      background: #f8f9fa;
+      padding: 40px 32px;
       border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+      border: 1px solid var(--border);
       position: relative;
       overflow: hidden;
     }
     
-    /* Responsive Design */
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-1);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+    
+    .feature-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--gradient-1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 32px;
+      box-shadow: 0 4px 16px rgba(194,65,12,0.25);
+    }
+    
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    
+    .feature-card p {
+      color: var(--text-light);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    
+    .feature-badge {
+      display: inline-block;
+      background: rgba(194,65,12,0.1);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    
+    /* Pricing */
+    .pricing {
+      background: linear-gradient(180deg, white 0%, #fafaf9 100%);
+    }
+    
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    
+    .pricing-card {
+      background: white;
+      padding: 48px 40px;
+      border-radius: 24px;
+      box-shadow: var(--shadow-md);
+      border: 2px solid var(--border);
+      position: relative;
+      transition: all 0.3s;
+    }
+    
+    .pricing-card.popular {
+      border-color: var(--primary);
+      box-shadow: 0 12px 40px rgba(194,65,12,0.2);
+      transform: scale(1.05);
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .pricing-card.popular:hover {
+      transform: translateY(-8px) scale(1.07);
+    }
+    
+    .popular-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gradient-1);
+      color: white;
+      padding: 6px 24px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .plan-name {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    
+    .plan-description {
+      color: var(--text-light);
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+    
+    .plan-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .price-currency {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .price-amount {
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    
+    .price-period {
+      font-size: 16px;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    
+    .plan-subtitle {
+      color: var(--text-light);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+    
+    .plan-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+    
+    .plan-features li {
+      padding: 12px 0;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+    }
+    
+    .plan-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .plan-cta {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+    
+    .plan-cta.primary {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: 0 6px 24px rgba(194,65,12,0.3);
+    }
+    
+    .plan-cta.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(194,65,12,0.4);
+    }
+    
+    .plan-cta.secondary {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    
+    .plan-cta.secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* Screenshot Section */
+    .screenshots {
+      background: white;
+    }
+    
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+    
+    .screenshot-card {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s;
+    }
+    
+    .screenshot-card:hover {
+      transform: scale(1.05);
+    }
+    
+    .screenshot-card img {
+      width: 100%;
+      display: block;
+    }
+    
+    /* Testimonials */
+    .testimonials {
+      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    }
+    
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 32px;
+    }
+    
+    .testimonial-card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .stars {
+      color: #f59e0b;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .testimonial-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .author-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--gradient-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 20px;
+    }
+    
+    .author-info h4 {
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    
+    .author-info p {
+      font-size: 14px;
+      color: var(--text-light);
+    }
+    
+    /* CTA Section */
+    .cta-section {
+      background: var(--gradient-1);
+      color: white;
+      text-align: center;
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="white" opacity="0.1"/></svg>');
+      background-size: 50px 50px;
+    }
+    
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .cta-section h2 {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 900;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+    }
+    
+    .cta-section p {
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.95;
+    }
+    
+    .cta-section .btn-primary {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .cta-section .btn-secondary {
+      border-color: white;
+      color: white;
+    }
+    
+    .cta-section .btn-secondary:hover {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .cta-guarantee {
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      font-size: 15px;
+      opacity: 0.9;
+    }
+    
+    /* Footer */
+    footer {
+      background: #1c1917;
+      color: #a8a29e;
+      padding: 80px 0 32px;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    
+    .footer-brand {
+      max-width: 320px;
+    }
+    
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 24px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 16px;
+    }
+    
+    .footer-description {
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    
+    .footer-links h4 {
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    .footer-links ul {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-links a {
+      color: #a8a29e;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary-light);
+    }
+    
+    .footer-bottom {
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .mobile-menu-btn { display: block; }
-      
-      .hero { padding: 100px 0 60px; }
-      .hero-stats { gap: 1rem; }
-      .cta-buttons { flex-direction: column; align-items: center; }
-      
-      .demo-container { 
-        grid-template-columns: 1fr; 
-        gap: 2rem; 
-        text-align: center;
-      }
-      
-      .stat-item { padding: 0.75rem; }
+      .hero { padding: 120px 0 80px; }
+      .hero-cta { flex-direction: column; }
       .features-grid { grid-template-columns: 1fr; }
-      .problem-grid { grid-template-columns: 1fr; }
-    }
-    
-    @media (max-width: 480px) {
-      .container, .container-wide { padding: 0 15px; }
-      .btn-primary, .btn-secondary { padding: 0.875rem 1.5rem; font-size: 1rem; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-card.popular { transform: scale(1); }
+      .footer-grid { grid-template-columns: 1fr; text-align: center; }
+      .footer-brand { max-width: 100%; }
+      .section-title { font-size: 32px; }
     }
   </style>
 </head>
@@ -442,432 +812,455 @@
   <header>
     <nav class="container">
       <a href="/" class="logo">
-        🍽️ <span>RestOrder</span>
+        <div class="logo-icon">🍽️</div>
+        <span>RestOrder</span>
       </a>
       
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
-        <li><a href="#demo">Demo</a></li>
         <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#testimonials">Reviews</a></li>
-        <li><a href="#contact">Contact</a></li>
-        <li><a href="/admin.html" class="cta-header">Get Started</a></li>
+        <li><a href="#testimonials">Testimonials</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="/admin.html" class="btn-nav">Start Free Trial</a></li>
       </ul>
       
-      <button class="mobile-menu-btn" aria-label="Toggle menu">☰</button>
+      <button class="mobile-menu-btn">☰</button>
     </nav>
   </header>
 
   <!-- Hero Section -->
   <section class="hero">
     <div class="container hero-content">
-      <h1>Transform Your Restaurant with Digital Menus</h1>
+      <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
+        <span>Trusted by 10,000+ Restaurants Worldwide</span>
+      </div>
+      
+      <h1>
+        Digital Menus That <span class="highlight">Boost Sales by 30%</span>
+      </h1>
+      
       <p class="subtitle">
-        Increase sales by 23% with beautiful, contactless digital menus. 
-        Setup takes 5 minutes. Your customers will love the modern experience.
+        Complete restaurant management platform with QR menus, table ordering, analytics, and real-time updates. 
+        Setup in 5 minutes. No technical skills required.
       </p>
       
+      <div class="hero-cta">
+        <a href="/admin.html" class="btn-primary">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Start Free 14-Day Trial
+        </a>
+        <a href="/menu.html?id=demo" target="_blank" class="btn-secondary">
+          <span class="material-symbols-outlined">visibility</span>
+          View Live Demo
+        </a>
+      </div>
+      
       <div class="hero-stats">
-        <div class="stat-item">
-          <span class="stat-number">10,000+</span>
-          <span class="stat-label">Restaurants</span>
+        <div class="stat-card">
+          <span class="stat-number">10K+</span>
+          <span class="stat-label">Active Restaurants</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-number">98%</span>
-          <span class="stat-label">Customer Satisfaction</span>
+        <div class="stat-card">
+          <span class="stat-number">99.9%</span>
+          <span class="stat-label">Uptime</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-number">23%</span>
-          <span class="stat-label">Sales Increase</span>
+        <div class="stat-card">
+          <span class="stat-number">30%</span>
+          <span class="stat-label">Average Sales Increase</span>
         </div>
-        <div class="stat-item">
+        <div class="stat-card">
           <span class="stat-number">5 min</span>
           <span class="stat-label">Setup Time</span>
         </div>
       </div>
-      
-      <div class="cta-buttons">
-        <a href="/admin.html" class="btn-primary">
-          🚀 Start Free Trial
-        </a>
-        <a href="#demo" class="btn-secondary">
-          👀 See Demo
-        </a>
-      </div>
     </div>
   </section>
 
-  <!-- Social Proof Ticker -->
-  <section class="social-proof">
-    <div class="ticker">
-      ⭐ "RestOrder increased our orders by 30%" - Pizza Palace • 
-      ⭐ "Setup was incredibly easy" - Café Luna • 
-      ⭐ "Customers love the QR code menus" - Bistro Central • 
-      ⭐ "Best investment for our restaurant" - Green Garden • 
-      ⭐ "Professional and reliable" - Spice Route •
-    </div>
-  </section>
-
-  <!-- Problem-Solution -->
-  <section class="problem-solution">
+  <!-- Trust Bar -->
+  <div class="trust-bar">
     <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">The Restaurant Industry is Changing</h2>
-        <p class="section-subtitle">Traditional menus are outdated. Your customers expect modern, safe, contactless experiences.</p>
-      </div>
-      
-      <div class="problem-grid">
-        <div class="problem-card">
-          <span class="problem-icon">😷</span>
-          <h3>Health Concerns</h3>
-          <p>Customers worry about touching physical menus shared by hundreds of people</p>
-        </div>
-        
-        <div class="solution-card">
-          <span class="problem-icon">📱</span>
-          <h3>QR Code Access</h3>
-          <p>Customers scan and view your menu on their personal phones - completely contactless</p>
-        </div>
-        
-        <div class="problem-card">
-          <span class="problem-icon">💸</span>
-          <h3>Expensive Updates</h3>
-          <p>Printing new menus for price changes and seasonal items costs hundreds monthly</p>
-        </div>
-        
-        <div class="solution-card">
-          <span class="problem-icon">⚡</span>
-          <h3>Instant Updates</h3>
-          <p>Change prices, add items, or update descriptions instantly - no printing costs</p>
-        </div>
-        
-        <div class="problem-card">
-          <span class="problem-icon">😞</span>
-          <h3>Poor Experience</h3>
-          <p>Worn, stained menus create bad first impressions and reduce perceived quality</p>
-        </div>
-        
-        <div class="solution-card">
-          <span class="problem-icon">✨</span>
-          <h3>Stunning Design</h3>
-          <p>Beautiful, professional menus that enhance your brand and increase perceived value</p>
+      <div class="trust-content">
+        <span class="trust-text">Trusted by leading restaurants:</span>
+        <div class="trust-logos">
+          <span style="font-weight: 700; color: var(--text-light);">🍕 Pizza Palace</span>
+          <span style="font-weight: 700; color: var(--text-light);">☕ Café Luna</span>
+          <span style="font-weight: 700; color: var(--text-light);">🍔 Bistro Central</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- Features Section -->
-  <section id="features" class="features">
+  <section id="features">
     <div class="container">
       <div class="section-header">
+        <span class="section-label">Complete Solution</span>
         <h2 class="section-title">Everything You Need to Succeed</h2>
-        <p class="section-subtitle">A complete digital menu solution designed specifically for restaurants</p>
+        <p class="section-subtitle">
+          Powerful features designed specifically for restaurants. No complicated setup, no hidden fees.
+        </p>
       </div>
       
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">📱</div>
           <h3>QR Code Access</h3>
-          <p>Customers scan your unique QR code to view the menu on their phone. Works on any device, no app download required.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Beautiful Design</h3>
-          <p>Professional, customizable themes that match your brand. Dark/light mode, custom colors, and stunning layouts.</p>
+          <p>Customers scan your QR code to instantly view the menu on their phone. Works on any device, no app download needed. Completely contactless and safe.</p>
+          <span class="feature-badge">Core Feature</span>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <h3>Lightning Fast</h3>
-          <p>Menus load instantly thanks to our performance-optimized platform. No waiting, no frustration for your customers.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🔄</div>
           <h3>Real-Time Updates</h3>
-          <p>Change prices, add specials, or update descriptions instantly. Changes appear immediately for all customers.</p>
+          <p>Change prices, add specials, or update descriptions instantly. Changes appear immediately for all customers. No reprinting costs.</p>
+          <span class="feature-badge">Save Money</span>
         </div>
         
         <div class="feature-card">
-          <div class="feature-icon">💰</div>
-          <h3>Multi-Currency</h3>
-          <p>Support for all major currencies. Perfect for tourist areas or international restaurants.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🏷️</div>
-          <h3>Smart Categories</h3>
-          <p>Organize items with custom categories, dietary tags (vegan, gluten-free), and detailed descriptions.</p>
+          <div class="feature-icon">🎨</div>
+          <h3>Custom Branding</h3>
+          <p>Match your brand with custom colors, fonts, logos, and themes. Professional design options that make your menu stand out.</p>
+          <span class="feature-badge">Professional</span>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">📊</div>
-          <h3>Admin Dashboard</h3>
-          <p>Easy-to-use management panel. Add items, set prices, upload images, and manage everything in one place.</p>
+          <h3>Advanced Analytics</h3>
+          <p>Track menu scans, popular items, peak hours, and customer behavior. Make data-driven decisions to boost sales.</p>
+          <span class="feature-badge">Insights</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🪑</div>
+          <h3>Table Management</h3>
+          <p>Generate unique QR codes for each table. Customers can call waiters, place orders, and view bills directly from their phone.</p>
+          <span class="feature-badge">Premium</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🛒</div>
+          <h3>Online Ordering</h3>
+          <p>Let customers add items to cart and place orders. Collect customer info, integrate with WhatsApp for order notifications.</p>
+          <span class="feature-badge">Boost Sales</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">⭐</div>
+          <h3>Customer Ratings</h3>
+          <p>Allow customers to rate menu items. Build trust and highlight your best dishes with authentic reviews.</p>
+          <span class="feature-badge">Social Proof</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <h3>Multi-Currency Support</h3>
+          <p>Support for all major currencies worldwide. Perfect for tourist areas and international restaurants.</p>
+          <span class="feature-badge">Global</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔔</div>
+          <h3>Table Alerts</h3>
+          <p>Customers can request service with one tap. Real-time notifications keep your staff responsive and customers happy.</p>
+          <span class="feature-badge">Premium</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🖨️</div>
+          <h3>Print Bills</h3>
+          <p>Auto-format and print customer bills with all order details. Works with standard thermal printers.</p>
+          <span class="feature-badge">Convenience</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📤</div>
+          <h3>Easy Import/Export</h3>
+          <p>Upload menus from PDF, CSV, Excel, or text files. Export your menu data anytime. Bulk updates made easy.</p>
+          <span class="feature-badge">Time-Saver</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h3>Categories & Tags</h3>
+          <p>Organize with unlimited categories and subcategories. Tag items (vegan, gluten-free, spicy) for easy filtering.</p>
+          <span class="feature-badge">Organization</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🌙</div>
+          <h3>Dark/Light Themes</h3>
+          <p>Customers can choose their preferred theme. Automatic detection based on device settings for comfortable viewing.</p>
+          <span class="feature-badge">UX</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Smart Search</h3>
+          <p>Powerful search lets customers find exactly what they want instantly. Search by name, description, category, or tags.</p>
+          <span class="feature-badge">Convenience</span>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📞</div>
+          <h3>Contact Integration</h3>
+          <p>Display phone, email, address, website, and social media links. Connect with customers on WhatsApp, Instagram, and more.</p>
+          <span class="feature-badge">Marketing</span>
         </div>
         
         <div class="feature-card">
           <div class="feature-icon">🔒</div>
           <h3>Secure & Reliable</h3>
-          <p>Bank-level security, 99.9% uptime, and protected with SSL encryption. Your data is always safe.</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🚀</div>
-          <h3>5-Minute Setup</h3>
-          <p>Get started immediately. Upload your menu, customize the design, and generate your QR code in minutes.</p>
+          <p>Bank-level SSL encryption, 99.9% uptime guarantee, automatic backups. Your data is always safe and accessible.</p>
+          <span class="feature-badge">Enterprise</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Demo Section -->
-  <section id="demo" class="demo">
+  <!-- Pricing Section -->
+  <section id="pricing" class="pricing">
     <div class="container">
-      <div class="demo-container">
-        <div class="demo-content">
-          <h2>See It In Action</h2>
-          <p style="font-size: 1.1rem; color: #666; margin-bottom: 2rem; line-height: 1.7;">
-            Experience how your customers will interact with your digital menu. 
-            This is exactly what they'll see when they scan your QR code.
-          </p>
+      <div class="section-header">
+        <span class="section-label">Simple Pricing</span>
+        <h2 class="section-title">Choose the Perfect Plan</h2>
+        <p class="section-subtitle">
+          No hidden fees. No setup costs. Cancel anytime. Start with a 14-day free trial.
+        </p>
+      </div>
+      
+      <div class="pricing-grid">
+        <!-- Starter Plan -->
+        <div class="pricing-card">
+          <div class="plan-name">Starter</div>
+          <p class="plan-description">Perfect for small cafés and food trucks</p>
           
-          <div style="margin-bottom: 2rem;">
-            <h4 style="margin-bottom: 1rem; color: #222; font-weight: 600;">✅ What customers love:</h4>
-            <ul style="list-style: none; padding: 0;">
-              <li style="padding: 0.5rem 0; color: #666; display: flex; align-items: center;"><span style="margin-right: 0.5rem;">📱</span> Works on any smartphone</li>
-              <li style="padding: 0.5rem 0; color: #666; display: flex; align-items: center;"><span style="margin-right: 0.5rem;">⚡</span> Loads instantly</li>
-              <li style="padding: 0.5rem 0; color: #666; display: flex; align-items: center;"><span style="margin-right: 0.5rem;">🎨</span> Beautiful, professional design</li>
-              <li style="padding: 0.5rem 0; color: #666; display: flex; align-items: center;"><span style="margin-right: 0.5rem;">🔍</span> Easy search and navigation</li>
-              <li style="padding: 0.5rem 0; color: #666; display: flex; align-items: center;"><span style="margin-right: 0.5rem;">🌙</span> Dark/light mode options</li>
-            </ul>
+          <div class="plan-price">
+            <span class="price-currency">$</span>
+            <span class="price-amount">19</span>
+            <span class="price-period">/month</span>
           </div>
+          <p class="plan-subtitle">Billed monthly • No contract</p>
           
-          <a href="/menu.html?id=demo" class="btn-primary" target="_blank">
-            👀 View Full Demo Menu
-          </a>
+          <ul class="plan-features">
+            <li>1 Digital Menu</li>
+            <li>Unlimited Menu Items</li>
+            <li>QR Code Generation</li>
+            <li>Real-Time Updates</li>
+            <li>Custom Branding</li>
+            <li>Multi-Currency</li>
+            <li>Dark/Light Themes</li>
+            <li>Basic Analytics</li>
+            <li>Email Support</li>
+          </ul>
+          
+          <a href="/admin.html" class="plan-cta secondary">Start Free Trial</a>
         </div>
         
-        <div class="demo-preview">
-          <!-- Realistic Menu Preview -->
-          <div style="background: #fafafa; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); min-height: 600px;">
-            
-            <!-- Mobile Frame -->
-            <div style="background: #000; border-radius: 16px; padding: 4px; max-width: 320px; margin: 0 auto;">
-              <div style="background: #fafafa; border-radius: 12px; overflow: hidden; min-height: 580px;">
-                
-                <!-- Topbar -->
-                <div style="background: rgba(250,250,250,0.97); border-bottom: 1px solid rgba(0,0,0,0.1); padding: 16px; text-align: center; position: sticky; top: 0;">
-                  <div style="font-size: 15px; font-weight: 700; color: #1a1a1a;">Bella Vista Restaurant</div>
-                  <div style="font-size: 11px; color: #666; margin-top: 2px;">Authentic Italian Cuisine</div>
-                </div>
-                
-                <!-- Menu Content -->
-                <div style="padding: 8px; max-height: 500px; overflow-y: auto;">
-                  
-                  <!-- Appetizers Category -->
-                  <div style="margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 16px 12px 8px;">
-                      <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #ff9a56, #ffad56); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🥗</div>
-                      <div style="flex: 1; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1a1a;">Appetizers</div>
-                      <div style="font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 50px; color: #666;">1</div>
-                    </div>
-                    
-                    <div style="margin: 0 8px; background: #eeeeee; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07);">
-                      <div style="display: flex; padding: 12px 16px; border-left: 3px solid #ff9a56; min-height: 60px;">
-                        <div style="flex: 1;">
-                          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
-                            <div style="font-size: 13px; font-weight: 700; color: #1a1a1a; line-height: 1.2;">Bruschetta</div>
-                            <div style="background: #222; color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">$9.00</div>
-                          </div>
-                          <div style="font-size: 11px; color: #595959; line-height: 1.4; margin-bottom: 4px;">Toasted artisan bread topped with fresh tomatoes, basil, garlic</div>
-                          <div style="display: flex; gap: 4px;">
-                            <span style="background: #e8f5e8; color: #2d5a2d; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">vegetarian</span>
-                            <span style="background: #e8f5e8; color: #2d5a2d; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">vegan</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Pizza Category -->
-                  <div style="margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 16px 12px 8px;">
-                      <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #ff6b6b, #ff5252); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🍕</div>
-                      <div style="flex: 1; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1a1a;">Pizza</div>
-                      <div style="font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 50px; color: #666;">1</div>
-                    </div>
-                    
-                    <div style="margin: 0 8px; background: #eeeeee; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07);">
-                      <div style="display: flex; padding: 12px 16px; border-left: 3px solid #ff6b6b; min-height: 60px;">
-                        <div style="flex: 1;">
-                          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
-                            <div style="font-size: 13px; font-weight: 700; color: #1a1a1a; line-height: 1.2;">Margherita Pizza</div>
-                            <div style="background: #222; color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">$18.00</div>
-                          </div>
-                          <div style="background: rgba(0,0,0,0.05); padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 600; display: inline-block; margin-bottom: 4px; color: #666;">Large (12")</div>
-                          <div style="font-size: 11px; color: #595959; line-height: 1.4; margin-bottom: 4px;">Fresh mozzarella, basil, San Marzano tomato sauce on wood-fired crust</div>
-                          <div style="display: flex; gap: 4px;">
-                            <span style="background: #e8f5e8; color: #2d5a2d; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">vegetarian</span>
-                            <span style="background: #f0f0f0; color: #666; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">classic</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Main Course Category -->
-                  <div style="margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 16px 12px 8px;">
-                      <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #4fc3f7, #29b6f6); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px;">🍽️</div>
-                      <div style="flex: 1; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1a1a;">Main Course</div>
-                      <div style="font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 50px; color: #666;">1</div>
-                    </div>
-                    
-                    <div style="margin: 0 8px; background: #eeeeee; border-radius: 12px; border: 1px solid rgba(0,0,0,0.07);">
-                      <div style="display: flex; padding: 12px 16px; border-left: 3px solid #4fc3f7; min-height: 60px;">
-                        <div style="flex: 1;">
-                          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
-                            <div style="font-size: 13px; font-weight: 700; color: #1a1a1a; line-height: 1.2;">Grilled Salmon</div>
-                            <div style="background: #222; color: white; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">$26.00</div>
-                          </div>
-                          <div style="background: rgba(0,0,0,0.05); padding: 1px 6px; border-radius: 4px; font-size: 8px; font-weight: 600; display: inline-block; margin-bottom: 4px; color: #666;">8oz</div>
-                          <div style="font-size: 11px; color: #595959; line-height: 1.4; margin-bottom: 4px;">Atlantic salmon fillet with seasonal roasted vegetables</div>
-                          <div style="display: flex; gap: 4px;">
-                            <span style="background: #e3f2fd; color: #1565c0; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">healthy</span>
-                            <span style="background: #fff3e0; color: #ef6c00; padding: 1px 6px; border-radius: 10px; font-size: 8px; font-weight: 600;">gluten-free</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- View More Indicator -->
-                  <div style="text-align: center; padding: 12px; color: #666; font-size: 11px;">
-                    <div style="background: rgba(0,0,0,0.05); border-radius: 8px; padding: 8px; display: inline-flex; align-items: center; gap: 4px;">
-                      <span>📱</span> <span>Tap to see full menu with 6 items</span>
-                    </div>
-                  </div>
-                  
-                </div>
-              </div>
+        <!-- Professional Plan -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">Most Popular</div>
+          <div class="plan-name">Professional</div>
+          <p class="plan-description">Best for growing restaurants</p>
+          
+          <div class="plan-price">
+            <span class="price-currency">$</span>
+            <span class="price-amount">49</span>
+            <span class="price-period">/month</span>
+          </div>
+          <p class="plan-subtitle">Billed monthly • No contract</p>
+          
+          <ul class="plan-features">
+            <li>3 Digital Menus</li>
+            <li>Everything in Starter, plus:</li>
+            <li>Table Management & QR Codes</li>
+            <li>Online Ordering System</li>
+            <li>Customer Ratings & Reviews</li>
+            <li>Table Alert Notifications</li>
+            <li>Advanced Analytics Dashboard</li>
+            <li>WhatsApp Integration</li>
+            <li>CSV Import/Export</li>
+            <li>Print Bill Feature</li>
+            <li>Priority Email Support</li>
+          </ul>
+          
+          <a href="/admin.html" class="plan-cta primary">Start Free Trial</a>
+        </div>
+        
+        <!-- Enterprise Plan -->
+        <div class="pricing-card">
+          <div class="plan-name">Enterprise</div>
+          <p class="plan-description">For restaurant chains & franchises</p>
+          
+          <div class="plan-price">
+            <span class="price-currency">$</span>
+            <span class="price-amount">149</span>
+            <span class="price-period">/month</span>
+          </div>
+          <p class="plan-subtitle">Billed monthly • Volume discounts available</p>
+          
+          <ul class="plan-features">
+            <li>Unlimited Menus</li>
+            <li>Everything in Professional, plus:</li>
+            <li>Multi-Location Management</li>
+            <li>Custom Domain Support</li>
+            <li>API Access</li>
+            <li>White-Label Options</li>
+            <li>Advanced Security Features</li>
+            <li>Custom Integrations</li>
+            <li>Dedicated Account Manager</li>
+            <li>24/7 Phone & Chat Support</li>
+            <li>SLA Guarantee</li>
+          </ul>
+          
+          <a href="/admin.html" class="plan-cta secondary">Start Free Trial</a>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 48px;">
+        <p style="font-size: 15px; color: var(--text-light); margin-bottom: 16px;">
+          ✅ All plans include 14-day free trial • ✅ No credit card required • ✅ Cancel anytime
+        </p>
+        <p style="font-size: 13px; color: var(--text-light);">
+          Need a custom plan? <a href="mailto:sales@restorder.online" style="color: var(--primary); font-weight: 700;">Contact Sales</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Success Stories</span>
+        <h2 class="section-title">What Restaurants Are Saying</h2>
+        <p class="section-subtitle">
+          Join thousands of satisfied restaurant owners who transformed their business with RestOrder
+        </p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">
+            "RestOrder completely transformed how we operate. Orders increased by 35% in the first month. 
+            The table management feature saves us so much time. Absolutely worth it!"
+          </p>
+          <div class="testimonial-author">
+            <div class="author-avatar">MP</div>
+            <div class="author-info">
+              <h4>Maria Perez</h4>
+              <p>Owner, Pizza Palace</p>
             </div>
           </div>
-          
-          <!-- QR Code Section -->
-          <div style="text-align: center; margin-top: 1.5rem; padding: 1rem; background: rgba(0,123,255,0.05); border-radius: 12px;">
-            <div style="margin-bottom: 1rem;">
-              <div style="width: 80px; height: 80px; background: #000; margin: 0 auto; border-radius: 8px; position: relative;">
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 0.6rem; text-align: center; line-height: 1.2;">QR<br/>CODE</div>
-              </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">
+            "Setup was incredibly easy - took me less than 10 minutes! Customers love scanning the QR code. 
+            We saved over $500/month on printing costs. Best investment we've made."
+          </p>
+          <div class="testimonial-author">
+            <div class="author-avatar">JL</div>
+            <div class="author-info">
+              <h4>James Liu</h4>
+              <p>Manager, Café Luna</p>
             </div>
-            <p style="color: #666; font-size: 0.9rem; margin: 0;"><strong>Scan to try demo →</strong><br/>Works with any phone camera</p>
           </div>
-          
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">
+            "The analytics dashboard is a game-changer. We can see which items are popular and adjust our menu accordingly. 
+            Support team is incredibly responsive. Highly recommend!"
+          </p>
+          <div class="testimonial-author">
+            <div class="author-avatar">SK</div>
+            <div class="author-info">
+              <h4>Sarah Kim</h4>
+              <p>Owner, Bistro Central</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 80px 0; text-align: center;">
-    <div class="container">
-      <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem;">Ready to Transform Your Restaurant?</h2>
-      <p style="font-size: 1.2rem; margin-bottom: 2.5rem; opacity: 0.9;">Join thousands of successful restaurants already using RestOrder</p>
+  <section class="cta-section">
+    <div class="container cta-content">
+      <h2>Ready to Transform Your Restaurant?</h2>
+      <p>Join 10,000+ restaurants already succeeding with RestOrder</p>
       
-      <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
-        <a href="/admin.html" class="btn-primary" style="background: white; color: #007bff;">
-          🚀 Start Free Trial - No Credit Card
+      <div class="hero-cta">
+        <a href="/admin.html" class="btn-primary">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Start Free 14-Day Trial
         </a>
-        <a href="#contact" class="btn-secondary" style="border-color: white; color: white;">
-          💬 Talk to Sales
+        <a href="mailto:sales@restorder.online" class="btn-secondary">
+          <span class="material-symbols-outlined">support_agent</span>
+          Talk to Sales
         </a>
       </div>
       
-      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2);">
-        <p style="font-size: 0.9rem; opacity: 0.8;">✅ Free 14-day trial • ✅ No setup fees • ✅ Cancel anytime</p>
+      <div class="cta-guarantee">
+        <p>✅ Free 14-day trial • ✅ No credit card required • ✅ Setup in 5 minutes • ✅ Cancel anytime</p>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer style="background: #222; color: white; padding: 40px 0;">
+  <footer>
     <div class="container">
-      <div style="text-align: center;">
-        <div style="margin-bottom: 2rem;">
-          <a href="/" class="logo" style="color: white; font-size: 1.5rem;">
-            🍽️ <span>RestOrder</span>
-          </a>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span style="font-size: 32px;">🍽️</span>
+            <span>RestOrder</span>
+          </div>
+          <p class="footer-description">
+            The complete digital menu platform for modern restaurants. Boost sales, reduce costs, and delight customers with professional digital menus.
+          </p>
         </div>
         
-        <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
-          <a href="#features" style="color: #ccc; text-decoration: none;">Features</a>
-          <a href="#demo" style="color: #ccc; text-decoration: none;">Demo</a>
-          <a href="mailto:support@restorder.online" style="color: #ccc; text-decoration: none;">Contact</a>
-          <a href="#" style="color: #ccc; text-decoration: none;">Privacy</a>
-          <a href="#" style="color: #ccc; text-decoration: none;">Terms</a>
+        <div class="footer-links">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="/menu.html?id=demo">Demo</a></li>
+            <li><a href="/admin.html">Get Started</a></li>
+          </ul>
         </div>
         
-        <p style="color: #888; font-size: 0.9rem;">
-          © 2026 RestOrder. All rights reserved. Made with ❤️ for restaurants worldwide.
-        </p>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#careers">Careers</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#docs">Documentation</a></li>
+            <li><a href="#support">Support</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
       </div>
     </div>
   </footer>
-
-  <!-- Enhanced JavaScript -->
-  <script>
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
-
-    // Header scroll effect
-    let lastScrollY = window.scrollY;
-    const header = document.querySelector('header');
-    
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 100) {
-        header.style.background = 'rgba(255, 255, 255, 0.98)';
-        header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
-      } else {
-        header.style.background = 'rgba(255, 255, 255, 0.95)';
-        header.style.boxShadow = 'none';
-      }
-    });
-
-    // Performance monitoring
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const nav = performance.getEntriesByType('navigation')[0];
-        if (nav) {
-          console.log('🚀 Page Performance:');
-          console.log(`DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms`);
-          console.log(`Full Load: ${nav.loadEventEnd.toFixed(2)}ms`);
-        }
-      }, 0);
-    });
-
-    // Simple mobile menu (basic implementation)
-    const mobileBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (mobileBtn && navLinks) {
-      mobileBtn.addEventListener('click', () => {
-        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-      });
-    }
-  </script>
 
 </body>
 </html>
