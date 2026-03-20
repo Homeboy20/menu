@@ -700,6 +700,10 @@
             <span id="copy-btn-text">Copy Link</span>
           </button>
         </div>
+        <button onclick="exportMenuCSV(currentMenuId)"
+                class="w-full flex items-center justify-center gap-2 h-11 rounded-xl border border-green-500/30 text-green-400 font-medium hover:bg-green-500/10 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">table_chart</span> Export Menu as CSV
+        </button>
       </div>
 
       <button onclick="showSection('upload'); clearAll()"
@@ -1933,6 +1937,13 @@ function copyLink() {
   });
 }
 
+function exportMenuCSV(menuId) {
+  if (!menuId) return;
+  const a = document.createElement('a');
+  a.href = '/api/menus/' + encodeURIComponent(menuId) + '/export-csv?token=' + encodeURIComponent(sessionToken);
+  a.click();
+}
+
 // ── Published menus list ──────────────────────────────────────────────────────
 async function loadPublished() {
   const el = document.getElementById('published-list');
@@ -1987,6 +1998,10 @@ async function loadPublished() {
           <button onclick="regenerateQR('${m.id}')" title="Regenerate QR code"
                   class="text-xs text-amber-400 hover:underline flex items-center gap-1">
             <span class="material-symbols-outlined text-[14px]">refresh</span> New QR
+          </button>
+          <button onclick="exportMenuCSV('${m.id}')" title="Export menu as CSV"
+                  class="text-xs text-green-400 hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">download</span> Export CSV
           </button>
           <button onclick="showLinkQR('${m.id}', '${esc(m.restaurantName)}')" title="Link external QR code"
                   class="text-xs text-violet-400 hover:underline flex items-center gap-1">

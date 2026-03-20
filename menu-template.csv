@@ -1,18 +1,4 @@
 name,category,subcategory,price,description,size,tags
-Margherita Pizza,Pizza,Classic Pizzas,18.50,Fresh mozzarella with basil and San Marzano tomato sauce on wood-fired crust,Large (12"),vegetarian|classic
-BBQ Chicken Pizza,Pizza,Specialty Pizzas,21.00,Grilled chicken with smoky BBQ sauce red onions and mozzarella,Large (12"),classic
-Caesar Salad,Salads,Green Salads,12.00,Crispy romaine lettuce with parmesan cheese and house-made croutons,Regular,vegetarian
-Greek Salad,Salads,Green Salads,13.00,Tomatoes cucumbers olives and feta with oregano vinaigrette,Regular,vegetarian|healthy
-Grilled Salmon,Main Course,Seafood,26.00,Atlantic salmon fillet with seasonal roasted vegetables and lemon herb butter,8oz,healthy|gluten-free
-Ribeye Steak,Main Course,Grills,32.00,12oz prime ribeye with garlic butter and roasted potatoes,12oz,signature
-Spaghetti Carbonara,Pasta,Italian,16.50,Traditional Roman pasta with eggs cream pancetta and pecorino,Regular,classic
-Penne Arrabbiata,Pasta,Italian,14.00,Penne in spicy tomato sauce with garlic and chili flakes,Regular,spicy|vegetarian
-Chicken Wings,Appetizers,Hot Bites,10.99,Spicy buffalo wings served with blue cheese dressing and celery sticks,12 pieces,spicy
-Bruschetta,Appetizers,Cold Bites,9.00,Toasted artisan bread topped with fresh tomatoes basil garlic and olive oil,3 pieces,vegetarian|vegan
-House Wine,Beverages,Wine,7.50,Italian red or white wine by the glass,5oz glass,alcohol
-Espresso,Beverages,Coffee,3.50,Double shot of rich Italian espresso,Double shot,coffee
-Fresh Orange Juice,Beverages,Juices,5.00,Freshly squeezed orange juice,10oz glass,healthy|vegan
-Tiramisu,Desserts,Italian,8.50,Traditional Italian dessert with mascarpone coffee-soaked ladyfingers and cocoa,Individual,classic|coffee
-Chocolate Lava Cake,Desserts,Cakes,9.50,Warm dark chocolate cake with molten center and vanilla ice cream,Individual,signature
-French Fries,Sides,,4.50,Crispy golden fries with sea salt,Regular,vegan|vegetarian
-Garlic Bread,Sides,,5.00,Toasted bread with garlic butter and herbs,4 pieces,vegetarian
+Margherita Pizza,FOOD,Pizza,18.5,Fresh mozzarella with basil and San Marzano tomato sauce on wood-fired crust,"Large (12"")",vegetarian|classic
+Coca cola,Drink,Soft drink,344,,,
+heinken,Drink,Beer,35,,,
