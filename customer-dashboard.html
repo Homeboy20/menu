@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard – RestOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols_Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+  .badge-active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+  .badge-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+  .badge-free { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+  .badge-pro { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+  .badge-enterprise { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+  <div class="flex items-center gap-3 mb-10">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-lg">RestOrder</h1>
+      <p class="text-xs text-slate-400" id="sidebar-business">Loading...</p>
+    </div>
+  </div>
+
+  <nav class="space-y-2 flex-1">
+    <a href="#" class="nav-link active flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="text-sm font-medium">Dashboard</span>
+    </a>
+    <a href="admin.html" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">add_circle</span>
+      <span class="text-sm font-medium">Create Menu</span>
+    </a>
+    <a href="#" onclick="showSection('subscription'); return false;" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <span class="text-sm font-medium">Subscription</span>
+    </a>
+    <a href="#" onclick="showSection('profile'); return false;" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">person</span>
+      <span class="text-sm font-medium">Profile</span>
+    </a>
+  </nav>
+
+  <div class="pt-4 border-t border-slate-700">
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="text-sm font-medium">Logout</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-auto">
+  
+  <!-- Dashboard Section -->
+  <div id="dashboard-section">
+    <!-- Header -->
+    <div class="mb-8">
+      <h2 class="text-3xl font-bold mb-2">Dashboard</h2>
+      <p class="text-slate-400">Welcome back! Here's your restaurant overview.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-slate-400 text-sm">Total Menus</span>
+          <span class="material-symbols-outlined text-primary text-[20px]">restaurant_menu</span>
+        </div>
+        <p class="text-3xl font-bold" id="stat-menus">0</p>
+        <p class="text-xs text-slate-500 mt-1">Active digital menus</p>
+      </div>
+      
+      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-slate-400 text-sm">Total Scans</span>
+          <span class="material-symbols-outlined text-amber-500 text-[20px]">qr_code_scanner</span>
+        </div>
+        <p class="text-3xl font-bold text-amber-500" id="stat-scans">0</p>
+        <p class="text-xs text-slate-500 mt-1">QR code scans</p>
+      </div>
+      
+      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-slate-400 text-sm">Current Plan</span>
+          <span class="material-symbols-outlined text-green-500 text-[20px]">workspace_premium</span>
+        </div>
+        <p class="text-2xl font-bold text-green-500" id="stat-plan">Loading...</p>
+        <p class="text-xs text-slate-500 mt-1">Subscription tier</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6 mb-8">
+      <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="admin.html" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
+          <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-[20px]">add</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Create Menu</p>
+            <p class="text-xs text-slate-400">Upload or create new</p>
+          </div>
+        </a>
+        
+        <a href="#" onclick="showSection('subscription'); return false;" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
+          <div class="size-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-amber-500 text-[20px]">upgrade</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Upgrade Plan</p>
+            <p class="text-xs text-slate-400">Get more features</p>
+          </div>
+        </a>
+        
+        <a href="index.html#pricing" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
+          <div class="size-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-500 text-[20px]">info</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">View Pricing</p>
+            <p class="text-xs text-slate-400">Compare plans</p>
+          </div>
+        </a>
+        
+        <a href="mailto:support@restorder.online" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
+          <div class="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-500 text-[20px]">support_agent</span>
+          </div>
+          <div>
+            <p class="font-semibold text-sm">Get Support</p>
+            <p class="text-xs text-slate-400">Contact our team</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Menus List -->
+    <div class="bg-surface border border-slate-700 rounded-2xl overflow-hidden">
+      <div class="p-6 border-b border-slate-700 flex items-center justify-between">
+        <h3 class="text-lg font-bold">Your Menus</h3>
+        <a href="admin.html" class="px-4 py-2 bg-primary text-bg-dark text-sm font-semibold rounded-lg hover:bg-primary/90 transition">
+          + New Menu
+        </a>
+      </div>
+      
+      <div id="menus-container">
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3">hourglass_empty</span>
+          <p class="text-slate-400">Loading your menus...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscription Section -->
+  <div id="subscription-section" class="hidden">
+    <div class="mb-8">
+      <button onclick="showSection('dashboard')" class="text-slate-400 hover:text-primary transition mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Back to Dashboard
+      </button>
+      <h2 class="text-3xl font-bold mb-2">Subscription</h2>
+      <p class="text-slate-400">Manage your subscription and billing</p>
+    </div>
+
+    <div id="subscription-content">
+      <div class="p-12 text-center">
+        <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span>
+        <p class="text-slate-400">Loading subscription details...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Section -->
+  <div id="profile-section" class="hidden">
+    <div class="mb-8">
+      <button onclick="showSection('dashboard')" class="text-slate-400 hover:text-primary transition mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Back to Dashboard
+      </button>
+      <h2 class="text-3xl font-bold mb-2">Profile Settings</h2>
+      <p class="text-slate-400">Update your business information</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-8 max-w-2xl">
+      <form id="profile-form" class="space-y-6">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Business Name</label>
+            <input id="profile-business-name" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Contact Name</label>
+            <input id="profile-contact-name" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+            <input id="profile-email" type="email" disabled class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 cursor-not-allowed" />
+            <p class="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Phone</label>
+            <input id="profile-phone" type="tel" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Address</label>
+          <input id="profile-address" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">City</label>
+            <input id="profile-city" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Country</label>
+            <input id="profile-country" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+          </div>
+        </div>
+
+        <div class="pt-4 flex gap-3">
+          <button type="submit" class="px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+            Save Changes
+          </button>
+          <button type="button" onclick="loadProfile()" class="px-6 py-2.5 bg-bg-dark text-slate-300 border border-slate-700 font-semibold rounded-xl hover:bg-slate-800 transition">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Authentication
+let customerToken = null;
+let customerId = null;
+
+function getToken() {
+  return localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
+}
+
+async function checkAuth() {
+  customerToken = getToken();
+  if (!customerToken) {
+    window.location.href = 'customer-login.html';
+    return false;
+  }
+
+  try {
+    const res = await fetch('/api/customers/check', {
+      headers: { 'x-customer-token': customerToken }
+    });
+    const data = await res.json();
+
+    if (!data.authenticated) {
+      window.location.href = 'customer-login.html';
+      return false;
+    }
+
+    customerId = data.customer.id;
+    document.getElementById('sidebar-business').textContent = localStorage.getItem('customerBusiness') || data.customer.email;
+    return true;
+  } catch (err) {
+    window.location.href = 'customer-login.html';
+    return false;
+  }
+}
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await fetch('/api/customers/logout', {
+    method: 'POST',
+    headers: { 'x-customer-token': customerToken }
+  });
+  localStorage.removeItem('customerToken');
+  localStorage.removeItem('customerEmail');
+  localStorage.removeItem('customerBusiness');
+  sessionStorage.removeItem('customerToken');
+  window.location.href = 'customer-login.html';
+});
+
+// Load dashboard data
+async function loadDashboard() {
+  try {
+    // Load menus
+    const menusRes = await fetch(`/api/customers/${customerId}/menus`, {
+      headers: { 'x-customer-token': customerToken }
+    });
+    
+    if (!menusRes.ok) throw new Error('Failed to load menus');
+    
+    const menus = await menusRes.json();
+    
+    // Update stats
+    document.getElementById('stat-menus').textContent = menus.length;
+    const totalScans = menus.reduce((sum, m) => sum + (m.total_scans || 0), 0);
+    document.getElementById('stat-scans').textContent = totalScans.toLocaleString();
+    
+    // Set plan
+    if (menus.length > 0 && menus[0].plan_name) {
+      document.getElementById('stat-plan').textContent = menus[0].plan_name;
+    } else {
+      document.getElementById('stat-plan').textContent = 'Starter';
+    }
+    
+    // Render menus
+    const container = document.getElementById('menus-container');
+    if (menus.length === 0) {
+      container.innerHTML = `
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3">restaurant</span>
+          <p class="text-slate-400 mb-4">No menus yet</p>
+          <a href="admin.html" class="inline-block px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+            Create Your First Menu
+          </a>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="divide-y divide-slate-700">
+          ${menus.map(menu => `
+            <div class="p-6 hover:bg-bg-dark/30 transition">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h4 class="font-bold text-lg">${escapeHtml(menu.restaurant_name)}</h4>
+                    ${menu.plan_name ? `<span class="badge badge-${menu.plan_name.toLowerCase()}">${menu.plan_name}</span>` : ''}
+                  </div>
+                  <div class="flex items-center gap-4 text-sm text-slate-400">
+                    <span><span class="material-symbols-outlined text-[16px] align-middle">menu_book</span> ${menu.item_count} items</span>
+                    <span><span class="material-symbols-outlined text-[16px] align-middle">qr_code_scanner</span> ${menu.total_scans.toLocaleString()} scans</span>
+                    <span><span class="material-symbols-outlined text-[16px] align-middle">calendar_today</span> Created ${formatDate(menu.created_at)}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a href="/menu.html?id=${menu.id}" target="_blank" class="px-4 py-2 text-sm bg-bg-dark border border-slate-700 rounded-lg hover:border-primary/50 transition">
+                    View Menu
+                  </a>
+                  <a href="admin.html?menu=${menu.id}" class="px-4 py-2 text-sm bg-primary/10 text-primary border border-primary/30 rounded-lg hover:bg-primary/20 transition">
+                    Edit
+                  </a>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error('Error loading dashboard:', err);
+    document.getElementById('menus-container').innerHTML = `
+      <div class="p-12 text-center text-red-400">
+        Failed to load menus. Please refresh the page.
+      </div>
+    `;
+  }
+}
+
+// Load profile
+async function loadProfile() {
+  try {
+    const res = await fetch('/api/customers/me', {
+      headers: { 'x-customer-token': customerToken }
+    });
+    
+    if (!res.ok) throw new Error('Failed to load profile');
+    
+    const customer = await res.json();
+    
+    document.getElementById('profile-email').value = customer.email || '';
+    document.getElementById('profile-business-name').value = customer.business_name || '';
+    document.getElementById('profile-contact-name').value = customer.contact_name || '';
+    document.getElementById('profile-phone').value = customer.phone || '';
+    document.getElementById('profile-address').value = customer.address || '';
+    document.getElementById('profile-city').value = customer.city || '';
+    document.getElementById('profile-country').value = customer.country || '';
+  } catch (err) {
+    console.error('Error loading profile:', err);
+    alert('Failed to load profile');
+  }
+}
+
+// Save profile
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  try {
+    const res = await fetch('/api/customers/me', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-customer-token': customerToken
+      },
+      body: JSON.stringify({
+        businessName: document.getElementById('profile-business-name').value,
+        contactName: document.getElementById('profile-contact-name').value,
+        phone: document.getElementById('profile-phone').value,
+        address: document.getElementById('profile-address').value,
+        city: document.getElementById('profile-city').value,
+        country: document.getElementById('profile-country').value
+      })
+    });
+    
+    if (!res.ok) throw new Error('Failed to save profile');
+    
+    // Update local storage
+    localStorage.setItem('customerBusiness', document.getElementById('profile-business-name').value);
+    document.getElementById('sidebar-business').textContent = document.getElementById('profile-business-name').value;
+    
+    alert('Profile updated successfully!');
+  } catch (err) {
+    console.error('Error saving profile:', err);
+    alert('Failed to save profile. Please try again.');
+  }
+});
+
+// Section navigation
+function showSection(section) {
+  document.getElementById('dashboard-section').classList.add('hidden');
+  document.getElementById('subscription-section').classList.add('hidden');
+  document.getElementById('profile-section').classList.add('hidden');
+  
+  document.getElementById(`${section}-section`).classList.remove('hidden');
+  
+  // Update nav
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active', 'bg-primary/10', 'text-primary');
+    link.classList.add('text-slate-300');
+  });
+  
+  if (section === 'profile') {
+    loadProfile();
+  } else if (section === 'subscription') {
+    loadSubscription();
+  }
+}
+
+// Load subscription info
+async function loadSubscription() {
+  const container = document.getElementById('subscription-content');
+  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span><p class="text-slate-400">Loading...</p></div>';
+  
+  // For now, just show placeholder
+  setTimeout(() => {
+    container.innerHTML = `
+      <div class="bg-surface border border-slate-700 rounded-2xl p-8">
+        <h3 class="text-xl font-bold mb-6">Current Plan: Starter (FREE)</h3>
+        <p class="text-slate-400 mb-6">You're currently on our free Starter plan. Upgrade to unlock more features and create unlimited menus.</p>
+        <a href="index.html#pricing" class="inline-block px-6 py-3 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+          View Plans & Upgrade
+        </a>
+      </div>
+    `;
+  }, 500);
+}
+
+// Helpers
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', { 
+    year: 'numeric', month: 'short', day: 'numeric' 
+  });
+}
+
+// Init
+(async () => {
+  const authed = await checkAuth();
+  if (authed) {
+    await loadDashboard();
+  }
+})();
+</script>
+
+</body>
+</html>

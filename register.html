@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Register – RestOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #2dd4bf 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(45, 212, 191, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen">
+
+<!-- Header -->
+<header class="border-b border-slate-800 bg-surface/50 backdrop-blur-sm sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg">RestOrder</h1>
+        <p class="text-xs text-slate-400">Digital Menu Platform</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-slate-400">Already have an account?</span>
+      <a href="customer-login.html" class="px-4 py-2 text-sm font-semibold text-primary border border-primary/30 rounded-xl hover:bg-primary/10 transition">
+        Sign In
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-6 py-12">
+  <div class="grid lg:grid-cols-2 gap-12 items-center">
+    
+    <!-- Left Side - Registration Form -->
+    <div class="order-2 lg:order-1">
+      <div class="bg-surface border border-slate-700 rounded-2xl p-8 shadow-2xl">
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold mb-2">Create Your Account</h2>
+          <p class="text-slate-400">Start managing your restaurant menus digitally in minutes</p>
+        </div>
+
+        <form id="register-form" class="space-y-6">
+          <!-- Business Name -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">store</span>
+              Business Name *
+            </label>
+            <input id="business-name" type="text" required placeholder="e.g., Joe's Pizza"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <!-- Contact Name -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">person</span>
+              Your Name
+            </label>
+            <input id="contact-name" type="text" placeholder="e.g., John Smith"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">email</span>
+              Email Address *
+            </label>
+            <input id="email" type="email" required placeholder="you@restaurant.com"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">phone</span>
+              Phone Number
+            </label>
+            <input id="phone" type="tel" placeholder="+1 (555) 123-4567"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">lock</span>
+              Password *
+            </label>
+            <input id="password" type="password" required placeholder="Minimum 8 characters"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+            <p class="text-xs text-slate-500 mt-1">Must be at least 8 characters long</p>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">
+              <span class="material-symbols-outlined text-[16px] align-middle mr-1">lock</span>
+              Confirm Password *
+            </label>
+            <input id="confirm-password" type="password" required placeholder="Re-enter your password"
+              class="w-full px-4 py-3 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <!-- Error Message -->
+          <div id="error-message" class="hidden p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-red-500 text-[20px]">error</span>
+              <div class="flex-1">
+                <p class="text-sm text-red-400" id="error-text"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <div id="success-message" class="hidden p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-green-500 text-[20px]">check_circle</span>
+              <div class="flex-1">
+                <p class="text-sm text-green-400">Account created successfully! Redirecting to dashboard...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terms -->
+          <div class="flex items-start gap-3">
+            <input id="terms" type="checkbox" required
+              class="mt-1 rounded border-slate-700 bg-bg-dark text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0 focus:ring-offset-bg-dark" />
+            <label for="terms" class="text-sm text-slate-400">
+              I agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a> and 
+              <a href="#" class="text-primary hover:underline">Privacy Policy</a>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="submit-btn"
+            class="w-full px-6 py-3.5 bg-primary text-bg-dark font-bold rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
+            <span id="submit-text">Create Account</span>
+            <span id="submit-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <p class="text-sm text-slate-400">
+            Start with our <span class="text-primary font-semibold">FREE Starter Plan</span> – No credit card required
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Features -->
+    <div class="order-1 lg:order-2 space-y-8">
+      <div>
+        <h3 class="text-4xl font-bold mb-4">
+          Join <span class="gradient-text">RestOrder</span> Today
+        </h3>
+        <p class="text-lg text-slate-400 mb-8">
+          Transform your restaurant with digital menus, QR codes, and online ordering – all in one platform.
+        </p>
+      </div>
+
+      <!-- Features List -->
+      <div class="space-y-4">
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">qr_code_2</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Instant QR Menus</h4>
+            <p class="text-slate-400 text-sm">Generate QR codes instantly for contactless menu viewing</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">phone_iphone</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Mobile Optimized</h4>
+            <p class="text-slate-400 text-sm">Beautiful menus that work perfectly on all devices</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">shopping_cart</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Online Ordering</h4>
+            <p class="text-slate-400 text-sm">Take orders directly from your digital menu</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">analytics</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Real-Time Analytics</h4>
+            <p class="text-slate-400 text-sm">Track menu views, popular items, and customer trends</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">palette</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Custom Branding</h4>
+            <p class="text-slate-400 text-sm">Match your restaurant's unique style and colors</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-4">
+          <div class="feature-icon">
+            <span class="material-symbols-outlined text-primary text-[24px]">support_agent</span>
+          </div>
+          <div>
+            <h4 class="font-semibold text-lg mb-1">Priority Support</h4>
+            <p class="text-slate-400 text-sm">Get help when you need it from our dedicated team</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="pt-8 border-t border-slate-800">
+        <div class="grid grid-cols-3 gap-6 text-center">
+          <div>
+            <p class="text-3xl font-bold text-primary">1,000+</p>
+            <p class="text-xs text-slate-400 mt-1">Restaurants</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-primary">50K+</p>
+            <p class="text-xs text-slate-400 mt-1">Menu Views</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-primary">99.9%</p>
+            <p class="text-xs text-slate-400 mt-1">Uptime</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// Handle registration form
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById('submit-btn');
+  const submitText = document.getElementById('submit-text');
+  const submitSpinner = document.getElementById('submit-spinner');
+  const errorMessage = document.getElementById('error-message');
+  const errorText = document.getElementById('error-text');
+  const successMessage = document.getElementById('success-message');
+  
+  // Get form values
+  const businessName = document.getElementById('business-name').value.trim();
+  const contactName = document.getElementById('contact-name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  const terms = document.getElementById('terms').checked;
+  
+  // Hide messages
+  errorMessage.classList.add('hidden');
+  successMessage.classList.add('hidden');
+  
+  // Validation
+  if (!businessName || !email || !password) {
+    errorText.textContent = 'Please fill in all required fields.';
+    errorMessage.classList.remove('hidden');
+    return;
+  }
+  
+  if (password !== confirmPassword) {
+    errorText.textContent = 'Passwords do not match.';
+    errorMessage.classList.remove('hidden');
+    return;
+  }
+  
+  if (password.length < 8) {
+    errorText.textContent = 'Password must be at least 8 characters long.';
+    errorMessage.classList.remove('hidden');
+    return;
+  }
+  
+  if (!terms) {
+    errorText.textContent = 'Please agree to the Terms of Service and Privacy Policy.';
+    errorMessage.classList.remove('hidden');
+    return;
+  }
+  
+  // Show loading
+  submitBtn.disabled = true;
+  submitText.textContent = 'Creating Account...';
+  submitSpinner.classList.remove('hidden');
+  
+  try {
+    const response = await fetch('/api/customers/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        businessName,
+        contactName,
+        phone
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Registration failed');
+    }
+    
+    // Store token
+    localStorage.setItem('customerToken', data.token);
+    localStorage.setItem('customerEmail', data.customer.email);
+    localStorage.setItem('customerBusiness', data.customer.businessName);
+    
+    // Show success
+    successMessage.classList.remove('hidden');
+    
+    // Redirect to dashboard
+    setTimeout(() => {
+      window.location.href = 'customer-dashboard.html';
+    }, 1500);
+    
+  } catch (err) {
+    errorText.textContent = err.message;
+    errorMessage.classList.remove('hidden');
+    
+    // Reset button
+    submitBtn.disabled = false;
+    submitText.textContent = 'Create Account';
+    submitSpinner.classList.add('hidden');
+  }
+});
+
+// Real-time password validation
+document.getElementById('password').addEventListener('input', (e) => {
+  const password = e.target.value;
+  const confirmPassword = document.getElementById('confirm-password').value;
+  
+  if (confirmPassword && password !== confirmPassword) {
+    document.getElementById('confirm-password').setCustomValidity('Passwords do not match');
+  } else {
+    document.getElementById('confirm-password').setCustomValidity('');
+  }
+});
+
+document.getElementById('confirm-password').addEventListener('input', (e) => {
+  const password = document.getElementById('password').value;
+  const confirmPassword = e.target.value;
+  
+  if (password !== confirmPassword) {
+    e.target.setCustomValidity('Passwords do not match');
+  } else {
+    e.target.setCustomValidity('');
+  }
+});
+</script>
+
+</body>
+</html>

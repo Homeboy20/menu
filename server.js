@@ -450,6 +450,36 @@ async function initDB() {
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT ''`);
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT ''`);
 
+    // ── Customer Management Tables ──────────────────────────────────────────────
+    
+    // Customers table - Restaurant owners/businesses
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS customers (
+        id              SERIAL PRIMARY KEY,
+        email           TEXT NOT NULL UNIQUE,
+        password_hash   TEXT NOT NULL,
+        business_name   TEXT NOT NULL,
+        contact_name    TEXT NOT NULL DEFAULT '',
+        phone           TEXT NOT NULL DEFAULT '',
+        address         TEXT NOT NULL DEFAULT '',
+        city            TEXT NOT NULL DEFAULT '',
+        country         TEXT NOT NULL DEFAULT '',
+        status          TEXT NOT NULL DEFAULT 'active',
+        email_verified  INTEGER NOT NULL DEFAULT 0,
+        verification_token TEXT DEFAULT '',
+        reset_token     TEXT DEFAULT '',
+        last_login      TEXT,
+        created_at      TEXT NOT NULL,
+        updated_at      TEXT
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_email ON customers (email)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_status ON customers (status)`);
+
+    // Migration: add customer_id to menus table
+    await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_menus_customer ON menus (customer_id)`);
+
     // ── Subscription Management Tables ──────────────────────────────────────────
     
     // Subscription Plans table
@@ -975,6 +1005,331 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
   sessions.clear();
 
   res.json({ ok: true });
+});
+
+// ── Customer Auth routes ───────────────────────────────────────────────────────
+
+// Customer session storage (separate from admin)
+const customerSessions = new Map();
+
+function createCustomerSession(customerId, email) {
+  const token = crypto.randomBytes(32).toString('hex');
+  customerSessions.set(token, {
+    customerId,
+    email,
+    createdAt: Date.now(),
+  });
+  return token;
+}
+
+function isValidCustomerSession(token) {
+  if (!token) return false;
+  const session = customerSessions.get(token);
+  if (!session) return false;
+  if (Date.now() - session.createdAt > SESSION_TTL) {
+    customerSessions.delete(token);
+    return false;
+  }
+  return session;
+}
+
+function requireCustomerAuth(req, res, next) {
+  const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
+  const session = isValidCustomerSession(token);
+  if (!session) {
+    return res.status(401).json({ error: 'Please log in to continue.' });
+  }
+  req.customer = session;
+  next();
+}
+
+// POST /api/customers/register - Create new customer account
+app.post('/api/customers/register', loginLimiter, async (req, res) => {
+  try {
+    const { email, password, businessName, contactName, phone } = req.body || {};
+    
+    // Validation
+    if (!email || !password || !businessName) {
+      return res.status(400).json({ error: 'Email, password, and business name are required.' });
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address.' });
+    }
+    
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    }
+    
+    // Check if email already exists
+    const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [email.toLowerCase()]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'Email already registered.' });
+    }
+    
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 12);
+    
+    // Create customer
+    const now = new Date().toISOString();
+    const { rows } = await pool.query(`
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, 'active', $6)
+      RETURNING id, email, business_name, contact_name, phone, status, created_at
+    `, [email.toLowerCase(), passwordHash, sanitizeStr(businessName, 200), 
+        sanitizeStr(contactName || '', 200), sanitizeStr(phone || '', 50), now]);
+    
+    const customer = rows[0];
+    
+    // Create session token
+    const token = createCustomerSession(customer.id, customer.email);
+    
+    console.log('✅ Customer registered:', customer.email);
+    
+    res.json({
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        businessName: customer.business_name,
+        contactName: customer.contact_name,
+        phone: customer.phone,
+        status: customer.status,
+        createdAt: customer.created_at
+      },
+      token,
+      expiresIn: SESSION_TTL
+    });
+  } catch (err) {
+    console.error('Customer registration error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/customers/login - Customer login
+app.post('/api/customers/login', loginLimiter, async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+    
+    // Get customer
+    const { rows } = await pool.query(
+      'SELECT * FROM customers WHERE email = $1',
+      [email.toLowerCase()]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+    
+    const customer = rows[0];
+    
+    // Check password
+    const match = await bcrypt.compare(password, customer.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+    
+    // Check if account is active
+    if (customer.status !== 'active') {
+      return res.status(403).json({ error: 'Account is not active. Please contact support.' });
+    }
+    
+    // Update last login
+    await pool.query(
+      'UPDATE customers SET last_login = $1 WHERE id = $2',
+      [new Date().toISOString(), customer.id]
+    );
+    
+    // Create session
+    const token = createCustomerSession(customer.id, customer.email);
+    
+    console.log('✅ Customer logged in:', customer.email);
+    
+    res.json({
+      customer: {
+        id: customer.id,
+        email: customer.email,
+        businessName: customer.business_name,
+        contactName: customer.contact_name,
+        phone: customer.phone,
+        status: customer.status
+      },
+      token,
+      expiresIn: SESSION_TTL
+    });
+  } catch (err) {
+    console.error('Customer login error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/customers/logout - Customer logout
+app.post('/api/customers/logout', (req, res) => {
+  const token = req.headers['x-customer-token'];
+  if (token) customerSessions.delete(token);
+  res.json({ ok: true });
+});
+
+// GET /api/customers/check - Check customer session
+app.get('/api/customers/check', (req, res) => {
+  const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
+  const session = isValidCustomerSession(token);
+  res.json({ 
+    authenticated: !!session,
+    customer: session ? { id: session.customerId, email: session.email } : null
+  });
+});
+
+// GET /api/customers/me - Get current customer info
+app.get('/api/customers/me', requireCustomerAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT id, email, business_name, contact_name, phone, address, city, country, 
+             status, email_verified, created_at, last_login
+      FROM customers WHERE id = $1
+    `, [req.customer.customerId]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found.' });
+    }
+    
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Get customer error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/customers/me - Update customer profile
+app.put('/api/customers/me', requireCustomerAuth, async (req, res) => {
+  try {
+    const { businessName, contactName, phone, address, city, country } = req.body || {};
+    
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+    
+    if (businessName) {
+      updates.push(`business_name = $${paramCount++}`);
+      values.push(sanitizeStr(businessName, 200));
+    }
+    if (contactName !== undefined) {
+      updates.push(`contact_name = $${paramCount++}`);
+      values.push(sanitizeStr(contactName, 200));
+    }
+    if (phone !== undefined) {
+      updates.push(`phone = $${paramCount++}`);
+      values.push(sanitizeStr(phone, 50));
+    }
+    if (address !== undefined) {
+      updates.push(`address = $${paramCount++}`);
+      values.push(sanitizeStr(address, 500));
+    }
+    if (city !== undefined) {
+      updates.push(`city = $${paramCount++}`);
+      values.push(sanitizeStr(city, 100));
+    }
+    if (country !== undefined) {
+      updates.push(`country = $${paramCount++}`);
+      values.push(sanitizeStr(country, 100));
+    }
+    
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update.' });
+    }
+    
+    updates.push(`updated_at = $${paramCount++}`);
+    values.push(new Date().toISOString());
+    values.push(req.customer.customerId);
+    
+    await pool.query(
+      `UPDATE customers SET ${updates.join(', ')} WHERE id = $${paramCount}`,
+      values
+    );
+    
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Update customer error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/customers/:id/menus - Get customer's menus
+app.get('/api/customers/:id/menus', requireCustomerAuth, async (req, res) => {
+  try {
+    // Customers can only view their own menus
+    if (parseInt(req.params.id) !== req.customer.customerId) {
+      return res.status(403).json({ error: 'Access denied.' });
+    }
+    
+    const { rows } = await pool.query(`
+      SELECT m.*, 
+        (SELECT COUNT(*) FROM menu_items WHERE menu_id = m.id) AS item_count,
+        s.status as subscription_status,
+        sp.display_name as plan_name
+      FROM menus m
+      LEFT JOIN subscriptions s ON s.menu_id = m.id
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE m.customer_id = $1
+      ORDER BY m.created_at DESC
+    `, [req.customer.customerId]);
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Get customer menus error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin endpoint: GET /api/admin/customers - List all customers
+app.get('/api/admin/customers', requireAuth, async (req, res) => {
+  try {
+    const status = req.query.status || 'active';
+    const { rows } = await pool.query(`
+      SELECT 
+        c.*,
+        COUNT(DISTINCT m.id) as menu_count,
+        SUM(m.total_scans) as total_scans
+      FROM customers c
+      LEFT JOIN menus m ON m.customer_id = c.id
+      WHERE c.status = $1
+      GROUP BY c.id
+      ORDER BY c.created_at DESC
+    `, [status]);
+    
+    res.json(rows);
+  } catch (err) {
+    console.error('Get customers error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin endpoint: GET /api/admin/customers/:id - Get customer details
+app.get('/api/admin/customers/:id', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT c.*,
+        COUNT(DISTINCT m.id) as menu_count,
+        SUM(m.total_scans) as total_scans
+      FROM customers c
+      LEFT JOIN menus m ON m.customer_id = c.id
+      WHERE c.id = $1
+      GROUP BY c.id
+    `, [req.params.id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found.' });
+    }
+    
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Get customer details error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET /api/health  – health check for containers/monitoring
