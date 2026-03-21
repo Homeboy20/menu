@@ -163,6 +163,9 @@ app.use(helmet({
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
       connectSrc:    ["'self'"],
+      frameAncestors: ["'self'"],  // Allow framing from same origin
+      formAction:    ["'self'"],   // Restrict form submissions to same origin
+      baseUri:       ["'self'"],   // Prevent base tag attacks
     },
   },
   crossOriginEmbedderPolicy: false, // needed for fonts/CDN on same page
