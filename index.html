@@ -1840,6 +1840,26 @@
       .exit-popup-discount-text { font-size: 36px; }
     }
   </style>
+  
+  <!-- Crisp Live Chat Widget -->
+  <script type="text/javascript">
+    window.$crisp = [];
+    window.CRISP_WEBSITE_ID = "YOUR_CRISP_WEBSITE_ID"; // Replace with your actual Crisp website ID
+    (function() {
+      var d = document;
+      var s = d.createElement("script");
+      s.src = "https://client.crisp.chat/l.js";
+      s.async = 1;
+      d.getElementsByTagName("head")[0].appendChild(s);
+    })();
+    
+    // Set Crisp user data (if available)
+    if (typeof $crisp !== 'undefined') {
+      // You can set user email, name, etc. here
+      // $crisp.push(["set", "user:email", ["user@example.com"]]);
+      // $crisp.push(["set", "user:nickname", ["John Doe"]]);
+    }
+  </script>
 </head>
 <body>
 
@@ -3054,6 +3074,12 @@
       startUrgencyCountdown();
     });
   </script>
+  
+  <!-- A/B Testing Framework -->
+  <script src="/js/ab-testing.js"></script>
+  
+  <!-- Live Chat Behavioral Triggers -->
+  <script src="/js/chat-triggers.js"></script>
 
 </body>
 </html>

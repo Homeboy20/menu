@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - RestOrder | Digital Menu Platform</title>
+  <meta name="description" content="Learn about RestOrder's mission to help restaurants, cafes, and bars succeed with modern digital menu technology. Trusted by 1,247+ businesses worldwide.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --primary: #c2410c;
+      --primary-dark: #9a3412;
+      --primary-light: #ea580c;
+      --accent: #4d7c5f;
+      --bg: #fafaf9;
+      --text: #1c1917;
+      --text-light: #78716c;
+      --border: #e7e5e4;
+      --surface: #ffffff;
+      --gradient-1: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      --gradient-2: linear-gradient(135deg, #4d7c5f 0%, #6aaa82 100%);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    }
+    
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      list-style: none;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+    
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(194, 65, 12, 0.2);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(194, 65, 12, 0.3);
+    }
+    
+    /* Hero Section */
+    .hero-about {
+      padding: 140px 0 80px;
+      background: linear-gradient(135deg, #fff9f5 0%, #fef3f2 100%);
+      text-align: center;
+    }
+    
+    .hero-about h1 {
+      font-size: 56px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero-about p {
+      font-size: 20px;
+      color: var(--text-light);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+      padding: 80px 0;
+      background: white;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      text-align: center;
+    }
+    
+    .stat-item h3 {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    
+    .stat-item p {
+      font-size: 16px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    
+    /* Story Section */
+    .story-section {
+      padding: 100px 0;
+      background: var(--bg);
+    }
+    
+    .story-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .story-content h2 {
+      font-size: 40px;
+      font-weight: 900;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    
+    .story-content p {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+    
+    .story-highlight {
+      background: white;
+      border-left: 4px solid var(--primary);
+      padding: 24px 32px;
+      margin: 40px 0;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .story-highlight p {
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text);
+      margin: 0;
+    }
+    
+    /* Values Section */
+    .values-section {
+      padding: 100px 0;
+      background: white;
+    }
+    
+    .values-section h2 {
+      font-size: 40px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    
+    .value-card {
+      background: var(--bg);
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .value-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .value-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient-1);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: white;
+      font-size: 40px;
+    }
+    
+    .value-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .value-card p {
+      font-size: 16px;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+    
+    /* Team Section */
+    .team-section {
+      padding: 100px 0;
+      background: var(--bg);
+    }
+    
+    .team-section h2 {
+      font-size: 40px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    
+    .team-member {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .team-member:hover {
+      transform: translateY(-4px);
+    }
+    
+    .team-photo {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      color: white;
+    }
+    
+    .team-info {
+      padding: 32px;
+    }
+    
+    .team-info h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .team-info .role {
+      font-size: 16px;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .team-info p {
+      font-size: 15px;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+      padding: 100px 0;
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      color: white;
+      text-align: center;
+    }
+    
+    .cta-section h2 {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 24px;
+    }
+    
+    .cta-section p {
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.95;
+    }
+    
+    .btn-white {
+      background: white;
+      color: var(--primary);
+      padding: 16px 40px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 18px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+    }
+    
+    /* Footer */
+    footer {
+      background: #1c1917;
+      color: white;
+      padding: 60px 0 30px;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 40px;
+    }
+    
+    .footer-brand .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+    
+    .footer-description {
+      color: #a8a29e;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    
+    .footer-links h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .footer-links ul {
+      list-style: none;
+    }
+    
+    .footer-links ul li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-links ul li a {
+      color: #a8a29e;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer-links ul li a:hover {
+      color: white;
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid #3f3f3f;
+      color: #a8a29e;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-about h1 { font-size: 36px; }
+      .hero-about p { font-size: 18px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .values-grid { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">
+        <div class="logo-icon">🍽️</div>
+        <span>RestOrder</span>
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/features">Features</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+      
+      <a href="/register" class="btn-primary">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Start Free Trial
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-about">
+    <div class="container">
+      <h1>We're On a Mission to Help<br>Restaurants Thrive</h1>
+      <p>RestOrder was born from a simple observation: restaurants waste thousands on outdated menus while customers crave digital convenience. We're changing that.</p>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <h3>1,247+</h3>
+          <p>Active Businesses</p>
+        </div>
+        <div class="stat-item">
+          <h3>$2.8M+</h3>
+          <p>Cost Savings Generated</p>
+        </div>
+        <div class="stat-item">
+          <h3>99.9%</h3>
+          <p>Uptime Guarantee</p>
+        </div>
+        <div class="stat-item">
+          <h3>4.9/5</h3>
+          <p>Customer Rating</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Story -->
+  <section class="story-section">
+    <div class="container">
+      <div class="story-content">
+        <h2>Our Story</h2>
+        
+        <p>In 2023, our founder walked into his favorite Italian restaurant and noticed something frustrating: Beautiful food, amazing service, but sticky laminated menus with outdated prices. When he asked the owner about it, she sighed: "We change our menu every season, but reprinting costs $800-$1,200 each time. So we just... live with it."</p>
+        
+        <p>That moment sparked an idea. What if restaurants could update menus instantly? What if every table had a QR code linking to a beautiful, always-current digital menu? What if this didn't require technical expertise or massive upfront costs?</p>
+        
+        <div class="story-highlight">
+          <p>"We built RestOrder for that Italian restaurant owner. And for the 767,000 other restaurants, cafes, bars, and eateries facing the same challenge."</p>
+        </div>
+        
+        <p>Within months, we launched our MVP. Within a year, we'd helped 1,247+ businesses save over $2.8 million in printing costs alone. But the real impact goes beyond savings: faster table turns, higher average orders, real-time menu updates, detailed analytics, and happier customers.</p>
+        
+        <p>Today, RestOrder powers digital menus for restaurants from family-owned cafes to multi-location chains. We're not just a software company—we're partners in your success.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Values -->
+  <section class="values-section">
+    <div class="container">
+      <h2>Our Core Values</h2>
+      
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">restaurant</span>
+          </div>
+          <h3>Restaurant-First</h3>
+          <p>Every feature we build starts with one question: "Does this help restaurants succeed?" If the answer isn't yes, we don't build it.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">speed</span>
+          </div>
+          <h3>Simplicity Wins</h3>
+          <p>Technology should be invisible. Our platform is powerful yet simple—setup takes minutes, not days. No training manuals required.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">psychology</span>
+          </div>
+          <h3>Customer Success</h3>
+          <p>Your success is our success. We're obsessed with helping you increase revenue, reduce costs, and delight your customers.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">attach_money</span>
+          </div>
+          <h3>Fair Pricing</h3>
+          <p>We believe great technology should be accessible. That's why we offer a forever-free plan and transparent pricing with no hidden fees.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">security</span>
+          </div>
+          <h3>Bank-Level Security</h3>
+          <p>We protect your data like it's our own. Enterprise-grade encryption, GDPR compliance, and 99.9% uptime guaranteed.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <span class="material-symbols-outlined">trending_up</span>
+          </div>
+          <h3>Continuous Innovation</h3>
+          <p>The restaurant industry evolves. So do we. Every quarter, we ship new features based on your feedback and market trends.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section">
+    <div class="container">
+      <h2>Meet the Team</h2>
+      
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="team-photo">👨‍💼</div>
+          <div class="team-info">
+            <h3>Marcus Chen</h3>
+            <p class="role">Founder & CEO</p>
+            <p>Former restaurant tech consultant. Built RestOrder after seeing firsthand how outdated systems held back great restaurants.</p>
+          </div>
+        </div>
+        
+        <div class="team-member">
+          <div class="team-photo">👩‍💻</div>
+          <div class="team-info">
+            <h3>Sarah Martinez</h3>
+            <p class="role">Head of Product</p>
+            <p>15 years in SaaS product development. Previously led teams at Toast and Square. Obsessed with user experience.</p>
+          </div>
+        </div>
+        
+        <div class="team-member">
+          <div class="team-photo">👨‍🍳</div>
+          <div class="team-info">
+            <h3>David Park</h3>
+            <p class="role">Customer Success Lead</p>
+            <p>Former restaurant owner turned customer advocate. Ensures every RestOrder customer achieves their goals.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Ready to Join 1,247+ Successful Restaurants?</h2>
+      <p>Start your free trial today. No credit card required.</p>
+      <a href="/register" class="btn-white">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Start Free Trial Now
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <span style="font-size: 32px;">🍽️</span>
+            <span>RestOrder</span>
+          </div>
+          <p class="footer-description">
+            The complete digital menu platform for modern restaurants, cafes, bars & eateries.
+          </p>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/features">Features</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+            <li><a href="/register">Get Started</a></li>
+            <li><a href="/customer-login">Sign In</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/faq">FAQ</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -284,7 +284,13 @@ app.use((req, res, next) => {
     '/analytics': 'analytics.html',
     '/payments': 'payments.html',
     '/admin-menus': 'admin-menus.html',
-    '/pricing': 'pricing.html'
+    '/pricing': 'pricing.html',
+    '/features': 'features.html',
+    '/about': 'about.html',
+    '/contact': 'contact.html',
+    '/faq': 'faq.html',
+    '/privacy': 'privacy.html',
+    '/terms': 'terms.html'
   };
   
   // Check if we have a mapping for this URL
@@ -1234,7 +1240,7 @@ function requireCustomerAuth(req, res, next) {
 // POST /api/customers/register - Create new customer account
 app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
-    const { email, password, businessName, contactName, phone } = req.body || {};
+    const { email, password, businessName, contactName, phone, promoCode } = req.body || {};
     
     // Validation
     if (!email || !password || !businessName) {
@@ -1276,14 +1282,38 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
     const cleanBusinessName = sanitizeInput(businessName, 200);
     const cleanContactName = sanitizeInput(contactName || '', 200);
     const cleanPhone = sanitizeInput(phone || '', 50);
+    const cleanPromoCode = promoCode ? sanitizeInput(promoCode, 50).toUpperCase() : null;
+    
+    // Validate and apply promo code
+    let discountPercent = 0;
+    let discountMonths = 0;
+    let promoDetails = null;
+    
+    if (cleanPromoCode) {
+      const validPromoCodes = {
+        'TRIAL50': { discount: 50, months: 3, description: '50% off for 3 months' },
+        'EXIT50': { discount: 50, months: 3, description: '50% off for 3 months (exit intent)' },
+        'LAUNCH25': { discount: 25, months: 6, description: '25% off for 6 months' },
+        'ANNUAL20': { discount: 20, months: 12, description: '20% off annual plan' }
+      };
+      
+      if (validPromoCodes[cleanPromoCode]) {
+        promoDetails = validPromoCodes[cleanPromoCode];
+        discountPercent = promoDetails.discount;
+        discountMonths = promoDetails.months;
+        console.log(`✅ Promo code applied: ${cleanPromoCode} - ${promoDetails.description}`);
+      } else {
+        console.log(`⚠️ Invalid promo code attempted: ${cleanPromoCode}`);
+      }
+    }
     
     // Create customer
     const now = new Date().toISOString();
     const { rows } = await pool.query(`
-      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at)
-      VALUES ($1, $2, $3, $4, $5, 'active', $6)
-      RETURNING id, email, business_name, contact_name, phone, status, created_at
-    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, cleanPhone, now]);
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months)
+      VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, $9)
+      RETURNING id, email, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months
+    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, cleanPhone, now, cleanPromoCode, discountPercent, discountMonths]);
     
     const customer = rows[0];
     
@@ -1308,8 +1338,13 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
         contactName: customer.contact_name,
         phone: customer.phone,
         status: customer.status,
-        createdAt: customer.created_at
+        createdAt: customer.created_at,
+        promoCode: customer.promo_code,
+        discountPercent: customer.discount_percent,
+        discountMonths: customer.discount_months
       },
+      promoApplied: promoDetails ? true : false,
+      promoDetails: promoDetails,
       token,
       expiresIn: SESSION_TTL
     });
