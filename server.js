@@ -198,6 +198,75 @@ function requireAuth(req, res, next) {
   res.status(401).json({ error: 'Unauthorised. Please log in.' });
 }
 
+// ── Subscription middleware (checks plan limits) ────────────────────────────────
+async function checkSubscriptionLimit(req, res, next) {
+  try {
+    // Get menu ID from request (could be in params or body)
+    const menuId = req.params.id || req.body.menu_id;
+    
+    if (!menuId) {
+      // If no menu ID, this might be a create operation or not menu-specific
+      // For create operations, we'd need to check total menu count
+      // For now, let it pass and handle in the route
+      return next();
+    }
+    
+    // Get subscription for this menu
+    const { rows } = await pool.query(`
+      SELECT 
+        s.status, 
+        sp.menu_limit, 
+        sp.display_name as plan_name
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.menu_id = $1
+    `, [menuId]);
+    
+    if (!rows.length) {
+      // No subscription found - allow but should auto-assign starter
+      return next();
+    }
+    
+    const subscription = rows[0];
+    
+    // Check if subscription is active
+    if (subscription.status !== 'active') {
+      return res.status(403).json({ 
+        error: 'Subscription is not active. Please renew your subscription.',
+        subscription_status: subscription.status
+      });
+    }
+    
+    // For menu creation, check if limit reached
+    if (req.method === 'POST' && req.path.includes('/menus')) {
+      const { rows: menuCount } = await pool.query(
+        'SELECT COUNT(*) as count FROM menus'
+      );
+      
+      const currentCount = parseInt(menuCount[0].count) || 0;
+      
+      if (currentCount >= subscription.menu_limit && subscription.menu_limit < 999) {
+        return res.status(403).json({ 
+          error: `You have reached your plan limit of ${subscription.menu_limit} menu(s). Please upgrade to create more.`,
+          current_plan: subscription.plan_name,
+          limit: subscription.menu_limit,
+          current_count: currentCount
+        });
+      }
+    }
+    
+    // Attach subscription info to request for use in routes
+    req.subscription = subscription;
+    next();
+    
+  } catch (err) {
+    console.error('Subscription check error:', err);
+    // On error, allow the request to continue (fail open)
+    next();
+  }
+}
+
+
 
 // ── Directories ───────────────────────────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -380,6 +449,90 @@ async function initDB() {
     // Migration: add customer columns if missing
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT ''`);
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT ''`);
+
+    // ── Subscription Management Tables ──────────────────────────────────────────
+    
+    // Subscription Plans table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS subscription_plans (
+        id              SERIAL PRIMARY KEY,
+        name            TEXT NOT NULL UNIQUE,
+        display_name    TEXT NOT NULL,
+        price           REAL NOT NULL,
+        interval        TEXT NOT NULL DEFAULT 'monthly',
+        menu_limit      INTEGER NOT NULL DEFAULT 1,
+        location_limit  INTEGER NOT NULL DEFAULT 1,
+        features        JSONB NOT NULL DEFAULT '[]',
+        is_active       INTEGER NOT NULL DEFAULT 1,
+        sort_order      INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_plans_active ON subscription_plans (is_active)`);
+
+    // Subscriptions table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS subscriptions (
+        id              SERIAL PRIMARY KEY,
+        menu_id         TEXT NOT NULL UNIQUE REFERENCES menus(id) ON DELETE CASCADE,
+        plan_id         INTEGER NOT NULL REFERENCES subscription_plans(id),
+        status          TEXT NOT NULL DEFAULT 'active',
+        start_date      TEXT NOT NULL,
+        end_date        TEXT,
+        trial_end       TEXT,
+        cancel_at_end   INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT NOT NULL,
+        updated_at      TEXT
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_menu ON subscriptions (menu_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_plan ON subscriptions (plan_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_status ON subscriptions (status)`);
+
+    // Payments table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id                SERIAL PRIMARY KEY,
+        subscription_id   INTEGER NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+        amount            REAL NOT NULL,
+        currency          TEXT NOT NULL DEFAULT 'USD',
+        payment_method    TEXT NOT NULL DEFAULT 'manual',
+        payment_id        TEXT NOT NULL DEFAULT '',
+        status            TEXT NOT NULL DEFAULT 'pending',
+        paid_at           TEXT,
+        notes             TEXT DEFAULT '',
+        created_at        TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_sub ON payments (subscription_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
+
+    // Usage tracking table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS usage_tracking (
+        id              SERIAL PRIMARY KEY,
+        menu_id         TEXT NOT NULL UNIQUE REFERENCES menus(id) ON DELETE CASCADE,
+        menus_count     INTEGER NOT NULL DEFAULT 1,
+        locations_count INTEGER NOT NULL DEFAULT 1,
+        scans_count     INTEGER NOT NULL DEFAULT 0,
+        updated_at      TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_usage_menu ON usage_tracking (menu_id)`);
+
+    // Seed default subscription plans if empty
+    const { rows: existingPlans } = await client.query('SELECT COUNT(*) FROM subscription_plans');
+    if (parseInt(existingPlans[0].count) === 0) {
+      const now = new Date().toISOString();
+      await client.query(`
+        INSERT INTO subscription_plans (name, display_name, price, interval, menu_limit, location_limit, features, is_active, sort_order, created_at)
+        VALUES
+          ('starter', 'Starter', 0, 'monthly', 1, 1, '["Digital Menu", "QR Code Generation", "Mobile Responsive", "Basic Analytics"]', 1, 1, $1),
+          ('professional', 'Professional', 39, 'monthly', 5, 3, '["Everything in Starter", "Custom Branding", "Online Ordering", "Customer Ratings", "Multiple Locations", "Priority Support"]', 1, 2, $1),
+          ('enterprise', 'Enterprise', 99, 'monthly', 999, 999, '["Everything in Professional", "Unlimited Menus", "Unlimited Locations", "Advanced Analytics", "API Access", "White Label", "Dedicated Support"]', 1, 3, $1)
+      `, [now]);
+      console.log('  ✓ Seeded subscription plans');
+    }
 
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
@@ -2090,6 +2243,274 @@ app.post('/api/items/:itemId/rate', async (req, res) => {
     menuCache.delete(menuId);
 
     res.json({ avgRating: newAvg, ratingCount: count });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Subscription Management ───────────────────────────────────────────────────
+
+// GET /api/subscription-plans - Get all subscription plans
+app.get('/api/subscription-plans', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY sort_order'
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/subscriptions - Admin: List all subscriptions
+app.get('/api/subscriptions', requireAuth, async (req, res) => {
+  try {
+    const status = req.query.status || 'active';
+    const { rows } = await pool.query(`
+      SELECT 
+        s.*, 
+        sp.display_name as plan_name, 
+        sp.price as plan_price,
+        m.restaurant_name,
+        m.total_scans
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      JOIN menus m ON s.menu_id = m.id
+      WHERE s.status = $1
+      ORDER BY s.created_at DESC
+    `, [status]);
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/subscriptions/:id - Get subscription details
+app.get('/api/subscriptions/:id', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+        s.*, 
+        sp.display_name as plan_name, 
+        sp.price as plan_price,
+        sp.menu_limit,
+        sp.location_limit,
+        sp.features,
+        m.restaurant_name
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      JOIN menus m ON s.menu_id = m.id
+      WHERE s.id = $1
+    `, [req.params.id]);
+    
+    if (!rows.length) return res.status(404).json({ error: 'Subscription not found.' });
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/menus/:id/subscription - Get subscription for a menu
+app.get('/api/menus/:id/subscription', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+        s.*, 
+        sp.display_name as plan_name, 
+        sp.price as plan_price,
+        sp.menu_limit,
+        sp.location_limit,
+        sp.features
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.menu_id = $1
+    `, [req.params.id]);
+    
+    if (!rows.length) {
+      // Auto-assign Starter plan if no subscription exists
+      const { rows: starterPlan } = await pool.query(
+        "SELECT id FROM subscription_plans WHERE name = 'starter' LIMIT 1"
+      );
+      
+      if (starterPlan.length) {
+        const now = new Date().toISOString();
+        const { rows: newSub } = await pool.query(`
+          INSERT INTO subscriptions (menu_id, plan_id, status, start_date, created_at)
+          VALUES ($1, $2, 'active', $3, $3)
+          ON CONFLICT (menu_id) DO NOTHING
+          RETURNING *
+        `, [req.params.id, starterPlan[0].id, now]);
+        
+        if (newSub.length) {
+          const { rows: fullSub } = await pool.query(`
+            SELECT 
+              s.*, 
+              sp.display_name as plan_name, 
+              sp.price as plan_price,
+              sp.menu_limit,
+              sp.location_limit,
+              sp.features
+            FROM subscriptions s
+            JOIN subscription_plans sp ON s.plan_id = sp.id
+            WHERE s.id = $1
+          `, [newSub[0].id]);
+          
+          return res.json(fullSub[0]);
+        }
+      }
+      
+      return res.status(404).json({ error: 'No subscription found.' });
+    }
+    
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/subscriptions - Admin: Create subscription
+app.post('/api/subscriptions', requireAuth, async (req, res) => {
+  try {
+    const menuId = sanitizeStr(req.body.menu_id, 100);
+    const planId = parseInt(req.body.plan_id) || 0;
+    
+    if (!menuId || !planId) {
+      return res.status(400).json({ error: 'menu_id and plan_id required.' });
+    }
+    
+    // Check if subscription already exists
+    const existing = await pool.query('SELECT id FROM subscriptions WHERE menu_id = $1', [menuId]);
+    if (existing.rows.length) {
+      return res.status(400).json({ error: 'Subscription already exists for this menu.' });
+    }
+    
+    const now = new Date().toISOString();
+    const { rows } = await pool.query(`
+      INSERT INTO subscriptions (menu_id, plan_id, status, start_date, created_at)
+      VALUES ($1, $2, 'active', $3, $3) RETURNING *
+    `, [menuId, planId, now]);
+    
+    // Initialize usage tracking
+    await pool.query(`
+      INSERT INTO usage_tracking (menu_id, menus_count, locations_count, scans_count, updated_at)
+      VALUES ($1, 1, 1, 0, $2)
+      ON CONFLICT (menu_id) DO NOTHING
+    `, [menuId, now]);
+    
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/subscriptions/:id - Admin: Update subscription (upgrade/downgrade)
+app.put('/api/subscriptions/:id', requireAuth, async (req, res) => {
+  try {
+    const subId = req.params.id;
+    const planId = parseInt(req.body.plan_id);
+    const status = sanitizeStr(req.body.status, 20);
+    const cancelAtEnd = req.body.cancel_at_end ? 1 : 0;
+    
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+    
+    if (planId) {
+      updates.push(`plan_id = $${paramCount++}`);
+      values.push(planId);
+    }
+    
+    if (status) {
+      updates.push(`status = $${paramCount++}`);
+      values.push(status);
+    }
+    
+    if (req.body.cancel_at_end !== undefined) {
+      updates.push(`cancel_at_end = $${paramCount++}`);
+      values.push(cancelAtEnd);
+    }
+    
+    if (req.body.end_date) {
+      updates.push(`end_date = $${paramCount++}`);
+      values.push(req.body.end_date);
+    }
+    
+    if (!updates.length) {
+      return res.status(400).json({ error: 'No fields to update.' });
+    }
+    
+    updates.push(`updated_at = $${paramCount++}`);
+    values.push(new Date().toISOString());
+    values.push(subId);
+    
+    await pool.query(
+      `UPDATE subscriptions SET ${updates.join(', ')} WHERE id = $${paramCount}`,
+      values
+    );
+    
+    // Log payment if plan changed
+    if (planId) {
+      const { rows: planRows } = await pool.query('SELECT price FROM subscription_plans WHERE id = $1', [planId]);
+      if (planRows.length && planRows[0].price > 0) {
+        await pool.query(`
+          INSERT INTO payments (subscription_id, amount, currency, payment_method, status, created_at)
+          VALUES ($1, $2, 'USD', 'upgrade', 'pending', $3)
+        `, [subId, planRows[0].price, new Date().toISOString()]);
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/subscriptions/:id - Admin: Cancel subscription
+app.delete('/api/subscriptions/:id', requireAuth, async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE subscriptions SET status = 'cancelled', cancel_at_end = 1, updated_at = $1 WHERE id = $2`,
+      [new Date().toISOString(), req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/subscriptions/:id/payments - Get payment history
+app.get('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM payments WHERE subscription_id = $1 ORDER BY created_at DESC LIMIT 50',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/subscriptions/:id/payments - Admin: Record payment
+app.post('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
+  try {
+    const subId = req.params.id;
+    const amount = parseFloat(req.body.amount) || 0;
+    const currency = sanitizeStr(req.body.currency, 10) || 'USD';
+    const paymentMethod = sanitizeStr(req.body.payment_method, 50) || 'manual';
+    const status = sanitizeStr(req.body.status, 20) || 'completed';
+    const notes = sanitizeStr(req.body.notes, 500) || '';
+    const now = new Date().toISOString();
+    
+    const { rows } = await pool.query(`
+      INSERT INTO payments (subscription_id, amount, currency, payment_method, status, paid_at, notes, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+    `, [subId, amount, currency, paymentMethod, status, now, notes, now]);
+    
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/menus/:id/usage - Get usage stats for a menu
+app.get('/api/menus/:id/usage', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT * FROM usage_tracking WHERE menu_id = $1
+    `, [req.params.id]);
+    
+    if (!rows.length) {
+      // Create initial usage tracking
+      const now = new Date().toISOString();
+      const { rows: newRows } = await pool.query(`
+        INSERT INTO usage_tracking (menu_id, menus_count, locations_count, scans_count, updated_at)
+        VALUES ($1, 1, 1, 0, $2) RETURNING *
+      `, [req.params.id, now]);
+      return res.json(newRows[0]);
+    }
+    
+    res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
