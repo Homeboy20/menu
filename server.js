@@ -2869,6 +2869,203 @@ app.get('/api/menus/:id/usage', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Customer Subscription Management ──────────────────────────────────────────
+
+// GET /api/customers/subscriptions - Get customer's subscriptions for all menus
+app.get('/api/customers/subscriptions', requireCustomerAuth, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    
+    // Get all menus for this customer with their subscriptions
+    const { rows } = await pool.query(`
+      SELECT 
+        m.id as menu_id,
+        m.restaurant_name,
+        s.id as subscription_id,
+        s.status,
+        s.start_date,
+        s.end_date,
+        sp.id as plan_id,
+        sp.name as plan_name,
+        sp.display_name as plan_display_name,
+        sp.price as plan_price,
+        sp.interval,
+        sp.menu_limit,
+        sp.location_limit,
+        sp.features,
+        u.menus_count,
+        u.locations_count,
+        u.scans_count
+      FROM menus m
+      LEFT JOIN subscriptions s ON m.id = s.menu_id
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      LEFT JOIN usage_tracking u ON m.id = u.menu_id
+      WHERE m.customer_id = $1
+      ORDER BY m.created_at DESC
+    `, [customerId]);
+    
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/customers/subscription/change - Customer: Change subscription plan
+app.post('/api/customers/subscription/change', requireCustomerAuth, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const menuId = sanitizeStr(req.body.menu_id, 100);
+    const planId = parseInt(req.body.plan_id);
+    
+    if (!menuId || !planId) {
+      return res.status(400).json({ error: 'menu_id and plan_id required.' });
+    }
+    
+    // Verify the menu belongs to this customer
+    const { rows: menuRows } = await pool.query(
+      'SELECT id FROM menus WHERE id = $1 AND customer_id = $2',
+      [menuId, customerId]
+    );
+    
+    if (!menuRows.length) {
+      return res.status(403).json({ error: 'You do not have permission to modify this menu.' });
+    }
+    
+    // Get the new plan details
+    const { rows: planRows } = await pool.query(
+      'SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1',
+      [planId]
+    );
+    
+    if (!planRows.length) {
+      return res.status(404).json({ error: 'Subscription plan not found.' });
+    }
+    
+    const newPlan = planRows[0];
+    const now = new Date().toISOString();
+    
+    // Check if subscription exists
+    const { rows: existingSub } = await pool.query(
+      'SELECT id, plan_id FROM subscriptions WHERE menu_id = $1',
+      [menuId]
+    );
+    
+    if (existingSub.length) {
+      // Update existing subscription
+      const subId = existingSub[0].id;
+      const oldPlanId = existingSub[0].plan_id;
+      
+      await pool.query(`
+        UPDATE subscriptions 
+        SET plan_id = $1, status = 'active', updated_at = $2 
+        WHERE id = $3
+      `, [planId, now, subId]);
+      
+      // Log payment if upgrading to paid plan
+      if (newPlan.price > 0) {
+        await pool.query(`
+          INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
+          VALUES ($1, $2, 'USD', 'customer_upgrade', 'pending', $3, $4)
+        `, [
+          subId,
+          newPlan.price,
+          `Plan changed from plan_id ${oldPlanId} to ${planId}`,
+          now
+        ]);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Subscription updated successfully',
+        subscription_id: subId,
+        plan: newPlan
+      });
+    } else {
+      // Create new subscription
+      const { rows: newSub } = await pool.query(`
+        INSERT INTO subscriptions (menu_id, plan_id, status, start_date, created_at)
+        VALUES ($1, $2, 'active', $3, $3) RETURNING id
+      `, [menuId, planId, now]);
+      
+      const subId = newSub[0].id;
+      
+      // Initialize usage tracking
+      await pool.query(`
+        INSERT INTO usage_tracking (menu_id, menus_count, locations_count, scans_count, updated_at)
+        VALUES ($1, 1, 1, 0, $2)
+        ON CONFLICT (menu_id) DO NOTHING
+      `, [menuId, now]);
+      
+      // Log payment if it's a paid plan
+      if (newPlan.price > 0) {
+        await pool.query(`
+          INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
+          VALUES ($1, $2, 'USD', 'customer_signup', 'pending', 'New subscription', $3)
+        `, [subId, newPlan.price, now]);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Subscription created successfully',
+        subscription_id: subId,
+        plan: newPlan
+      });
+    }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/customers/subscription/cancel - Customer: Cancel subscription
+app.post('/api/customers/subscription/cancel', requireCustomerAuth, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const menuId = sanitizeStr(req.body.menu_id, 100);
+    
+    if (!menuId) {
+      return res.status(400).json({ error: 'menu_id required.' });
+    }
+    
+    // Verify the menu belongs to this customer
+    const { rows: menuRows } = await pool.query(
+      'SELECT id FROM menus WHERE id = $1 AND customer_id = $2',
+      [menuId, customerId]
+    );
+    
+    if (!menuRows.length) {
+      return res.status(403).json({ error: 'You do not have permission to modify this menu.' });
+    }
+    
+    // Get subscription
+    const { rows: subRows } = await pool.query(
+      'SELECT id, plan_id FROM subscriptions WHERE menu_id = $1',
+      [menuId]
+    );
+    
+    if (!subRows.length) {
+      return res.status(404).json({ error: 'No subscription found.' });
+    }
+    
+    const now = new Date().toISOString();
+    
+    // Set to cancel at end of period (downgrade to starter)
+    const { rows: starterPlan } = await pool.query(
+      "SELECT id FROM subscription_plans WHERE name = 'starter' LIMIT 1"
+    );
+    
+    if (starterPlan.length) {
+      await pool.query(`
+        UPDATE subscriptions 
+        SET plan_id = $1, cancel_at_end = 1, updated_at = $2 
+        WHERE id = $3
+      `, [starterPlan[0].id, now, subRows[0].id]);
+      
+      res.json({ 
+        success: true, 
+        message: 'Subscription will be downgraded to Starter (Free) plan.'
+      });
+    } else {
+      res.status(500).json({ error: 'Unable to process cancellation.' });
+    }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 (async () => {
   await initDB();

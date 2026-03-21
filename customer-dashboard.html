@@ -330,6 +330,9 @@ async function loadDashboard() {
     
     const menus = await menusRes.json();
     
+    // Store menus globally for subscription management
+    window.customerMenus = menus;
+    
     // Update stats
     document.getElementById('stat-menus').textContent = menus.length;
     const totalScans = menus.reduce((sum, m) => sum + (m.total_scans || 0), 0);
@@ -477,20 +480,186 @@ function showSection(section) {
 // Load subscription info
 async function loadSubscription() {
   const container = document.getElementById('subscription-content');
-  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span><p class="text-slate-400">Loading...</p></div>';
+  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span><p class="text-slate-400">Loading subscription details...</p></div>';
   
-  // For now, just show placeholder
-  setTimeout(() => {
+  try {
+    // Fetch available plans and customer's subscriptions
+    const [plansRes, subsRes] = await Promise.all([
+      fetch('/api/subscription-plans'),
+      fetch('/api/customers/subscriptions', {
+        headers: { 'x-customer-token': getToken() }
+      })
+    ]);
+    
+    if (!plansRes.ok || !subsRes.ok) throw new Error('Failed to load subscription data');
+    
+    const plans = await plansRes.json();
+    const subscriptions = await subsRes.json();
+    
+    // Get primary subscription (first menu's subscription)
+    const currentSub = subscriptions.find(s => s.subscription_id) || subscriptions[0];
+    const currentPlanId = currentSub?.plan_id || plans.find(p => p.name === 'starter')?.id;
+    const currentPlan = plans.find(p => p.id === currentPlanId);
+    
+    // Render subscription UI
     container.innerHTML = `
-      <div class="bg-surface border border-slate-700 rounded-2xl p-8">
-        <h3 class="text-xl font-bold mb-6">Current Plan: Starter (FREE)</h3>
-        <p class="text-slate-400 mb-6">You're currently on our free Starter plan. Upgrade to unlock more features and create unlimited menus.</p>
-        <a href="index.html#pricing" class="inline-block px-6 py-3 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
-          View Plans & Upgrade
-        </a>
+      <!-- Current Plan Overview -->
+      <div class="bg-surface border border-slate-700 rounded-2xl p-8 mb-8">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-2xl font-bold mb-2">${escapeHtml(currentPlan?.display_name || 'Starter')}</h3>
+            <p class="text-3xl font-bold text-primary mb-1">
+              ${currentPlan?.price === 0 ? 'FREE' : `$${currentPlan?.price || 0}`}
+              ${currentPlan?.price > 0 ? `<span class="text-lg text-slate-400 font-normal">/${currentPlan?.interval || 'month'}</span>` : ''}
+            </p>
+          </div>
+          <div class="px-4 py-2 bg-primary/20 text-primary rounded-xl border border-primary/30 text-sm font-semibold">
+            Current Plan
+          </div>
+        </div>
+        
+        ${currentSub?.menu_id ? `
+          <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-700">
+            <div>
+              <p class="text-slate-400 text-sm mb-1">Menu Limit</p>
+              <p class="text-lg font-semibold">${currentPlan?.menu_limit === 999 ? 'Unlimited' : currentPlan?.menu_limit || 1}</p>
+            </div>
+            <div>
+              <p class="text-slate-400 text-sm mb-1">Location Limit</p>
+              <p class="text-lg font-semibold">${currentPlan?.location_limit === 999 ? 'Unlimited' : currentPlan?.location_limit || 1}</p>
+            </div>
+            <div>
+              <p class="text-slate-400 text-sm mb-1">Status</p>
+              <p class="text-lg font-semibold text-green-500">${currentSub?.status || 'Active'}</p>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Available Plans -->
+      <div class="mb-6">
+        <h3 class="text-xl font-bold mb-4">Available Plans</h3>
+        <p class="text-slate-400 mb-6">Upgrade or downgrade your subscription at any time. Changes take effect immediately.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        ${plans.map(plan => {
+          const isCurrent = plan.id === currentPlanId;
+          const isUpgrade = plan.price > (currentPlan?.price || 0);
+          const isDowngrade = plan.price < (currentPlan?.price || 0);
+          
+          return `
+            <div class="bg-surface border ${isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-slate-700'} rounded-2xl p-6 relative">
+              ${isCurrent ? '<div class="absolute top-4 right-4 px-3 py-1 bg-primary text-bg-dark text-xs font-bold rounded-full">CURRENT</div>' : ''}
+              
+              <h4 class="text-xl font-bold mb-2">${escapeHtml(plan.display_name)}</h4>
+              <div class="mb-4">
+                <span class="text-3xl font-bold">${plan.price === 0 ? 'FREE' : `$${plan.price}`}</span>
+                ${plan.price > 0 ? `<span class="text-slate-400">/${plan.interval}</span>` : ''}
+              </div>
+              
+              <div class="space-y-2 mb-6">
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                  <span class="text-slate-300">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm">
+                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                  <span class="text-slate-300">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span>
+                </div>
+                ${plan.features && Array.isArray(plan.features) ? plan.features.map(f => `
+                  <div class="flex items-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+                    <span class="text-slate-300">${escapeHtml(f)}</span>
+                  </div>
+                `).join('') : ''}
+              </div>
+              
+              ${!isCurrent ? `
+                <button 
+                  onclick="changePlan(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price})"
+                  class="w-full px-4 py-3 ${isUpgrade ? 'bg-primary hover:bg-primary/90 text-bg-dark' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'} font-semibold rounded-xl transition"
+                >
+                  ${isUpgrade ? 'Upgrade' : isDowngrade ? 'Downgrade' : 'Select'} Plan
+                </button>
+              ` : `
+                <button disabled class="w-full px-4 py-3 bg-slate-800 text-slate-500 font-semibold rounded-xl cursor-not-allowed">
+                  Current Plan
+                </button>
+              `}
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Need Help? -->
+      <div class="mt-8 p-6 bg-slate-800/50 border border-slate-700 rounded-2xl">
+        <div class="flex items-start gap-4">
+          <span class="material-symbols-outlined text-primary text-[32px]">help</span>
+          <div class="flex-1">
+            <h4 class="font-bold mb-2">Need help choosing a plan?</h4>
+            <p class="text-slate-400 text-sm mb-4">Our team is here to help you find the perfect plan for your business needs.</p>
+            <a href="mailto:support@restorder.online" class="text-primary hover:underline text-sm font-semibold">
+              Contact Support →
+            </a>
+          </div>
+        </div>
       </div>
     `;
-  }, 500);
+    
+  } catch (err) {
+    container.innerHTML = `
+      <div class="bg-red-900/20 border border-red-800 rounded-2xl p-8 text-center">
+        <span class="material-symbols-outlined text-red-500 text-[48px] block mb-3">error</span>
+        <p class="text-red-400 mb-4">Failed to load subscription details</p>
+        <button onclick="loadSubscription()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl transition">
+          Try Again
+        </button>
+      </div>
+    `;
+  }
+}
+
+async function changePlan(planId, planName, planPrice) {
+  // Get the customer's first menu ID
+  const menus = window.customerMenus || [];
+  if (!menus.length) {
+    alert('No menus found. Please create a menu first.');
+    return;
+  }
+  
+  const menuId = menus[0].id;
+  
+  // Confirm plan change
+  const action = planPrice > 0 ? 'upgrade to' : 'downgrade to';
+  const priceText = planPrice === 0 ? 'FREE' : `$${planPrice}/month`;
+  if (!confirm(`Are you sure you want to ${action} ${planName} (${priceText})?\n\nChanges will take effect immediately.`)) {
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/customers/subscription/change', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-customer-token': getToken()
+      },
+      body: JSON.stringify({ menu_id: menuId, plan_id: planId })
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok) throw new Error(data.error || 'Failed to change plan');
+    
+    alert(`✅ Successfully changed to ${planName} plan!`);
+    
+    // Reload subscription and dashboard
+    await loadSubscription();
+    await loadDashboard();
+    
+  } catch (err) {
+    alert(`❌ Error: ${err.message}`);
+  }
 }
 
 // Helpers
