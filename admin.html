@@ -1,47 +1,48 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MenuAdmin – Upload &amp; Publish</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
   tailwind.config = {
-    darkMode: "class",
     theme: {
       extend: {
         colors: {
-          "primary": "#2dd4bf",
-          "bg-dark":  "#0d1b2a",
-          "surface":  "#132639",
+          "primary": "#c2410c",
+          "primary-light": "#ea580c",
+          "primary-dark": "#9a3412",
+          "bg": "#fafaf9",
+          "surface": "#ffffff",
         },
-        fontFamily: { display: ["Work Sans", "sans-serif"] },
+        fontFamily: { display: ["Inter", "sans-serif"] },
       },
     },
   };
 </script>
 <style>
-  body { font-family: "Work Sans", sans-serif; }
+  body { font-family: "Inter", sans-serif; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   /* drag-over highlight */
-  .drag-over { border-color: #2dd4bf !important; background: rgba(45,212,191,.12) !important; }
+  .drag-over { border-color: #c2410c !important; background: rgba(194,65,12,.12) !important; }
   /* layout picker */
-  .layout-opt  { border-color: rgba(255,255,255,.1); color:#64748b; }
-  .layout-opt:hover { border-color: rgba(45,212,191,.4); color:#94a3b8; }
-  .layout-active { border-color:#2dd4bf !important; background:rgba(45,212,191,.1); color:#2dd4bf !important; }
+  .layout-opt  { border-color: rgba(120,113,108,.2); color:#78716c; }
+  .layout-opt:hover { border-color: rgba(194,65,12,.4); color:#57534e; }
+  .layout-active { border-color:#c2410c !important; background:rgba(194,65,12,.1); color:#c2410c !important; }
   /* toggle switches */
-  .tog-track { width:36px; height:20px; background:#334155; border-radius:10px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; flex-shrink:0; }
-  .tog-track::after { content:''; position:absolute; width:16px; height:16px; background:#fff; border-radius:50%; top:2px; left:2px; transition:transform .2s; }
-  .tog-track.on { background:#2dd4bf; }
+  .tog-track { width:36px; height:20px; background:#d6d3d1; border-radius:10px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; flex-shrink:0; }
+  .tog-track::after { content:''; position:absolute; width:16px; height:16px; background:#fff; border-radius:50%; top:2px; left:2px; transition:transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .tog-track.on { background:#c2410c; }
   .tog-track.on::after { transform:translateX(16px); }
   .adv-color-input { height:32px; width:40px; padding:2px; border-radius:8px; cursor:pointer; background:transparent; }
-  .adv-reset-btn { font-size:11px; color:#475569; padding:3px 7px; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:all .15s; flex-shrink:0; }
-  .adv-reset-btn:hover { color:#f87171; border-color:rgba(248,113,113,.35); background:rgba(248,113,113,.06); }
+  .adv-reset-btn { font-size:11px; color:#78716c; padding:3px 7px; border:1px solid rgba(120,113,108,.2); border-radius:6px; cursor:pointer; transition:all .15s; flex-shrink:0; }
+  .adv-reset-btn:hover { color:#dc2626; border-color:rgba(220,38,38,.35); background:rgba(220,38,38,.06); }
 
   /* Alert toast notifications */
   #alert-toast-container {
@@ -52,89 +53,98 @@
   .alert-toast {
     pointer-events: auto;
     display: flex; align-items: flex-start; gap: 12px;
-    background: #1c1c1e; border: 1px solid rgba(251,191,36,.4);
-    border-left: 4px solid #f59e0b;
+    background: #ffffff; border: 1px solid rgba(234,88,12,.4);
+    border-left: 4px solid #ea580c;
     border-radius: 14px; padding: 14px 16px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    box-shadow: 0 8px 30px rgba(0,0,0,.15);
     animation: toastIn .35s cubic-bezier(.16,1,.3,1);
     transition: opacity .25s, transform .25s;
   }
   .alert-toast.out { opacity: 0; transform: translateX(40px); }
   @keyframes toastIn { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
-  .toast-icon { flex-shrink:0; width:36px; height:36px; border-radius:10px; background:rgba(251,191,36,.15); display:flex; align-items:center; justify-content:center; }
-  .toast-icon .material-symbols-outlined { color:#fbbf24; font-size:20px; animation: bellRing .5s ease; }
+  .toast-icon { flex-shrink:0; width:36px; height:36px; border-radius:10px; background:rgba(234,88,12,.15); display:flex; align-items:center; justify-content:center; }
+  .toast-icon .material-symbols-outlined { color:#ea580c; font-size:20px; animation: bellRing .5s ease; }
   @keyframes bellRing { 0%,100%{transform:rotate(0)} 25%{transform:rotate(12deg)} 50%{transform:rotate(-12deg)} 75%{transform:rotate(6deg)} }
   .toast-body { flex:1; min-width:0; }
-  .toast-title { font-size:14px; font-weight:700; color:#f5f5f5; }
-  .toast-msg { font-size:12px; color:#a3a3a3; margin-top:2px; }
-  .toast-time { font-size:11px; color:#525252; margin-top:3px; }
-  .toast-dismiss { flex-shrink:0; background:none; border:none; color:#525252; cursor:pointer; padding:4px; border-radius:6px; transition:color .15s; }
-  .toast-dismiss:hover { color:#f87171; }
+  .toast-title { font-size:14px; font-weight:700; color:#1c1917; }
+  .toast-msg { font-size:12px; color:#78716c; margin-top:2px; }
+  .toast-time { font-size:11px; color:#a8a29e; margin-top:3px; }
+  .toast-dismiss { flex-shrink:0; background:none; border:none; color:#a8a29e; cursor:pointer; padding:4px; border-radius:6px; transition:color .15s; }
+  .toast-dismiss:hover { color:#dc2626; }
 
   /* Alert badge on nav link */
   .nav-alert-badge {
-    background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
+    background: #dc2626; color: #fff; font-size: 10px; font-weight: 700;
     min-width: 18px; height: 18px; line-height: 18px;
     border-radius: 9px; text-align: center; padding: 0 5px;
     display: none; /* shown via JS */
   }
   .nav-alert-badge.visible { display: inline-block; }
+  
+  /* Navigation active state */
+  .nav-link.active {
+    background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+    color: white !important;
+  }
+  .nav-link.active .material-symbols-outlined {
+    color: white;
+  }
 </style>
 </head>
-<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+<body class="bg-bg text-stone-900 min-h-screen flex">
 
 <!-- ── Login Overlay ──────────────────────────────────────────────────────── -->
-<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
-  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+<div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-white border border-stone-200 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <div class="flex items-center gap-3">
-      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
         <span class="material-symbols-outlined text-[22px]">lock</span>
       </div>
       <div>
-        <h2 class="font-bold text-lg">Admin Access</h2>
-        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+        <h2 class="font-bold text-lg text-stone-900">Admin Access</h2>
+        <p class="text-stone-600 text-xs">Enter your admin secret to continue</p>
       </div>
     </div>
     <div>
-      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Admin Password</label>
       <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
-             class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"
+             class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
              onkeydown="if(event.key==='Enter')doLogin()"/>
     </div>
-    <p id="login-error" class="text-red-400 text-sm hidden"></p>
+    <p id="login-error" class="text-red-600 text-sm hidden"></p>
     <button onclick="doLogin()"
-            class="w-full bg-primary text-bg-dark font-bold py-3 rounded-xl hover:bg-primary/90 active:scale-[.98] transition-all flex items-center justify-center gap-2">
+            class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
       <span class="material-symbols-outlined text-[18px]">login</span> Sign In
     </button>
   </div>
 </div>
 
 <!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
-<aside class="w-60 shrink-0 border-r border-primary/10 bg-surface hidden md:flex flex-col h-screen sticky top-0">
-  <div class="h-16 flex items-center px-5 border-b border-primary/10 gap-3">
-    <div class="size-8 rounded bg-primary flex items-center justify-center text-bg-dark">
+<aside class="w-60 shrink-0 border-r border-stone-200 bg-white hidden md:flex flex-col h-screen sticky top-0">
+  <div class="h-16 flex items-center px-5 border-b border-stone-200 gap-3">
+    <div class="size-8 rounded bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
       <span class="material-symbols-outlined text-[20px]">restaurant</span>
     </div>
-    <span class="text-base font-bold tracking-tight">MenuAdmin</span>
+    <span class="text-base font-bold tracking-tight text-stone-900">MenuAdmin</span>
   </div>
   <nav class="flex-1 px-3 py-5 space-y-1">
     <a id="nav-upload"    href="#upload"   onclick="showSection('upload')"   class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors">
       <span class="material-symbols-outlined text-[20px]">file_upload</span> Upload Menu
     </a>
-    <a id="nav-preview"   href="#preview"  onclick="showSection('preview')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+    <a id="nav-preview"   href="#preview"  onclick="showSection('preview')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">table_view</span> Preview &amp; Edit
     </a>
-    <a id="nav-publish"   href="#publish"  onclick="showSection('publish')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+    <a id="nav-publish"   href="#publish"  onclick="showSection('publish')"  class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">qr_code_2</span> QR &amp; Publish
     </a>
-    <a id="nav-published" href="#published" onclick="showSection('published')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+    <a id="nav-published" href="#published" onclick="showSection('published')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">format_list_bulleted</span> Published Menus
     </a>
-    <a id="nav-tables" href="#tables" onclick="showSection('tables')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+    <a id="nav-tables" href="#tables" onclick="showSection('tables')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">table_restaurant</span> Tables
       <span id="nav-tables-badge" class="nav-alert-badge ml-auto"></span>
     </a>
-    <a id="nav-settings" href="#settings" onclick="showSection('settings')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-slate-400 hover:text-slate-100 hover:bg-white/5">
+    <a id="nav-settings" href="#settings" onclick="showSection('settings')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">settings</span> Settings
     </a>
   </nav>
@@ -144,10 +154,10 @@
 <div class="flex-1 flex flex-col min-w-0">
 
   <!-- topbar -->
-  <header class="h-16 border-b border-primary/10 flex items-center px-6 justify-between bg-bg-dark/80 backdrop-blur sticky top-0 z-10">
+  <header class="h-16 border-b border-stone-200 flex items-center px-6 justify-between bg-white/95 backdrop-blur sticky top-0 z-10">
     <div class="flex items-center gap-3">
       <!-- mobile menu icon -->
-      <button class="md:hidden text-slate-400 hover:text-slate-100" onclick="document.querySelector('aside').classList.toggle('hidden')">
+      <button class="md:hidden text-stone-600 hover:text-stone-900" onclick="document.querySelector('aside').classList.toggle('hidden')">
         <span class="material-symbols-outlined text-2xl">menu</span>
       </button>
       <h1 id="page-title" class="text-lg font-bold">Upload Menu</h1>
@@ -155,7 +165,7 @@
     <div class="flex items-center gap-3">
       <span id="status-badge" class="hidden text-xs font-medium px-3 py-1 rounded-full bg-primary/20 text-primary"></span>
       <button id="logout-btn" onclick="doLogout()" title="Log out"
-              class="hidden text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 border border-transparent hover:border-red-400/20">
+              class="hidden text-stone-600 hover:text-red-400 transition-colors flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 border border-transparent hover:border-red-400/20">
         <span class="material-symbols-outlined text-[18px]">logout</span>
         <span class="hidden md:inline">Logout</span>
       </button>
@@ -168,12 +178,12 @@
     <section id="section-upload" class="max-w-2xl mx-auto space-y-6">
       <div>
         <h2 class="text-2xl font-bold">Upload Your Menu File</h2>
-        <p class="text-slate-400 text-sm mt-1">Supports PDF, CSV, XLSX, TXT. Items are extracted automatically.</p>
+        <p class="text-stone-600 text-sm mt-1">Supports PDF, CSV, XLSX, TXT. Items are extracted automatically.</p>
       </div>
 
       <!-- drop zone -->
       <div id="drop-zone"
-           class="border-2 border-dashed border-primary/30 rounded-2xl p-12 flex flex-col items-center gap-5 text-center bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all cursor-pointer"
+           class="border-2 border-dashed border-primary/40 rounded-2xl p-12 flex flex-col items-center gap-5 text-center bg-primary/5 hover:bg-primary/10 hover:border-primary/60 transition-all cursor-pointer"
            onclick="document.getElementById('file-input').click()"
            ondragover="handleDragOver(event)"
            ondragleave="handleDragLeave(event)"
@@ -182,61 +192,61 @@
           <span class="material-symbols-outlined text-5xl text-primary">cloud_upload</span>
         </div>
         <div>
-          <p class="text-xl font-bold text-slate-100">Drag &amp; drop or click to browse</p>
-          <p class="text-slate-400 text-sm mt-1">PDF, CSV, XLSX or TXT – max 10 MB</p>
+          <p class="text-xl font-bold text-stone-900">Drag &amp; drop or click to browse</p>
+          <p class="text-stone-600 text-sm mt-1">PDF, CSV, XLSX or TXT – max 10 MB</p>
         </div>
-        <div class="flex gap-4 text-sm font-medium text-slate-400 bg-surface px-4 py-2 rounded-lg border border-primary/10">
+        <div class="flex gap-4 text-sm font-medium text-stone-600 bg-white px-4 py-2 rounded-lg border border-stone-200">
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-red-400">picture_as_pdf</span>PDF</span>
-          <span class="text-slate-600">|</span>
+          <span class="text-stone-400">|</span>
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-400">table_chart</span>CSV</span>
-          <span class="text-slate-600">|</span>
+          <span class="text-stone-400">|</span>
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-500">grid_on</span>XLSX</span>
-          <span class="text-slate-600">|</span>
+          <span class="text-stone-400">|</span>
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-blue-400">description</span>TXT</span>
         </div>
         <input id="file-input" type="file" accept=".pdf,.csv,.xlsx,.xls,.txt" class="hidden" onchange="handleFileSelect(event)"/>
       </div>
 
       <!-- selected file info -->
-      <div id="file-info" class="hidden flex items-center gap-4 p-4 bg-surface rounded-xl border border-primary/10">
+      <div id="file-info" class="hidden flex items-center gap-4 p-4 bg-white rounded-xl border border-stone-200">
         <span id="file-icon" class="material-symbols-outlined text-3xl text-primary">description</span>
         <div class="flex-1 min-w-0">
           <p id="file-name" class="font-semibold truncate"></p>
-          <p id="file-size" class="text-xs text-slate-400 mt-0.5"></p>
+          <p id="file-size" class="text-xs text-stone-600 mt-0.5"></p>
         </div>
-        <button onclick="clearFile()" class="text-slate-500 hover:text-red-400 transition-colors p-1">
+        <button onclick="clearFile()" class="text-stone-500 hover:text-red-400 transition-colors p-1">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
       <!-- restaurant name -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1.5">Restaurant Name</label>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Restaurant Name</label>
         <input id="rest-name" type="text" value="The Rusty Spoon"
                oninput="updateBrandPreview()"
-               class="w-full bg-surface border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"/>
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"/>
       </div>
 
       <!-- currency selector -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1.5">
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">
           Currency
-          <span class="ml-2 text-xs text-slate-500 font-normal">(auto-detected from file after upload)</span>
+          <span class="ml-2 text-xs text-stone-500 font-normal">(auto-detected from file after upload)</span>
         </label>
         <div class="flex gap-2">
           <select id="currency-select" onchange="setCurrency(this.value)"
-                  class="flex-1 bg-surface border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                  class="flex-1 bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
           </select>
           <div id="currency-badge"
-               class="shrink-0 w-16 flex items-center justify-center bg-primary/10 border border-primary/20 rounded-xl text-lg font-bold text-primary">
+               class="shrink-0 w-16 flex items-center justify-center bg-primary/10 border border-stone-300 rounded-xl text-lg font-bold text-primary">
             $
           </div>
         </div>
       </div>
 
       <!-- ── Menu Branding ──────────────────────────────────────────────── -->
-      <div class="space-y-5 p-4 bg-surface rounded-xl border border-primary/10">
-        <p class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+      <div class="space-y-5 p-4 bg-white rounded-xl border border-stone-200">
+        <p class="text-sm font-semibold text-stone-700 flex items-center gap-2">
           <span class="material-symbols-outlined text-[16px] text-primary">palette</span>
           Menu Branding
         </p>
@@ -246,18 +256,18 @@
           <label class="flex items-center gap-2.5 cursor-pointer select-none" onclick="togClick('show-logo')">
             <span id="tog-show-logo" class="tog-track on"></span>
             <input type="checkbox" id="show-logo" checked class="sr-only"/>
-            <span class="text-sm text-slate-300">Show Logo</span>
+            <span class="text-sm text-stone-700">Show Logo</span>
           </label>
           <label class="flex items-center gap-2.5 cursor-pointer select-none" onclick="togClick('show-name')">
             <span id="tog-show-name" class="tog-track on"></span>
             <input type="checkbox" id="show-name" checked class="sr-only"/>
-            <span class="text-sm text-slate-300">Show Name &amp; Tagline</span>
+            <span class="text-sm text-stone-700">Show Name &amp; Tagline</span>
           </label>
         </div>
 
         <!-- ── Header Layout ───────────────────────────────────────── -->
         <div>
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Header Layout</label>
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">Header Layout</label>
           <div class="grid grid-cols-3 gap-1.5" id="layout-picker">
             <button onclick="setLayout('logo-left')" data-layout="logo-left"
                     class="layout-opt layout-active p-2 rounded-lg border flex flex-col items-center gap-1.5 transition-all">
@@ -319,29 +329,29 @@
 
         <!-- ── Accent color ────────────────────────────────────────── -->
         <div class="flex items-center gap-3">
-          <label class="text-sm text-slate-400 flex-1">Accent Color</label>
+          <label class="text-sm text-stone-600 flex-1">Accent Color</label>
           <input type="color" id="brand-color" value="#2dd4bf"
                  oninput="onAccentChange()"
-                 class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-primary/20 p-1"/>
-          <span id="brand-color-hex" class="text-xs font-mono text-slate-500 w-16">#2dd4bf</span>
+                 class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-stone-300 p-1"/>
+          <span id="brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#2dd4bf</span>
         </div>
 
         <!-- ── Logo ───────────────────────────────────────────────── -->
         <div>
-          <label class="block text-sm text-slate-400 mb-1.5">
-            Logo <span class="text-slate-600 text-xs">(optional)</span>
+          <label class="block text-sm text-stone-600 mb-1.5">
+            Logo <span class="text-stone-400 text-xs">(optional)</span>
           </label>
           <div class="flex items-start gap-3">
             <div id="logo-preview-wrap"
-                 class="shrink-0 size-[60px] rounded-xl border border-primary/20 bg-bg-dark
+                 class="shrink-0 size-[60px] rounded-xl border border-stone-300 bg-stone-50
                         flex items-center justify-center overflow-hidden">
-              <span id="logo-preview-ph" class="material-symbols-outlined text-2xl text-slate-600">image</span>
+              <span id="logo-preview-ph" class="material-symbols-outlined text-2xl text-stone-400">image</span>
               <img id="logo-preview-img" src="" alt="" class="hidden size-full object-cover"/>
             </div>
             <div class="flex-1 space-y-2">
               <button type="button" onclick="document.getElementById('logo-file-input').click()"
                       class="w-full flex items-center justify-center gap-2 h-9 rounded-xl
-                             border border-primary/20 text-sm text-slate-300
+                             border border-stone-300 text-sm text-stone-700
                              hover:border-primary hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-[16px]">upload</span>
                 Upload from device
@@ -350,17 +360,17 @@
                      onchange="handleLogoFile(event)"/>
               <input id="logo-url" type="url" placeholder="…or paste image URL"
                      oninput="handleLogoUrl()"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm
-                            text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary
-                            outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm
+                            text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary
+                            outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
-          <p class="text-[11px] text-slate-600 mt-1.5 flex items-center gap-1">
+          <p class="text-[11px] text-stone-400 mt-1.5 flex items-center gap-1">
             <span class="material-symbols-outlined text-[12px]">info</span>
             Recommended: square image, 256 × 256 px or larger (max 2 MB)
           </p>
           <button id="logo-clear-btn" onclick="clearLogo()"
-                  class="hidden mt-1.5 text-xs text-slate-600 hover:text-red-400 transition-colors
+                  class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors
                          flex items-center gap-1">
             <span class="material-symbols-outlined text-[13px]">close</span> Remove logo
           </button>
@@ -368,21 +378,21 @@
 
         <!-- ── Tagline ─────────────────────────────────────────────── -->
         <div id="tagline-wrap">
-          <label class="block text-sm text-slate-400 mb-1.5">
-            Tagline <span class="text-slate-600 text-xs">(optional)</span>
+          <label class="block text-sm text-stone-600 mb-1.5">
+            Tagline <span class="text-stone-400 text-xs">(optional)</span>
             <span id="tagline-hidden-note" class="hidden text-[10px] text-amber-500/70 ml-1">— hidden (name is off)</span>
           </label>
           <input id="tagline" type="text" placeholder="Fresh food, great vibes"
                  oninput="updateBrandPreview()"
-                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
         </div>
 
         <!-- ── Font & Background ───────────────────────────────────── -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Font Style</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Font Style</label>
             <select id="font-style" onchange="updateBrandPreview()"
-                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
               <option value="modern">Modern (Work Sans)</option>
               <option value="elegant">Elegant (Playfair)</option>
               <option value="casual">Casual (Poppins)</option>
@@ -391,9 +401,9 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Background Preset</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Background Preset</label>
             <select id="bg-style" onchange="onBgStyleChange()"
-                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
               <option value="dark">Dark Navy</option>
               <option value="darker">Deep Black</option>
               <option value="warm">Warm Dark</option>
@@ -406,7 +416,7 @@
         <!-- ── Advanced Colors (collapsible) ──────────────────────── -->
         <div>
           <button onclick="toggleAdvancedColors()"
-                  class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors w-full text-left">
+                  class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-stone-700 transition-colors w-full text-left">
             <span id="adv-colors-arrow" class="material-symbols-outlined text-[14px] transition-transform">expand_more</span>
             Advanced Colors
             <span class="flex-1 h-px bg-slate-800 ml-1"></span>
@@ -416,11 +426,11 @@
 
               <!-- Page Background -->
               <div>
-                <label class="text-xs text-slate-500 mb-1.5 block">Page Background</label>
+                <label class="text-xs text-stone-500 mb-1.5 block">Page Background</label>
                 <div class="flex items-center gap-2">
                   <input type="color" id="bg-color-custom" value="#0d1b2a"
                          oninput="onAdvColorInput('bg-color-custom')"
-                         class="adv-color-input border border-primary/20"/>
+                         class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('bg-color-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
                   <span id="bg-color-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
@@ -428,11 +438,11 @@
 
               <!-- Card / Surface -->
               <div>
-                <label class="text-xs text-slate-500 mb-1.5 block">Card / Surface</label>
+                <label class="text-xs text-stone-500 mb-1.5 block">Card / Surface</label>
                 <div class="flex items-center gap-2">
                   <input type="color" id="card-bg-custom" value="#132639"
                          oninput="onAdvColorInput('card-bg-custom')"
-                         class="adv-color-input border border-primary/20"/>
+                         class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('card-bg-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
                   <span id="card-bg-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
@@ -440,11 +450,11 @@
 
               <!-- Heading Color -->
               <div>
-                <label class="text-xs text-slate-500 mb-1.5 block">Headings &amp; Name</label>
+                <label class="text-xs text-stone-500 mb-1.5 block">Headings &amp; Name</label>
                 <div class="flex items-center gap-2">
                   <input type="color" id="heading-color" value="#ffffff"
                          oninput="onAdvColorInput('heading-color')"
-                         class="adv-color-input border border-primary/20"/>
+                         class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('heading-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
                   <span id="heading-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
@@ -452,11 +462,11 @@
 
               <!-- Body Text -->
               <div>
-                <label class="text-xs text-slate-500 mb-1.5 block">Body Text</label>
+                <label class="text-xs text-stone-500 mb-1.5 block">Body Text</label>
                 <div class="flex items-center gap-2">
                   <input type="color" id="text-color" value="#94a3b8"
                          oninput="onAdvColorInput('text-color')"
-                         class="adv-color-input border border-primary/20"/>
+                         class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('text-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
                   <span id="text-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
@@ -464,14 +474,14 @@
 
               <!-- Price Badge Color -->
               <div class="col-span-2">
-                <label class="text-xs text-slate-500 mb-1.5 block">
+                <label class="text-xs text-stone-500 mb-1.5 block">
                   Price Badge Color
-                  <span class="text-[10px] text-slate-600 ml-1">(defaults to accent)</span>
+                  <span class="text-[10px] text-stone-400 ml-1">(defaults to accent)</span>
                 </label>
                 <div class="flex items-center gap-2">
                   <input type="color" id="price-color" value="#2dd4bf"
                          oninput="onAdvColorInput('price-color')"
-                         class="adv-color-input border border-primary/20"/>
+                         class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('price-color')" class="adv-reset-btn" title="Reset to accent">↺ Reset</button>
                   <span id="price-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
@@ -494,90 +504,90 @@
           <div class="shrink-0 flex flex-col items-end gap-1">
             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full"
                   style="background:rgba(45,212,191,.2); color:#2dd4bf; white-space:nowrap">Preview</span>
-            <span id="prev-layout-label" class="text-[9px] text-slate-600">Logo Left</span>
+            <span id="prev-layout-label" class="text-[9px] text-stone-400">Logo Left</span>
           </div>
         </div>
       </div>
 
       <!-- ── Contact & Social ────────────────────────────────────────── -->
-      <div class="space-y-4 p-4 bg-surface rounded-xl border border-primary/10">
+      <div class="space-y-4 p-4 bg-white rounded-xl border border-stone-200">
         <button onclick="toggleContactSection()"
-                class="flex items-center gap-2 text-sm font-semibold text-slate-300 w-full text-left">
+                class="flex items-center gap-2 text-sm font-semibold text-stone-700 w-full text-left">
           <span class="material-symbols-outlined text-[16px] text-primary">contact_phone</span>
           Contact &amp; Social Media
           <span class="flex-1 h-px bg-slate-800 ml-1"></span>
-          <span id="contact-section-arrow" class="material-symbols-outlined text-[16px] text-slate-500 transition-transform">expand_more</span>
+          <span id="contact-section-arrow" class="material-symbols-outlined text-[16px] text-stone-500 transition-transform">expand_more</span>
         </button>
         <div id="contact-section" class="hidden space-y-4">
           <!-- Phone & Email -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm text-slate-400 mb-1.5">Phone</label>
+              <label class="block text-sm text-stone-600 mb-1.5">Phone</label>
               <input id="contact-phone" type="tel" placeholder="+1 (555) 123-4567"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-sm text-slate-400 mb-1.5">Email</label>
+              <label class="block text-sm text-stone-600 mb-1.5">Email</label>
               <input id="contact-email" type="email" placeholder="hello@restaurant.com"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
           <!-- Address -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Address</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Address</label>
             <input id="contact-address" type="text" placeholder="123 Main St, City, State"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
           </div>
           <!-- Website -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Website</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Website</label>
             <input id="contact-website" type="url" placeholder="https://myrestaurant.com"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
           </div>
 
           <hr class="border-slate-800"/>
 
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Social Media Links</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Social Media Links</p>
           <!-- Instagram & Facebook -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">Instagram</label>
+              <label class="block text-xs text-stone-500 mb-1.5">Instagram</label>
               <input id="social-instagram" type="url" placeholder="https://instagram.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">Facebook</label>
+              <label class="block text-xs text-stone-500 mb-1.5">Facebook</label>
               <input id="social-facebook" type="url" placeholder="https://facebook.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
           <!-- Twitter/X & WhatsApp -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">Twitter / X</label>
+              <label class="block text-xs text-stone-500 mb-1.5">Twitter / X</label>
               <input id="social-twitter" type="url" placeholder="https://x.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">WhatsApp</label>
+              <label class="block text-xs text-stone-500 mb-1.5">WhatsApp</label>
               <input id="social-whatsapp" type="text" placeholder="https://wa.me/15551234567"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
           <!-- TikTok & YouTube -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">TikTok</label>
+              <label class="block text-xs text-stone-500 mb-1.5">TikTok</label>
               <input id="social-tiktok" type="url" placeholder="https://tiktok.com/@…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1.5">YouTube</label>
+              <label class="block text-xs text-stone-500 mb-1.5">YouTube</label>
               <input id="social-youtube" type="url" placeholder="https://youtube.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
-          <p class="text-[11px] text-slate-600 flex items-center gap-1">
+          <p class="text-[11px] text-stone-400 flex items-center gap-1">
             <span class="material-symbols-outlined text-[12px]">info</span>
             All fields are optional. Only filled fields will appear on the menu.
           </p>
@@ -599,23 +609,23 @@
       <div class="flex items-end justify-between gap-4">
         <div>
           <h2 id="preview-heading" class="text-2xl font-bold">Review Extracted Items</h2>
-          <p id="preview-subtext" class="text-slate-400 text-sm mt-1">Edit, uncheck, or delete rows before publishing.</p>
+          <p id="preview-subtext" class="text-stone-600 text-sm mt-1">Edit, uncheck, or delete rows before publishing.</p>
         </div>
-        <button onclick="addRow()" class="flex items-center gap-1.5 text-primary hover:text-primary/80 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary/5 transition-colors">
+        <button onclick="addRow()" class="flex items-center gap-1.5 text-primary hover:text-primary/80 border border-primary/40 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary/5 transition-colors">
           <span class="material-symbols-outlined text-[18px]">add</span> Add Row
         </button>
       </div>
 
       <!-- re-upload zone (visible when editing) -->
       <div id="reupload-zone" class="hidden">
-        <div class="border border-dashed border-primary/20 rounded-xl p-4 bg-primary/5 flex items-center gap-4">
+        <div class="border border-dashed border-stone-300 rounded-xl p-4 bg-primary/5 flex items-center gap-4">
           <span class="material-symbols-outlined text-2xl text-primary/60">upload_file</span>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-slate-200">Replace menu items from file</p>
-            <p class="text-xs text-slate-500">Upload a new PDF, CSV, XLSX or TXT to replace current items</p>
+            <p class="text-sm font-medium text-stone-800">Replace menu items from file</p>
+            <p class="text-xs text-stone-500">Upload a new PDF, CSV, XLSX or TXT to replace current items</p>
           </div>
           <button onclick="document.getElementById('reupload-file-input').click()"
-                  class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg border border-primary/30 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
+                  class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg border border-primary/40 text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
             <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
             Choose File
           </button>
@@ -625,29 +635,29 @@
 
       <!-- summary chips -->
       <div class="flex gap-3 flex-wrap text-sm">
-        <span id="chip-total"   class="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium"></span>
+        <span id="chip-total"   class="px-3 py-1 rounded-full bg-primary/10 text-primary border border-stone-300 font-medium"></span>
         <span id="chip-selected" class="px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-medium"></span>
       </div>
 
       <!-- search bar -->
       <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[18px]">search</span>
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-[18px]">search</span>
         <input id="items-search" type="text" placeholder="Search items by name, category, or description…"
                oninput="renderTable()"
-               class="w-full bg-surface border border-primary/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+               class="w-full bg-white border border-stone-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
         <button id="items-search-clear" onclick="document.getElementById('items-search').value=''; renderTable();"
-                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors">
+                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors">
           <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
       </div>
 
-      <div class="bg-surface border border-primary/10 rounded-xl overflow-x-auto shadow-lg">
+      <div class="bg-white border border-stone-200 rounded-xl overflow-x-auto shadow-lg">
         <table class="w-full text-left min-w-[1020px]">
           <thead>
-            <tr class="border-b border-primary/10 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <tr class="border-b border-stone-200 text-xs font-semibold text-stone-600 uppercase tracking-wider">
               <th class="p-4 w-10 text-center">
                 <input type="checkbox" id="check-all" onchange="toggleAll(this.checked)"
-                       class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4 cursor-pointer"/>
+                       class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4 cursor-pointer"/>
               </th>
               <th class="p-4">Name</th>
               <th class="p-4 w-40">Category</th>
@@ -659,12 +669,12 @@
               <th class="p-4 w-10 text-center">Del</th>
             </tr>
           </thead>
-          <tbody id="items-body" class="divide-y divide-primary/5 text-sm text-slate-200"></tbody>
+          <tbody id="items-body" class="divide-y divide-primary/5 text-sm text-stone-800"></tbody>
         </table>
       </div>
 
       <div class="flex justify-end gap-3">
-        <button onclick="showSection('upload')" class="px-5 py-2.5 rounded-xl border border-primary/20 text-slate-300 hover:bg-primary/5 transition-colors font-medium">
+        <button onclick="showSection('upload')" class="px-5 py-2.5 rounded-xl border border-stone-300 text-stone-700 hover:bg-primary/5 transition-colors font-medium">
           ← Back
         </button>
         <button id="proceed-btn" onclick="proceedToPublish()"
@@ -679,11 +689,11 @@
     <section id="section-publish" class="hidden max-w-xl mx-auto space-y-6 text-center">
       <div>
         <h2 id="publish-heading" class="text-2xl font-bold">Your Menu is Live! 🎉</h2>
-        <p id="publish-subtext" class="text-slate-400 text-sm mt-1">Print or display this QR code for customers to scan.</p>
+        <p id="publish-subtext" class="text-stone-600 text-sm mt-1">Print or display this QR code for customers to scan.</p>
       </div>
 
-      <div class="bg-surface rounded-2xl border border-primary/10 p-8 flex flex-col items-center gap-6 shadow-lg">
-        <img id="qr-img" src="" alt="QR Code" class="rounded-xl size-52 bg-bg-dark p-2"/>
+      <div class="bg-white rounded-2xl border border-stone-200 p-8 flex flex-col items-center gap-6 shadow-lg">
+        <img id="qr-img" src="" alt="QR Code" class="rounded-xl size-52 bg-stone-50 p-2"/>
         <div class="space-y-1">
           <p class="text-lg font-bold" id="qr-rest-name"></p>
           <a id="qr-link" href="#" target="_blank"
@@ -695,7 +705,7 @@
             <span class="material-symbols-outlined text-[18px]">download</span> Download QR
           </button>
           <button onclick="copyLink()"
-                  class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/30 text-primary font-medium hover:bg-primary/5 transition-colors">
+                  class="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border border-primary/40 text-primary font-medium hover:bg-primary/5 transition-colors">
             <span class="material-symbols-outlined text-[18px]">content_copy</span>
             <span id="copy-btn-text">Copy Link</span>
           </button>
@@ -707,7 +717,7 @@
       </div>
 
       <button onclick="showSection('upload'); clearAll()"
-              class="text-slate-400 hover:text-slate-200 text-sm underline underline-offset-2 transition-colors">
+              class="text-stone-600 hover:text-stone-800 text-sm underline underline-offset-2 transition-colors">
         Upload another menu →
       </button>
     </section>
@@ -717,7 +727,7 @@
       <div class="flex items-end justify-between">
         <div>
           <h2 class="text-2xl font-bold">Published Menus</h2>
-          <p class="text-slate-400 text-sm mt-1">All menus available to customers.</p>
+          <p class="text-stone-600 text-sm mt-1">All menus available to customers.</p>
         </div>
         <button onclick="loadPublished()" class="text-primary text-sm hover:underline flex items-center gap-1">
           <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
@@ -725,16 +735,16 @@
       </div>
 
       <div id="published-list" class="space-y-3">
-        <p class="text-slate-400 text-sm">Loading…</p>
+        <p class="text-stone-600 text-sm">Loading…</p>
       </div>
 
       <!-- Linked QR codes -->
       <div id="linked-qr-section" class="hidden space-y-3 mt-8">
-        <h3 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+        <h3 class="text-lg font-semibold text-stone-800 flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px] text-violet-400">link</span>
           Linked QR Codes
         </h3>
-        <p class="text-xs text-slate-500">External QR codes that have been reprogrammed to serve your menus.</p>
+        <p class="text-xs text-stone-500">External QR codes that have been reprogrammed to serve your menus.</p>
         <div id="linked-qr-list" class="space-y-2"></div>
       </div>
     </section>
@@ -744,15 +754,15 @@
       <div class="flex items-end justify-between">
         <div>
           <h2 class="text-2xl font-bold">Table Management</h2>
-          <p class="text-slate-400 text-sm mt-1">Add tables, generate QR codes, and monitor alerts.</p>
+          <p class="text-stone-600 text-sm mt-1">Add tables, generate QR codes, and monitor alerts.</p>
         </div>
       </div>
 
       <!-- Menu Selector -->
-      <div class="bg-surface rounded-2xl border border-primary/10 p-5 space-y-4">
-        <label class="block text-sm font-medium text-slate-300 mb-1.5">Select Menu</label>
+      <div class="bg-white rounded-2xl border border-stone-200 p-5 space-y-4">
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Select Menu</label>
         <select id="tables-menu-select" onchange="loadTablesForMenu(this.value)"
-                class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
           <option value="">— Choose a menu —</option>
         </select>
       </div>
@@ -765,11 +775,11 @@
       </div>
 
       <!-- Add table form -->
-      <div id="tables-add-form" class="hidden bg-surface rounded-2xl border border-primary/10 p-5 space-y-3">
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Add Table</h3>
+      <div id="tables-add-form" class="hidden bg-white rounded-2xl border border-stone-200 p-5 space-y-3">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-stone-600">Add Table</h3>
         <div class="flex gap-3">
           <input id="new-table-label" type="text" placeholder="e.g. Table 1, Patio 3, VIP"
-                 class="flex-1 bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"/>
+                 class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"/>
           <button onclick="addTable()"
                   class="px-5 py-2.5 rounded-xl bg-primary text-bg-dark font-bold hover:brightness-110 transition-all flex items-center gap-2">
             <span class="material-symbols-outlined text-[18px]">add</span> Add
@@ -782,9 +792,9 @@
       <div id="tables-list" class="hidden space-y-3"></div>
 
       <!-- Alerts panel -->
-      <div id="alerts-panel" class="hidden bg-surface rounded-2xl border border-primary/10 p-5 space-y-3">
+      <div id="alerts-panel" class="hidden bg-white rounded-2xl border border-stone-200 p-5 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-stone-600 flex items-center gap-2">
             <span class="material-symbols-outlined text-[18px] text-amber-400">notifications_active</span>
             Table Alerts
           </h3>
@@ -792,19 +802,19 @@
             <span class="material-symbols-outlined text-[14px]">refresh</span> Refresh
           </button>
         </div>
-        <div id="alerts-list"><p class="text-slate-500 text-sm">No alerts.</p></div>
+        <div id="alerts-list"><p class="text-stone-500 text-sm">No alerts.</p></div>
       </div>
 
       <!-- Orders panel -->
-      <div id="orders-panel" class="hidden bg-surface rounded-2xl border border-primary/10 p-5 space-y-3">
+      <div id="orders-panel" class="hidden bg-white rounded-2xl border border-stone-200 p-5 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-stone-600 flex items-center gap-2">
             <span class="material-symbols-outlined text-[18px] text-emerald-400">receipt_long</span>
             Orders
           </h3>
           <div class="flex items-center gap-2">
             <select id="orders-status-filter" onchange="loadOrders()"
-                    class="text-xs bg-bg-dark border border-primary/20 rounded-lg px-2 py-1 text-slate-300 outline-none">
+                    class="text-xs bg-stone-50 border border-stone-300 rounded-lg px-2 py-1 text-stone-700 outline-none">
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </select>
@@ -813,7 +823,7 @@
             </button>
           </div>
         </div>
-        <div id="orders-list"><p class="text-slate-500 text-sm">No orders.</p></div>
+        <div id="orders-list"><p class="text-stone-500 text-sm">No orders.</p></div>
       </div>
     </section>
 
@@ -821,22 +831,22 @@
     <section id="section-settings" class="hidden max-w-lg mx-auto space-y-6">
       <div>
         <h2 class="text-2xl font-bold">Settings</h2>
-        <p class="text-slate-400 text-sm mt-1">Manage your account and business branding.</p>
+        <p class="text-stone-600 text-sm mt-1">Manage your account and business branding.</p>
       </div>
 
       <!-- ── Business & Branding ──────────────────────────────────── -->
-      <div class="bg-surface rounded-2xl border border-primary/10 p-6 space-y-5">
+      <div class="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px] text-primary">palette</span>
           Business &amp; Branding
         </h3>
-        <p class="text-xs text-slate-500">Edit your restaurant details, logo, theme, and contact info without touching menu items.</p>
+        <p class="text-xs text-stone-500">Edit your restaurant details, logo, theme, and contact info without touching menu items.</p>
 
         <!-- Menu selector -->
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1.5">Select Menu</label>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">Select Menu</label>
           <select id="settings-menu-select" onchange="loadSettingsBranding(this.value)"
-                  class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                  class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
             <option value="">— Choose a menu to edit —</option>
           </select>
         </div>
@@ -844,65 +854,65 @@
         <div id="settings-branding-form" class="hidden space-y-5">
           <!-- Restaurant name -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Restaurant Name</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Restaurant Name</label>
             <input id="s-rest-name" type="text"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"/>
           </div>
 
           <!-- Currency -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Currency</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Currency</label>
             <select id="s-currency"
-                    class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                    class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
             </select>
           </div>
 
           <!-- Logo -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Logo</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Logo</label>
             <div class="flex items-start gap-3">
               <div id="s-logo-preview-wrap"
-                   class="shrink-0 size-[60px] rounded-xl border border-primary/20 bg-bg-dark flex items-center justify-center overflow-hidden">
-                <span id="s-logo-ph" class="material-symbols-outlined text-2xl text-slate-600">image</span>
+                   class="shrink-0 size-[60px] rounded-xl border border-stone-300 bg-stone-50 flex items-center justify-center overflow-hidden">
+                <span id="s-logo-ph" class="material-symbols-outlined text-2xl text-stone-400">image</span>
                 <img id="s-logo-img" src="" alt="" class="hidden size-full object-cover"/>
               </div>
               <div class="flex-1 space-y-2">
                 <button type="button" onclick="document.getElementById('s-logo-file').click()"
-                        class="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-primary/20 text-sm text-slate-300 hover:border-primary hover:text-primary transition-colors">
+                        class="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-stone-300 text-sm text-stone-700 hover:border-primary hover:text-primary transition-colors">
                   <span class="material-symbols-outlined text-[16px]">upload</span> Upload
                 </button>
                 <input id="s-logo-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsLogoFile(event)"/>
                 <input id="s-logo-url" type="url" placeholder="…or paste image URL" oninput="handleSettingsLogoUrl()"
-                       class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                       class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
               </div>
             </div>
             <button id="s-logo-clear" onclick="clearSettingsLogo()"
-                    class="hidden mt-1.5 text-xs text-slate-600 hover:text-red-400 transition-colors flex items-center gap-1">
+                    class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors flex items-center gap-1">
               <span class="material-symbols-outlined text-[13px]">close</span> Remove logo
             </button>
           </div>
 
           <!-- Tagline -->
           <div>
-            <label class="block text-sm text-slate-400 mb-1.5">Tagline</label>
+            <label class="block text-sm text-stone-600 mb-1.5">Tagline</label>
             <input id="s-tagline" type="text" placeholder="Fresh food, great vibes"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
           </div>
 
           <!-- Accent color -->
           <div class="flex items-center gap-3">
-            <label class="text-sm text-slate-400 flex-1">Accent Color</label>
+            <label class="text-sm text-stone-600 flex-1">Accent Color</label>
             <input type="color" id="s-brand-color" value="#2dd4bf"
-                   class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-primary/20 p-1"/>
-            <span id="s-brand-color-hex" class="text-xs font-mono text-slate-500 w-16">#2dd4bf</span>
+                   class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-stone-300 p-1"/>
+            <span id="s-brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#2dd4bf</span>
           </div>
 
           <!-- Font & Background -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm text-slate-400 mb-1.5">Font Style</label>
+              <label class="block text-sm text-stone-600 mb-1.5">Font Style</label>
               <select id="s-font-style"
-                      class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                 <option value="modern">Modern (Work Sans)</option>
                 <option value="elegant">Elegant (Playfair)</option>
                 <option value="casual">Casual (Poppins)</option>
@@ -911,9 +921,9 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm text-slate-400 mb-1.5">Background Preset</label>
+              <label class="block text-sm text-stone-600 mb-1.5">Background Preset</label>
               <select id="s-bg-style"
-                      class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                 <option value="dark">Dark Navy</option>
                 <option value="darker">Deep Black</option>
                 <option value="warm">Warm Dark</option>
@@ -926,98 +936,98 @@
           <!-- Show/hide toggles -->
           <div class="flex gap-5">
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
-              <input type="checkbox" id="s-show-logo" checked class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4"/>
-              <span class="text-sm text-slate-300">Show Logo</span>
+              <input type="checkbox" id="s-show-logo" checked class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4"/>
+              <span class="text-sm text-stone-700">Show Logo</span>
             </label>
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
-              <input type="checkbox" id="s-show-name" checked class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4"/>
-              <span class="text-sm text-slate-300">Show Name &amp; Tagline</span>
+              <input type="checkbox" id="s-show-name" checked class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4"/>
+              <span class="text-sm text-stone-700">Show Name &amp; Tagline</span>
             </label>
           </div>
 
           <!-- Table QR toggle -->
-          <div class="flex items-center justify-between p-3 bg-bg-dark rounded-xl border border-primary/10">
+          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
             <div>
-              <p class="text-sm font-medium text-slate-300">Enable Table QR Codes</p>
-              <p class="text-xs text-slate-500 mt-0.5">Allow customers to scan table QR codes and send alerts</p>
+              <p class="text-sm font-medium text-stone-700">Enable Table QR Codes</p>
+              <p class="text-xs text-stone-500 mt-0.5">Allow customers to scan table QR codes and send alerts</p>
             </div>
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
-              <input type="checkbox" id="s-tables-enabled" class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4"/>
+              <input type="checkbox" id="s-tables-enabled" class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4"/>
             </label>
           </div>
 
           <!-- Header layout -->
           <div>
-            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Header Layout</label>
+            <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">Header Layout</label>
             <div class="grid grid-cols-3 gap-1.5" id="s-layout-picker">
-              <button onclick="sSetLayout('logo-left')" data-layout="logo-left"  class="s-layout-opt s-layout-active p-2 rounded-lg border border-primary/30 bg-primary/10 text-primary flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide">Logo Left</button>
-              <button onclick="sSetLayout('stacked')"   data-layout="stacked"    class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Stacked</button>
-              <button onclick="sSetLayout('logo-right')" data-layout="logo-right" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Right</button>
-              <button onclick="sSetLayout('logo-only')"  data-layout="logo-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Only</button>
-              <button onclick="sSetLayout('name-only')"  data-layout="name-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Name Only</button>
-              <button onclick="sSetLayout('logo-center')" data-layout="logo-center" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-slate-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Centered</button>
+              <button onclick="sSetLayout('logo-left')" data-layout="logo-left"  class="s-layout-opt s-layout-active p-2 rounded-lg border border-primary/40 bg-primary/10 text-primary flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide">Logo Left</button>
+              <button onclick="sSetLayout('stacked')"   data-layout="stacked"    class="s-layout-opt p-2 rounded-lg border border-slate-700 text-stone-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Stacked</button>
+              <button onclick="sSetLayout('logo-right')" data-layout="logo-right" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-stone-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Right</button>
+              <button onclick="sSetLayout('logo-only')"  data-layout="logo-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-stone-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Logo Only</button>
+              <button onclick="sSetLayout('name-only')"  data-layout="name-only"  class="s-layout-opt p-2 rounded-lg border border-slate-700 text-stone-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Name Only</button>
+              <button onclick="sSetLayout('logo-center')" data-layout="logo-center" class="s-layout-opt p-2 rounded-lg border border-slate-700 text-stone-500 flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wide hover:border-slate-500">Centered</button>
             </div>
           </div>
 
           <hr class="border-slate-800"/>
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Contact &amp; Social</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Contact &amp; Social</p>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-500 mb-1">Phone</label>
+              <label class="block text-xs text-stone-500 mb-1">Phone</label>
               <input id="s-phone" type="text" placeholder="+1 555-123-4567"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">Email</label>
+              <label class="block text-xs text-stone-500 mb-1">Email</label>
               <input id="s-email" type="email" placeholder="hello@restaurant.com"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
           <div>
-            <label class="block text-xs text-slate-500 mb-1">Address</label>
+            <label class="block text-xs text-stone-500 mb-1">Address</label>
             <input id="s-address" type="text" placeholder="123 Main St, City"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
           </div>
           <div>
-            <label class="block text-xs text-slate-500 mb-1">Website</label>
+            <label class="block text-xs text-stone-500 mb-1">Website</label>
             <input id="s-website" type="url" placeholder="https://myrestaurant.com"
-                   class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
           </div>
 
           <hr class="border-slate-800"/>
-          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Social Media</p>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-stone-500">Social Media</p>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs text-slate-500 mb-1">Instagram</label>
+              <label class="block text-xs text-stone-500 mb-1">Instagram</label>
               <input id="s-instagram" type="url" placeholder="https://instagram.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">Facebook</label>
+              <label class="block text-xs text-stone-500 mb-1">Facebook</label>
               <input id="s-facebook" type="url" placeholder="https://facebook.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">Twitter / X</label>
+              <label class="block text-xs text-stone-500 mb-1">Twitter / X</label>
               <input id="s-twitter" type="url" placeholder="https://x.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">WhatsApp</label>
+              <label class="block text-xs text-stone-500 mb-1">WhatsApp</label>
               <input id="s-whatsapp" type="text" placeholder="https://wa.me/15551234567"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">TikTok</label>
+              <label class="block text-xs text-stone-500 mb-1">TikTok</label>
               <input id="s-tiktok" type="url" placeholder="https://tiktok.com/@…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
-              <label class="block text-xs text-slate-500 mb-1">YouTube</label>
+              <label class="block text-xs text-stone-500 mb-1">YouTube</label>
               <input id="s-youtube" type="url" placeholder="https://youtube.com/…"
-                     class="w-full bg-bg-dark border border-primary/20 rounded-xl px-3 py-2 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                     class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
 
@@ -1032,28 +1042,28 @@
         </div>
       </div>
 
-      <div class="bg-surface rounded-2xl border border-primary/10 p-6 space-y-5">
+      <div class="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px] text-primary">lock</span>
           Change Password
         </h3>
 
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1.5">Current Password</label>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">Current Password</label>
           <input id="pw-current" type="password" autocomplete="current-password"
-                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"
+                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"
                  placeholder="Enter current password"/>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1.5">New Password</label>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">New Password</label>
           <input id="pw-new" type="password" autocomplete="new-password"
-                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"
+                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"
                  placeholder="Enter new password"/>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1.5">Confirm New Password</label>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">Confirm New Password</label>
           <input id="pw-confirm" type="password" autocomplete="new-password"
-                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-3 text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-500"
+                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"
                  placeholder="Confirm new password"/>
         </div>
 
@@ -1071,10 +1081,10 @@
 </div>
 
 <!-- ── Loading overlay ──────────────────────────────────────────────────────── -->
-<div id="loading-overlay" class="hidden fixed inset-0 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center z-50">
+<div id="loading-overlay" class="hidden fixed inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center z-50">
   <div class="flex flex-col items-center gap-4">
     <span class="material-symbols-outlined text-5xl text-primary spin">sync</span>
-    <p id="loading-text" class="text-slate-300 font-medium">Processing…</p>
+    <p id="loading-text" class="text-stone-700 font-medium">Processing…</p>
   </div>
 </div>
 
@@ -1213,9 +1223,9 @@ function showSection(name) {
     if (link) {
       link.classList.toggle('bg-primary/10', s === name);
       link.classList.toggle('text-primary',   s === name);
-      link.classList.toggle('text-slate-400',  s !== name);
-      link.classList.toggle('hover:text-slate-100', s !== name);
-      link.classList.toggle('hover:bg-white/5',     s !== name);
+      link.classList.toggle('text-stone-600',  s !== name);
+      link.classList.toggle('hover:text-stone-900', s !== name);
+      link.classList.toggle('hover:bg-stone-50',     s !== name);
     }
   });
   document.getElementById('page-title').textContent = TITLES[name] || '';
@@ -1423,40 +1433,40 @@ function buildRow(item, i) {
   tr.innerHTML = `
     <td class="p-3 text-center">
       <input type="checkbox" ${item._selected ? 'checked' : ''} onchange="toggleRow(${i}, this.checked)"
-             class="rounded border-slate-600 bg-bg-dark text-primary focus:ring-primary h-4 w-4 cursor-pointer mt-0.5"/>
+             class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4 cursor-pointer mt-0.5"/>
     </td>
     <td class="p-3">
       <input type="text" value="${esc(item.name)}" placeholder="Item name"
              oninput="updateItem(${i},'name',this.value)"
-             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
     </td>
     <td class="p-3">
       <input type="text" value="${esc(item.category)}" placeholder="Category"
              oninput="updateItem(${i},'category',this.value)"
-             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
     </td>
     <td class="p-3">
       <input type="text" value="${esc(item.subcategory||'')}" placeholder="Subcategory"
              oninput="updateItem(${i},'subcategory',this.value)"
-             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
     </td>
     <td class="p-3">
       <div class="relative">
-        <span class="currency-sym absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">${getCurrencySymbol()}</span>
+        <span class="currency-sym absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-500 text-sm">${getCurrencySymbol()}</span>
         <input type="number" value="${item.price}" placeholder="0.00" step="0.01" min="0"
                oninput="updateItem(${i},'price',parseFloat(this.value)||0)"
-               class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg pl-6 pr-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+               class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg pl-6 pr-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
       </div>
     </td>
     <td class="p-3">
       <input type="text" value="${esc(item.size||'')}" placeholder="e.g. 250ml"
              oninput="updateItem(${i},'size',this.value)"
-             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
     </td>
     <td class="p-3">
       <input type="text" value="${esc(item.description)}" placeholder="Description (optional)"
              oninput="updateItem(${i},'description',this.value)"
-             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 focus:bg-bg-dark focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+             class="w-full bg-white/5 border border-transparent hover:border-slate-700 rounded-lg px-2.5 py-1.5 text-stone-900 focus:bg-stone-50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
     </td>
     <td class="p-3 text-center">
       <div class="flex flex-col items-center gap-1">
@@ -1470,7 +1480,7 @@ function buildRow(item, i) {
     </td>
     <td class="p-3 text-center">
       <button onclick="deleteRow(${i})"
-              class="text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+              class="text-stone-400 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
         <span class="material-symbols-outlined text-[18px]">delete</span>
       </button>
     </td>`;
@@ -1947,49 +1957,49 @@ function exportMenuCSV(menuId) {
 // ── Published menus list ──────────────────────────────────────────────────────
 async function loadPublished() {
   const el = document.getElementById('published-list');
-  el.innerHTML = '<p class="text-slate-400 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-600 text-sm">Loading…</p>';
   try {
     const res  = await fetch('/api/menus');
     const list = await res.json();
     if (!list.length) {
-      el.innerHTML = '<p class="text-slate-400 text-sm">No published menus yet.</p>';
+      el.innerHTML = '<p class="text-stone-600 text-sm">No published menus yet.</p>';
       return;
     }
     el.innerHTML = list.map(m => `
-      <div class="p-4 bg-surface rounded-xl border border-primary/10 shadow-sm space-y-3">
+      <div class="p-4 bg-white rounded-xl border border-stone-200 shadow-sm space-y-3">
         <div class="flex items-center gap-4">
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-slate-100 truncate">${esc(m.restaurantName)}</p>
-            <p class="text-xs text-slate-400 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
+            <p class="font-semibold text-stone-900 truncate">${esc(m.restaurantName)}</p>
+            <p class="text-xs text-stone-600 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
             <a href="/menu?id=${m.id}" target="_blank"
                class="text-primary text-xs hover:underline truncate block mt-1">/menu?id=${m.id}</a>
           </div>
           <div class="flex gap-2 shrink-0">
             <button onclick="loadMenuForEditing('${m.id}')" title="Edit menu"
-                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 transition-colors">
+                    class="size-9 flex items-center justify-center rounded-lg text-stone-600 hover:text-amber-400 hover:bg-amber-400/10 transition-colors">
               <span class="material-symbols-outlined text-[18px]">edit</span>
             </button>
             <button onclick="previewMenu('${m.id}')" title="Open menu"
-                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors">
+                    class="size-9 flex items-center justify-center rounded-lg text-stone-600 hover:text-primary hover:bg-primary/10 transition-colors">
               <span class="material-symbols-outlined text-[18px]">open_in_new</span>
             </button>
             <button onclick="deleteMenu('${m.id}', this)" title="Delete menu"
-                    class="size-9 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
+                    class="size-9 flex items-center justify-center rounded-lg text-stone-600 hover:text-red-400 hover:bg-red-400/10 transition-colors">
               <span class="material-symbols-outlined text-[18px]">delete</span>
             </button>
           </div>
         </div>
         <!-- Analytics row -->
         <div class="flex items-center gap-4 pt-2 border-t border-primary/5">
-          <div class="flex items-center gap-1.5 text-xs text-slate-400">
+          <div class="flex items-center gap-1.5 text-xs text-stone-600">
             <span class="material-symbols-outlined text-[15px]">visibility</span>
             <span>${m.totalScans || 0} scans</span>
           </div>
-          <div class="flex items-center gap-1.5 text-xs text-slate-400">
+          <div class="flex items-center gap-1.5 text-xs text-stone-600">
             <span class="material-symbols-outlined text-[15px]">qr_code_2</span>
             <span>QR v${m.qrVersion || 1}</span>
           </div>
-          ${m.lastScanAt ? `<div class="text-xs text-slate-500">Last scan: ${new Date(m.lastScanAt).toLocaleString()}</div>` : ''}
+          ${m.lastScanAt ? `<div class="text-xs text-stone-500">Last scan: ${new Date(m.lastScanAt).toLocaleString()}</div>` : ''}
           <div class="flex-1"></div>
           <button onclick="showAnalytics('${m.id}')" title="View analytics"
                   class="text-xs text-primary hover:underline flex items-center gap-1">
@@ -2029,10 +2039,10 @@ async function showAnalytics(menuId) {
     const dailyHtml = data.dailyStats.length
       ? data.dailyStats.map(d => `
           <div class="flex justify-between text-xs py-1.5 border-b border-primary/5">
-            <span class="text-slate-300">${d.date}</span>
+            <span class="text-stone-700">${d.date}</span>
             <span class="text-primary font-semibold">${d.scans} scan${d.scans !== 1 ? 's' : ''}</span>
           </div>`).join('')
-      : '<p class="text-slate-500 text-xs">No scans recorded yet.</p>';
+      : '<p class="text-stone-500 text-xs">No scans recorded yet.</p>';
 
     const recentHtml = data.recentScans.length
       ? data.recentScans.map(s => {
@@ -2041,60 +2051,60 @@ async function showAnalytics(menuId) {
           const time = new Date(s.scannedAt).toLocaleString();
           return `
             <div class="flex items-center gap-2 text-xs py-1.5 border-b border-primary/5">
-              <span class="material-symbols-outlined text-[14px] text-slate-500">${device}</span>
-              <span class="text-slate-300 flex-1">${time}</span>
-              ${s.referrer ? `<span class="text-slate-500 truncate max-w-[120px]">${esc(s.referrer)}</span>` : ''}
+              <span class="material-symbols-outlined text-[14px] text-stone-500">${device}</span>
+              <span class="text-stone-700 flex-1">${time}</span>
+              ${s.referrer ? `<span class="text-stone-500 truncate max-w-[120px]">${esc(s.referrer)}</span>` : ''}
             </div>`;
         }).join('')
-      : '<p class="text-slate-500 text-xs">No recent scans.</p>';
+      : '<p class="text-stone-500 text-xs">No recent scans.</p>';
 
     // Show a dialog overlay
     let dlg = document.getElementById('analytics-dialog');
     if (!dlg) {
       dlg = document.createElement('div');
       dlg.id = 'analytics-dialog';
-      dlg.className = 'fixed inset-0 z-50 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center p-4';
+      dlg.className = 'fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex items-center justify-center p-4';
       document.body.appendChild(dlg);
     }
     dlg.classList.remove('hidden');
     dlg.innerHTML = `
-      <div class="bg-surface border border-primary/20 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl space-y-5">
+      <div class="bg-white border border-stone-300 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl space-y-5">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h3 class="text-lg font-bold text-stone-900 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">analytics</span> Scan Analytics
           </h3>
           <button onclick="document.getElementById('analytics-dialog').classList.add('hidden')"
-                  class="text-slate-400 hover:text-slate-100 transition-colors">
+                  class="text-stone-600 hover:text-stone-900 transition-colors">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
 
         <!-- Stats cards -->
         <div class="grid grid-cols-3 gap-3">
-          <div class="bg-bg-dark rounded-xl p-3 text-center">
+          <div class="bg-stone-50 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-primary">${data.totalScans}</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Total Scans</p>
+            <p class="text-[10px] text-stone-600 mt-0.5">Total Scans</p>
           </div>
-          <div class="bg-bg-dark rounded-xl p-3 text-center">
+          <div class="bg-stone-50 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-amber-400">v${data.qrVersion}</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">QR Version</p>
+            <p class="text-[10px] text-stone-600 mt-0.5">QR Version</p>
           </div>
-          <div class="bg-bg-dark rounded-xl p-3 text-center">
+          <div class="bg-stone-50 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-green-400">${data.dailyStats.length ? data.dailyStats[0].scans : 0}</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Today</p>
+            <p class="text-[10px] text-stone-600 mt-0.5">Today</p>
           </div>
         </div>
 
         <!-- Daily stats -->
         <div>
-          <p class="text-xs font-semibold text-slate-300 mb-2">Last 30 Days</p>
-          <div class="bg-bg-dark rounded-xl p-3 max-h-48 overflow-y-auto">${dailyHtml}</div>
+          <p class="text-xs font-semibold text-stone-700 mb-2">Last 30 Days</p>
+          <div class="bg-stone-50 rounded-xl p-3 max-h-48 overflow-y-auto">${dailyHtml}</div>
         </div>
 
         <!-- Recent scans -->
         <div>
-          <p class="text-xs font-semibold text-slate-300 mb-2">Recent Scans</p>
-          <div class="bg-bg-dark rounded-xl p-3 max-h-48 overflow-y-auto">${recentHtml}</div>
+          <p class="text-xs font-semibold text-stone-700 mb-2">Recent Scans</p>
+          <div class="bg-stone-50 rounded-xl p-3 max-h-48 overflow-y-auto">${recentHtml}</div>
         </div>
       </div>`;
   } catch (err) {
@@ -2142,43 +2152,43 @@ function showLinkQR(targetMenuId, targetName) {
   if (!dlg) {
     dlg = document.createElement('div');
     dlg.id = 'link-qr-dialog';
-    dlg.className = 'fixed inset-0 z-50 bg-bg-dark/80 backdrop-blur-sm flex items-center justify-center p-4';
+    dlg.className = 'fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex items-center justify-center p-4';
     document.body.appendChild(dlg);
   }
   dlg.classList.remove('hidden');
   dlg.innerHTML = `
-    <div class="bg-surface border border-primary/20 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5">
+    <div class="bg-white border border-stone-300 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+        <h3 class="text-lg font-bold text-stone-900 flex items-center gap-2">
           <span class="material-symbols-outlined text-violet-400">qr_code_scanner</span> Link QR Code
         </h3>
         <button onclick="document.getElementById('link-qr-dialog').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-100 transition-colors">
+                class="text-stone-600 hover:text-stone-900 transition-colors">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <p class="text-sm text-slate-400">Upload an existing QR code image. The system will decode it and reprogram it to serve <strong class="text-slate-200">${esc(targetName)}</strong>.</p>
+      <p class="text-sm text-stone-600">Upload an existing QR code image. The system will decode it and reprogram it to serve <strong class="text-stone-800">${esc(targetName)}</strong>.</p>
 
       <div id="link-qr-upload" class="border-2 border-dashed border-violet-500/30 rounded-xl p-8 flex flex-col items-center gap-3 text-center cursor-pointer hover:bg-violet-500/5 hover:border-violet-500/50 transition-all"
            onclick="document.getElementById('link-qr-file').click()">
         <span class="material-symbols-outlined text-4xl text-violet-400/60">qr_code_scanner</span>
-        <p class="text-sm text-slate-300 font-medium">Drop or click to upload QR image</p>
-        <p class="text-xs text-slate-500">PNG, JPG, or SVG</p>
+        <p class="text-sm text-stone-700 font-medium">Drop or click to upload QR image</p>
+        <p class="text-xs text-stone-500">PNG, JPG, or SVG</p>
         <input id="link-qr-file" type="file" accept="image/*" class="hidden"
                onchange="decodeQRFile(event, '${targetMenuId}', '${esc(targetName)}')"/>
       </div>
 
       <div id="link-qr-result" class="hidden space-y-4">
-        <div class="bg-bg-dark rounded-xl p-4 space-y-2">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Decoded QR Content</p>
-          <p id="link-qr-decoded" class="text-sm text-slate-200 break-all font-mono"></p>
+        <div class="bg-stone-50 rounded-xl p-4 space-y-2">
+          <p class="text-xs font-semibold text-stone-600 uppercase tracking-wider">Decoded QR Content</p>
+          <p id="link-qr-decoded" class="text-sm text-stone-800 break-all font-mono"></p>
           <p id="link-qr-source-id" class="hidden"></p>
         </div>
         <div>
-          <label class="block text-sm text-slate-400 mb-1.5">Label <span class="text-slate-600 text-xs">(optional)</span></label>
+          <label class="block text-sm text-stone-600 mb-1.5">Label <span class="text-stone-400 text-xs">(optional)</span></label>
           <input id="link-qr-label" type="text" placeholder="e.g. Table 5, Front door"
-                 class="w-full bg-bg-dark border border-primary/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-600"/>
+                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
         </div>
         <button id="link-qr-save-btn" onclick="saveLinkQR('${targetMenuId}')"
                 class="w-full h-11 bg-violet-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all">
@@ -2296,14 +2306,14 @@ async function loadLinkedQRs() {
     }
     section.classList.remove('hidden');
     el.innerHTML = list.map(r => `
-      <div class="flex items-center gap-3 p-3 bg-bg-dark rounded-xl border border-primary/5">
+      <div class="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-primary/5">
         <span class="material-symbols-outlined text-violet-400/60 text-[20px]">qr_code_2</span>
         <div class="flex-1 min-w-0">
-          <p class="text-sm text-slate-200 truncate">${esc(r.label || r.source_menu_id)}</p>
-          <p class="text-xs text-slate-500 truncate">→ ${esc(r.target_name || r.target_menu_id)}</p>
+          <p class="text-sm text-stone-800 truncate">${esc(r.label || r.source_menu_id)}</p>
+          <p class="text-xs text-stone-500 truncate">→ ${esc(r.target_name || r.target_menu_id)}</p>
         </div>
         <button onclick="unlinkQR(${r.id})" title="Remove link"
-                class="text-slate-600 hover:text-red-400 transition-colors p-1">
+                class="text-stone-400 hover:text-red-400 transition-colors p-1">
           <span class="material-symbols-outlined text-[16px]">link_off</span>
         </button>
       </div>`).join('');
@@ -2514,11 +2524,11 @@ async function loadSettingsBranding(menuId) {
     document.querySelectorAll('.s-layout-opt').forEach(btn => {
       const active = btn.dataset.layout === settingsLayout;
       btn.classList.toggle('s-layout-active', active);
-      btn.classList.toggle('border-primary/30', active);
+      btn.classList.toggle('border-primary/40', active);
       btn.classList.toggle('bg-primary/10', active);
       btn.classList.toggle('text-primary', active);
       btn.classList.toggle('border-slate-700', !active);
-      btn.classList.toggle('text-slate-500', !active);
+      btn.classList.toggle('text-stone-500', !active);
     });
 
     // Contact
@@ -2550,11 +2560,11 @@ function sSetLayout(layout) {
   document.querySelectorAll('.s-layout-opt').forEach(btn => {
     const active = btn.dataset.layout === layout;
     btn.classList.toggle('s-layout-active', active);
-    btn.classList.toggle('border-primary/30', active);
+    btn.classList.toggle('border-primary/40', active);
     btn.classList.toggle('bg-primary/10', active);
     btn.classList.toggle('text-primary', active);
     btn.classList.toggle('border-slate-700', !active);
-    btn.classList.toggle('text-slate-500', !active);
+    btn.classList.toggle('text-stone-500', !active);
   });
 }
 
@@ -2719,27 +2729,27 @@ async function loadTablesForMenu(menuId) {
 async function renderTables() {
   if (!tablesMenuId) return;
   const el = document.getElementById('tables-list');
-  el.innerHTML = '<p class="text-slate-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', { headers: { 'X-Admin-Token': sessionToken } });
     const rows = await res.json();
     if (!rows.length) {
-      el.innerHTML = '<p class="text-slate-500 text-sm">No tables yet. Add one above.</p>';
+      el.innerHTML = '<p class="text-stone-500 text-sm">No tables yet. Add one above.</p>';
       return;
     }
     el.innerHTML = rows.map(t => `
-      <div class="bg-surface rounded-xl border border-primary/10 p-4 flex items-center gap-4">
-        <img src="${t.qr_code}" alt="QR" class="w-16 h-16 rounded-lg border border-primary/10"/>
+      <div class="bg-white rounded-xl border border-stone-200 p-4 flex items-center gap-4">
+        <img src="${t.qr_code}" alt="QR" class="w-16 h-16 rounded-lg border border-stone-200"/>
         <div class="flex-1 min-w-0">
-          <p class="font-semibold text-slate-200 truncate">${esc(t.label)}</p>
-          <p class="text-xs text-slate-500 mt-0.5">${new Date(t.created_at).toLocaleDateString()}</p>
+          <p class="font-semibold text-stone-800 truncate">${esc(t.label)}</p>
+          <p class="text-xs text-stone-500 mt-0.5">${new Date(t.created_at).toLocaleDateString()}</p>
         </div>
         <a href="${t.qr_code}" download="qr-${esc(t.label)}.png"
            class="text-primary hover:underline text-xs flex items-center gap-1">
           <span class="material-symbols-outlined text-[14px]">download</span> Download
         </a>
         <button onclick="deleteTable(${t.id})"
-                class="text-slate-600 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors">
+                class="text-stone-400 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors">
           <span class="material-symbols-outlined text-[18px]">delete</span>
         </button>
       </div>`).join('');
@@ -2783,25 +2793,25 @@ async function deleteTable(tableId) {
 async function loadAlerts() {
   if (!tablesMenuId) return;
   const el = document.getElementById('alerts-list');
-  el.innerHTML = '<p class="text-slate-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/alerts', { headers: { 'X-Admin-Token': sessionToken } });
     const rows = await res.json();
     const pending = rows.filter(r => r.status === 'pending');
     if (!pending.length) {
-      el.innerHTML = '<p class="text-slate-500 text-sm">No pending alerts.</p>';
+      el.innerHTML = '<p class="text-stone-500 text-sm">No pending alerts.</p>';
       return;
     }
     el.innerHTML = pending.map(r => `
       <div class="flex items-start gap-3 p-3 bg-amber-400/10 border border-amber-400/30 rounded-xl">
         <span class="material-symbols-outlined text-amber-400 text-[20px] mt-0.5">notifications_active</span>
         <div class="flex-1">
-          <p class="text-sm font-semibold text-slate-200">${esc(r.table_label)}</p>
-          <p class="text-xs text-slate-400 mt-0.5">${esc(r.message)}</p>
-          <p class="text-xs text-slate-600 mt-0.5">${new Date(r.created_at).toLocaleString()}</p>
+          <p class="text-sm font-semibold text-stone-800">${esc(r.table_label)}</p>
+          <p class="text-xs text-stone-600 mt-0.5">${esc(r.message)}</p>
+          <p class="text-xs text-stone-400 mt-0.5">${new Date(r.created_at).toLocaleString()}</p>
         </div>
         <button onclick="dismissAlert(${r.id})"
-                class="text-xs text-slate-500 hover:text-green-400 transition-colors flex items-center gap-1">
+                class="text-xs text-stone-500 hover:text-green-400 transition-colors flex items-center gap-1">
           <span class="material-symbols-outlined text-[14px]">check_circle</span> Dismiss
         </button>
       </div>`).join('');
@@ -2825,32 +2835,32 @@ const CURR_MAP = {USD:'$',EUR:'€',GBP:'£',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AE
 async function loadOrders() {
   if (!tablesMenuId) return;
   const el = document.getElementById('orders-list');
-  el.innerHTML = '<p class="text-slate-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   const status = document.getElementById('orders-status-filter').value || 'pending';
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: { 'X-Admin-Token': sessionToken } });
     const rows = await res.json();
     if (!rows.length) {
-      el.innerHTML = '<p class="text-slate-500 text-sm">No ' + esc(status) + ' orders.</p>';
+      el.innerHTML = '<p class="text-stone-500 text-sm">No ' + esc(status) + ' orders.</p>';
       return;
     }
     el.innerHTML = rows.map(r => {
       const items = typeof r.items === 'string' ? JSON.parse(r.items) : (r.items || []);
       const sym = CURR_MAP[r.currency] || r.currency + ' ';
-      const itemLines = items.map(it => '<span class="text-slate-400">' + esc(it.name) + ' x' + it.qty + ' &mdash; ' + sym + (it.price * it.qty).toFixed(2) + '</span>').join('<br/>');
+      const itemLines = items.map(it => '<span class="text-stone-600">' + esc(it.name) + ' x' + it.qty + ' &mdash; ' + sym + (it.price * it.qty).toFixed(2) + '</span>').join('<br/>');
       return `
-        <div class="bg-bg-dark/50 border border-primary/10 rounded-xl p-4 space-y-2">
+        <div class="bg-stone-50/50 border border-stone-200 rounded-xl p-4 space-y-2">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-sm font-semibold text-slate-200">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : ''}</span>
-              <span class="text-xs text-slate-600 ml-2">${new Date(r.created_at).toLocaleString()}</span>
-              ${r.customer_name ? '<br/><span class="text-xs text-slate-400">' + esc(r.customer_name) + (r.customer_phone ? ' &mdash; ' + esc(r.customer_phone) : '') + '</span>' : ''}
+              <span class="text-sm font-semibold text-stone-800">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : ''}</span>
+              <span class="text-xs text-stone-400 ml-2">${new Date(r.created_at).toLocaleString()}</span>
+              ${r.customer_name ? '<br/><span class="text-xs text-stone-600">' + esc(r.customer_name) + (r.customer_phone ? ' &mdash; ' + esc(r.customer_phone) : '') + '</span>' : ''}
             </div>
             <span class="text-xs font-bold ${status === 'pending' ? 'text-amber-400' : 'text-emerald-400'}">${esc(status.toUpperCase())}</span>
           </div>
           <div class="text-xs leading-relaxed">${itemLines}</div>
-          <div class="flex items-center justify-between pt-1 border-t border-primary/10">
-            <span class="text-sm font-bold text-slate-100">Total: ${sym}${parseFloat(r.total).toFixed(2)}</span>
+          <div class="flex items-center justify-between pt-1 border-t border-stone-200">
+            <span class="text-sm font-bold text-stone-900">Total: ${sym}${parseFloat(r.total).toFixed(2)}</span>
             <div class="flex gap-2">
               <button onclick="printOrderBill(${r.id})" class="text-xs text-primary hover:underline flex items-center gap-1">
                 <span class="material-symbols-outlined text-[14px]">print</span> Print Bill
