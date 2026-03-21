@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics – RestOrder Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols_Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- Login Overlay -->
+<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">lock</span>
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">Admin Access</h2>
+        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
+      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+      Sign In
+    </button>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid password. Please try again.</p>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+  <div class="flex items-center gap-3 mb-10">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-lg">RestOrder Admin</h1>
+      <p class="text-xs text-slate-400">Internal Management</p>
+    </div>
+  </div>
+
+  <nav class="space-y-2 flex-1">
+    <a href="admin-dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="text-sm font-medium">Dashboard</span>
+    </a>
+    <a href="customers.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <span class="text-sm font-medium">Customers</span>
+    </a>
+    <a href="admin-menus.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
+    <a href="subscriptions.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="payments.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
+    </a>
+    <a href="analytics.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+      <span class="material-symbols-outlined text-[20px]">analytics</span>
+      <span class="text-sm font-medium">Analytics</span>
+    </a>
+  </nav>
+
+  <div class="pt-4 border-t border-slate-700">
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="text-sm font-medium">Logout</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-auto">
+  
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h2 class="text-3xl font-bold">Analytics & Insights</h2>
+          <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+        </div>
+        <p class="text-slate-400">Deep dive into business performance and customer behavior</p>
+      </div>
+      <button onclick="loadAnalytics()" class="px-4 py-2 bg-surface border border-slate-700 rounded-xl hover:bg-bg-dark transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">refresh</span>
+        <span class="text-sm font-medium">Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-primary text-[24px]">trending_up</span>
+        <p class="text-sm text-slate-400">Conversion Rate</p>
+      </div>
+      <p class="text-2xl font-bold" id="stat-conversion">0%</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-primary text-[24px]">person_add</span>
+        <p class="text-sm text-slate-400">New Customers (30d)</p>
+      </div>
+      <p class="text-2xl font-bold" id="stat-new-customers">0</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-primary text-[24px]">currency_exchange</span>
+        <p class="text-sm text-slate-400">Avg. Revenue/Customer</p>
+      </div>
+      <p class="text-2xl font-bold" id="stat-arpu">$0</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-primary text-[24px]">speed</span>
+        <p class="text-sm text-slate-400">Churn Rate</p>
+      </div>
+      <p class="text-2xl font-bold" id="stat-churn">0%</p>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-8">
+    <!-- Customer Growth -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Customer Growth (Last 30 Days)</h3>
+      <div id="customer-growth-chart" class="h-64">
+        <div class="h-full flex items-center justify-center">
+          <div class="text-center">
+            <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+            <p class="text-slate-400 text-sm">Loading chart...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue Growth -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Revenue Growth (Last 30 Days)</h3>
+      <div id="revenue-growth-chart" class="h-64">
+        <div class="h-full flex items-center justify-center">
+          <div class="text-center">
+            <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+            <p class="text-slate-400 text-sm">Loading chart...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- More Analytics -->
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Top Performing Menus -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Top Performing Menus</h3>
+      <div id="top-menus">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading menus...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Analytics -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Scan Activity</h3>
+      <div id="scan-analytics">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading scan data...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+let adminToken = null;
+
+// Login
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const secret = document.getElementById('login-secret').value;
+  const errorEl = document.getElementById('login-error');
+  
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret })
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    
+    adminToken = data.token;
+    localStorage.setItem('admin-token', adminToken);
+    document.getElementById('login-overlay').classList.add('hidden');
+    await loadAnalytics();
+  } catch (err) {
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('admin-token');
+  location.reload();
+});
+
+// Check existing session
+(async () => {
+  const token = localStorage.getItem('admin-token');
+  if (!token) return;
+  
+  const res = await fetch('/api/admin/check', {
+    headers: { 'x-admin-token': token }
+  });
+  
+  if (res.ok) {
+    adminToken = token;
+    document.getElementById('login-overlay').classList.add('hidden');
+    await loadAnalytics();
+  } else {
+    localStorage.removeItem('admin-token');
+  }
+})();
+
+// Load analytics
+async function loadAnalytics() {
+  try {
+    const headers = { 'x-admin-token': adminToken };
+    
+    // Fetch all data
+    const [customersRes, subsRes] = await Promise.all([
+      fetch('/api/admin/customers', { headers }),
+      fetch('/api/subscriptions?status=active', { headers })
+    ]);
+    
+    if (!customersRes.ok || !subsRes.ok) throw new Error('Failed to load data');
+    
+    const customers = await customersRes.json();
+    const subscriptions = await subsRes.json();
+    
+    // Calculate metrics
+    const totalCustomers = customers.length;
+    const activeCustomers = customers.filter(c => c.status === 'active').length;
+    const paidCustomers = subscriptions.filter(s => (s.plan_price || 0) > 0).length;
+    const conversionRate = totalCustomers > 0 ? (paidCustomers / totalCustomers * 100) : 0;
+    
+    // New customers in last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const newCustomers = customers.filter(c => new Date(c.created_at) >= thirtyDaysAgo).length;
+    
+    // Average revenue per user
+    const totalRevenue = subscriptions.reduce((sum, s) => sum + (parseFloat(s.plan_price) || 0), 0);
+    const arpu = activeCustomers > 0 ? (totalRevenue / activeCustomers) : 0;
+    
+    // Update stats
+    document.getElementById('stat-conversion').textContent = `${conversionRate.toFixed(1)}%`;
+    document.getElementById('stat-new-customers').textContent = newCustomers;
+    document.getElementById('stat-arpu').textContent = `$${arpu.toFixed(0)}`;
+    document.getElementById('stat-churn').textContent = `0%`;
+    
+    // Render charts (simplified bar charts)
+    renderCustomerGrowthChart(customers);
+    renderRevenueGrowthChart(subscriptions);
+    
+    // Top menus
+    renderTopMenus(customers);
+    
+    // Scan analytics
+    renderScanAnalytics(customers);
+    
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderCustomerGrowthChart(customers) {
+  // Group by last 7 days
+  const days = [];
+  const counts = [];
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dayStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    days.push(dayStr);
+    
+    const count = customers.filter(c => {
+      const createdDate = new Date(c.created_at);
+      return createdDate.toDateString() === date.toDateString();
+    }).length;
+    counts.push(count);
+  }
+  
+  const maxCount = Math.max(...counts, 1);
+  
+  const html = `
+    <div class="h-full flex items-end gap-3 px-4">
+      ${counts.map((count, i) => `
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-primary/20 rounded-t-lg relative" style="height: ${(count / maxCount * 100)}%; min-height: 8px;">
+            <div class="absolute inset-0 bg-primary rounded-t-lg" style="height: 100%;"></div>
+          </div>
+          <p class="text-xs text-slate-400 rotate-0">${days[i]}</p>
+          <p class="text-sm font-bold">${count}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  
+  document.getElementById('customer-growth-chart').innerHTML = html;
+}
+
+function renderRevenueGrowthChart(subscriptions) {
+  // Simplified revenue by last 7 days (using created_at as proxy)
+  const days = [];
+  const revenues = [];
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dayStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    days.push(dayStr);
+    
+    const revenue = subscriptions
+      .filter(s => new Date(s.created_at).toDateString() === date.toDateString())
+      .reduce((sum, s) => sum + (parseFloat(s.plan_price) || 0), 0);
+    revenues.push(revenue);
+  }
+  
+  const maxRevenue = Math.max(...revenues, 1);
+  
+  const html = `
+    <div class="h-full flex items-end gap-3 px-4">
+      ${revenues.map((revenue, i) => `
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <div class="w-full bg-green-500/20 rounded-t-lg relative" style="height: ${(revenue / maxRevenue * 100)}%; min-height: 8px;">
+            <div class="absolute inset-0 bg-green-500 rounded-t-lg" style="height: 100%;"></div>
+          </div>
+          <p class="text-xs text-slate-400 rotate-0">${days[i]}</p>
+          <p class="text-sm font-bold text-green-500">$${revenue.toFixed(0)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  
+  document.getElementById('revenue-growth-chart').innerHTML = html;
+}
+
+function renderTopMenus(customers) {
+  // Sort by total_scans and get top 5
+  const topCustomers = customers
+    .filter(c => c.menu_count > 0)
+    .sort((a, b) => (b.total_scans || 0) - (a.total_scans || 0))
+    .slice(0, 5);
+  
+  if (!topCustomers.length) {
+    document.getElementById('top-menus').innerHTML = '<p class="text-slate-400 text-center py-8">No menu data available</p>';
+    return;
+  }
+  
+  const html = topCustomers.map((customer, index) => `
+    <div class="flex items-center gap-4 p-4 bg-bg-dark/30 rounded-xl mb-3">
+      <div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold">
+        #${index + 1}
+      </div>
+      <div class="flex-1">
+        <p class="font-semibold mb-1">${escapeHtml(customer.business_name || 'Unknown')}</p>
+        <p class="text-sm text-slate-400">${customer.menu_count} menu${customer.menu_count !== 1 ? 's' : ''}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xl font-bold text-primary">${(customer.total_scans || 0).toLocaleString()}</p>
+        <p class="text-xs text-slate-400">scans</p>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('top-menus').innerHTML = html;
+}
+
+function renderScanAnalytics(customers) {
+  const totalScans = customers.reduce((sum, c) => sum + (c.total_scans || 0), 0);
+  const totalMenus = customers.reduce((sum, c) => sum + (c.menu_count || 0), 0);
+  const avgScansPerMenu = totalMenus > 0 ? (totalScans / totalMenus) : 0;
+  
+  const html = `
+    <div class="space-y-4">
+      <div class="p-6 bg-bg-dark/30 rounded-xl">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-slate-400">Total Scans</p>
+          <span class="material-symbols-outlined text-primary">qr_code_scanner</span>
+        </div>
+        <p class="text-3xl font-bold">${totalScans.toLocaleString()}</p>
+      </div>
+      
+      <div class="p-6 bg-bg-dark/30 rounded-xl">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-slate-400">Avg. Scans per Menu</p>
+          <span class="material-symbols-outlined text-primary">analytics</span>
+        </div>
+        <p class="text-3xl font-bold">${avgScansPerMenu.toFixed(0)}</p>
+      </div>
+      
+      <div class="p-6 bg-bg-dark/30 rounded-xl">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-slate-400">Active Menus</p>
+          <span class="material-symbols-outlined text-primary">restaurant_menu</span>
+        </div>
+        <p class="text-3xl font-bold">${totalMenus}</p>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('scan-analytics').innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Allow Enter key to submit login
+document.getElementById('login-secret').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('login-btn').click();
+  }
+});
+</script>
+
+</body>
+</html>

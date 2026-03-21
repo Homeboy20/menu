@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard – RestOrder Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols_Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+  .badge-starter { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+  .badge-professional { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; }
+  .badge-enterprise { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- Login Overlay -->
+<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">lock</span>
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">Admin Access</h2>
+        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
+      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+      Sign In
+    </button>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid password. Please try again.</p>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+  <div class="flex items-center gap-3 mb-10">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-lg">RestOrder Admin</h1>
+      <p class="text-xs text-slate-400">Internal Management</p>
+    </div>
+  </div>
+
+  <nav class="space-y-2 flex-1">
+    <a href="admin-dashboard.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="text-sm font-medium">Dashboard</span>
+    </a>
+    <a href="customers.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <span class="text-sm font-medium">Customers</span>
+    </a>
+    <a href="admin-menus.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
+    <a href="subscriptions.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="payments.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
+    </a>
+    <a href="analytics.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">analytics</span>
+      <span class="text-sm font-medium">Analytics</span>
+    </a>
+  </nav>
+
+  <div class="pt-4 border-t border-slate-700">
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="text-sm font-medium">Logout</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-auto">
+  
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h2 class="text-3xl font-bold">Business Overview</h2>
+          <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+        </div>
+        <p class="text-slate-400">Monitor your SaaS performance and key metrics</p>
+      </div>
+      <button onclick="loadDashboard()" class="px-4 py-2 bg-surface border border-slate-700 rounded-xl hover:bg-bg-dark transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">refresh</span>
+        <span class="text-sm font-medium">Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-primary text-[28px]">groups</span>
+        <span class="text-green-500 text-sm font-semibold" id="customers-growth">+0%</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-customers">0</p>
+      <p class="text-slate-400 text-sm">Total Customers</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-primary text-[28px]">restaurant_menu</span>
+        <span class="text-green-500 text-sm font-semibold" id="menus-growth">+0%</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-menus">0</p>
+      <p class="text-slate-400 text-sm">Active Menus</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-primary text-[28px]">payments</span>
+        <span class="text-green-500 text-sm font-semibold" id="revenue-growth">+0%</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-revenue">$0</p>
+      <p class="text-slate-400 text-sm">Monthly Revenue</p>
+    </div>
+
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-primary text-[28px]">qr_code_scanner</span>
+        <span class="text-green-500 text-sm font-semibold" id="scans-growth">+0%</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-scans">0</p>
+      <p class="text-slate-400 text-sm">Total Scans</p>
+    </div>
+  </div>
+
+  <!-- Revenue & Subscriptions -->
+  <div class="grid lg:grid-cols-2 gap-6 mb-8">
+    <!-- Revenue Breakdown -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Revenue Breakdown</h3>
+      <div id="revenue-breakdown" class="space-y-4">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading revenue data...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscription Distribution -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <h3 class="text-xl font-bold mb-6">Subscription Distribution</h3>
+      <div id="subscription-distribution" class="space-y-4">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading subscription data...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Recent Customers -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Recent Customers</h3>
+        <a href="customers.html" class="text-primary text-sm font-semibold hover:underline">View All →</a>
+      </div>
+      <div id="recent-customers">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading customers...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Subscriptions -->
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold">Recent Subscriptions</h3>
+        <a href="subscriptions.html" class="text-primary text-sm font-semibold hover:underline">View All →</a>
+      </div>
+      <div id="recent-subscriptions">
+        <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
+          <span class="material-symbols-outlined text-slate-600 text-[48px] block mb-2 spin">progress_activity</span>
+          <p class="text-slate-400 text-sm">Loading subscriptions...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+let adminToken = null;
+
+// Login
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const secret = document.getElementById('login-secret').value;
+  const errorEl = document.getElementById('login-error');
+  
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret })
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    
+    adminToken = data.token;
+    localStorage.setItem('admin-token', adminToken);
+    document.getElementById('login-overlay').classList.add('hidden');
+    await loadDashboard();
+  } catch (err) {
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('admin-token');
+  location.reload();
+});
+
+// Check existing session
+(async () => {
+  const token = localStorage.getItem('admin-token');
+  if (!token) return;
+  
+  const res = await fetch('/api/admin/check', {
+    headers: { 'x-admin-token': token }
+  });
+  
+  if (res.ok) {
+    adminToken = token;
+    document.getElementById('login-overlay').classList.add('hidden');
+    await loadDashboard();
+  } else {
+    localStorage.removeItem('admin-token');
+  }
+})();
+
+// Load dashboard data
+async function loadDashboard() {
+  try {
+    const headers = { 'x-admin-token': adminToken };
+    
+    // Fetch all data
+    const [customersRes, subsRes, plansRes] = await Promise.all([
+      fetch('/api/admin/customers', { headers }),
+      fetch('/api/subscriptions?status=active', { headers }),
+      fetch('/api/subscription-plans')
+    ]);
+    
+    if (!customersRes.ok || !subsRes.ok) throw new Error('Failed to load data');
+    
+    const customers = await customersRes.json();
+    const subscriptions = await subsRes.json();
+    const plans = await plansRes.json();
+    
+    // Calculate stats
+    const totalCustomers = customers.length;
+    const activeCustomers = customers.filter(c => c.status === 'active').length;
+    const totalMenus = customers.reduce((sum, c) => sum + (c.menu_count || 0), 0);
+    const totalScans = customers.reduce((sum, c) => sum + (c.total_scans || 0), 0);
+    
+    // Calculate monthly revenue
+    const monthlyRevenue = subscriptions.reduce((sum, sub) => {
+      return sum + (parseFloat(sub.plan_price) || 0);
+    }, 0);
+    
+    // Update stats
+    document.getElementById('stat-customers').textContent = totalCustomers;
+    document.getElementById('stat-menus').textContent = totalMenus;
+    document.getElementById('stat-revenue').textContent = `$${monthlyRevenue.toFixed(0)}`;
+    document.getElementById('stat-scans').textContent = totalScans.toLocaleString();
+    
+    // Revenue breakdown by plan
+    renderRevenueBreakdown(subscriptions, plans);
+    
+    // Subscription distribution
+    renderSubscriptionDistribution(subscriptions, plans);
+    
+    // Recent customers (last 5)
+    renderRecentCustomers(customers.slice(0, 5));
+    
+    // Recent subscriptions (last 5)
+    renderRecentSubscriptions(subscriptions.slice(0, 5));
+    
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderRevenueBreakdown(subscriptions, plans) {
+  const revenueByPlan = {};
+  let totalRevenue = 0;
+  
+  plans.forEach(plan => {
+    revenueByPlan[plan.name] = {
+      display_name: plan.display_name,
+      count: 0,
+      revenue: 0,
+      price: plan.price
+    };
+  });
+  
+  subscriptions.forEach(sub => {
+    const planName = sub.plan_name?.toLowerCase() || 'starter';
+    if (revenueByPlan[planName]) {
+      revenueByPlan[planName].count++;
+      revenueByPlan[planName].revenue += parseFloat(sub.plan_price) || 0;
+      totalRevenue += parseFloat(sub.plan_price) || 0;
+    }
+  });
+  
+  const html = Object.entries(revenueByPlan)
+    .filter(([, data]) => data.count > 0)
+    .map(([name, data]) => {
+      const percentage = totalRevenue > 0 ? (data.revenue / totalRevenue * 100) : 0;
+      return `
+        <div class="flex items-center justify-between p-4 bg-bg-dark/30 rounded-xl">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="badge badge-${name}">${escapeHtml(data.display_name)}</span>
+              <span class="text-sm text-slate-400">${data.count} customer${data.count !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2 mt-2">
+              <div class="bg-primary h-2 rounded-full" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+          <div class="ml-4 text-right">
+            <p class="text-xl font-bold text-primary">$${data.revenue.toFixed(0)}</p>
+            <p class="text-xs text-slate-400">${percentage.toFixed(0)}%</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  
+  document.getElementById('revenue-breakdown').innerHTML = html || '<p class="text-slate-400 text-center py-8">No revenue data</p>';
+}
+
+function renderSubscriptionDistribution(subscriptions, plans) {
+  const distribution = {};
+  
+  plans.forEach(plan => {
+    distribution[plan.name] = {
+      display_name: plan.display_name,
+      count: 0
+    };
+  });
+  
+  subscriptions.forEach(sub => {
+    const planName = sub.plan_name?.toLowerCase() || 'starter';
+    if (distribution[planName]) {
+      distribution[planName].count++;
+    }
+  });
+  
+  const total = subscriptions.length;
+  
+  const html = Object.entries(distribution)
+    .map(([name, data]) => {
+      const percentage = total > 0 ? (data.count / total * 100) : 0;
+      return `
+        <div class="flex items-center justify-between p-4 bg-bg-dark/30 rounded-xl">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-${name}">${escapeHtml(data.display_name)}</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+          <div class="ml-4 text-right">
+            <p class="text-2xl font-bold">${data.count}</p>
+            <p class="text-xs text-slate-400">${percentage.toFixed(0)}%</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  
+  document.getElementById('subscription-distribution').innerHTML = html;
+}
+
+function renderRecentCustomers(customers) {
+  if (!customers.length) {
+    document.getElementById('recent-customers').innerHTML = '<p class="text-slate-400 text-center py-8">No customers yet</p>';
+    return;
+  }
+  
+  const html = customers.map(customer => `
+    <div class="flex items-center justify-between p-4 bg-bg-dark/30 rounded-xl hover:bg-bg-dark/50 transition">
+      <div class="flex-1">
+        <p class="font-semibold mb-1">${escapeHtml(customer.business_name || 'Unknown')}</p>
+        <p class="text-sm text-slate-400">${escapeHtml(customer.email)}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-semibold text-primary">${customer.menu_count || 0} menu${customer.menu_count !== 1 ? 's' : ''}</p>
+        <p class="text-xs text-slate-400">${formatDate(customer.created_at)}</p>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('recent-customers').innerHTML = html;
+}
+
+function renderRecentSubscriptions(subscriptions) {
+  if (!subscriptions.length) {
+    document.getElementById('recent-subscriptions').innerHTML = '<p class="text-slate-400 text-center py-8">No subscriptions yet</p>';
+    return;
+  }
+  
+  const html = subscriptions.map(sub => `
+    <div class="flex items-center justify-between p-4 bg-bg-dark/30 rounded-xl hover:bg-bg-dark/50 transition">
+      <div class="flex-1">
+        <p class="font-semibold mb-1">${escapeHtml(sub.restaurant_name || 'Unknown')}</p>
+        <span class="badge badge-${(sub.plan_name || 'starter').toLowerCase()}">${escapeHtml(sub.plan_name || 'Starter')}</span>
+      </div>
+      <div class="text-right">
+        <p class="text-lg font-bold text-primary">$${parseFloat(sub.plan_price || 0).toFixed(0)}</p>
+        <p class="text-xs text-slate-400">${formatDate(sub.created_at)}</p>
+      </div>
+    </div>
+  `).join('');
+  
+  document.getElementById('recent-subscriptions').innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', { 
+    year: 'numeric', month: 'short', day: 'numeric' 
+  });
+}
+
+// Allow Enter key to submit login
+document.getElementById('login-secret').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('login-btn').click();
+  }
+});
+</script>
+
+</body>
+</html>
