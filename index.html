@@ -538,81 +538,124 @@
       font-weight: 500;
     }
     
-    /* Features Grid */
+    /* Features Grid - Redesigned with Flat Colors */
+    #features {
+      background: linear-gradient(180deg, #ffffff 0%, #fafaf9 100%);
+    }
+    
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 32px;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
     }
     
     .feature-card {
       background: white;
-      padding: 40px 32px;
-      border-radius: 20px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s;
-      border: 1px solid var(--border);
+      padding: 32px 28px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      overflow: hidden;
-    }
-    
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--gradient-1);
-      opacity: 0;
-      transition: opacity 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     
     .feature-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
       border-color: var(--primary);
     }
     
-    .feature-card:hover::before {
-      opacity: 1;
-    }
-    
     .feature-icon {
-      width: 72px;
-      height: 72px;
-      background: var(--gradient-1);
-      border-radius: 16px;
+      width: 64px;
+      height: 64px;
+      background: white;
+      border: 3px solid var(--primary);
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 24px;
-      font-size: 32px;
-      box-shadow: 0 4px 16px rgba(194,65,12,0.25);
+      font-size: 28px;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover .feature-icon {
+      background: var(--primary);
+      transform: scale(1.05) rotate(-5deg);
     }
     
     .feature-card h3 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
-      margin-bottom: 12px;
+      margin: 0;
       color: var(--text);
+      line-height: 1.3;
     }
     
     .feature-card p {
       color: var(--text-light);
-      line-height: 1.7;
-      font-size: 15px;
+      line-height: 1.6;
+      font-size: 14px;
+      margin: 0;
+      flex-grow: 1;
     }
     
     .feature-badge {
       display: inline-block;
-      background: rgba(194,65,12,0.1);
-      color: var(--primary);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
+      background: var(--primary);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 700;
-      margin-top: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      align-self: flex-start;
+    }
+    
+    /* Feature Categories */
+    .feature-category {
+      margin-bottom: 56px;
+    }
+    
+    .feature-category:last-child {
+      margin-bottom: 0;
+    }
+    
+    .category-header {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    .category-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(194,65,12,0.2);
+    }
+    
+    .category-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .category-description {
+      font-size: 16px;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
     }
     
     /* Pricing */
@@ -1408,8 +1451,8 @@
     </div>
   </div>
 
-  <!-- Features Section -->
-  <section id="features" style="padding: 80px 0 60px;">
+  <!-- Features Section - Redesigned -->
+  <section id="features" style="padding: 80px 0;">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Complete Solution</span>
@@ -1419,119 +1462,144 @@
         </p>
       </div>
       
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📱</div>
-          <h3>QR Code Access</h3>
-          <p>Customers scan your QR code to instantly view the menu on their phone. Works on any device, no app download needed. Completely contactless and safe.</p>
-          <span class="feature-badge">Core Feature</span>
+      <!-- Core Features -->
+      <div class="feature-category">
+        <div class="category-header">
+          <div class="category-icon">🚀</div>
+          <h3 class="category-title">Core Features</h3>
+          <p class="category-description">Essential tools every restaurant needs to create and manage digital menus</p>
         </div>
         
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Real-Time Updates</h3>
-          <p>Change prices, add specials, or update descriptions instantly. Changes appear immediately for all customers. No reprinting costs.</p>
-          <span class="feature-badge">Save Money</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Custom Branding</h3>
-          <p>Match your brand with custom colors, fonts, logos, and themes. Professional design options that make your menu stand out.</p>
-          <span class="feature-badge">Professional</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Advanced Analytics</h3>
-          <p>Track menu scans, popular items, peak hours, and customer behavior. Make data-driven decisions to boost sales.</p>
-          <span class="feature-badge">Insights</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🪑</div>
-          <h3>Table Management</h3>
-          <p>Generate unique QR codes for each table. Customers can call waiters, place orders, and view bills directly from their phone.</p>
-          <span class="feature-badge">Premium</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🛒</div>
-          <h3>Online Ordering</h3>
-          <p>Let customers add items to cart and place orders. Collect customer info, integrate with WhatsApp for order notifications.</p>
-          <span class="feature-badge">Boost Sales</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">⭐</div>
-          <h3>Customer Ratings</h3>
-          <p>Allow customers to rate menu items. Build trust and highlight your best dishes with authentic reviews.</p>
-          <span class="feature-badge">Social Proof</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">💰</div>
-          <h3>Multi-Currency Support</h3>
-          <p>Support for all major currencies worldwide. Perfect for tourist areas and international restaurants.</p>
-          <span class="feature-badge">Global</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🔔</div>
-          <h3>Table Alerts</h3>
-          <p>Customers can request service with one tap. Real-time notifications keep your staff responsive and customers happy.</p>
-          <span class="feature-badge">Premium</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🖨️</div>
-          <h3>Print Bills</h3>
-          <p>Auto-format and print customer bills with all order details. Works with standard thermal printers.</p>
-          <span class="feature-badge">Convenience</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">📤</div>
-          <h3>Easy Import/Export</h3>
-          <p>Upload menus from PDF, CSV, Excel, or text files. Export your menu data anytime. Bulk updates made easy.</p>
-          <span class="feature-badge">Time-Saver</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🏷️</div>
-          <h3>Categories & Tags</h3>
-          <p>Organize with unlimited categories and subcategories. Tag items (vegan, gluten-free, spicy) for easy filtering.</p>
-          <span class="feature-badge">Organization</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🌙</div>
-          <h3>Dark/Light Themes</h3>
-          <p>Customers can choose their preferred theme. Automatic detection based on device settings for comfortable viewing.</p>
-          <span class="feature-badge">UX</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <h3>Smart Search</h3>
-          <p>Powerful search lets customers find exactly what they want instantly. Search by name, description, category, or tags.</p>
-          <span class="feature-badge">Convenience</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">📞</div>
-          <h3>Contact Integration</h3>
-          <p>Display phone, email, address, website, and social media links. Connect with customers on WhatsApp, Instagram, and more.</p>
-          <span class="feature-badge">Marketing</span>
-        </div>
-        
-        <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <h3>Secure & Reliable</h3>
-          <p>Bank-level SSL encryption, 99.9% uptime guarantee, automatic backups. Your data is always safe and accessible.</p>
-          <span class="feature-badge">Enterprise</span>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>QR Code Access</h3>
+            <p>Customers scan your QR code to instantly view the menu on their phone. Works on any device, no app download needed.</p>
+            <span class="feature-badge">Essential</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Real-Time Updates</h3>
+            <p>Change prices, add specials, or update descriptions instantly. Changes appear immediately for all customers.</p>
+            <span class="feature-badge">Essential</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Custom Branding</h3>
+            <p>Match your brand with custom colors, fonts, logos, and themes. Professional design options that make your menu stand out.</p>
+            <span class="feature-badge">Essential</span>
+          </div>
         </div>
       </div>
+      
+      <!-- Advanced Features -->
+      <div class="feature-category">
+        <div class="category-header">
+          <div class="category-icon">📈</div>
+          <h3 class="category-title">Advanced Features</h3>
+          <p class="category-description">Powerful tools to grow your business and delight customers</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🪑</div>
+            <h3>Table Management</h3>
+            <p>Generate unique QR codes for each table. Customers can call waiters, place orders, and view bills from their phone.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🛒</div>
+            <h3>Online Ordering</h3>
+            <p>Let customers add items to cart and place orders. Collect customer info, integrate with WhatsApp for notifications.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3>Customer Ratings</h3>
+            <p>Allow customers to rate menu items. Build trust and highlight your best dishes with authentic reviews.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Advanced Analytics</h3>
+            <p>Track menu scans, popular items, peak hours, and customer behavior. Make data-driven decisions to boost sales.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>Table Alerts</h3>
+            <p>Customers can request service with one tap. Real-time notifications keep your staff responsive and customers happy.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3>Multi-Currency</h3>
+            <p>Support for all major currencies worldwide. Perfect for tourist areas and international restaurants.</p>
+            <span class="feature-badge">Premium</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Management Tools -->
+      <div class="feature-category">
+        <div class="category-header">
+          <div class="category-icon">🛠️</div>
+          <h3 class="category-title">Management Tools</h3>
+          <p class="category-description">Efficient tools to organize and manage your restaurant operations</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">📤</div>
+            <h3>Easy Import/Export</h3>
+            <p>Upload menus from PDF, CSV, Excel, or text files. Export your menu data anytime. Bulk updates made easy.</p>
+            <span class="feature-badge">Tools</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🏷️</div>
+            <h3>Categories & Tags</h3>
+            <p>Organize with unlimited categories and subcategories. Tag items (vegan, gluten-free, spicy) for easy filtering.</p>
+            <span class="feature-badge">Tools</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🖨️</div>
+            <h3>Print Bills</h3>
+            <p>Auto-format and print customer bills with all order details. Works with standard thermal printers.</p>
+            <span class="feature-badge">Tools</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔍</div>
+            <h3>Smart Search</h3>
+            <p>Powerful search lets customers find exactly what they want instantly. Search by name, description, category, or tags.</p>
+            <span class="feature-badge">Tools</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🌙</div>
+            <h3>Dark/Light Themes</h3>
+            <p>Customers can choose their preferred theme. Automatic detection based on device settings for comfortable viewing.</p>
+            <span class="feature-badge">Tools</span>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure & Reliable</h3>
+            <p>Bank-level SSL encryption, 99.9% uptime guarantee, automatic backups. Your data is always safe and accessible.</p>
+            <span class="feature-badge">Enterprise</span>
+          </div>
+        </div>
+      </div>
+      
     </div>
   </section>
 
