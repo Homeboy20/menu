@@ -1102,31 +1102,82 @@
     
     .cta-features {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
       margin: 48px 0;
-      max-width: 700px;
+      max-width: 800px;
       margin-left: auto;
       margin-right: auto;
     }
     
     .cta-feature-item {
-      background: rgba(255,255,255,0.15);
-      border: 2px solid rgba(255,255,255,0.3);
-      padding: 20px;
-      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.4);
+      padding: 24px;
+      border-radius: 16px;
       backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-feature-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .cta-feature-item:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateX(8px);
+    }
+    
+    .cta-feature-item:hover::before {
+      opacity: 1;
     }
     
     .cta-feature-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
+      font-size: 48px;
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    
+    .cta-feature-content {
+      flex: 1;
+      text-align: left;
+    }
+    
+    .cta-feature-number {
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
     }
     
     .cta-feature-text {
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 800;
       margin: 0;
+      line-height: 1.3;
     }
     
     .cta-section .btn-primary {
@@ -1537,6 +1588,23 @@
       .testimonial-card {
         padding: 32px 24px;
         min-height: auto;
+      }
+      
+      /* CTA Feature Cards Responsive */
+      .cta-features {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .cta-feature-item {
+        padding: 20px;
+      }
+      .cta-feature-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 40px;
+      }
+      .cta-feature-text {
+        font-size: 16px;
       }
       
       .footer-grid { grid-template-columns: 1fr; text-align: center; }
@@ -2114,19 +2182,31 @@
       <div class="cta-features">
         <div class="cta-feature-item">
           <div class="cta-feature-icon">⚡</div>
-          <p class="cta-feature-text">Setup in 5 Minutes</p>
+          <div class="cta-feature-content">
+            <div class="cta-feature-number">Benefit 01</div>
+            <p class="cta-feature-text">Setup in 5 Minutes</p>
+          </div>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">💰</div>
-          <p class="cta-feature-text">Save $200+ Monthly</p>
+          <div class="cta-feature-content">
+            <div class="cta-feature-number">Benefit 02</div>
+            <p class="cta-feature-text">Save $200+ Monthly</p>
+          </div>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">📈</div>
-          <p class="cta-feature-text">+35% Revenue Boost</p>
+          <div class="cta-feature-content">
+            <div class="cta-feature-number">Benefit 03</div>
+            <p class="cta-feature-text">+35% Revenue Boost</p>
+          </div>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">🔒</div>
-          <p class="cta-feature-text">Bank-Level Security</p>
+          <div class="cta-feature-content">
+            <div class="cta-feature-number">Benefit 04</div>
+            <p class="cta-feature-text">Bank-Level Security</p>
+          </div>
         </div>
       </div>
       
