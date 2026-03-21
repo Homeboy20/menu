@@ -1,6 +1,6 @@
 {
   "name": "menu",
-  "version": "1.42.0",
+  "version": "1.43.0",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
@@ -16,6 +16,7 @@
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^3.2.2",
     "csv-parser": "^3.2.0",
     "dotenv": "^17.3.1",
     "exceljs": "^4.4.0",
@@ -26,6 +27,8 @@
     "pdf-parse": "^2.4.5",
     "pg": "^8.13.0",
     "qrcode": "^1.5.4",
-    "sharp": "^0.33.2"
+    "sharp": "^0.33.2",
+    "validator": "^13.15.26",
+    "xss": "^1.0.15"
   }
 }

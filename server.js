@@ -14,6 +14,9 @@ const rateLimit    = require('express-rate-limit');
 const bcrypt       = require('bcrypt');
 const sharp        = require('sharp');
 const cookieParser = require('cookie-parser');
+const { doubleCsrf } = require('csrf-csrf');
+const validator    = require('validator');
+const xss          = require('xss');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -69,6 +72,74 @@ function isValidSession(token) {
   if (Date.now() - s.createdAt > SESSION_TTL) { sessions.delete(token); return false; }
   return true;
 }
+
+// ── Input Sanitization ─────────────────────────────────────────────────────────
+
+// Enhanced input sanitization using validator and xss libraries
+function sanitizeInput(input, maxLength = 1000) {
+  if (input === null || input === undefined) return '';
+  
+  let str = String(input);
+  
+  // Trim and limit length
+  str = str.trim().substring(0, maxLength);
+  
+  // Remove XSS attacks
+  str = xss(str);
+  
+  // Escape HTML entities
+  str = validator.escape(str);
+  
+  return str;
+}
+
+// Validate and sanitize email
+function sanitizeEmail(email) {
+  if (!email) return '';
+  const trimmed = String(email).trim().toLowerCase();
+  
+  // Normalize email
+  const normalized = validator.normalizeEmail(trimmed, {
+    gmail_remove_dots: false,
+    gmail_remove_subaddress: false,
+    outlookdotcom_remove_subaddress: false,
+    yahoo_remove_subaddress: false,
+    icloud_remove_subaddress: false
+  });
+  
+  return normalized || trimmed;
+}
+
+// Validate email format
+function isValidEmail(email) {
+  return validator.isEmail(email, {
+    allow_utf8_local_part: false,
+    require_tld: true,
+    allow_ip_domain: false
+  });
+}
+
+// ── CSRF Protection ────────────────────────────────────────────────────────────
+
+const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
+
+const { generateToken, doubleCsrfProtection } = doubleCsrf({
+  getSecret: () => CSRF_SECRET,
+  cookieName: 'csrf-token',
+  cookieOptions: {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/'
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+  getTokenFromRequest: (req) => {
+    return req.body?.csrfToken || 
+           req.headers['x-csrf-token'] || 
+           req.query?.csrfToken;
+  }
+});
 
 // ── Security middleware ────────────────────────────────────────────────────────
 
@@ -1021,8 +1092,14 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.42.0'
+    version: '1.43.0'
   });
+});
+
+// CSRF token endpoint - Returns a token for forms
+app.get('/api/csrf-token', (req, res) => {
+  const csrfToken = generateToken(req, res);
+  res.json({ csrfToken });
 });
 
 // GET /  – serve landing page
@@ -1155,7 +1232,7 @@ function requireCustomerAuth(req, res, next) {
 }
 
 // POST /api/customers/register - Create new customer account
-app.post('/api/customers/register', loginLimiter, async (req, res) => {
+app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password, businessName, contactName, phone } = req.body || {};
     
@@ -1164,17 +1241,30 @@ app.post('/api/customers/register', loginLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Email, password, and business name are required.' });
     }
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Sanitize and validate email
+    const cleanEmail = sanitizeEmail(email);
+    if (!isValidEmail(cleanEmail)) {
       return res.status(400).json({ error: 'Invalid email address.' });
     }
     
+    // Validate password strength
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
     
+    // Additional password strength validation
+    if (!validator.isStrongPassword(password, { 
+      minLength: 8, 
+      minLowercase: 1, 
+      minUppercase: 0, 
+      minNumbers: 1, 
+      minSymbols: 0 
+    })) {
+      return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
+    }
+    
     // Check if email already exists
-    const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [email.toLowerCase()]);
+    const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
     if (existing.rows.length > 0) {
       return res.status(400).json({ error: 'Email already registered.' });
     }
@@ -1182,14 +1272,18 @@ app.post('/api/customers/register', loginLimiter, async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
     
+    // Sanitize user inputs
+    const cleanBusinessName = sanitizeInput(businessName, 200);
+    const cleanContactName = sanitizeInput(contactName || '', 200);
+    const cleanPhone = sanitizeInput(phone || '', 50);
+    
     // Create customer
     const now = new Date().toISOString();
     const { rows } = await pool.query(`
       INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at)
       VALUES ($1, $2, $3, $4, $5, 'active', $6)
       RETURNING id, email, business_name, contact_name, phone, status, created_at
-    `, [email.toLowerCase(), passwordHash, sanitizeStr(businessName, 200), 
-        sanitizeStr(contactName || '', 200), sanitizeStr(phone || '', 50), now]);
+    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, cleanPhone, now]);
     
     const customer = rows[0];
     
@@ -1226,7 +1320,7 @@ app.post('/api/customers/register', loginLimiter, async (req, res) => {
 });
 
 // POST /api/customers/login - Customer login
-app.post('/api/customers/login', loginLimiter, async (req, res) => {
+app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password } = req.body || {};
     
@@ -1234,10 +1328,16 @@ app.post('/api/customers/login', loginLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
     
+    // Sanitize email
+    const cleanEmail = sanitizeEmail(email);
+    if (!isValidEmail(cleanEmail)) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+    
     // Get customer
     const { rows } = await pool.query(
       'SELECT * FROM customers WHERE email = $1',
-      [email.toLowerCase()]
+      [cleanEmail]
     );
     
     if (rows.length === 0) {
