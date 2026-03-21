@@ -1030,16 +1030,59 @@
     }
     
     .cta-highlight {
-      display: inline-block;
-      background: white;
-      color: var(--primary);
-      padding: 12px 28px;
-      border-radius: 50px;
-      font-size: 14px;
-      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      color: #78350f;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
+      letter-spacing: 1.2px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+      border: 3px solid rgba(255,255,255,0.4);
+      animation: badgePulse 2s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-highlight::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shine 3s infinite;
+    }
+    
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 12px 32px rgba(251, 191, 36, 0.6); }
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    .cta-badge-icon {
+      font-size: 20px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    
+    .cta-badge-text {
+      position: relative;
+      z-index: 1;
     }
     
     .cta-section h2 {
@@ -2057,45 +2100,49 @@
     </div>
   </section>
 
-  <!-- CTA Section - Colorful Design -->
+  <!-- CTA Section - Redesigned -->
   <section class="cta-section" style="padding: 100px 0;">
     <div class="container cta-content">
-      <div class="cta-highlight">🎉 Limited Time Offer</div>
+      <div class="cta-highlight">
+        <span class="cta-badge-icon">🔥</span>
+        <span class="cta-badge-text">Get 3 Months Free - Limited Time</span>
+        <span class="cta-badge-icon">🔥</span>
+      </div>
       <h2>Ready to Transform Your Restaurant?</h2>
-      <p>Join 10,000+ restaurants already succeeding with RestOrder</p>
+      <p>Join 10,000+ restaurants saving time, money, and delighting customers</p>
       
       <div class="cta-features">
         <div class="cta-feature-item">
           <div class="cta-feature-icon">⚡</div>
-          <p class="cta-feature-text">5 Min Setup</p>
+          <p class="cta-feature-text">Setup in 5 Minutes</p>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">💰</div>
-          <p class="cta-feature-text">Save $200+/mo</p>
+          <p class="cta-feature-text">Save $200+ Monthly</p>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">📈</div>
-          <p class="cta-feature-text">+35% Revenue</p>
+          <p class="cta-feature-text">+35% Revenue Boost</p>
         </div>
         <div class="cta-feature-item">
           <div class="cta-feature-icon">🔒</div>
-          <p class="cta-feature-text">100% Secure</p>
+          <p class="cta-feature-text">Bank-Level Security</p>
         </div>
       </div>
       
       <div class="hero-cta">
         <a href="/admin.html" class="btn-primary">
           <span class="material-symbols-outlined">rocket_launch</span>
-          Start Free 14-Day Trial
+          Start Free Trial Now
         </a>
         <a href="mailto:sales@restorder.online" class="btn-secondary">
           <span class="material-symbols-outlined">support_agent</span>
-          Talk to Sales
+          Talk to Sales Team
         </a>
       </div>
       
       <div class="cta-guarantee">
-        <p style="font-size: 16px; margin: 0;">✅ Free forever plan available • ✅ No credit card required • ✅ Cancel anytime • ✅ 99.9% uptime</p>
+        <p style="font-size: 16px; margin: 0; font-weight: 600;">✅ Free Forever Plan • ✅ No Credit Card Required • ✅ Cancel Anytime • ✅ 99.9% Uptime Guarantee</p>
       </div>
     </div>
   </section>
