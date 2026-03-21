@@ -658,58 +658,76 @@
       margin: 0 auto;
     }
     
-    /* Pricing */
+    /* Pricing - Redesigned with Flat Colors */
     .pricing {
-      background: linear-gradient(180deg, white 0%, #fafaf9 100%);
+      background: #fafaf9;
     }
     
     .pricing-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 32px;
-      max-width: 1100px;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 28px;
+      max-width: 1160px;
       margin: 0 auto;
     }
     
     .pricing-card {
       background: white;
-      padding: 48px 40px;
-      border-radius: 24px;
-      box-shadow: var(--shadow-md);
-      border: 2px solid var(--border);
+      padding: 44px 36px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 3px solid var(--border);
       position: relative;
-      transition: all 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
     }
     
     .pricing-card.popular {
       border-color: var(--primary);
-      box-shadow: 0 12px 40px rgba(194,65,12,0.2);
-      transform: scale(1.05);
+      box-shadow: 0 8px 32px rgba(194,65,12,0.15);
+      transform: scale(1.03);
+      background: linear-gradient(180deg, #ffffff 0%, #fffaf5 100%);
     }
     
     .pricing-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow-xl);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+      border-color: var(--primary);
     }
     
     .pricing-card.popular:hover {
-      transform: translateY(-8px) scale(1.07);
+      transform: translateY(-6px) scale(1.03);
     }
     
     .popular-badge {
       position: absolute;
-      top: -14px;
+      top: -16px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--gradient-1);
+      background: var(--primary);
       color: white;
-      padding: 6px 24px;
-      border-radius: 50px;
-      font-size: 13px;
+      padding: 8px 28px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 4px 12px rgba(194,65,12,0.3);
+    }
+    
+    .save-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      box-shadow: var(--shadow-md);
     }
     
     .plan-name {
@@ -782,38 +800,65 @@
     
     .plan-cta {
       width: 100%;
-      padding: 16px;
+      padding: 18px;
       border-radius: 12px;
       border: none;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: all 0.3s;
       text-decoration: none;
-      display: block;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: auto;
     }
     
     .plan-cta.primary {
-      background: var(--gradient-1);
+      background: var(--primary);
       color: white;
-      box-shadow: 0 6px 24px rgba(194,65,12,0.3);
+      box-shadow: 0 6px 20px rgba(194,65,12,0.25);
     }
     
     .plan-cta.primary:hover {
+      background: #ea580c;
       transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(194,65,12,0.4);
+      box-shadow: 0 8px 28px rgba(194,65,12,0.35);
     }
     
     .plan-cta.secondary {
       background: white;
       color: var(--primary);
-      border: 2px solid var(--primary);
+      border: 3px solid var(--primary);
     }
     
     .plan-cta.secondary:hover {
       background: var(--primary);
       color: white;
+    }
+    
+    .plan-value {
+      background: #f0fdf4;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .plan-value-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 0;
+    }
+    
+    .plan-value-amount {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent);
+      margin: 4px 0 0;
     }
     
     /* Screenshot Section */
@@ -845,7 +890,7 @@
     
     /* Testimonials */
     .testimonials {
-      background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+      background: #fef3c7;
     }
     
     .testimonials-grid {
@@ -885,13 +930,14 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: var(--gradient-1);
+      background: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 800;
       font-size: 20px;
+      border: 3px solid #fed7aa;
     }
     
     .author-info h4 {
@@ -904,9 +950,9 @@
       color: var(--text-light);
     }
     
-    /* CTA Section */
+    /* CTA Section - Colorful Design */
     .cta-section {
-      background: var(--gradient-1);
+      background: var(--primary);
       color: white;
       text-align: center;
       padding: 100px 0;
@@ -917,42 +963,111 @@
     .cta-section::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="white" opacity="0.1"/></svg>');
-      background-size: 50px 50px;
+      top: -50%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.15;
+    }
+    
+    .cta-section::after {
+      content: '';
+      position: absolute;
+      bottom: -40%;
+      left: -5%;
+      width: 500px;
+      height: 500px;
+      background: #ea580c;
+      border-radius: 50%;
+      opacity: 0.2;
     }
     
     .cta-content {
       position: relative;
       z-index: 2;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
     }
     
-    .cta-section h2 {
-      font-size: clamp(36px, 5vw, 56px);
-      font-weight: 900;
+    .cta-highlight {
+      display: inline-block;
+      background: white;
+      color: var(--primary);
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       margin-bottom: 24px;
+    }
+    
+    .cta-section h2 {
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 900;
+      margin-bottom: 20px;
       letter-spacing: -1px;
+      line-height: 1.1;
     }
     
     .cta-section p {
-      font-size: 20px;
-      margin-bottom: 40px;
+      font-size: 22px;
+      margin-bottom: 48px;
       opacity: 0.95;
+      font-weight: 500;
+    }
+    
+    .cta-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .cta-feature-item {
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .cta-feature-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .cta-feature-text {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
     }
     
     .cta-section .btn-primary {
       background: white;
       color: var(--primary);
+      font-size: 18px;
+      padding: 20px 48px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    
+    .cta-section .btn-primary:hover {
+      background: #fef3c7;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
     }
     
     .cta-section .btn-secondary {
       border-color: white;
       color: white;
+      font-size: 18px;
+      padding: 20px 48px;
+      border-width: 3px;
     }
     
     .cta-section .btn-secondary:hover {
@@ -1665,14 +1780,14 @@
     </div>
   </section>
 
-  <!-- Pricing Section -->
+  <!-- Pricing Section - Redesigned -->
   <section id="pricing" class="pricing" style="padding: 80px 0;">
     <div class="container">
       <div class="section-header">
         <span class="section-label">Simple Pricing</span>
-        <h2 class="section-title">Choose the Perfect Plan</h2>
+        <h2 class="section-title">Choose Your Perfect Plan</h2>
         <p class="section-subtitle">
-          No hidden fees. No setup costs. Cancel anytime. Start with a 14-day free trial.
+          Start free for 14 days. No credit card required. Cancel anytime. Pay only for what you need.
         </p>
       </div>
       
@@ -1680,97 +1795,140 @@
         <!-- Starter Plan -->
         <div class="pricing-card">
           <div class="plan-name">Starter</div>
-          <p class="plan-description">Perfect for small cafés and food trucks</p>
+          <p class="plan-description">Essential digital menu for small businesses</p>
           
           <div class="plan-price">
             <span class="price-currency">$</span>
-            <span class="price-amount">19</span>
+            <span class="price-amount">0</span>
             <span class="price-period">/month</span>
           </div>
-          <p class="plan-subtitle">Billed monthly • No contract</p>
+          <p class="plan-subtitle">Free forever • Perfect for single location</p>
+          
+          <div class="plan-value">
+            <p class="plan-value-text">🎉 Save $200+ on printing costs</p>
+          </div>
           
           <ul class="plan-features">
+            <li><strong>Core Features:</strong></li>
             <li>1 Digital Menu</li>
             <li>Unlimited Menu Items</li>
             <li>QR Code Generation</li>
-            <li>Real-Time Updates</li>
-            <li>Custom Branding</li>
-            <li>Multi-Currency</li>
+            <li>Real-Time Menu Updates</li>
+            <li>Custom Branding & Colors</li>
+            <li><strong>Tools:</strong></li>
+            <li>Multi-Currency Support</li>
             <li>Dark/Light Themes</li>
+            <li>Smart Search</li>
+            <li>Categories & Tags</li>
             <li>Basic Analytics</li>
             <li>Email Support</li>
           </ul>
           
-          <a href="/admin.html" class="plan-cta secondary">Start Free Trial</a>
+          <a href="/admin.html" class="plan-cta secondary">
+            <span class="material-symbols-outlined">rocket_launch</span>
+            Start Free Forever
+          </a>
         </div>
         
         <!-- Professional Plan -->
         <div class="pricing-card popular">
-          <div class="popular-badge">Most Popular</div>
+          <div class="popular-badge">⭐ Best Value</div>
+          <div class="save-badge">Save 67%</div>
           <div class="plan-name">Professional</div>
-          <p class="plan-description">Best for growing restaurants</p>
+          <p class="plan-description">Complete solution for growing restaurants</p>
           
           <div class="plan-price">
             <span class="price-currency">$</span>
-            <span class="price-amount">49</span>
+            <span class="price-amount">39</span>
             <span class="price-period">/month</span>
           </div>
-          <p class="plan-subtitle">Billed monthly • No contract</p>
+          <p class="plan-subtitle">$468/year • Everything in Starter plus advanced features</p>
+          
+          <div class="plan-value">
+            <p class="plan-value-text">💰 Average revenue increase</p>
+            <p class="plan-value-amount">+35% in first month</p>
+          </div>
           
           <ul class="plan-features">
-            <li>3 Digital Menus</li>
-            <li>Everything in Starter, plus:</li>
-            <li>Table Management & QR Codes</li>
-            <li>Online Ordering System</li>
+            <li><strong>Everything in Starter, plus:</strong></li>
+            <li><strong>Advanced Features:</strong></li>
+            <li>Up to 5 Locations</li>
+            <li>Table Management System</li>
+            <li>Online Ordering & Cart</li>
             <li>Customer Ratings & Reviews</li>
-            <li>Table Alert Notifications</li>
             <li>Advanced Analytics Dashboard</li>
+            <li>Table Alert Notifications</li>
+            <li><strong>Premium Tools:</strong></li>
             <li>WhatsApp Integration</li>
-            <li>CSV Import/Export</li>
-            <li>Print Bill Feature</li>
-            <li>Priority Email Support</li>
+            <li>Import/Export (CSV, Excel)</li>
+            <li>Print Bills & Receipts</li>
+            <li>Priority Support (24h response)</li>
+            <li>99.9% Uptime SLA</li>
           </ul>
           
-          <a href="/admin.html" class="plan-cta primary">Start Free Trial</a>
+          <a href="/admin.html" class="plan-cta primary">
+            <span class="material-symbols-outlined">stars</span>
+            Start 14-Day Free Trial
+          </a>
         </div>
         
         <!-- Enterprise Plan -->
         <div class="pricing-card">
           <div class="plan-name">Enterprise</div>
-          <p class="plan-description">For restaurant chains & franchises</p>
+          <p class="plan-description">For chains & multi-location restaurants</p>
           
           <div class="plan-price">
             <span class="price-currency">$</span>
-            <span class="price-amount">149</span>
+            <span class="price-amount">99</span>
             <span class="price-period">/month</span>
           </div>
-          <p class="plan-subtitle">Billed monthly • Volume discounts available</p>
+          <p class="plan-subtitle">$1,188/year • Custom pricing for 20+ locations</p>
+          
+          <div class="plan-value">
+            <p class="plan-value-text">🚀 Complete control & customization</p>
+          </div>
           
           <ul class="plan-features">
-            <li>Unlimited Menus</li>
-            <li>Everything in Professional, plus:</li>
+            <li><strong>Everything in Professional, plus:</strong></li>
+            <li>Unlimited Locations</li>
             <li>Multi-Location Management</li>
-            <li>Custom Domain Support</li>
-            <li>API Access</li>
-            <li>White-Label Options</li>
-            <li>Advanced Security Features</li>
+            <li>Custom Domain (menu.yourbrand.com)</li>
+            <li>White-Label Branding</li>
+            <li>API Access & Webhooks</li>
+            <li>Advanced Security & SSO</li>
             <li>Custom Integrations</li>
+            <li>Bulk Operations</li>
+            <li>Team Collaboration Tools</li>
+            <li><strong>Enterprise Support:</strong></li>
             <li>Dedicated Account Manager</li>
             <li>24/7 Phone & Chat Support</li>
-            <li>SLA Guarantee</li>
+            <li>Custom Onboarding & Training</li>
+            <li>99.99% Uptime SLA</li>
           </ul>
           
-          <a href="/admin.html" class="plan-cta secondary">Start Free Trial</a>
+          <a href="mailto:sales@restorder.online" class="plan-cta secondary">
+            <span class="material-symbols-outlined">support_agent</span>
+            Contact Sales
+          </a>
         </div>
       </div>
       
-      <div style="text-align: center; margin-top: 48px;">
-        <p style="font-size: 15px; color: var(--text-light); margin-bottom: 16px;">
-          ✅ All plans include 14-day free trial • ✅ No credit card required • ✅ Cancel anytime
-        </p>
-        <p style="font-size: 13px; color: var(--text-light);">
-          Need a custom plan? <a href="mailto:sales@restorder.online" style="color: var(--primary); font-weight: 700;">Contact Sales</a>
-        </p>
+      <div style="text-align: center; margin-top: 56px;">
+        <div style="background: white; border: 3px solid var(--primary); border-radius: 16px; padding: 32px; max-width: 800px; margin: 0 auto;">
+          <p style="font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 16px;">
+            ✅ All Plans Include:
+          </p>
+          <p style="font-size: 15px; color: var(--text-light); margin-bottom: 8px;">
+            14-day free trial • No credit card required • Cancel anytime • Free migration assistance
+          </p>
+          <p style="font-size: 15px; color: var(--text-light); margin-bottom: 16px;">
+            SSL security • Automatic backups • Mobile responsive • Regular updates
+          </p>
+          <p style="font-size: 14px; color: var(--text-light);">
+            Need a custom plan for your business? 
+            <a href="mailto:sales@restorder.online" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Contact our sales team →</a>
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -1835,11 +1993,31 @@
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="cta-section" style="padding: 80px 0;">
+  <!-- CTA Section - Colorful Design -->
+  <section class="cta-section" style="padding: 100px 0;">
     <div class="container cta-content">
+      <div class="cta-highlight">🎉 Limited Time Offer</div>
       <h2>Ready to Transform Your Restaurant?</h2>
       <p>Join 10,000+ restaurants already succeeding with RestOrder</p>
+      
+      <div class="cta-features">
+        <div class="cta-feature-item">
+          <div class="cta-feature-icon">⚡</div>
+          <p class="cta-feature-text">5 Min Setup</p>
+        </div>
+        <div class="cta-feature-item">
+          <div class="cta-feature-icon">💰</div>
+          <p class="cta-feature-text">Save $200+/mo</p>
+        </div>
+        <div class="cta-feature-item">
+          <div class="cta-feature-icon">📈</div>
+          <p class="cta-feature-text">+35% Revenue</p>
+        </div>
+        <div class="cta-feature-item">
+          <div class="cta-feature-icon">🔒</div>
+          <p class="cta-feature-text">100% Secure</p>
+        </div>
+      </div>
       
       <div class="hero-cta">
         <a href="/admin.html" class="btn-primary">
@@ -1853,7 +2031,7 @@
       </div>
       
       <div class="cta-guarantee">
-        <p>✅ Free 14-day trial • ✅ No credit card required • ✅ Setup in 5 minutes • ✅ Cancel anytime</p>
+        <p style="font-size: 16px; margin: 0;">✅ Free forever plan available • ✅ No credit card required • ✅ Cancel anytime • ✅ 99.9% uptime</p>
       </div>
     </div>
   </section>
