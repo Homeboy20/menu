@@ -1961,8 +1961,8 @@ async function loadPublished() {
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-slate-100 truncate">${esc(m.restaurantName)}</p>
             <p class="text-xs text-slate-400 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
-            <a href="/menu.html?id=${m.id}" target="_blank"
-               class="text-primary text-xs hover:underline truncate block mt-1">/menu.html?id=${m.id}</a>
+            <a href="/menu?id=${m.id}" target="_blank"
+               class="text-primary text-xs hover:underline truncate block mt-1">/menu?id=${m.id}</a>
           </div>
           <div class="flex gap-2 shrink-0">
             <button onclick="loadMenuForEditing('${m.id}')" title="Edit menu"

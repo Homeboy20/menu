@@ -13,6 +13,7 @@ const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const bcrypt       = require('bcrypt');
 const sharp        = require('sharp');
+const cookieParser = require('cookie-parser');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -143,6 +144,90 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Additional Security Headers ───────────────────────────────────────────────
+app.use((req, res, next) => {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  
+  // Prevent MIME-type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // XSS Protection (legacy but still used by older browsers)
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Referrer Policy
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Permissions Policy (limit browser features)
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  
+  next();
+});
+
+// ── CORS Configuration (for API endpoints only) ────────────────────────────────
+app.use('/api', (req, res, next) => {
+  const allowedOrigins = [
+    HOST,
+    'https://restorder.online',
+    'http://localhost:3000'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, x-customer-token');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  
+  next();
+});
+
+// ── Clean URLs - Remove .html Extension ────────────────────────────────────────
+// This middleware serves HTML files without the .html extension
+app.use((req, res, next) => {
+  // Skip if URL already has .html or is an API route
+  if (req.path.endsWith('.html') || req.path.startsWith('/api/') || req.path.includes('.')) {
+    return next();
+  }
+  
+  // Map clean URLs to actual HTML files (handle special cases)
+  const urlMap = {
+    '/': 'index.html',
+    '/login': 'customer-login.html',
+    '/dashboard': 'customer-dashboard.html',
+    '/index': 'index.html',
+    '/menu': 'menu.html',
+    '/admin': 'admin.html',
+    '/register': 'register.html',
+    '/admin-dashboard': 'admin-dashboard.html',
+    '/customers': 'customers.html',
+    '/subscriptions': 'subscriptions.html',
+    '/analytics': 'analytics.html',
+    '/payments': 'payments.html',
+    '/admin-menus': 'admin-menus.html',
+    '/pricing': 'pricing.html'
+  };
+  
+  // Check if we have a mapping for this URL
+  const htmlFile = urlMap[req.path];
+  if (htmlFile) {
+    const filePath = path.join(__dirname, htmlFile);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
+  }
+  
+  next();
+});
+
 // Record menu scans before serving menu.html
 app.get('/menu.html', async (req, res, next) => {
   const menuId = req.query.id;
@@ -167,6 +252,32 @@ app.get('/menu.html', async (req, res, next) => {
   }
   
   next();
+});
+
+// Also handle clean URL for menu page
+app.get('/menu', async (req, res, next) => {
+  const menuId = req.query.id;
+  
+  if (menuId) {
+    try {
+      const now = new Date().toISOString();
+      const rawIp = req.ip || req.connection.remoteAddress || '';
+      const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
+      const userAgent = req.headers['user-agent'] || '';
+      const referrer = req.headers['referer'] || req.headers['referrer'] || '';
+
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const recent = await dbLastScanFrom(String(menuId), String(ipHash), String(fiveMinAgo));
+      if (!recent) {
+        await dbRecordScan(String(menuId), String(now), String(userAgent), String(ipHash), String(referrer));
+        await dbIncrementScans(String(now), String(menuId));
+      }
+    } catch (err) {
+      console.error('Failed to record scan:', err);
+    }
+  }
+  
+  res.sendFile(path.join(__dirname, 'menu.html'));
 });
 
 // Static file caching and optimization
@@ -868,7 +979,7 @@ const upload = multer({
 });
 
 app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8–10 MB encoded)
-app.use(express.static(__dirname));
+app.use(cookieParser());  // Parse cookies for secure session management
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 // ── Item image upload (auto-resize & optimize) ────────────────────────────────
@@ -910,7 +1021,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.11.0'
+    version: '1.42.0'
   });
 });
 
@@ -1085,6 +1196,14 @@ app.post('/api/customers/register', loginLimiter, async (req, res) => {
     // Create session token
     const token = createCustomerSession(customer.id, customer.email);
     
+    // Set secure httpOnly cookie
+    res.cookie('customerToken', token, {
+      httpOnly: true,  // Prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
+      sameSite: 'strict',  // Prevent CSRF attacks
+      maxAge: SESSION_TTL
+    });
+    
     console.log('✅ Customer registered:', customer.email);
     
     res.json({
@@ -1147,6 +1266,14 @@ app.post('/api/customers/login', loginLimiter, async (req, res) => {
     // Create session
     const token = createCustomerSession(customer.id, customer.email);
     
+    // Set secure httpOnly cookie
+    res.cookie('customerToken', token, {
+      httpOnly: true,  // Prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
+      sameSite: 'strict',  // Prevent CSRF attacks
+      maxAge: SESSION_TTL
+    });
+    
     console.log('✅ Customer logged in:', customer.email);
     
     res.json({
@@ -1169,8 +1296,16 @@ app.post('/api/customers/login', loginLimiter, async (req, res) => {
 
 // POST /api/customers/logout - Customer logout
 app.post('/api/customers/logout', (req, res) => {
-  const token = req.headers['x-customer-token'];
+  const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
   if (token) customerSessions.delete(token);
+  
+  // Clear cookie
+  res.clearCookie('customerToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+  
   res.json({ ok: true });
 });
 

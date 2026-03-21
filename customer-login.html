@@ -100,7 +100,7 @@
     </div>
 
     <!-- Register Link -->
-    <a href="register.html"
+    <a href="/register"
       class="block w-full px-6 py-3.5 bg-bg-dark text-primary font-semibold rounded-xl border border-primary/30 hover:bg-primary/10 transition text-center">
       Create Account
     </a>
@@ -108,7 +108,7 @@
 
   <!-- Admin Link -->
   <div class="mt-6 text-center">
-    <a href="admin.html" class="text-sm text-slate-400 hover:text-primary transition">
+    <a href="/admin" class="text-sm text-slate-400 hover:text-primary transition">
       Admin Panel
     </a>
   </div>
@@ -158,7 +158,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     storage.setItem('customerBusiness', data.customer.businessName);
     
     // Redirect to dashboard
-    window.location.href = 'customer-dashboard.html';
+    window.location.href = '/dashboard';
     
   } catch (err) {
     errorText.textContent = err.message;
@@ -182,7 +182,7 @@ window.addEventListener('load', async () => {
       const data = await response.json();
       
       if (data.authenticated) {
-        window.location.href = 'customer-dashboard.html';
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       // Continue with login

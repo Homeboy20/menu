@@ -62,7 +62,7 @@
     </div>
     <div class="flex items-center gap-4">
       <span class="text-sm text-slate-400">Already have an account?</span>
-      <a href="customer-login.html" class="px-4 py-2 text-sm font-semibold text-primary border border-primary/30 rounded-xl hover:bg-primary/10 transition">
+      <a href="/login" class="px-4 py-2 text-sm font-semibold text-primary border border-primary/30 rounded-xl hover:bg-primary/10 transition">
         Sign In
       </a>
     </div>
@@ -369,7 +369,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     
     // Redirect to dashboard
     setTimeout(() => {
-      window.location.href = 'customer-dashboard.html';
+      window.location.href = '/dashboard';
     }, 1500);
     
   } catch (err) {
