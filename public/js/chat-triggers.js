@@ -96,7 +96,7 @@ function initialGreeting() {
   const messages = [
     "👋 Hi! I'm Alex from RestOrder. Need help setting up your digital menu?",
     "Hey there! 👋 Questions about RestOrder? I'm here to help!",
-    "Welcome! 🍽️ Looking for a specific feature? Let me know!",
+    "Welcome! 🍽️ Whether you're a restaurant, cafe, bar or juice bar - I can help you get started!",
   ];
   
   const randomMessage = messages[Math.floor(Math.random() * messages.length)];
@@ -119,7 +119,7 @@ function pricingPageHelp() {
   
   setTimeout(() => {
     showChatMessage(
-      "💡 Comparing plans? I can help you choose the best option for your restaurant. What's your main priority?"
+      "💡 Comparing plans? I can help you choose the best option for your business. What's your main priority?"
     );
   }, CHAT_CONFIG.PRICING_PAGE_DELAY);
 }
@@ -210,7 +210,7 @@ function pageSpecificTriggers() {
   if (path.includes('demo')) {
     setTimeout(() => {
       showChatMessage(
-        "🎥 Enjoying the demo? Want to see how it works for your specific restaurant type?"
+        "🎥 Enjoying the demo? Want to see how it works for your specific business type?"
       );
     }, 20000);
   }

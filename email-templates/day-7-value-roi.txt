@@ -42,7 +42,7 @@ Monthly Savings:
 
 ---
 
-### Real Example: Pizza Palace
+**Real Example: Pizza Palace Restaurant**
 
 **Before RestOrder:**
 - $700/month printing

@@ -8,7 +8,7 @@ Hey {{first_name}},
 
 Yesterday you joined RestOrder. Today, I want to share a quick success story that might inspire you.
 
-**Meet Maria Perez, Owner of Pizza Palace**
+**Meet Maria Perez, Owner of Pizza Palace Restaurant**
 
 6 weeks ago, Maria was frustrated:
 - Printing new menus cost $700/month

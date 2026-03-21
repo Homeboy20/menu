@@ -8,7 +8,7 @@ Hi {{first_name}},
 
 You're not alone on this journey.
 
-**1,247 restaurants joined RestOrder this month.** Here's what they're saying:
+**1,247 restaurants, cafes, bars & eateries joined RestOrder this month.** Here's what they're saying:
 
 ---
 
@@ -82,7 +82,7 @@ P.S. Read more success stories here: [Customer Testimonials →](https://restord
 
 ---
 
-**RestOrder** | Trusted by 1,247+ Restaurants
+**RestOrder** | Trusted by 1,247+ Restaurants, Cafes & Bars
 ⭐⭐⭐⭐⭐ 4.9/5 Rating
 
 [Dashboard](https://restorder.online/dashboard) | [Success Stories](https://restorder.online/testimonials) | [Help Center](https://restorder.online/help)
