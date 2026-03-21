@@ -213,12 +213,17 @@ try {
   _pgConnStr = _u.toString();
 } catch (_) { /* use as-is if not a valid URL */ }
 
+// Determine SSL configuration based on environment
+// Local PostgreSQL typically doesn't have SSL enabled
+const isLocalDB = _pgConnStr.includes('localhost') || _pgConnStr.includes('127.0.0.1');
+const sslConfig = isLocalDB ? false : { rejectUnauthorized: false };
+
 const pool = new Pool({
   connectionString: _pgConnStr,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
-  ssl: { rejectUnauthorized: false },
+  ssl: sslConfig,
 });
 
 pool.on('error', (err) => {
