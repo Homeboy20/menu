@@ -629,26 +629,19 @@
       text-align: center;
       margin-bottom: 40px;
       position: relative;
-    }
-    
-    .category-icon {
-      width: 80px;
-      height: 80px;
-      background: var(--primary);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      margin: 0 auto 20px;
-      box-shadow: 0 8px 24px rgba(194,65,12,0.2);
+      padding-top: 16px;
+      border-top: 4px solid var(--primary);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
     
     .category-title {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 900;
-      color: var(--text);
-      margin-bottom: 8px;
+      color: var(--primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
     }
     
     .category-description {
@@ -950,9 +943,9 @@
       color: var(--text-light);
     }
     
-    /* CTA Section - Colorful Design */
+    /* CTA Section - Vibrant Color Combination */
     .cta-section {
-      background: var(--primary);
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #fb923c 100%);
       color: white;
       text-align: center;
       padding: 100px 0;
@@ -963,25 +956,32 @@
     .cta-section::before {
       content: '';
       position: absolute;
-      top: -50%;
+      top: -30%;
       right: -10%;
-      width: 600px;
-      height: 600px;
-      background: var(--accent);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, #fbbf24 0%, #f59e0b 100%);
       border-radius: 50%;
-      opacity: 0.15;
+      opacity: 0.3;
+      animation: pulse 8s ease-in-out infinite;
     }
     
     .cta-section::after {
       content: '';
       position: absolute;
-      bottom: -40%;
-      left: -5%;
-      width: 500px;
-      height: 500px;
-      background: #ea580c;
+      bottom: -35%;
+      left: -8%;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, #6aaa82 0%, #4d7c5f 100%);
       border-radius: 50%;
-      opacity: 0.2;
+      opacity: 0.25;
+      animation: pulse 8s ease-in-out infinite 2s;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.25; }
+      50% { transform: scale(1.1); opacity: 0.35; }
     }
     
     .cta-content {
@@ -1580,7 +1580,6 @@
       <!-- Core Features -->
       <div class="feature-category">
         <div class="category-header">
-          <div class="category-icon">🚀</div>
           <h3 class="category-title">Core Features</h3>
           <p class="category-description">Essential tools every restaurant needs to create and manage digital menus</p>
         </div>
@@ -1612,7 +1611,6 @@
       <!-- Advanced Features -->
       <div class="feature-category">
         <div class="category-header">
-          <div class="category-icon">📈</div>
           <h3 class="category-title">Advanced Features</h3>
           <p class="category-description">Powerful tools to grow your business and delight customers</p>
         </div>
@@ -1665,7 +1663,6 @@
       <!-- Management Tools -->
       <div class="feature-category">
         <div class="category-header">
-          <div class="category-icon">🛠️</div>
           <h3 class="category-title">Management Tools</h3>
           <p class="category-description">Efficient tools to organize and manage your restaurant operations</p>
         </div>
