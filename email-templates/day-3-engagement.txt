@@ -1,0 +1,74 @@
+Subject: 🎉 Congrats {{first_name}}! You're already ahead of 80% of restaurants
+
+Preview Text: Here's what you've accomplished so far
+
+---
+
+Hey {{first_name}},
+
+I just checked {{business_name}}'s dashboard and wanted to reach out personally.
+
+**You're crushing it!** 🚀
+
+Here's what you've accomplished in just 3 days:
+
+✅ Menu created
+✅ QR code generated
+✅ [X] items added
+✅ [X] menu views
+
+**That puts you ahead of 80% of restaurants who are still using outdated paper menus.**
+
+---
+
+### Quick Win: Add Photos for 40% More Orders
+
+Restaurants that add food photos see an average **40% increase in orders** for those items.
+
+Here's why:
+- Photos build trust
+- Show portion size
+- Make mouths water 🤤
+- Increase perceived value
+
+**Pro Tip**: Use your phone camera. You don't need professional photos. Natural lighting + a clean plate = perfect shots.
+
+Upload photos here → [Add Photos Now](https://restorder.online/admin/items)
+
+---
+
+### What Other Successful Restaurants Do:
+
+1. **Add descriptions with sensory words**
+   - ❌ "Grilled chicken"
+   - ✅ "Tender, flame-grilled chicken with smoky chipotle glaze"
+
+2. **Highlight signature dishes** with a ⭐ or 🔥 emoji
+
+3. **Use daily specials** to create urgency
+
+4. **Update prices during happy hour** with one click
+
+---
+
+**Question for you:**
+
+What's been your biggest win with RestOrder so far? Hit reply and let me know - I love hearing success stories!
+
+Keep up the momentum,
+
+**Alex Chen**
+Customer Success Manager
+RestOrder
+
+P.S. Your trial is going strong. **11 days left** to explore all features. Don't miss the table management system - it's a game-changer for busy nights!
+
+---
+
+**RestOrder** | Digital Menu Platform
+📊 Track your progress: [View Analytics →](https://restorder.online/analytics)
+
+---
+
+*Trial Day 3 of 14 • {{days_left}} days remaining*
+[Manage Preferences]({{unsubscribe_link}})

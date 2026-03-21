@@ -1,0 +1,110 @@
+Subject: ⏰ Only 4 days left - Lock in 50% OFF now
+
+Preview Text: Your trial ends soon. Don't lose this discount.
+
+---
+
+{{first_name}},
+
+Your 14-day trial ends in **4 days** ({{trial_end_date}}).
+
+After that, two things happen:
+
+1. ❌ Your 50% discount disappears
+2. ❌ Your menu becomes inaccessible
+
+**Don't let that happen.**
+
+---
+
+### 🔥 Limited-Time Offer (Expires in 4 Days):
+
+~~$39/month~~ → **$19.50/month** for 3 months
+
+**Save $58.50** when you upgrade now.
+
+[Claim 50% OFF →](https://restorder.online/pricing?code=TRIAL50)
+
+---
+
+### What You Keep With Professional Plan:
+
+✅ Everything you've built (menu, QR codes, data)
+✅ Unlimited menu updates
+✅ Online ordering & table management
+✅ Advanced analytics dashboard
+✅ Priority support (1-hour response)
+✅ 99.9% uptime guarantee
+
+**Plus our 30-Day Money-Back Guarantee.**
+
+If RestOrder doesn't increase your revenue by 20% in 30 days, we'll refund every penny. Zero risk.
+
+---
+
+### Why Upgrade Now?
+
+**Reason #1: You've already done the work**
+
+You've:
+- Created your menu
+- Generated QR codes
+- Started getting orders
+- Built momentum
+
+Don't throw that away.
+
+**Reason #2: Your customers expect it**
+
+Once customers experience QR menus, they won't want to go back to paper. Don't disappoint them.
+
+**Reason #3: The math makes sense**
+
+- RestOrder: $19.50/month (with discount)
+- Paper menus: $500-700/month
+- **Your savings: $480.50/month minimum**
+
+**That's $5,766/year in your pocket.** 💰
+
+---
+
+### What Other Restaurants Did:
+
+**Maria (Pizza Palace):** "I upgraded on Day 10. Wish I'd done it sooner. The ROI is insane."
+
+**James (Café Luna):** "Best $39/month I spend. Saves me 15 hours and $500/month."
+
+**Sarah (Bistro Central):** "The discount pays for itself in saved printing costs alone."
+
+---
+
+**Action Required:**
+
+You have **4 days** to decide:
+
+Option A: Upgrade now, save $58.50, keep everything
+Option B: Wait, lose discount, start over
+
+[Upgrade & Save 50% →](https://restorder.online/pricing?code=TRIAL50)
+
+Questions? Reply to this email or call/text me: (555) 123-4567
+
+I'm here to help,
+
+**Alex Chen**
+Customer Success Manager
+RestOrder
+
+P.S. This discount is **only available during your trial**. After {{trial_end_date}}, it's gone forever. Don't miss out.
+
+---
+
+**RestOrder** | Digital Menu Platform
+⏰ **4 Days Left** • 50% OFF Expires Soon
+
+[Claim Discount](https://restorder.online/pricing?code=TRIAL50) | [Talk to Sales](mailto:sales@restorder.online) | [FAQs](https://restorder.online/faq)
+
+---
+
+*Trial Day 10 of 14 • Offer expires {{trial_end_date}}*
+[Manage Preferences]({{unsubscribe_link}})

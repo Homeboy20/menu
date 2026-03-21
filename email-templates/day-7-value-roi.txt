@@ -1,0 +1,115 @@
+Subject: Calculate Your ROI: How much money are you leaving on the table?
+
+Preview Text: Most restaurants save $3,600/month. What about yours?
+
+---
+
+Hey {{first_name}},
+
+You're halfway through your 14-day trial. Let's talk numbers.
+
+**How much is RestOrder worth to {{business_name}}?**
+
+I built a simple calculator to show you the exact ROI. Takes 30 seconds:
+
+---
+
+### 📊 Your RestOrder ROI Calculator
+
+**Current Situation (Paper Menus):**
+
+Monthly Costs:
+- Menu printing: $_____/month
+- Time updating menus: _____ hours × $20/hour = $_____
+- Lost sales (outdated items): $_____
+- Missed analytics opportunities: $_____
+
+**TOTAL MONTHLY LOSS: $_____**
+
+---
+
+**With RestOrder:**
+
+Monthly Savings:
++ $0 printing costs
++ 15 hours saved × $20 = $300
++ 30% revenue increase = $_____
++ Data-driven menu optimization = $_____
+
+**TOTAL MONTHLY GAIN: $_____**
+
+**Annual ROI: $_____** 💰
+
+---
+
+### Real Example: Pizza Palace
+
+**Before RestOrder:**
+- $700/month printing
+- 20 hours/month updating menus
+- $15,000/month revenue
+- No data on popular items
+
+**With RestOrder:**
+- $0 printing (saved $700)
+- 5 hours/month updating (saved $300)
+- $20,250/month revenue (+35%)
+- Menu optimized for profit
+
+**Pizza Palace ROI: $5,850/month = $70,200/year**
+
+---
+
+### The Math Is Simple:
+
+RestOrder Professional Plan: $39/month
+
+Average restaurant saves: $3,600/month
+
+**Your ROI: 9,123%** in the first year
+
+---
+
+**You have 7 days left in your trial.**
+
+Two options:
+
+1. ❌ Go back to paper menus and lose $3,600/month
+2. ✅ Lock in your Professional plan and start saving
+
+The choice is obvious.
+
+[Upgrade to Professional →](https://restorder.online/pricing)
+
+**Special Trial Offer:**
+Use code **TRIAL50** for 50% off your first 3 months.
+Only available during your trial period.
+
+---
+
+**Questions?**
+
+Reply to this email or jump on a quick call: [Book 15-Minute Demo →](https://restorder.online/demo)
+
+Let's make {{business_name}} more profitable together.
+
+Cheers,
+
+**Alex Chen**
+Customer Success Manager
+RestOrder
+
+P.S. This discount expires when your trial ends. Don't miss out on $585 in savings (50% × 3 months × $39).
+
+---
+
+**RestOrder** | Digital Menu Platform
+💰 Average restaurant saves $3,600/month
+
+[View Pricing](https://restorder.online/pricing) | [ROI Calculator](https://restorder.online/roi) | [Book Demo](https://restorder.online/demo)
+
+---
+
+*Trial Day 7 of 14 • {{days_left}} days remaining*
+*Special offer expires: {{trial_end_date}}*
+[Manage Preferences]({{unsubscribe_link}})

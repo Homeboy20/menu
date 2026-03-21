@@ -1,0 +1,59 @@
+Subject: Welcome to RestOrder! 🎉 Your Quick Start Guide Inside
+
+Preview Text: Get your digital menu live in 5 minutes
+
+---
+
+Hi {{first_name}},
+
+Welcome to RestOrder! 🍽️
+
+You just took the first step toward increasing your restaurant's revenue by 30% while saving $3,600/month on printing costs.
+
+**Here's what happens next:**
+
+✅ **Step 1**: Log in to your dashboard → [Login Here](https://restorder.online/login)
+✅ **Step 2**: Add your first menu items (takes 3 minutes)
+✅ **Step 3**: Download your QR code and print it
+✅ **Step 4**: Watch the orders come in! 🚀
+
+**Quick Start Video (2 minutes):**
+[Watch Setup Tutorial →](https://restorder.online/tutorial)
+
+---
+
+### Your 14-Day Trial Includes:
+- Unlimited menu items
+- QR code generation
+- Real-time updates
+- Online ordering
+- Analytics dashboard
+- Priority support (we respond in under 1 hour)
+
+---
+
+**Need Help?**
+
+Just reply to this email or click the live chat icon in your dashboard. Our team is standing by to help you succeed.
+
+I'll check in with you tomorrow to share a success story from a restaurant just like yours.
+
+To your success,
+
+**Alex Chen**
+Customer Success Manager
+RestOrder
+
+P.S. Your trial expires on {{trial_end_date}}. Set up your menu today to start seeing results immediately!
+
+---
+
+**RestOrder** | Digital Menu Platform
+🌐 [restorder.online](https://restorder.online) | 📧 support@restorder.online
+
+[Dashboard](https://restorder.online/dashboard) | [Help Center](https://restorder.online/help) | [Video Tutorials](https://restorder.online/tutorials)
+
+---
+
+*You're receiving this because you signed up for a 14-day free trial of RestOrder on {{signup_date}}.*
+[Manage Preferences]({{unsubscribe_link}})

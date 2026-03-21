@@ -1,0 +1,93 @@
+Subject: "I wish I'd switched to RestOrder sooner" - See what others are saying
+
+Preview Text: 1,247+ restaurants can't be wrong
+
+---
+
+Hi {{first_name}},
+
+You're not alone on this journey.
+
+**1,247 restaurants joined RestOrder this month.** Here's what they're saying:
+
+---
+
+⭐⭐⭐⭐⭐ **"Increased revenue by 35% in the first month"**
+
+*"RestOrder completely transformed how we operate. We recovered $4,200 monthly from paper menu waste. The table management feature saves us 15 hours per week. Absolutely worth every penny!"*
+
+**— Maria Perez**, Owner, Pizza Palace
+
+---
+
+⭐⭐⭐⭐⭐ **"Setup took less than 10 minutes"**
+
+*"We saved over $500/month on printing costs and customer satisfaction increased by 40%. Customers love scanning the QR code. Best investment we've made this year."*
+
+**— James Liu**, Manager, Café Luna
+
+---
+
+⭐⭐⭐⭐⭐ **"The analytics are a game-changer"**
+
+*"We optimized our menu and increased profit margins by 28%. We can see which items are popular and adjust accordingly. Support responds within 1 hour!"*
+
+**— Sarah Kim**, Owner, Bistro Central
+
+---
+
+### The Common Thread?
+
+All three restaurants:
+1. ✅ Started with the 14-day free trial (just like you)
+2. ✅ Set up their menu in under 10 minutes
+3. ✅ Saw results within the first week
+4. ✅ Never looked back
+
+**Your restaurant could be next.**
+
+---
+
+### Featured in the Press:
+
+🗞️ TechCrunch: "RestOrder is revolutionizing restaurant technology"
+📰 Forbes: "The digital menu platform every restaurant needs"
+🎯 Restaurant Business: "How one platform is saving restaurants $3,600/month"
+
+---
+
+**Still on the fence?**
+
+Remember: You have **9 days left** in your trial. Zero risk. No credit card on file. Cancel anytime.
+
+**But here's what you might miss:**
+
+- $3,600/month in savings
+- 30% revenue increase
+- 15 hours/week saved
+- Happier customers
+- Real-time insights
+
+[Continue Setup →](https://restorder.online/dashboard)
+
+Let's make {{business_name}} the next success story.
+
+Best,
+
+**Alex Chen**
+Customer Success Manager
+RestOrder
+
+P.S. Read more success stories here: [Customer Testimonials →](https://restorder.online/testimonials)
+
+---
+
+**RestOrder** | Trusted by 1,247+ Restaurants
+⭐⭐⭐⭐⭐ 4.9/5 Rating
+
+[Dashboard](https://restorder.online/dashboard) | [Success Stories](https://restorder.online/testimonials) | [Help Center](https://restorder.online/help)
+
+---
+
+*Trial Day 5 of 14 • {{days_left}} days remaining*
+[Manage Preferences]({{unsubscribe_link}})
