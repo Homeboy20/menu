@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dashboard � RestOrder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`r`n  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<title>Dashboard ? RestOrder</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -306,7 +306,7 @@
         <form id="password-form" class="space-y-5">
           <div>
             <label class="block text-sm font-medium text-stone-700 mb-1.5">Current Password</label>
-            <input id="current-password" type="password" autocomplete="current-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="��������"/>
+            <input id="current-password" type="password" autocomplete="current-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="????????"/>
           </div>
           <div class="grid md:grid-cols-2 gap-5">
             <div>
@@ -344,7 +344,7 @@
                 <p class="text-xs text-stone-400">Your email address confirmation status</p>
               </div>
             </div>
-            <span id="email-verified-badge" class="badge">�</span>
+            <span id="email-verified-badge" class="badge">?</span>
           </div>
           <div class="flex items-center justify-between py-3 border-b border-stone-100">
             <div class="flex items-center gap-3">
@@ -354,7 +354,7 @@
                 <p class="text-xs text-stone-400">Most recent session start</p>
               </div>
             </div>
-            <span id="last-login-text" class="text-sm text-stone-600">�</span>
+            <span id="last-login-text" class="text-sm text-stone-600">?</span>
           </div>
           <div class="flex items-center justify-between py-3">
             <div class="flex items-center gap-3">
@@ -364,7 +364,7 @@
                 <p class="text-xs text-stone-400">Account creation date</p>
               </div>
             </div>
-            <span id="member-since-text" class="text-sm text-stone-600">�</span>
+            <span id="member-since-text" class="text-sm text-stone-600">?</span>
           </div>
         </div>
       </div>
@@ -388,7 +388,7 @@
   <div id="team-section" class="hidden">
     <div class="mb-8">
       <h2 class="text-3xl font-bold mb-2 text-stone-900">Team</h2>
-      <p class="text-stone-500">Manage your staff — Managers, Waiters, and Cashiers.</p>
+      <p class="text-stone-500">Manage your staff � Managers, Waiters, and Cashiers.</p>
     </div>
     <div class="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
       <div class="p-6 border-b border-stone-200 flex items-center justify-between">
@@ -425,9 +425,9 @@
     <div>
       <label class="block text-sm font-medium text-stone-700 mb-1.5">Role</label>
       <select id="staff-modal-role" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
-        <option value="manager">Manager — full menu access</option>
-        <option value="waiter">Waiter — tables &amp; orders</option>
-        <option value="cashier">Cashier — orders &amp; payments</option>
+        <option value="manager">Manager � full menu access</option>
+        <option value="waiter">Waiter � tables &amp; orders</option>
+        <option value="cashier">Cashier � orders &amp; payments</option>
       </select>
     </div>
     <div>
@@ -449,7 +449,7 @@ let customerToken = null;
 let customerId = null;
 
 const COUNTRIES=[
-["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AO","Angola"],["AR","Argentina"],["AU","Australia"],["AT","Austria"],["BH","Bahrain"],["BD","Bangladesh"],["BE","Belgium"],["BJ","Benin"],["BW","Botswana"],["BR","Brazil"],["BF","Burkina Faso"],["BI","Burundi"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CO","Colombia"],["KM","Comoros"],["CG","Congo"],["CD","Congo (DRC)"],["CR","Costa Rica"],["CI","Côte d'Ivoire"],["HR","Croatia"],["CZ","Czech Republic"],["DK","Denmark"],["DJ","Djibouti"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["ET","Ethiopia"],["FI","Finland"],["FR","France"],["GA","Gabon"],["GM","Gambia"],["DE","Germany"],["GH","Ghana"],["GR","Greece"],["GT","Guatemala"],["GN","Guinea"],["HK","Hong Kong"],["HU","Hungary"],["IN","India"],["ID","Indonesia"],["IQ","Iraq"],["IE","Ireland"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JO","Jordan"],["KE","Kenya"],["KW","Kuwait"],["LB","Lebanon"],["LR","Liberia"],["LY","Libya"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["ML","Mali"],["MR","Mauritania"],["MU","Mauritius"],["MX","Mexico"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NP","Nepal"],["NL","Netherlands"],["NZ","New Zealand"],["NE","Niger"],["NG","Nigeria"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PL","Poland"],["PT","Portugal"],["QA","Qatar"],["RO","Romania"],["RW","Rwanda"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SL","Sierra Leone"],["SG","Singapore"],["SK","Slovakia"],["SI","Slovenia"],["SO","Somalia"],["ZA","South Africa"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SE","Sweden"],["CH","Switzerland"],["TW","Taiwan"],["TZ","Tanzania"],["TH","Thailand"],["TG","Togo"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TR","Turkey"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UY","Uruguay"],["VN","Vietnam"],["ZM","Zambia"],["ZW","Zimbabwe"]
+["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AO","Angola"],["AR","Argentina"],["AU","Australia"],["AT","Austria"],["BH","Bahrain"],["BD","Bangladesh"],["BE","Belgium"],["BJ","Benin"],["BW","Botswana"],["BR","Brazil"],["BF","Burkina Faso"],["BI","Burundi"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CO","Colombia"],["KM","Comoros"],["CG","Congo"],["CD","Congo (DRC)"],["CR","Costa Rica"],["CI","C�te d'Ivoire"],["HR","Croatia"],["CZ","Czech Republic"],["DK","Denmark"],["DJ","Djibouti"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["ET","Ethiopia"],["FI","Finland"],["FR","France"],["GA","Gabon"],["GM","Gambia"],["DE","Germany"],["GH","Ghana"],["GR","Greece"],["GT","Guatemala"],["GN","Guinea"],["HK","Hong Kong"],["HU","Hungary"],["IN","India"],["ID","Indonesia"],["IQ","Iraq"],["IE","Ireland"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JO","Jordan"],["KE","Kenya"],["KW","Kuwait"],["LB","Lebanon"],["LR","Liberia"],["LY","Libya"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["ML","Mali"],["MR","Mauritania"],["MU","Mauritius"],["MX","Mexico"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NP","Nepal"],["NL","Netherlands"],["NZ","New Zealand"],["NE","Niger"],["NG","Nigeria"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PL","Poland"],["PT","Portugal"],["QA","Qatar"],["RO","Romania"],["RW","Rwanda"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SL","Sierra Leone"],["SG","Singapore"],["SK","Slovakia"],["SI","Slovenia"],["SO","Somalia"],["ZA","South Africa"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SE","Sweden"],["CH","Switzerland"],["TW","Taiwan"],["TZ","Tanzania"],["TH","Thailand"],["TG","Togo"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TR","Turkey"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UY","Uruguay"],["VN","Vietnam"],["ZM","Zambia"],["ZW","Zimbabwe"]
 ];
 
 const COUNTRY_CITIES={AF:["Kabul","Kandahar","Herat","Mazar-i-Sharif","Jalalabad"],AL:["Tirana","Durres","Vlore","Elbasan","Shkoder"],DZ:["Algiers","Oran","Constantine","Annaba","Blida"],AO:["Luanda","Huambo","Lobito","Benguela","Lubango"],AR:["Buenos Aires","Cordoba","Rosario","Mendoza","La Plata","Tucuman"],AU:["Sydney","Melbourne","Brisbane","Perth","Adelaide","Gold Coast","Canberra","Hobart","Darwin"],AT:["Vienna","Graz","Linz","Salzburg","Innsbruck"],BH:["Manama","Riffa","Muharraq","Hamad Town"],BD:["Dhaka","Chittagong","Khulna","Rajshahi","Sylhet","Rangpur"],BE:["Brussels","Antwerp","Ghent","Charleroi","Liege"],BJ:["Cotonou","Porto-Novo","Parakou","Djougou"],BW:["Gaborone","Francistown","Molepolole","Maun","Serowe"],BR:["Sao Paulo","Rio de Janeiro","Brasilia","Salvador","Fortaleza","Belo Horizonte","Manaus","Curitiba","Recife"],BF:["Ouagadougou","Bobo-Dioulasso","Koudougou","Banfora"],BI:["Bujumbura","Gitega","Muyinga","Ngozi","Rumonge"],KH:["Phnom Penh","Siem Reap","Battambang","Sihanoukville"],CM:["Douala","Yaounde","Bamenda","Bafoussam","Garoua","Maroua"],CA:["Toronto","Montreal","Vancouver","Calgary","Edmonton","Ottawa","Winnipeg","Quebec City","Hamilton","Halifax"],CF:["Bangui","Bimbo","Berberati","Carnot"],TD:["NDjamena","Moundou","Abeche","Sarh"],CL:["Santiago","Valparaiso","Concepcion","Antofagasta","Temuco"],CN:["Shanghai","Beijing","Guangzhou","Shenzhen","Chengdu","Hangzhou","Wuhan","Xian","Nanjing","Chongqing"],CO:["Bogota","Medellin","Cali","Barranquilla","Cartagena","Bucaramanga"],KM:["Moroni","Mutsamudu","Fomboni"],CG:["Brazzaville","Pointe-Noire","Dolisie","Nkayi"],CD:["Kinshasa","Lubumbashi","Mbuji-Mayi","Kisangani","Kananga","Bukavu","Goma"],CR:["San Jose","Alajuela","Cartago","Heredia"],CI:["Abidjan","Bouake","Daloa","Yamoussoukro","Korhogo"],HR:["Zagreb","Split","Rijeka","Osijek","Zadar"],CZ:["Prague","Brno","Ostrava","Plzen"],DK:["Copenhagen","Aarhus","Odense","Aalborg"],DJ:["Djibouti City","Ali Sabieh","Tadjoura","Obock","Dikhil"],DO:["Santo Domingo","Santiago","San Pedro de Macoris","La Romana"],EC:["Quito","Guayaquil","Cuenca","Machala","Ambato"],EG:["Cairo","Alexandria","Giza","Port Said","Suez","Luxor","Aswan","Mansoura"],SV:["San Salvador","Santa Ana","San Miguel","Mejicanos"],GQ:["Malabo","Bata","Ebebiyin"],ER:["Asmara","Keren","Massawa","Assab","Mendefera"],ET:["Addis Ababa","Dire Dawa","Mekelle","Gondar","Adama","Hawassa","Bahir Dar","Jimma","Dessie","Harar"],FI:["Helsinki","Espoo","Tampere","Vantaa","Oulu","Turku"],FR:["Paris","Marseille","Lyon","Toulouse","Nice","Nantes","Strasbourg","Bordeaux","Lille"],GA:["Libreville","Port-Gentil","Franceville","Oyem"],GM:["Banjul","Serekunda","Brikama","Bakau"],DE:["Berlin","Hamburg","Munich","Cologne","Frankfurt","Stuttgart","Dusseldorf","Leipzig","Dortmund"],GH:["Accra","Kumasi","Tamale","Takoradi","Cape Coast","Tema","Sunyani","Obuasi","Koforidua"],GR:["Athens","Thessaloniki","Patras","Heraklion","Larissa"],GT:["Guatemala City","Mixco","Villa Nueva","Quetzaltenango"],GN:["Conakry","Nzerekore","Kankan","Kindia"],HK:["Central","Tsim Sha Tsui","Wan Chai","Mong Kok","Causeway Bay","Kowloon"],HU:["Budapest","Debrecen","Szeged","Miskolc","Pecs"],IN:["Mumbai","Delhi","Bangalore","Hyderabad","Ahmedabad","Chennai","Kolkata","Pune","Jaipur","Lucknow","Surat","Kochi"],ID:["Jakarta","Surabaya","Bandung","Medan","Semarang","Makassar","Denpasar","Yogyakarta"],IQ:["Baghdad","Basra","Erbil","Mosul","Sulaymaniyah","Najaf"],IE:["Dublin","Cork","Limerick","Galway","Waterford"],IL:["Tel Aviv","Jerusalem","Haifa","Rishon LeZion","Beersheba"],IT:["Rome","Milan","Naples","Turin","Palermo","Genoa","Bologna","Florence","Venice"],JM:["Kingston","Montego Bay","Spanish Town","Portmore"],JP:["Tokyo","Osaka","Yokohama","Nagoya","Sapporo","Fukuoka","Kobe","Kyoto","Sendai"],JO:["Amman","Zarqa","Irbid","Aqaba","Madaba"],KE:["Nairobi","Mombasa","Kisumu","Nakuru","Eldoret","Thika","Malindi","Kitale","Garissa","Nyeri","Machakos","Meru","Lamu","Nanyuki","Naivasha"],KW:["Kuwait City","Hawalli","Salmiya","Farwaniya"],LB:["Beirut","Tripoli","Sidon","Tyre","Jounieh"],LR:["Monrovia","Gbarnga","Kakata","Buchanan"],LY:["Tripoli","Benghazi","Misrata","Sabha"],MG:["Antananarivo","Toamasina","Antsirabe","Fianarantsoa","Mahajanga"],MW:["Lilongwe","Blantyre","Mzuzu","Zomba","Mangochi","Karonga"],MY:["Kuala Lumpur","George Town","Johor Bahru","Ipoh","Shah Alam","Kota Kinabalu","Kuching"],ML:["Bamako","Sikasso","Mopti","Koutiala","Segou"],MR:["Nouakchott","Nouadhibou","Kaedi","Rosso"],MU:["Port Louis","Beau Bassin-Rose Hill","Vacoas-Phoenix","Curepipe"],MX:["Mexico City","Guadalajara","Monterrey","Puebla","Tijuana","Cancun","Merida","Leon","Queretaro"],MA:["Casablanca","Rabat","Marrakech","Fez","Tangier","Agadir","Meknes"],MZ:["Maputo","Matola","Beira","Nampula","Chimoio"],MM:["Yangon","Mandalay","Naypyidaw","Mawlamyine"],NA:["Windhoek","Walvis Bay","Swakopmund","Oshakati","Rundu"],NP:["Kathmandu","Pokhara","Lalitpur","Bharatpur","Biratnagar"],NL:["Amsterdam","Rotterdam","The Hague","Utrecht","Eindhoven","Groningen"],NZ:["Auckland","Wellington","Christchurch","Hamilton","Tauranga","Dunedin","Queenstown"],NE:["Niamey","Zinder","Maradi","Tahoua"],NG:["Lagos","Abuja","Kano","Ibadan","Port Harcourt","Benin City","Kaduna","Enugu","Calabar","Warri","Owerri","Jos","Ilorin","Uyo"],NO:["Oslo","Bergen","Trondheim","Stavanger","Tromso"],OM:["Muscat","Salalah","Sohar","Nizwa"],PK:["Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Peshawar","Multan","Quetta"],PA:["Panama City","Colon","David","Santiago"],PG:["Port Moresby","Lae","Mount Hagen","Madang"],PY:["Asuncion","Ciudad del Este","San Lorenzo","Luque"],PE:["Lima","Arequipa","Trujillo","Chiclayo","Cusco","Piura","Iquitos"],PH:["Manila","Quezon City","Davao","Cebu City","Makati","Taguig","Cagayan de Oro","Zamboanga"],PL:["Warsaw","Krakow","Lodz","Wroclaw","Poznan","Gdansk"],PT:["Lisbon","Porto","Braga","Coimbra","Funchal"],QA:["Doha","Al Wakrah","Al Khor","Umm Salal","Al Rayyan"],RO:["Bucharest","Cluj-Napoca","Timisoara","Iasi","Constanta","Brasov"],RW:["Kigali","Butare","Gitarama","Musanze","Rubavu","Muhanga","Huye","Nyagatare"],SA:["Riyadh","Jeddah","Mecca","Medina","Dammam","Khobar","Tabuk"],SN:["Dakar","Touba","Thies","Saint-Louis","Kaolack"],RS:["Belgrade","Novi Sad","Nis","Kragujevac"],SL:["Freetown","Bo","Kenema","Makeni"],SG:["Singapore","Jurong East","Tampines","Woodlands"],SK:["Bratislava","Kosice","Presov","Zilina"],SI:["Ljubljana","Maribor","Celje","Kranj"],SO:["Mogadishu","Hargeisa","Kismayo","Marka","Berbera","Baidoa","Garowe"],ZA:["Johannesburg","Cape Town","Durban","Pretoria","Port Elizabeth","Bloemfontein","East London","Polokwane"],SS:["Juba","Malakal","Wau","Bor","Yambio","Rumbek"],ES:["Madrid","Barcelona","Valencia","Seville","Zaragoza","Malaga","Bilbao"],LK:["Colombo","Kandy","Galle","Jaffna","Negombo"],SD:["Khartoum","Omdurman","Port Sudan","Kassala","El Obeid","Nyala"],SE:["Stockholm","Gothenburg","Malmo","Uppsala","Linkoping"],CH:["Zurich","Geneva","Basel","Bern","Lausanne","Lucerne"],TW:["Taipei","Kaohsiung","Taichung","Tainan","Hsinchu"],TZ:["Dar es Salaam","Dodoma","Mwanza","Arusha","Zanzibar City","Mbeya","Morogoro","Tanga","Iringa","Kigoma","Tabora","Moshi","Songea","Bukoba","Musoma"],TH:["Bangkok","Chiang Mai","Pattaya","Nonthaburi","Hat Yai","Phuket","Udon Thani"],TG:["Lome","Sokode","Kara","Kpalime"],TT:["Port of Spain","Chaguanas","San Fernando","Arima"],TN:["Tunis","Sfax","Sousse","Kairouan","Bizerte"],TR:["Istanbul","Ankara","Izmir","Bursa","Antalya","Adana","Konya","Gaziantep"],UG:["Kampala","Gulu","Lira","Mbarara","Jinja","Mbale","Mukono","Masaka","Entebbe","Fort Portal","Kabale","Soroti","Arua","Hoima"],UA:["Kyiv","Kharkiv","Odesa","Dnipro","Lviv"],AE:["Dubai","Abu Dhabi","Sharjah","Ajman","Al Ain","Ras Al Khaimah","Fujairah"],GB:["London","Birmingham","Manchester","Leeds","Glasgow","Liverpool","Edinburgh","Bristol","Cardiff","Belfast"],US:["New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Francisco","Austin","Seattle","Denver","Miami","Atlanta"],UY:["Montevideo","Salto","Paysandu","Las Piedras"],VN:["Ho Chi Minh City","Hanoi","Da Nang","Hai Phong","Can Tho","Nha Trang","Hue"],ZM:["Lusaka","Kitwe","Ndola","Kabwe","Livingstone","Chipata","Kasama","Solwezi"],ZW:["Harare","Bulawayo","Chitungwiza","Mutare","Gweru","Masvingo","Kwekwe"]};
@@ -726,7 +726,7 @@ async function loadProfile() {
     document.getElementById('profile-avatar').textContent = initial;
 
     // Header display
-    document.getElementById('profile-display-name').textContent = customer.business_name || customer.email || '�';
+    document.getElementById('profile-display-name').textContent = customer.business_name || customer.email || '?';
     document.getElementById('profile-display-email').textContent = customer.email || '';
 
     // Status badge
@@ -744,7 +744,7 @@ async function loadProfile() {
       verifiedBadge.className = 'badge badge-cancelled';
     }
     document.getElementById('last-login-text').textContent = customer.last_login ? formatDate(customer.last_login) : 'Never';
-    document.getElementById('member-since-text').textContent = customer.created_at ? formatDate(customer.created_at) : '�';
+    document.getElementById('member-since-text').textContent = customer.created_at ? formatDate(customer.created_at) : '?';
 
   } catch (err) {
     console.error('Error loading profile:', err);
@@ -950,13 +950,13 @@ async function loadSubscription() {
           </div>
           <div>
             <p class="text-stone-400 text-xs mb-1">Member Since</p>
-            <p class="text-lg font-bold text-stone-900">${currentSub?.start_date ? new Date(currentSub.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}</p>
+            <p class="text-lg font-bold text-stone-900">${currentSub?.start_date ? new Date(currentSub.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '�'}</p>
           </div>
           <div>
             <p class="text-stone-400 text-xs mb-1">Next Billing</p>
             ${nextBillingDisplay
               ? `<p class="text-lg font-bold ${isOverdue ? 'text-red-600' : 'text-stone-900'}">${nextBillingDisplay}${isOverdue ? ' <span class="text-xs font-normal text-red-500">(overdue)</span>' : ''}</p>`
-              : `<p class="text-lg font-bold text-stone-400">—</p>`}
+              : `<p class="text-lg font-bold text-stone-400">�</p>`}
           </div>
         </div>
 
@@ -1009,9 +1009,9 @@ async function loadSubscription() {
               ${!isCurrent ? `
                 <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}', '${escapeHtml(plan.name)}')"
                   class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
-                  ${isUpgrade ? '⬆ Upgrade' : '⬇ Downgrade'} to ${escapeHtml(plan.display_name)}
+                  ${isUpgrade ? '? Upgrade' : '? Downgrade'} to ${escapeHtml(plan.display_name)}
                 </button>` : `
-                <button disabled class="w-full px-4 py-2.5 bg-stone-100 text-stone-400 font-semibold rounded-xl cursor-not-allowed text-sm">✓ Current Plan</button>`}
+                <button disabled class="w-full px-4 py-2.5 bg-stone-100 text-stone-400 font-semibold rounded-xl cursor-not-allowed text-sm">? Current Plan</button>`}
             </div>`;
         }).join('')}
       </div>
@@ -1042,8 +1042,8 @@ async function loadSubscription() {
                 const pColor = pStatusColors[p.status] || 'bg-stone-100 text-stone-500';
                 return `<tr class="hover:bg-stone-50/50 transition">
                   <td class="px-6 py-4 text-stone-600">${new Date(p.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                  <td class="px-6 py-4 font-medium text-stone-900">${escapeHtml(p.plan_name || '—')}</td>
-                  <td class="px-6 py-4 text-stone-500 capitalize">${(p.payment_method || '—').replace(/_/g,' ')}</td>
+                  <td class="px-6 py-4 font-medium text-stone-900">${escapeHtml(p.plan_name || '�')}</td>
+                  <td class="px-6 py-4 text-stone-500 capitalize">${(p.payment_method || '�').replace(/_/g,' ')}</td>
                   <td class="px-6 py-4 text-right font-bold text-stone-900">$${Number(p.amount).toFixed(2)}</td>
                   <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${pColor}">${p.status}</span></td>
                 </tr>`;
@@ -1076,7 +1076,7 @@ async function loadSubscription() {
   }
 }
 
-// ── Payment gateway helpers ─────────────────────────────────────────────────
+// -- Payment gateway helpers -------------------------------------------------
 let detectedCountry = '';
 async function detectCountry() {
   if (detectedCountry) return;
@@ -1113,7 +1113,7 @@ function handlePlanClick(planId, planName, planPrice, menuId, planSlug) {
     window.location.href = `/checkout?${params.toString()}`;
     return;
   }
-  // Free downgrade — use existing modal
+  // Free downgrade � use existing modal
   openChangePlanModal(planId, planName, planPrice, menuId);
 }
 
@@ -1141,10 +1141,10 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
     return;
   }
 
-  // Paid plan — load available gateways
+  // Paid plan � load available gateways
   confirmBtn.classList.add('hidden');
   document.getElementById('pcm-payment-section').innerHTML =
-    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><span class="material-symbols-outlined spin text-[20px]">progress_activity</span>Loading payment options…</div>';
+    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><span class="material-symbols-outlined spin text-[20px]">progress_activity</span>Loading payment options�</div>';
 
   try {
     await detectCountry();
@@ -1156,7 +1156,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
     const section = document.getElementById('pcm-payment-section');
 
     if (!hasFW && !hasPP && !hasBT && !hasCP) {
-      // No live gateway configured – fallback to manual
+      // No live gateway configured � fallback to manual
       section.innerHTML = '';
       document.getElementById('pcm-note').textContent = 'Our team will contact you within 24 hours with payment instructions.';
       confirmBtn.classList.remove('hidden');
@@ -1203,7 +1203,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
           return d.order_id;
         },
         onApprove: async (data) => {
-          showSubToast('Processing payment…');
+          showSubToast('Processing payment�');
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
@@ -1229,7 +1229,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
     if (hasCP) {
       document.getElementById('cp-pay-btn').onclick = async () => {
         const btn = document.getElementById('cp-pay-btn');
-        btn.disabled = true; btn.textContent = 'Processing…';
+        btn.disabled = true; btn.textContent = 'Processing�';
         try {
           const r = await fetch('/api/payments/clickpesa/create-order-public', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1265,7 +1265,7 @@ function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey
     customizations: { title: 'RestOrder', description: `${planName} Plan`, logo: '/icon-192.png' },
     callback: async (response) => {
       if (response.status === 'successful' || response.status === 'completed') {
-        showSubToast('Verifying payment…');
+        showSubToast('Verifying payment�');
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
@@ -1367,7 +1367,7 @@ function showSubToast(msg, isError = false) {
   toast.style.background = isError ? '#fef2f2' : '#f0fdf4';
   toast.style.color = isError ? '#dc2626' : '#16a34a';
   toast.style.border = `1px solid ${isError ? '#fecaca' : '#bbf7d0'}`;
-  toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
+  toast.textContent = (isError ? '? ' : '? ') + msg;
   toast.style.opacity = '1';
   clearTimeout(toast._t);
   toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
@@ -1531,7 +1531,7 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '�';
+  if (!isoStr) return '?';
   return new Date(isoStr).toLocaleDateString('en-US', { 
     year: 'numeric', month: 'short', day: 'numeric' 
   });
@@ -1556,7 +1556,7 @@ async function showTrialExpiredOverlay(menuId) {
               </div>
               <a href="/checkout?plan=${encodeURIComponent(p.name)}${menuId ? '&menu_id=' + menuId : ''}" class="px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition">Upgrade</a>
             </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>✓ ' + escapeHtml(f) + '</span>').join('')}</div>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>? ' + escapeHtml(f) + '</span>').join('')}</div>
           </div>`;
       }).join('');
       // Also add enterprise contact option
@@ -1574,7 +1574,7 @@ async function showTrialExpiredOverlay(menuId) {
   const authed = await checkAuth();
   if (authed) {
     await loadDashboard();
-    // Check trial expiry — load subscription data and show overlay if expired
+    // Check trial expiry � load subscription data and show overlay if expired
     try {
       const subsRes = await fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } });
       if (subsRes.ok) {

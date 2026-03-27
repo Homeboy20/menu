@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MenuAdmin – Upload &amp; Publish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`r`n  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<title>MenuAdmin � Upload &amp; Publish</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -95,7 +95,7 @@
 </head>
 <body class="bg-bg text-stone-900 min-h-screen flex">
 
-<!-- ── Login Overlay ──────────────────────────────────────────────────────── -->
+<!-- -- Login Overlay -------------------------------------------------------- -->
 <div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
   <div class="bg-white border border-stone-200 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <!-- Tab switcher -->
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<!-- -- Sidebar --------------------------------------------------------------- -->
 <aside class="w-60 shrink-0 border-r border-stone-200 bg-white hidden md:flex flex-col h-screen sticky top-0">
   <div class="h-16 flex items-center px-5 border-b border-stone-200 gap-3">
     <div class="size-8 rounded bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
@@ -242,7 +242,7 @@
   </nav>
 </aside>
 
-<!-- ── Main ────────────────────────────────────────────────────────────────── -->
+<!-- -- Main ------------------------------------------------------------------ -->
 <div class="flex-1 flex flex-col min-w-0">
 
   <!-- topbar -->
@@ -266,7 +266,7 @@
 
   <main class="flex-1 overflow-y-auto p-6 md:p-8">
 
-    <!-- ═══════════════════ STEP 1 – UPLOAD ═══════════════════ -->
+    <!-- ------------------- STEP 1 � UPLOAD ------------------- -->
     <section id="section-upload" class="max-w-2xl mx-auto space-y-6">
       <div>
         <h2 class="text-2xl font-bold">Upload Your Menu File</h2>
@@ -285,7 +285,7 @@
         </div>
         <div>
           <p class="text-xl font-bold text-stone-900">Drag &amp; drop or click to browse</p>
-          <p class="text-stone-600 text-sm mt-1">PDF, CSV, XLSX or TXT – max 10 MB</p>
+          <p class="text-stone-600 text-sm mt-1">PDF, CSV, XLSX or TXT � max 10 MB</p>
         </div>
         <div class="flex gap-4 text-sm font-medium text-stone-600 bg-white px-4 py-2 rounded-lg border border-stone-200">
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-red-400">picture_as_pdf</span>PDF</span>
@@ -336,14 +336,14 @@
         </div>
       </div>
 
-      <!-- ── Menu Branding ──────────────────────────────────────────────── -->
+      <!-- -- Menu Branding ------------------------------------------------ -->
       <div class="space-y-5 p-4 bg-white rounded-xl border border-stone-200">
         <p class="text-sm font-semibold text-stone-700 flex items-center gap-2">
           <span class="material-symbols-outlined text-[16px] text-primary">palette</span>
           Menu Branding
         </p>
 
-        <!-- ── Visibility toggles ──────────────────────────────────── -->
+        <!-- -- Visibility toggles ------------------------------------ -->
         <div class="flex gap-5">
           <label class="flex items-center gap-2.5 cursor-pointer select-none" onclick="togClick('show-logo')">
             <span id="tog-show-logo" class="tog-track on"></span>
@@ -357,7 +357,7 @@
           </label>
         </div>
 
-        <!-- ── Header Layout ───────────────────────────────────────── -->
+        <!-- -- Header Layout ----------------------------------------- -->
         <div>
           <label class="block text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">Header Layout</label>
           <div class="grid grid-cols-3 gap-1.5" id="layout-picker">
@@ -419,7 +419,7 @@
           </div>
         </div>
 
-        <!-- ── Accent color ────────────────────────────────────────── -->
+        <!-- -- Accent color ------------------------------------------ -->
         <div class="flex items-center gap-3">
           <label class="text-sm text-stone-600 flex-1">Accent Color</label>
           <input type="color" id="brand-color" value="#2dd4bf"
@@ -428,7 +428,7 @@
           <span id="brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#2dd4bf</span>
         </div>
 
-        <!-- ── Logo ───────────────────────────────────────────────── -->
+        <!-- -- Logo ------------------------------------------------- -->
         <div>
           <label class="block text-sm text-stone-600 mb-1.5">
             Logo <span class="text-stone-400 text-xs">(optional)</span>
@@ -450,7 +450,7 @@
               </button>
               <input id="logo-file-input" type="file" accept="image/*" class="hidden"
                      onchange="handleLogoFile(event)"/>
-              <input id="logo-url" type="url" placeholder="…or paste image URL"
+              <input id="logo-url" type="url" placeholder="�or paste image URL"
                      oninput="handleLogoUrl()"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm
                             text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary
@@ -459,7 +459,7 @@
           </div>
           <p class="text-[11px] text-stone-400 mt-1.5 flex items-center gap-1">
             <span class="material-symbols-outlined text-[12px]">info</span>
-            Recommended: square image, 256 × 256 px or larger (max 2 MB)
+            Recommended: square image, 256 � 256 px or larger (max 2 MB)
           </p>
           <button id="logo-clear-btn" onclick="clearLogo()"
                   class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors
@@ -468,18 +468,18 @@
           </button>
         </div>
 
-        <!-- ── Tagline ─────────────────────────────────────────────── -->
+        <!-- -- Tagline ----------------------------------------------- -->
         <div id="tagline-wrap">
           <label class="block text-sm text-stone-600 mb-1.5">
             Tagline <span class="text-stone-400 text-xs">(optional)</span>
-            <span id="tagline-hidden-note" class="hidden text-[10px] text-amber-500/70 ml-1">— hidden (name is off)</span>
+            <span id="tagline-hidden-note" class="hidden text-[10px] text-amber-500/70 ml-1">� hidden (name is off)</span>
           </label>
           <input id="tagline" type="text" placeholder="Fresh food, great vibes"
                  oninput="updateBrandPreview()"
                  class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
         </div>
 
-        <!-- ── Font & Background ───────────────────────────────────── -->
+        <!-- -- Font & Background ------------------------------------- -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-sm text-stone-600 mb-1.5">Font Style</label>
@@ -500,12 +500,12 @@
               <option value="darker">Deep Black</option>
               <option value="warm">Warm Dark</option>
               <option value="light">Light</option>
-              <option value="cafe">Café Brown</option>
+              <option value="cafe">Caf� Brown</option>
             </select>
           </div>
         </div>
 
-        <!-- ── Advanced Colors (collapsible) ──────────────────────── -->
+        <!-- -- Advanced Colors (collapsible) ------------------------ -->
         <div>
           <button onclick="toggleAdvancedColors()"
                   class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-500 hover:text-stone-700 transition-colors w-full text-left">
@@ -523,7 +523,7 @@
                   <input type="color" id="bg-color-custom" value="#0d1b2a"
                          oninput="onAdvColorInput('bg-color-custom')"
                          class="adv-color-input border border-stone-300"/>
-                  <button onclick="resetAdvColor('bg-color-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <button onclick="resetAdvColor('bg-color-custom')" class="adv-reset-btn" title="Reset to theme">? Reset</button>
                   <span id="bg-color-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
               </div>
@@ -535,7 +535,7 @@
                   <input type="color" id="card-bg-custom" value="#132639"
                          oninput="onAdvColorInput('card-bg-custom')"
                          class="adv-color-input border border-stone-300"/>
-                  <button onclick="resetAdvColor('card-bg-custom')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <button onclick="resetAdvColor('card-bg-custom')" class="adv-reset-btn" title="Reset to theme">? Reset</button>
                   <span id="card-bg-custom-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
               </div>
@@ -547,7 +547,7 @@
                   <input type="color" id="heading-color" value="#ffffff"
                          oninput="onAdvColorInput('heading-color')"
                          class="adv-color-input border border-stone-300"/>
-                  <button onclick="resetAdvColor('heading-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <button onclick="resetAdvColor('heading-color')" class="adv-reset-btn" title="Reset to theme">? Reset</button>
                   <span id="heading-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
               </div>
@@ -559,7 +559,7 @@
                   <input type="color" id="text-color" value="#94a3b8"
                          oninput="onAdvColorInput('text-color')"
                          class="adv-color-input border border-stone-300"/>
-                  <button onclick="resetAdvColor('text-color')" class="adv-reset-btn" title="Reset to theme">↺ Reset</button>
+                  <button onclick="resetAdvColor('text-color')" class="adv-reset-btn" title="Reset to theme">? Reset</button>
                   <span id="text-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
               </div>
@@ -574,7 +574,7 @@
                   <input type="color" id="price-color" value="#2dd4bf"
                          oninput="onAdvColorInput('price-color')"
                          class="adv-color-input border border-stone-300"/>
-                  <button onclick="resetAdvColor('price-color')" class="adv-reset-btn" title="Reset to accent">↺ Reset</button>
+                  <button onclick="resetAdvColor('price-color')" class="adv-reset-btn" title="Reset to accent">? Reset</button>
                   <span id="price-color-flag" class="hidden text-[9px] text-primary bg-primary/10 rounded px-1.5 py-0.5 font-medium">custom</span>
                 </div>
               </div>
@@ -582,7 +582,7 @@
           </div>
         </div>
 
-        <!-- ── Live preview strip ──────────────────────────────────── -->
+        <!-- -- Live preview strip ------------------------------------ -->
         <div id="brand-preview"
              class="rounded-xl px-3 py-2.5 border border-white/10 flex items-center gap-3 transition-all overflow-hidden"
              style="background:#132639">
@@ -601,7 +601,7 @@
         </div>
       </div>
 
-      <!-- ── Contact & Social ────────────────────────────────────────── -->
+      <!-- -- Contact & Social ------------------------------------------ -->
       <div class="space-y-4 p-4 bg-white rounded-xl border border-stone-200">
         <button onclick="toggleContactSection()"
                 class="flex items-center gap-2 text-sm font-semibold text-stone-700 w-full text-left">
@@ -644,12 +644,12 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-stone-500 mb-1.5">Instagram</label>
-              <input id="social-instagram" type="url" placeholder="https://instagram.com/…"
+              <input id="social-instagram" type="url" placeholder="https://instagram.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1.5">Facebook</label>
-              <input id="social-facebook" type="url" placeholder="https://facebook.com/…"
+              <input id="social-facebook" type="url" placeholder="https://facebook.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
@@ -657,7 +657,7 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-stone-500 mb-1.5">Twitter / X</label>
-              <input id="social-twitter" type="url" placeholder="https://x.com/…"
+              <input id="social-twitter" type="url" placeholder="https://x.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
@@ -670,12 +670,12 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-stone-500 mb-1.5">TikTok</label>
-              <input id="social-tiktok" type="url" placeholder="https://tiktok.com/@…"
+              <input id="social-tiktok" type="url" placeholder="https://tiktok.com/@�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1.5">YouTube</label>
-              <input id="social-youtube" type="url" placeholder="https://youtube.com/…"
+              <input id="social-youtube" type="url" placeholder="https://youtube.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
@@ -696,7 +696,7 @@
       <div id="upload-error" class="hidden text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3"></div>
     </section>
 
-    <!-- ═══════════════════ STEP 2 – PREVIEW / EDIT ═══════════ -->
+    <!-- ------------------- STEP 2 � PREVIEW / EDIT ----------- -->
     <section id="section-preview" class="hidden max-w-5xl mx-auto space-y-6">
       <div class="flex items-end justify-between gap-4">
         <div>
@@ -734,7 +734,7 @@
       <!-- search bar -->
       <div class="relative">
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 text-[18px]">search</span>
-        <input id="items-search" type="text" placeholder="Search items by name, category, or description…"
+        <input id="items-search" type="text" placeholder="Search items by name, category, or description�"
                oninput="renderTable()"
                class="w-full bg-white border border-stone-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
         <button id="items-search-clear" onclick="document.getElementById('items-search').value=''; renderTable();"
@@ -767,7 +767,7 @@
 
       <div class="flex justify-end gap-3">
         <button onclick="showSection('upload')" class="px-5 py-2.5 rounded-xl border border-stone-300 text-stone-700 hover:bg-primary/5 transition-colors font-medium">
-          ← Back
+          ? Back
         </button>
         <button id="proceed-btn" onclick="proceedToPublish()"
                 class="px-6 py-2.5 rounded-xl bg-primary text-bg-dark font-bold hover:opacity-90 active:scale-[0.98] transition-all shadow-md shadow-primary/20 flex items-center gap-2">
@@ -777,10 +777,10 @@
       </div>
     </section>
 
-    <!-- ═══════════════════ STEP 3 – QR / PUBLISH ════════════= -->
+    <!-- ------------------- STEP 3 � QR / PUBLISH ------------= -->
     <section id="section-publish" class="hidden max-w-xl mx-auto space-y-6 text-center">
       <div>
-        <h2 id="publish-heading" class="text-2xl font-bold">Your Menu is Live! 🎉</h2>
+        <h2 id="publish-heading" class="text-2xl font-bold">Your Menu is Live! ??</h2>
         <p id="publish-subtext" class="text-stone-600 text-sm mt-1">Print or display this QR code for customers to scan.</p>
       </div>
 
@@ -810,11 +810,11 @@
 
       <button onclick="showSection('upload'); clearAll()"
               class="text-stone-600 hover:text-stone-800 text-sm underline underline-offset-2 transition-colors">
-        Upload another menu →
+        Upload another menu ?
       </button>
     </section>
 
-    <!-- ═══════════════════ STEP 4 – PUBLISHED MENUS ══════════ -->
+    <!-- ------------------- STEP 4 � PUBLISHED MENUS ---------- -->
     <section id="section-published" class="hidden max-w-4xl mx-auto space-y-6">
       <div class="flex items-end justify-between">
         <div>
@@ -827,7 +827,7 @@
       </div>
 
       <div id="published-list" class="space-y-3">
-        <p class="text-stone-600 text-sm">Loading…</p>
+        <p class="text-stone-600 text-sm">Loading�</p>
       </div>
 
       <!-- Linked QR codes -->
@@ -841,7 +841,7 @@
       </div>
     </section>
 
-    <!-- ═══════════════════ TABLES ═══════════════════ -->
+    <!-- ------------------- TABLES ------------------- -->
     <section id="section-tables" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="flex items-end justify-between">
         <div>
@@ -855,7 +855,7 @@
         <label class="block text-sm font-medium text-stone-700 mb-1.5">Select Menu</label>
         <select id="tables-menu-select" onchange="loadTablesForMenu(this.value)"
                 class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-          <option value="">— Choose a menu —</option>
+          <option value="">� Choose a menu �</option>
         </select>
       </div>
 
@@ -863,7 +863,7 @@
       <div id="tables-disabled-notice" class="hidden bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-5 text-sm text-yellow-300">
         <span class="material-symbols-outlined text-[18px] align-middle mr-1">warning</span>
         Table QR codes are <strong>disabled</strong> for this menu. Enable them in
-        <button onclick="showSection('settings')" class="underline hover:text-yellow-100 transition-colors">Settings → Business &amp; Branding</button>.
+        <button onclick="showSection('settings')" class="underline hover:text-yellow-100 transition-colors">Settings ? Business &amp; Branding</button>.
       </div>
 
       <!-- Add table form -->
@@ -919,14 +919,14 @@
       </div>
     </section>
 
-    <!-- ═══════════════════ STEP 5 – SETTINGS ═══════════════════ -->
+    <!-- ------------------- STEP 5 � SETTINGS ------------------- -->
     <section id="section-settings" class="hidden max-w-lg mx-auto space-y-6">
       <div>
         <h2 class="text-2xl font-bold">Settings</h2>
         <p class="text-stone-600 text-sm mt-1">Manage your account and business branding.</p>
       </div>
 
-      <!-- ── Business & Branding ──────────────────────────────────── -->
+      <!-- -- Business & Branding ------------------------------------ -->
       <div class="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px] text-primary">palette</span>
@@ -939,7 +939,7 @@
           <label class="block text-sm font-medium text-stone-700 mb-1.5">Select Menu</label>
           <select id="settings-menu-select" onchange="loadSettingsBranding(this.value)"
                   class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
-            <option value="">— Choose a menu to edit —</option>
+            <option value="">� Choose a menu to edit �</option>
           </select>
         </div>
 
@@ -974,7 +974,7 @@
                   <span class="material-symbols-outlined text-[16px]">upload</span> Upload
                 </button>
                 <input id="s-logo-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsLogoFile(event)"/>
-                <input id="s-logo-url" type="url" placeholder="…or paste image URL" oninput="handleSettingsLogoUrl()"
+                <input id="s-logo-url" type="url" placeholder="�or paste image URL" oninput="handleSettingsLogoUrl()"
                        class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
               </div>
             </div>
@@ -999,7 +999,7 @@
                   <span class="material-symbols-outlined text-[16px]">upload</span> Upload Banner
                 </button>
                 <input id="s-cover-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsCoverFile(event)"/>
-                <input id="s-cover-url" type="url" placeholder="…or paste banner URL" oninput="handleSettingsCoverUrl()"
+                <input id="s-cover-url" type="url" placeholder="�or paste banner URL" oninput="handleSettingsCoverUrl()"
                        class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
               </div>
             </div>
@@ -1045,7 +1045,7 @@
                 <option value="darker">Deep Black</option>
                 <option value="warm">Warm Dark</option>
                 <option value="light">Light</option>
-                <option value="cafe">Café Brown</option>
+                <option value="cafe">Caf� Brown</option>
               </select>
             </div>
           </div>
@@ -1118,17 +1118,17 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs text-stone-500 mb-1">Instagram</label>
-              <input id="s-instagram" type="url" placeholder="https://instagram.com/…"
+              <input id="s-instagram" type="url" placeholder="https://instagram.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1">Facebook</label>
-              <input id="s-facebook" type="url" placeholder="https://facebook.com/…"
+              <input id="s-facebook" type="url" placeholder="https://facebook.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1">Twitter / X</label>
-              <input id="s-twitter" type="url" placeholder="https://x.com/…"
+              <input id="s-twitter" type="url" placeholder="https://x.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
@@ -1138,12 +1138,12 @@
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1">TikTok</label>
-              <input id="s-tiktok" type="url" placeholder="https://tiktok.com/@…"
+              <input id="s-tiktok" type="url" placeholder="https://tiktok.com/@�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
             <div>
               <label class="block text-xs text-stone-500 mb-1">YouTube</label>
-              <input id="s-youtube" type="url" placeholder="https://youtube.com/…"
+              <input id="s-youtube" type="url" placeholder="https://youtube.com/�"
                      class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
             </div>
           </div>
@@ -1197,11 +1197,11 @@
   </main>
 </div>
 
-<!-- ── Loading overlay ──────────────────────────────────────────────────────── -->
+<!-- -- Loading overlay -------------------------------------------------------- -->
 <div id="loading-overlay" class="hidden fixed inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center z-50">
   <div class="flex flex-col items-center gap-4">
     <span class="material-symbols-outlined text-5xl text-primary spin">sync</span>
-    <p id="loading-text" class="text-stone-700 font-medium">Processing…</p>
+    <p id="loading-text" class="text-stone-700 font-medium">Processing�</p>
   </div>
 </div>
 
@@ -1209,7 +1209,7 @@
 <div id="alert-toast-container"></div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────────────────
+// -- State ---------------------------------------------------------------------
 let sessionToken   = localStorage.getItem('adminToken') || '';
 let customerToken  = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken') || '';
 let isCustomerMode = false;
@@ -1241,37 +1241,37 @@ const advColorCustom = {
 };
 
 const CURRENCIES = {
-  // ─ Americas ──────────────────────────────────────────────────────────────────────
+  // - Americas ----------------------------------------------------------------------
   USD: { symbol: '$',     name: 'US Dollar' },
   CAD: { symbol: 'CA$',   name: 'Canadian Dollar' },
   BRL: { symbol: 'R$',    name: 'Brazilian Real' },
   AUD: { symbol: 'A$',    name: 'Australian Dollar' },
-  // ─ Europe ────────────────────────────────────────────────────────────────────────
-  EUR: { symbol: '€',     name: 'Euro' },
-  GBP: { symbol: '£',     name: 'British Pound' },
-  TRY: { symbol: '₺',     name: 'Turkish Lira' },
-  // ─ Middle East ───────────────────────────────────────────────────────────────
+  // - Europe ------------------------------------------------------------------------
+  EUR: { symbol: '�',     name: 'Euro' },
+  GBP: { symbol: '�',     name: 'British Pound' },
+  TRY: { symbol: '?',     name: 'Turkish Lira' },
+  // - Middle East ---------------------------------------------------------------
   AED: { symbol: 'AED ',  name: 'UAE Dirham' },
   SAR: { symbol: 'SAR ',  name: 'Saudi Riyal' },
   QAR: { symbol: 'QR ',   name: 'Qatari Riyal' },
   KWD: { symbol: 'KD ',   name: 'Kuwaiti Dinar' },
   BHD: { symbol: 'BD ',   name: 'Bahraini Dinar' },
   OMR: { symbol: 'OMR ',  name: 'Omani Rial' },
-  // ─ Asia ──────────────────────────────────────────────────────────────────────────
-  INR: { symbol: '₹',     name: 'Indian Rupee' },
-  PKR: { symbol: '₨',     name: 'Pakistani Rupee' },
-  BDT: { symbol: '৳',     name: 'Bangladeshi Taka' },
-  JPY: { symbol: '¥',     name: 'Japanese Yen' },
-  CNY: { symbol: '¥',     name: 'Chinese Yuan' },
-  KRW: { symbol: '₩',     name: 'Korean Won' },
+  // - Asia --------------------------------------------------------------------------
+  INR: { symbol: '?',     name: 'Indian Rupee' },
+  PKR: { symbol: '?',     name: 'Pakistani Rupee' },
+  BDT: { symbol: '?',     name: 'Bangladeshi Taka' },
+  JPY: { symbol: '�',     name: 'Japanese Yen' },
+  CNY: { symbol: '�',     name: 'Chinese Yuan' },
+  KRW: { symbol: '?',     name: 'Korean Won' },
   MYR: { symbol: 'RM',    name: 'Malaysian Ringgit' },
   SGD: { symbol: 'S$',    name: 'Singapore Dollar' },
-  THB: { symbol: '฿',     name: 'Thai Baht' },
-  PHP: { symbol: '₱',     name: 'Philippine Peso' },
+  THB: { symbol: '?',     name: 'Thai Baht' },
+  PHP: { symbol: '?',     name: 'Philippine Peso' },
   IDR: { symbol: 'Rp',    name: 'Indonesian Rupiah' },
-  // ─ Africa – West ─────────────────────────────────────────────────────────────────
-  NGN: { symbol: '₦',     name: 'Nigerian Naira' },
-  GHS: { symbol: '₵',     name: 'Ghanaian Cedi' },
+  // - Africa � West -----------------------------------------------------------------
+  NGN: { symbol: '?',     name: 'Nigerian Naira' },
+  GHS: { symbol: '?',     name: 'Ghanaian Cedi' },
   XOF: { symbol: 'CFA',   name: 'West African CFA Franc' },
   XAF: { symbol: 'FCFA',  name: 'Central African CFA Franc' },
   GMD: { symbol: 'D',     name: 'Gambian Dalasi' },
@@ -1279,7 +1279,7 @@ const CURRENCIES = {
   SLE: { symbol: 'Le',    name: 'Sierra Leonean Leone' },
   LRD: { symbol: 'L$',    name: 'Liberian Dollar' },
   CVE: { symbol: 'CV$',   name: 'Cape Verdean Escudo' },
-  // ─ Africa – East ──────────────────────────────────────────────────────────────────
+  // - Africa � East ------------------------------------------------------------------
   KES: { symbol: 'KSh',   name: 'Kenyan Shilling' },
   ETB: { symbol: 'Br',    name: 'Ethiopian Birr' },
   TZS: { symbol: 'TSh',   name: 'Tanzanian Shilling' },
@@ -1287,21 +1287,21 @@ const CURRENCIES = {
   RWF: { symbol: 'RF',    name: 'Rwandan Franc' },
   BIF: { symbol: 'Fr',    name: 'Burundian Franc' },
   SOS: { symbol: 'Sh.So', name: 'Somali Shilling' },
-  SSP: { symbol: 'SS£',   name: 'South Sudanese Pound' },
+  SSP: { symbol: 'SS�',   name: 'South Sudanese Pound' },
   ERN: { symbol: 'Nfk',   name: 'Eritrean Nakfa' },
   DJF: { symbol: 'Fdj',   name: 'Djiboutian Franc' },
   KMF: { symbol: 'CF',    name: 'Comorian Franc' },
-  SCR: { symbol: '₨',     name: 'Seychellois Rupee' },
+  SCR: { symbol: '?',     name: 'Seychellois Rupee' },
   MUR: { symbol: 'Rs',    name: 'Mauritian Rupee' },
   MGA: { symbol: 'Ar',    name: 'Malagasy Ariary' },
-  // ─ Africa – North ─────────────────────────────────────────────────────────────────
-  EGP: { symbol: 'E£',    name: 'Egyptian Pound' },
+  // - Africa � North -----------------------------------------------------------------
+  EGP: { symbol: 'E�',    name: 'Egyptian Pound' },
   MAD: { symbol: 'MAD',   name: 'Moroccan Dirham' },
   DZD: { symbol: 'DA',    name: 'Algerian Dinar' },
   TND: { symbol: 'DT',    name: 'Tunisian Dinar' },
   LYD: { symbol: 'LD',    name: 'Libyan Dinar' },
   SDG: { symbol: 'SDG',   name: 'Sudanese Pound' },
-  // ─ Africa – Southern ──────────────────────────────────────────────────────────────
+  // - Africa � Southern --------------------------------------------------------------
   ZAR: { symbol: 'R',     name: 'South African Rand' },
   NAD: { symbol: 'N$',    name: 'Namibian Dollar' },
   BWP: { symbol: 'P',     name: 'Botswana Pula' },
@@ -1313,7 +1313,7 @@ const CURRENCIES = {
   MZN: { symbol: 'MT',    name: 'Mozambican Metical' },
   AOA: { symbol: 'Kz',    name: 'Angolan Kwanza' },
   CDF: { symbol: 'FC',    name: 'Congolese Franc' },
-  STN: { symbol: 'Db',    name: 'São Tomé Dobra' },
+  STN: { symbol: 'Db',    name: 'S�o Tom� Dobra' },
 };
 
 function getCurrencySymbol() { return (CURRENCIES[currency] || CURRENCIES.USD).symbol; }
@@ -1336,11 +1336,11 @@ function initCurrencySelect() {
   if (!sel) return;
   sel.innerHTML = Object.entries(CURRENCIES)
     .map(([code, { symbol, name }]) =>
-      `<option value="${code}" ${code === currency ? 'selected' : ''}>${code} – ${symbol} ${name}</option>`)
+      `<option value="${code}" ${code === currency ? 'selected' : ''}>${code} � ${symbol} ${name}</option>`)
     .join('');
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
+// -- Navigation ----------------------------------------------------------------
 const SECTIONS = ['upload', 'preview', 'publish', 'published', 'tables', 'settings'];
 const TITLES   = { upload: 'Upload Menu', preview: 'Preview & Edit', publish: 'QR & Publish', published: 'Published Menus', tables: 'Table Management', settings: 'Settings' };
 
@@ -1366,7 +1366,7 @@ function showSection(name) {
   document.querySelector('aside').classList.remove('hidden');
 }
 
-// ── Drag & Drop ───────────────────────────────────────────────────────────────
+// -- Drag & Drop ---------------------------------------------------------------
 function handleDragOver(e)  { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
 function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
 function handleDrop(e) {
@@ -1432,7 +1432,7 @@ function formatBytes(b) {
   return (b/(1024*1024)).toFixed(1) + ' MB';
 }
 
-// ── Upload ────────────────────────────────────────────────────────────────────
+// -- Upload --------------------------------------------------------------------
 async function uploadFile() {
   const errEl = document.getElementById('upload-error');
   errEl.classList.add('hidden');
@@ -1454,7 +1454,7 @@ async function uploadFile() {
 
   restaurantName = document.getElementById('rest-name').value.trim() || 'The Rusty Spoon';
 
-  showLoading('Uploading & extracting items…');
+  showLoading('Uploading & extracting items�');
   const fd = new FormData();
   fd.append('menuFile', selectedFile);
 
@@ -1473,7 +1473,7 @@ async function uploadFile() {
     // If no items were auto-extracted, add one blank row so user can fill manually
     if (extractedItems.length === 0) {
       extractedItems.push(blankRow());
-      showStatusBadge('No items auto-detected – add them manually', 'yellow');
+      showStatusBadge('No items auto-detected � add them manually', 'yellow');
     } else {
       showStatusBadge(`${extractedItems.length} items extracted`, 'green');
     }
@@ -1488,7 +1488,7 @@ async function uploadFile() {
   }
 }
 
-// ── Re-upload file while editing ──────────────────────────────────────────────
+// -- Re-upload file while editing ----------------------------------------------
 async function handleReupload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1500,7 +1500,7 @@ async function handleReupload(e) {
   );
   if (!choice) return;
 
-  showLoading('Uploading & extracting items…');
+  showLoading('Uploading & extracting items�');
   const fd = new FormData();
   fd.append('menuFile', file);
 
@@ -1517,7 +1517,7 @@ async function handleReupload(e) {
 
     if (extractedItems.length === 0) {
       extractedItems.push(blankRow());
-      showStatusBadge('No items auto-detected – add them manually', 'yellow');
+      showStatusBadge('No items auto-detected � add them manually', 'yellow');
     } else {
       showStatusBadge(`${extractedItems.length} items imported from file`, 'green');
     }
@@ -1530,7 +1530,7 @@ async function handleReupload(e) {
   }
 }
 
-// ── Table rendering ───────────────────────────────────────────────────────────
+// -- Table rendering -----------------------------------------------------------
 function blankRow() {
   return { id: crypto.randomUUID(), name: '', category: 'General', subcategory: '', price: '', description: '', size: '', tags: [], imageUrl: '', _selected: true };
 }
@@ -1647,7 +1647,7 @@ function updateChips() {
   document.getElementById('check-all').indeterminate   = sel > 0 && sel < extractedItems.length;
 }
 
-// ── Branding ──────────────────────────────────────────────────────────────────
+// -- Branding ------------------------------------------------------------------
 function getBranding() {
   return {
     brandColor:   document.getElementById('brand-color').value || '#2dd4bf',
@@ -1677,7 +1677,7 @@ function getBranding() {
   };
 }
 
-// ── Logo helpers ──────────────────────────────────────────────────────────────
+// -- Logo helpers --------------------------------------------------------------
 function handleLogoFile(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1800,7 +1800,7 @@ function updateBrandPreview() {
   if (lbl) lbl.textContent = LAYOUT_LABELS[currentHeaderLayout] || currentHeaderLayout;
 }
 
-// ── Layout picker ─────────────────────────────────────────────────────────────
+// -- Layout picker -------------------------------------------------------------
 function setLayout(layout) {
   currentHeaderLayout = layout;
   document.querySelectorAll('.layout-opt').forEach(btn => {
@@ -1810,7 +1810,7 @@ function setLayout(layout) {
   updateBrandPreview();
 }
 
-// ── Toggle switches ───────────────────────────────────────────────────────────
+// -- Toggle switches -----------------------------------------------------------
 function togClick(id) {
   const checkbox = document.getElementById(id);
   checkbox.checked = !checkbox.checked;
@@ -1826,7 +1826,7 @@ function syncNameVisibility() {
   updateBrandPreview();
 }
 
-// ── Advanced colors ───────────────────────────────────────────────────────────
+// -- Advanced colors -----------------------------------------------------------
 const ADV_BG      = { dark: '#0d1b2a', darker: '#080e18', warm: '#1a1008', light: '#f1f5f9', cafe: '#1c1108' };
 const ADV_SURFACE = { dark: '#132639', darker: '#0d1726', warm: '#241808', light: '#ffffff', cafe: '#2a1a0e' };
 
@@ -1907,9 +1907,9 @@ function hexAlpha(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-// ── Edit existing menu ───────────────────────────────────────────────────────────────────
+// -- Edit existing menu -------------------------------------------------------------------
 async function loadMenuForEditing(id) {
-  showLoading('Loading menu…');
+  showLoading('Loading menu�');
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(id));
     if (!res.ok) throw new Error('Failed to load menu');
@@ -2006,7 +2006,7 @@ async function loadMenuForEditing(id) {
   }
 }
 
-// ── Publish ───────────────────────────────────────────────────────────────────
+// -- Publish -------------------------------------------------------------------
 async function proceedToPublish() {
   const items = extractedItems.filter(it => it._selected && it.name.trim());
   if (items.length === 0) {
@@ -2015,7 +2015,7 @@ async function proceedToPublish() {
   }
 
   const isEditing = !!editingMenuId;
-  showLoading(isEditing ? 'Saving changes…' : 'Saving menu & generating QR…');
+  showLoading(isEditing ? 'Saving changes�' : 'Saving menu & generating QR�');
   try {
     const url    = isEditing ? '/api/menus/' + editingMenuId : '/api/menus';
     const method = isEditing ? 'PUT' : 'POST';
@@ -2031,11 +2031,11 @@ async function proceedToPublish() {
     currentQrDataUrl = data.qrDataUrl;
 
     if (isEditing) {
-      // Editing: go to published list — QR code is unchanged
+      // Editing: go to published list � QR code is unchanged
       editingMenuId = null;
       showSection('published');
       loadPublished();
-      showStatusBadge('Menu updated — QR unchanged ✓', 'green');
+      showStatusBadge('Menu updated � QR unchanged ?', 'green');
     } else {
       // New publish: show QR code
       document.getElementById('qr-img').src              = data.qrDataUrl;
@@ -2043,7 +2043,7 @@ async function proceedToPublish() {
       document.getElementById('qr-link').textContent      = data.menuUrl;
       document.getElementById('qr-link').href             = data.menuUrl;
 
-      document.getElementById('publish-heading').textContent = 'Your Menu is Live! 🎉';
+      document.getElementById('publish-heading').textContent = 'Your Menu is Live! ??';
       document.getElementById('publish-subtext').textContent = 'Print or display this QR code for customers to scan.';
 
       showSection('publish');
@@ -2056,7 +2056,7 @@ async function proceedToPublish() {
   }
 }
 
-// ── QR utilities ──────────────────────────────────────────────────────────────
+// -- QR utilities --------------------------------------------------------------
 function downloadQR() {
   if (!currentQrDataUrl) return;
   const a = document.createElement('a');
@@ -2084,10 +2084,10 @@ function exportMenuCSV(menuId) {
   a.click();
 }
 
-// ── Published menus list ──────────────────────────────────────────────────────
+// -- Published menus list ------------------------------------------------------
 async function loadPublished() {
   const el = document.getElementById('published-list');
-  el.innerHTML = '<p class="text-stone-600 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-600 text-sm">Loading�</p>';
   try {
     const res  = await fetch('/api/menus', { headers: authHeaders() });
     const list = await res.json();
@@ -2100,7 +2100,7 @@ async function loadPublished() {
         <div class="flex items-center gap-4">
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-stone-900 truncate">${esc(m.restaurantName)}</p>
-            <p class="text-xs text-stone-600 mt-0.5">${m.itemCount} items · ${new Date(m.createdAt).toLocaleString()}</p>
+            <p class="text-xs text-stone-600 mt-0.5">${m.itemCount} items � ${new Date(m.createdAt).toLocaleString()}</p>
             <a href="/menu?id=${m.id}" target="_blank"
                class="text-primary text-xs hover:underline truncate block mt-1">/menu?id=${m.id}</a>
           </div>
@@ -2155,9 +2155,9 @@ async function loadPublished() {
   }
 }
 
-// ── Analytics modal ──────────────────────────────────────────────────────────
+// -- Analytics modal ----------------------------------------------------------
 async function showAnalytics(menuId) {
-  showLoading('Loading analytics…');
+  showLoading('Loading analytics�');
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/analytics', {
       headers: authHeaders()
@@ -2243,10 +2243,10 @@ async function showAnalytics(menuId) {
   }
 }
 
-// ── Regenerate QR code ──────────────────────────────────────────────────────
+// -- Regenerate QR code ------------------------------------------------------
 async function regenerateQR(menuId) {
   if (!confirm('Generate a new QR code? The old QR code will still work, but a new version will be created.')) return;
-  showLoading('Regenerating QR code…');
+  showLoading('Regenerating QR code�');
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/regenerate-qr', {
       method: 'POST',
@@ -2276,7 +2276,7 @@ async function deleteMenu(id, btn) {
   }
 }
 
-// ── Link / Reprogram QR Code ────────────────────────────────────────────────
+// -- Link / Reprogram QR Code ------------------------------------------------
 function showLinkQR(targetMenuId, targetName) {
   let dlg = document.getElementById('link-qr-dialog');
   if (!dlg) {
@@ -2369,7 +2369,7 @@ async function decodeQRFile(event, targetMenuId, targetName) {
       const u = new URL(decoded);
       sourceId = u.searchParams.get('id');
     } catch (_) {
-      // Not a URL — use the raw content as the source ID
+      // Not a URL � use the raw content as the source ID
       sourceId = decoded;
     }
 
@@ -2402,7 +2402,7 @@ async function saveLinkQR(targetMenuId) {
   const btn = document.getElementById('link-qr-save-btn');
   errEl.classList.add('hidden');
   btn.disabled = true;
-  btn.innerHTML = '<span class="material-symbols-outlined text-[18px] spin">progress_activity</span> Saving…';
+  btn.innerHTML = '<span class="material-symbols-outlined text-[18px] spin">progress_activity</span> Saving�';
 
   try {
     const res = await fetch('/api/qr-redirects', {
@@ -2440,7 +2440,7 @@ async function loadLinkedQRs() {
         <span class="material-symbols-outlined text-violet-400/60 text-[20px]">qr_code_2</span>
         <div class="flex-1 min-w-0">
           <p class="text-sm text-stone-800 truncate">${esc(r.label || r.source_menu_id)}</p>
-          <p class="text-xs text-stone-500 truncate">→ ${esc(r.target_name || r.target_menu_id)}</p>
+          <p class="text-xs text-stone-500 truncate">? ${esc(r.target_name || r.target_menu_id)}</p>
         </div>
         <button onclick="unlinkQR(${r.id})" title="Remove link"
                 class="text-stone-400 hover:text-red-400 transition-colors p-1">
@@ -2459,9 +2459,9 @@ async function unlinkQR(id) {
   } catch (_) {}
 }
 
-// ── Misc UI ───────────────────────────────────────────────────────────────────
+// -- Misc UI -------------------------------------------------------------------
 function showLoading(msg) {
-  document.getElementById('loading-text').textContent = msg || 'Processing…';
+  document.getElementById('loading-text').textContent = msg || 'Processing�';
   document.getElementById('loading-overlay').classList.remove('hidden');
 }
 function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
@@ -2477,7 +2477,7 @@ function showStatusBadge(msg, color) {
   setTimeout(() => el.classList.add('hidden'), 5000);
 }
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// -- Auth ---------------------------------------------------------------------
 async function initAuth() {
   // 1. Try admin token
   if (sessionToken) {
@@ -2516,7 +2516,7 @@ async function initAuth() {
     localStorage.removeItem('customerToken');
     sessionStorage.removeItem('customerToken');
   }
-  // 3. No valid auth — show admin login overlay (admins can log in here; customers should come from /login)
+  // 3. No valid auth � show admin login overlay (admins can log in here; customers should come from /login)
   showLogin();
 }
 
@@ -2745,7 +2745,7 @@ async function changePassword() {
   }
 }
 
-// ── Settings Branding ──────────────────────────────────────────────────────────
+// -- Settings Branding ----------------------------------------------------------
 let settingsLogoSrc = '';
 let settingsCoverSrc = '';
 let settingsLayout = 'logo-left';
@@ -2758,7 +2758,7 @@ async function loadSettingsMenuList() {
     const list = await res.json();
     const sel  = document.getElementById('settings-menu-select');
     const current = sel.value;
-    sel.innerHTML = '<option value="">— Choose a menu to edit —</option>';
+    sel.innerHTML = '<option value="">� Choose a menu to edit �</option>';
     list.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id;
@@ -2772,7 +2772,7 @@ async function loadSettingsMenuList() {
       for (const [code, info] of Object.entries(CURRENCIES)) {
         const opt = document.createElement('option');
         opt.value = code;
-        opt.textContent = info.symbol + ' – ' + info.name + ' (' + code + ')';
+        opt.textContent = info.symbol + ' � ' + info.name + ' (' + code + ')';
         curSel.appendChild(opt);
       }
     }
@@ -2987,7 +2987,7 @@ async function saveSettingsBranding() {
   }
 }
 
-// ── Tables Management ─────────────────────────────────────────────────────────
+// -- Tables Management ---------------------------------------------------------
 let tablesMenuId = null;
 let tablesEnabled = false;
 
@@ -2998,7 +2998,7 @@ async function loadTablesMenuList() {
     const list = await res.json();
     const sel  = document.getElementById('tables-menu-select');
     const cur  = sel.value;
-    sel.innerHTML = '<option value="">— Choose a menu —</option>';
+    sel.innerHTML = '<option value="">� Choose a menu �</option>';
     list.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id;
@@ -3057,7 +3057,7 @@ async function loadTablesForMenu(menuId) {
 async function renderTables() {
   if (!tablesMenuId) return;
   const el = document.getElementById('tables-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', { headers: authHeaders() });
     const rows = await res.json();
@@ -3121,7 +3121,7 @@ async function deleteTable(tableId) {
 async function loadAlerts() {
   if (!tablesMenuId) return;
   const el = document.getElementById('alerts-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/alerts', { headers: authHeaders() });
     const rows = await res.json();
@@ -3157,13 +3157,13 @@ async function dismissAlert(alertId) {
   } catch (err) { alert(err.message); }
 }
 
-// ── Orders ────────────────────────────────────────────────────────────────────────
-const CURR_MAP = {USD:'$',EUR:'€',GBP:'£',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'₹',JPY:'¥',CNY:'¥',NGN:'₦',GHS:'₵',KES:'KSh',ZAR:'R',EGP:'E£',MAD:'MAD',TRY:'₺',MYR:'RM',SGD:'S$',PHP:'₱',IDR:'Rp',THB:'฿',KRW:'₩',PKR:'₨',BDT:'৳'};
+// -- Orders ------------------------------------------------------------------------
+const CURR_MAP = {USD:'$',EUR:'�',GBP:'�',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'?',JPY:'�',CNY:'�',NGN:'?',GHS:'?',KES:'KSh',ZAR:'R',EGP:'E�',MAD:'MAD',TRY:'?',MYR:'RM',SGD:'S$',PHP:'?',IDR:'Rp',THB:'?',KRW:'?',PKR:'?',BDT:'?'};
 
 async function loadOrders() {
   if (!tablesMenuId) return;
   const el = document.getElementById('orders-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
   const status = document.getElementById('orders-status-filter').value || 'pending';
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: authHeaders() });
@@ -3282,7 +3282,7 @@ async function printOrderBill(orderId) {
   } catch (err) { alert(err.message); }
 }
 
-// ── Alert Polling & Notifications ─────────────────────────────────────────────
+// -- Alert Polling & Notifications ---------------------------------------------
 let knownAlertIds = new Set();
 let alertPollTimer = null;
 let audioCtx = null;
@@ -3313,7 +3313,7 @@ function showAlertToast(alert) {
   div.innerHTML = `
     <div class="toast-icon"><span class="material-symbols-outlined">notifications_active</span></div>
     <div class="toast-body">
-      <div class="toast-title">${esc(alert.table_label)} — ${esc(alert.restaurant_name || 'Table Alert')}</div>
+      <div class="toast-title">${esc(alert.table_label)} � ${esc(alert.restaurant_name || 'Table Alert')}</div>
       <div class="toast-msg">${esc(alert.message)}</div>
       <div class="toast-time">${new Date(alert.created_at).toLocaleTimeString()}</div>
     </div>
@@ -3328,9 +3328,9 @@ function showAlertToast(alert) {
 function sendBrowserNotification(alert) {
   if (Notification.permission !== 'granted') return;
   try {
-    const n = new Notification('🔔 ' + (alert.table_label || 'Table Alert'), {
-      body: alert.message + (alert.restaurant_name ? ' — ' + alert.restaurant_name : ''),
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔔</text></svg>',
+    const n = new Notification('?? ' + (alert.table_label || 'Table Alert'), {
+      body: alert.message + (alert.restaurant_name ? ' � ' + alert.restaurant_name : ''),
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">??</text></svg>',
       tag: 'table-alert-' + alert.id,
       requireInteraction: true,
     });

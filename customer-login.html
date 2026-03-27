@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sign In – RestOrder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`r`n  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<title>Sign In � RestOrder</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -110,7 +110,7 @@
             <p class="text-sm text-red-700" id="error-text"></p>
           </div>
         </div>
-        <!-- Role detected badge — shown after successful lookup -->
+        <!-- Role detected badge � shown after successful lookup -->
         <div id="role-badge" class="hidden p-3 bg-stone-50 border border-stone-200 rounded-xl flex items-center gap-3">
           <span class="material-symbols-outlined text-primary text-[20px]" id="role-icon">person</span>
           <p class="text-sm font-medium text-stone-700" id="role-text"></p>
@@ -122,7 +122,7 @@
         </button>
       </form>
 
-      <!-- ── Social sign-in divider ── -->
+      <!-- -- Social sign-in divider -- -->
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
         <div class="relative flex justify-center text-sm">
@@ -187,7 +187,7 @@
     <!-- Admin Link -->
     <div class="mt-6 text-center">
       <a href="/admin" class="text-sm text-stone-500 hover:text-primary transition">
-        Admin Panel →
+        Admin Panel ?
       </a>
     </div>
   </div>
@@ -235,7 +235,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       localStorage.removeItem('staffName');
       localStorage.removeItem('staffRole');
       document.getElementById('role-icon').textContent = 'store';
-      document.getElementById('role-text').textContent = 'Account Owner — redirecting…';
+      document.getElementById('role-text').textContent = 'Account Owner � redirecting�';
     } else {
       localStorage.setItem('staffName', data.staff.name);
       localStorage.setItem('staffRole', data.staff.role);
@@ -243,7 +243,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       localStorage.removeItem('customerBusiness');
       const roleLabel = data.staff.role === 'manager' ? 'Manager' : 'Staff Member';
       document.getElementById('role-icon').textContent = 'badge';
-      document.getElementById('role-text').textContent = `${roleLabel} — redirecting…`;
+      document.getElementById('role-text').textContent = `${roleLabel} � redirecting�`;
     }
 
     roleBadge.classList.remove('hidden');
@@ -284,7 +284,7 @@ window.addEventListener('load', async () => {
   } catch (_) {}
 });
 
-// ── Firebase ──────────────────────────────────────────────────────────────────
+// -- Firebase ------------------------------------------------------------------
 let firebaseApp = null, firebaseAuth = null, phoneConfirmation = null;
 
 async function initFirebase(cfg) {
@@ -315,7 +315,7 @@ function firebaseErr(msg) {
 async function signInWithGoogle() {
   if (!firebaseAuth) return;
   const btn = document.getElementById('google-btn');
-  document.getElementById('google-btn-text').textContent = 'Signing in…';
+  document.getElementById('google-btn-text').textContent = 'Signing in�';
   document.getElementById('google-spinner').classList.remove('hidden');
   btn.disabled = true;
   try {
@@ -341,7 +341,7 @@ async function sendPhoneOTP() {
   const phone = document.getElementById('phone-input').value.trim();
   if (!phone) { firebaseErr('Please enter a phone number with country code.'); return; }
 
-  document.getElementById('send-otp-text').textContent = 'Sending…';
+  document.getElementById('send-otp-text').textContent = 'Sending�';
   document.getElementById('otp-spinner').classList.remove('hidden');
   document.getElementById('send-otp-btn').disabled = true;
   try {
@@ -366,7 +366,7 @@ async function verifyPhoneOTP() {
   const code = document.getElementById('otp-input').value.trim();
   if (!/^\d{6}$/.test(code)) { firebaseErr('Enter the 6-digit code.'); return; }
 
-  document.getElementById('verify-otp-text').textContent = 'Verifying…';
+  document.getElementById('verify-otp-text').textContent = 'Verifying�';
   document.getElementById('verify-spinner').classList.remove('hidden');
   document.getElementById('verify-otp-btn').disabled = true;
   try {
@@ -390,7 +390,7 @@ async function handleFirebaseToken(idToken) {
   const data = await res.json();
 
   if (res.status === 422 && data.requiresRegistration) {
-    // New user — need business name
+    // New user � need business name
     const biz = prompt('Welcome! What is your restaurant / business name?');
     if (!biz) return;
     const res2 = await fetch('/api/customers/firebase-auth', {

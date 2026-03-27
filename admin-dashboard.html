@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dashboard – RestOrder Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>`r`n  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<title>Dashboard � RestOrder Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -220,7 +220,7 @@
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold">Recent Customers</h3>
-        <a href="/customers" class="text-primary text-sm font-semibold hover:underline">View All →</a>
+        <a href="/customers" class="text-primary text-sm font-semibold hover:underline">View All ?</a>
       </div>
       <div id="recent-customers">
         <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
@@ -234,7 +234,7 @@
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold">Recent Subscriptions</h3>
-        <button onclick="showSection('subscriptions')" class="text-primary text-sm font-semibold hover:underline">Manage All →</button>
+        <button onclick="showSection('subscriptions')" class="text-primary text-sm font-semibold hover:underline">Manage All ?</button>
       </div>
       <div id="recent-subscriptions">
         <div class="p-4 bg-bg-dark/50 rounded-xl text-center">
@@ -247,7 +247,7 @@
 
 </div><!-- /section-overview -->
 
-<!-- ── Subscriptions Management Section ───────────────────────────────────── -->
+<!-- -- Subscriptions Management Section ------------------------------------- -->
 <div id="section-subscriptions" class="hidden">
 
   <!-- Header -->
@@ -344,7 +344,7 @@
 
 </div><!-- /section-subscriptions -->
 
-<!-- ── Subscription Modal ─────────────────────────────────────────────────── -->
+<!-- -- Subscription Modal --------------------------------------------------- -->
 <div id="subscription-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-bg-dark/80 backdrop-blur-sm">
   <div class="bg-surface border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl">
     <div class="flex items-center justify-between p-6 border-b border-slate-700">
@@ -363,7 +363,7 @@
   </div>
 </div>
 
-<!-- ── Record Payment Modal ───────────────────────────────────────────────── -->
+<!-- -- Record Payment Modal ------------------------------------------------- -->
 <div id="payment-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-bg-dark/80 backdrop-blur-sm">
   <div class="bg-surface border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl">
     <div class="flex items-center justify-between p-6 border-b border-slate-700">
@@ -406,7 +406,7 @@
   </div>
 </div>
 
-<!-- ── Packages Section ─────────────────────────────────────── -->
+<!-- -- Packages Section --------------------------------------- -->
 <div id="section-packages" class="hidden">
 
   <!-- Header -->
@@ -863,7 +863,7 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '—';
+  if (!isoStr) return '�';
   return new Date(isoStr).toLocaleDateString('en-US', { 
     year: 'numeric', month: 'short', day: 'numeric' 
   });
@@ -877,7 +877,7 @@ document.getElementById('login-password').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('login-btn').click();
 });
 
-// ── Section switching ────────────────────────────────────────────────────────
+// -- Section switching --------------------------------------------------------
 function showSection(name) {
   ['overview', 'subscriptions', 'packages'].forEach(s => {
     const el = document.getElementById('section-' + s);
@@ -898,7 +898,7 @@ function showSection(name) {
   }
 }
 
-// ── Package tabs ──────────────────────────────────────────────────────────────
+// -- Package tabs --------------------------------------------------------------
 function switchPkgTab(tab) {
   ['plans', 'promos'].forEach(t => {
     document.getElementById('pkg-tab-' + t).classList.toggle('hidden', t !== tab);
@@ -914,7 +914,7 @@ function switchPkgTab(tab) {
   if (tab === 'promos') loadPkgPromos();
 }
 
-// ── Plan Management ───────────────────────────────────────────────────────────
+// -- Plan Management -----------------------------------------------------------
 let pkgAllPlans = [];
 
 async function loadPkgPlans() {
@@ -954,7 +954,7 @@ function renderPkgPlansTable(plans) {
             <td class="px-6 py-4 font-mono font-semibold text-primary">${escapeHtml(p.name)}</td>
             <td class="px-6 py-4 font-semibold">${escapeHtml(p.display_name)}</td>
             <td class="px-6 py-4 text-right font-bold">$${parseFloat(p.price).toFixed(2)}/mo</td>
-            <td class="px-6 py-4 text-right font-bold">${p.annual_price > 0 ? '$' + parseFloat(p.annual_price).toFixed(2) + '/yr' : '<span class="text-slate-500">—</span>'}</td>
+            <td class="px-6 py-4 text-right font-bold">${p.annual_price > 0 ? '$' + parseFloat(p.annual_price).toFixed(2) + '/yr' : '<span class="text-slate-500">�</span>'}</td>
             <td class="px-6 py-4 text-center">${p.menu_limit === 999 ? '<span class="text-primary font-bold">&infin;</span>' : p.menu_limit}</td>
             <td class="px-6 py-4 text-center">${p.location_limit === 999 ? '<span class="text-primary font-bold">&infin;</span>' : p.location_limit}</td>
             <td class="px-6 py-4 text-center">${p.is_active ? '<span class="badge badge-professional">Active</span>' : '<span class="badge badge-starter">Inactive</span>'}</td>
@@ -1058,7 +1058,7 @@ document.getElementById('pkg-plan-form').addEventListener('submit', async (e) =>
   }
 });
 
-// ── Promo Management ──────────────────────────────────────────────────────────
+// -- Promo Management ----------------------------------------------------------
 let pkgAllPromos = [];
 let pkgPlansForPromo = [];
 
@@ -1213,9 +1213,9 @@ document.getElementById('pkg-promo-form').addEventListener('submit', async (e) =
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ── SUBSCRIPTION MANAGEMENT ────────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════════
+// -------------------------------------------------------------------------------
+// -- SUBSCRIPTION MANAGEMENT ----------------------------------------------------
+// -------------------------------------------------------------------------------
 
 let allSubscriptions = [];
 let allPlansForSub = [];
@@ -1391,7 +1391,7 @@ async function viewSubscription(id) {
         </div>
         <div>
           <p class="text-xs text-slate-400 uppercase font-semibold mb-1">Email</p>
-          <p class="text-slate-200">${escapeHtml(sub.email || '—')}</p>
+          <p class="text-slate-200">${escapeHtml(sub.email || '�')}</p>
         </div>
         <div>
           <p class="text-xs text-slate-400 uppercase font-semibold mb-1">Menu ID</p>
@@ -1409,16 +1409,16 @@ async function viewSubscription(id) {
         </div>
         <div>
           <p class="text-xs text-slate-400 uppercase font-semibold mb-1">Period</p>
-          <p class="text-slate-200">${formatDate(sub.start_date)} → ${formatDate(sub.end_date) || 'Ongoing'}</p>
+          <p class="text-slate-200">${formatDate(sub.start_date)} ? ${formatDate(sub.end_date) || 'Ongoing'}</p>
         </div>
       </div>
     </div>
     <div class="mt-6 p-4 bg-bg-dark/50 rounded-xl">
       <p class="text-xs text-slate-400 uppercase font-semibold mb-2">Plan Features</p>
       <ul class="grid grid-cols-2 gap-2 text-sm text-slate-300">
-        <li class="flex items-center gap-2"><span class="text-primary">✓</span> ${sub.menu_limit === 999 ? 'Unlimited' : sub.menu_limit || 1} Menu(s)</li>
-        <li class="flex items-center gap-2"><span class="text-primary">✓</span> ${sub.location_limit === 999 ? 'Unlimited' : sub.location_limit || 1} Location(s)</li>
-        ${(sub.features || []).slice(0, 6).map(f => `<li class="flex items-center gap-2"><span class="text-primary">✓</span> ${escapeHtml(f)}</li>`).join('')}
+        <li class="flex items-center gap-2"><span class="text-primary">?</span> ${sub.menu_limit === 999 ? 'Unlimited' : sub.menu_limit || 1} Menu(s)</li>
+        <li class="flex items-center gap-2"><span class="text-primary">?</span> ${sub.location_limit === 999 ? 'Unlimited' : sub.location_limit || 1} Location(s)</li>
+        ${(sub.features || []).slice(0, 6).map(f => `<li class="flex items-center gap-2"><span class="text-primary">?</span> ${escapeHtml(f)}</li>`).join('')}
       </ul>
     </div>
     <div class="mt-4 flex gap-3">

@@ -1011,7 +1011,10 @@ async function initDB() {
       const settingsNow = new Date().toISOString();
       const settingsDefaults = [
         ['site_name',           'RestOrder'],
+        ['site_tagline',        'Digital Menu & QR Code Platform'],
         ['site_description',    'Digital Menu & QR Code Platform for restaurants'],
+        ['site_logo_url',       ''],
+        ['site_favicon_url',    ''],
         ['support_email',       'support@restorder.online'],
         ['timezone',            'UTC'],
         ['default_currency',    'USD'],
@@ -1441,6 +1444,49 @@ app.post('/api/upload-item-image', requireAnyAuth, imgUpload.single('image'), as
   }
 });
 
+// ── Branding image upload (logo / favicon) ─────────────────────────────────────
+const BRANDING_DIR = path.join(UPLOADS_DIR, 'branding');
+if (!fs.existsSync(BRANDING_DIR)) fs.mkdirSync(BRANDING_DIR, { recursive: true });
+
+const brandingUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    if (/^image\/(jpeg|png|webp|gif|svg\+xml)$/.test(file.mimetype) ||
+        /\.(png|jpg|jpeg|webp|gif|svg|ico)$/i.test(file.originalname)) return cb(null, true);
+    cb(new Error('Only image files are allowed.'));
+  },
+});
+
+app.post('/api/admin/branding/upload', requireRole('super_admin'), brandingUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file provided.' });
+    const type = (req.body.type || '').toLowerCase();
+    if (!['logo', 'favicon'].includes(type)) return res.status(400).json({ error: 'type must be logo or favicon.' });
+    const isSvg = /svg/i.test(req.file.mimetype) || /\.svg$/i.test(req.file.originalname);
+    let filename, outPath, imageUrl;
+    if (isSvg) {
+      // Serve SVGs as-is
+      filename = `${type}-${Date.now()}.svg`;
+      outPath  = path.join(BRANDING_DIR, filename);
+      fs.writeFileSync(outPath, req.file.buffer);
+    } else if (type === 'favicon') {
+      filename = `favicon-${Date.now()}.png`;
+      outPath  = path.join(BRANDING_DIR, filename);
+      await sharp(req.file.buffer).resize(64, 64, { fit: 'cover' }).png().toFile(outPath);
+    } else {
+      filename = `logo-${Date.now()}.webp`;
+      outPath  = path.join(BRANDING_DIR, filename);
+      await sharp(req.file.buffer).resize(null, 120, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toFile(outPath);
+    }
+    imageUrl = `/uploads/branding/${filename}`;
+    res.json({ imageUrl });
+  } catch (err) {
+    console.error('Branding upload error:', err);
+    res.status(500).json({ error: 'Failed to process image.' });
+  }
+});
+
 // ── Static routes ──────────────────────────────────────────────────────────────
 
 // Health check endpoint for deployment platforms
@@ -1501,6 +1547,42 @@ app.get('/api/firebase-config', async (req, res) => {
   if (process.env.FIREBASE_MESSAGING_SENDER_ID) out.messagingSenderId = process.env.FIREBASE_MESSAGING_SENDER_ID;
   if (process.env.FIREBASE_MEASUREMENT_ID)      out.measurementId     = process.env.FIREBASE_MEASUREMENT_ID;
   res.json(out);
+});
+
+// GET /api/public/branding – public site identity (no auth required)
+app.get('/api/public/branding', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT key, value FROM app_settings WHERE key IN ('site_name','site_tagline','site_logo_url','site_favicon_url','site_description')"
+    );
+    const out = { site_name: 'RestOrder', site_tagline: '', site_logo_url: '', site_favicon_url: '', site_description: '' };
+    for (const r of rows) out[r.key] = r.value || '';
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.json(out);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /favicon.ico – serve dynamic favicon from branding settings
+app.get('/favicon.ico', async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'site_favicon_url'");
+    const url = (rows[0]?.value || '').trim();
+    if (url) {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return res.redirect(302, url);
+      }
+      if (url.startsWith('/uploads/')) {
+        const filePath = path.join(__dirname, url.replace(/^\//, ''));
+        if (fs.existsSync(filePath)) {
+          return res.sendFile(filePath);
+        }
+      }
+    }
+  } catch (_) {}
+  // Default: orange "R" SVG favicon
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.send('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#c2410c"/><text x="16" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="#fff">R</text></svg>');
 });
 
 // GET /  – serve landing page

@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>`r`n  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#fdf9f4"/>
@@ -110,9 +110,9 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 <div id="app">
   <!-- Critical above-the-fold content -->
   <div id="topbar">
-    <button id="theme-btn" class="icon-btn" aria-label="Toggle theme">🌙</button>
+    <button id="theme-btn" class="icon-btn" aria-label="Toggle theme">??</button>
     <div id="topbar-name" class="skeleton" style="width: 200px; height: 20px;"></div>
-    <button id="search-btn" class="icon-btn" aria-label="Search menu">🔍</button>
+    <button id="search-btn" class="icon-btn" aria-label="Search menu">??</button>
   </div>
 
   <!-- Content will be injected here -->
@@ -125,7 +125,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 const perf = {
   start: performance.now(),
   log: (label, start = perf.start) => {
-    console.log(`⚡ ${label}: ${(performance.now() - start).toFixed(2)}ms`);
+    console.log(`? ${label}: ${(performance.now() - start).toFixed(2)}ms`);
   }
 };
 
@@ -144,7 +144,7 @@ const app = {
 
   setupTheme() {
     document.documentElement.setAttribute('data-theme', this.theme);
-    document.getElementById('theme-btn').textContent = this.theme === 'dark' ? '☀️' : '🌙';
+    document.getElementById('theme-btn').textContent = this.theme === 'dark' ? '??' : '??';
   },
 
   async loadMenu() {
@@ -258,7 +258,7 @@ const app = {
     const content = document.getElementById('content');
     content.innerHTML = `
       <div style="padding: 40px; text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 16px;">😔</div>
+        <div style="font-size: 48px; margin-bottom: 16px;">??</div>
         <h2 style="color: var(--head); margin-bottom: 8px;">Oops!</h2>
         <p style="color: var(--text); margin-bottom: 20px;">${message}</p>
         <button onclick="location.reload()" style="
@@ -286,10 +286,10 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     const nav = performance.getEntriesByType('navigation')[0];
     if (nav) {
-      console.log(`📊 Performance Metrics:
-        • DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms
-        • Page Load Complete: ${nav.loadEventEnd.toFixed(2)}ms
-        • First Paint: ${nav.responseStart.toFixed(2)}ms
+      console.log(`?? Performance Metrics:
+        � DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms
+        � Page Load Complete: ${nav.loadEventEnd.toFixed(2)}ms
+        � First Paint: ${nav.responseStart.toFixed(2)}ms
       `);
     }
   }, 0);
