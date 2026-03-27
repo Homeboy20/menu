@@ -1597,6 +1597,9 @@ app.get('/terms', (req, res) => {
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, 'privacy.html'));
 });
+app.get('/refund', (req, res) => {
+  res.sendFile(path.join(__dirname, 'refund.html'));
+});
 
 // ── Auth routes ────────────────────────────────────────────────────────────────
 

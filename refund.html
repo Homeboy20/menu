@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+  <title>Refund Policy – RestOrder</title>
+  <meta name="description" content="RestOrder Refund Policy. Understand when and how you can request a refund for your RestOrder subscription.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+  <style>
+.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#c2410c;--primary-dark:#9a3412;--primary-light:#ea580c;
+  --bg:#fafaf9;--text:#1c1917;--text-light:#78716c;--border:#e7e5e4;--surface:#ffffff;
+  --gradient-1:linear-gradient(135deg,#c2410c 0%,#ea580c 100%);
+  --font-display:'Plus Jakarta Sans',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+body{font-family:var(--font-body);font-size:16px;line-height:1.7;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-0.025em;line-height:1.25;}
+.container{max-width:860px;margin:0 auto;padding:0 24px;}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-bottom:1px solid transparent;z-index:1000;transition:all 0.4s ease;}
+header.scrolled{box-shadow:0 2px 20px rgba(0,0,0,0.06);border-bottom-color:var(--border);}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;max-width:1280px;margin:0 auto;padding-left:24px;padding-right:24px;transition:padding 0.4s ease;}
+header.scrolled nav{padding-top:12px;padding-bottom:12px;}
+.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:900;color:var(--primary);text-decoration:none;letter-spacing:-0.5px;}
+.logo-icon{width:42px;height:42px;background:var(--gradient-1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;filter:drop-shadow(0 3px 8px rgba(194,65,12,0.3));transition:all 0.3s ease;}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.btn-nav{color:var(--primary);text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;border-radius:10px;border:2px solid var(--border);background:white;transition:all 0.2s ease;}
+.btn-nav:hover{border-color:var(--primary);color:var(--primary);}
+.btn-nav-primary{background:var(--gradient-1);color:white;border-color:transparent;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;transition:all 0.2s ease;}
+.btn-nav-primary:hover{opacity:0.9;transform:translateY(-1px);}
+
+/* Page */
+.page-hero{padding:140px 0 60px;text-align:center;border-bottom:1px solid var(--border);background:white;}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:700;padding:6px 14px;border-radius:100px;border:1px solid #bfdbfe;margin-bottom:20px;}
+.page-hero h1{font-size:42px;color:var(--text);margin-bottom:12px;}
+.page-hero .meta{font-size:14px;color:var(--text-light);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.page-hero .meta span{display:flex;align-items:center;gap:5px;}
+
+/* TOC */
+.toc-bar{background:white;border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:70px;z-index:100;overflow-x:auto;}
+.toc-inner{display:flex;gap:6px;white-space:nowrap;}
+.toc-inner a{color:var(--text-light);text-decoration:none;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;transition:all 0.2s ease;}
+.toc-inner a:hover{color:var(--primary);background:#fff7ed;}
+
+/* Content */
+.legal-body{padding:60px 0 100px;}
+.legal-section{margin-bottom:56px;}
+.section-number{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#1d4ed8;color:white;border-radius:10px;font-family:var(--font-display);font-weight:800;font-size:15px;flex-shrink:0;margin-right:12px;vertical-align:middle;}
+.legal-section h2{font-size:24px;color:var(--text);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #bfdbfe;display:flex;align-items:center;}
+.legal-section h3{font-size:17px;color:var(--text);margin:24px 0 10px;font-weight:700;}
+.legal-section p{color:#44403c;margin-bottom:14px;font-size:15.5px;}
+.legal-section ul,
+.legal-section ol{padding-left:20px;margin-bottom:14px;color:#44403c;}
+.legal-section li{margin-bottom:7px;font-size:15.5px;}
+.legal-section strong{color:var(--text);}
+
+.highlight-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#1e3a8a;}
+.highlight-box strong{color:#1d4ed8;}
+.success-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#14532d;}
+.warn-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#7c2d12;}
+.warn-box strong{color:#9a3412;}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#7f1d1d;}
+
+/* Plan cards */
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.plan-card{background:white;border:1.5px solid var(--border);border-radius:14px;padding:20px 18px;}
+.plan-card.eligible{border-color:#bbf7d0;background:#f0fdf4;}
+.plan-card.partial{border-color:#fed7aa;background:#fff7ed;}
+.plan-card.no-refund{border-color:#fecaca;background:#fef2f2;}
+.plan-card .plan-name{font-family:var(--font-display);font-weight:800;font-size:15px;margin-bottom:4px;}
+.plan-card.eligible .plan-name{color:#15803d;}
+.plan-card.partial .plan-name{color:#9a3412;}
+.plan-card.no-refund .plan-name{color:#991b1b;}
+.plan-card .plan-verdict{font-size:13px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;margin-bottom:10px;}
+.plan-card.eligible .plan-verdict{color:#16a34a;}
+.plan-card.partial .plan-verdict{color:#c2410c;}
+.plan-card.no-refund .plan-verdict{color:#dc2626;}
+.plan-card p{font-size:13.5px;color:#57534e;margin:0;}
+
+/* Timeline */
+.timeline{margin:24px 0 28px;padding-left:0;list-style:none;}
+.timeline li{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+.tl-dot{width:36px;height:36px;background:var(--gradient-1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--font-display);font-weight:800;font-size:14px;flex-shrink:0;}
+.tl-body strong{display:block;font-family:var(--font-display);font-size:15px;color:var(--text);margin-bottom:3px;}
+.tl-body span{font-size:14.5px;color:#57534e;}
+
+/* Footer */
+footer{background:#1c1917;color:#a8a29e;padding:60px 0 30px;}
+footer .container{max-width:1280px;}
+.footer-grid{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:40px;margin-bottom:40px;}
+.footer-brand .footer-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:20px;font-weight:800;color:white;margin-bottom:12px;}
+.footer-description{font-size:14px;line-height:1.6;max-width:280px;}
+.footer-links h4{color:white;font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:14px;letter-spacing:0.02em;}
+.footer-links ul{list-style:none;}
+.footer-links li{margin-bottom:8px;}
+.footer-links a{color:#a8a29e;text-decoration:none;font-size:14px;transition:color 0.2s ease;}
+.footer-links a:hover{color:white;}
+.footer-bottom{border-top:1px solid #292524;padding-top:24px;text-align:center;font-size:13px;}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px;}.page-hero h1{font-size:30px;}.legal-section h2{font-size:20px;}.toc-bar{display:none;}.plan-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header id="header">
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-icon">✕</div>
+      RestOrder
+    </a>
+    <div class="nav-actions">
+      <a href="/customer-login" class="btn-nav">Sign In</a>
+      <a href="/register" class="btn-nav-primary">Get Started Free</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="badge"><span class="material-symbols-outlined" style="font-size:15px">payments</span> Billing &amp; Refunds</div>
+    <h1>Refund Policy</h1>
+    <div class="meta">
+      <span><span class="material-symbols-outlined" style="font-size:15px">calendar_today</span> Effective: January 1, 2026</span>
+      <span><span class="material-symbols-outlined" style="font-size:15px">update</span> Last updated: March 27, 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOC -->
+<div class="toc-bar">
+  <div class="container">
+    <div class="toc-inner">
+      <a href="#overview">Overview</a>
+      <a href="#monthly">Monthly Plans</a>
+      <a href="#annual">Annual Plans</a>
+      <a href="#free">Free Plan</a>
+      <a href="#non-refundable">Non-Refundable</a>
+      <a href="#how-to">How to Request</a>
+      <a href="#processing">Processing Time</a>
+      <a href="#chargebacks">Chargebacks</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- Body -->
+<main class="legal-body">
+  <div class="container">
+
+    <div class="highlight-box">
+      <strong>Quick summary:</strong> Monthly plans are non-refundable but you can cancel any time. Annual plans qualify for a pro-rata refund within 14 days of purchase if paid features have not been used. Exceptional circumstances are reviewed case-by-case. To request a refund email <a href="mailto:support@restorder.online" style="color:#1d4ed8">support@restorder.online</a>.
+    </div>
+
+    <!-- Overview -->
+    <div class="legal-section" id="overview">
+      <h2><span class="section-number">1</span>Overview</h2>
+      <p>RestOrder is a Software-as-a-Service (SaaS) product. When you subscribe to a paid plan, you immediately receive access to all features of that plan. Because value is delivered on day one, our refund policy reflects the nature of digital services rather than physical goods.</p>
+      <p>This policy applies to direct subscriptions purchased through the RestOrder platform. Subscriptions purchased through third-party resellers or marketplaces are subject to the refund policy of that platform.</p>
+      <p>This Refund Policy forms part of and should be read alongside our <a href="/terms" style="color:var(--primary)">Terms of Service</a>.</p>
+
+      <div class="plan-grid">
+        <div class="plan-card eligible">
+          <div class="plan-name">Annual Plan</div>
+          <div class="plan-verdict">✓ Eligible</div>
+          <p>Pro-rata refund within 14 days if paid features unused.</p>
+        </div>
+        <div class="plan-card partial">
+          <div class="plan-name">Monthly Plan</div>
+          <div class="plan-verdict">~ Case-by-case</div>
+          <p>Generally non-refundable. Exceptional cases reviewed.</p>
+        </div>
+        <div class="plan-card no-refund">
+          <div class="plan-name">After Policy Window</div>
+          <div class="plan-verdict">✗ Not Eligible</div>
+          <p>No refunds after the eligibility window or for used features.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly -->
+    <div class="legal-section" id="monthly">
+      <h2><span class="section-number">2</span>Monthly Subscriptions</h2>
+      <div class="error-box">
+        <strong>Monthly plans are non-refundable.</strong> When you subscribe to a monthly plan you gain immediate, full access to all plan features. We do not issue refunds for partially used monthly billing periods.
+      </div>
+      <p>You may <strong>cancel at any time</strong> from your account dashboard (Settings → Subscription → Cancel Plan). Cancellation stops future renewals while preserving your access until the end of the paid period.</p>
+      <h3>Example</h3>
+      <p>If you subscribe on March 1 and cancel on March 15, you retain access until March 31 and will not be charged again. No refund is issued for the 16 unused days.</p>
+      <h3>Downgrades</h3>
+      <p>If you downgrade from a higher plan to a lower plan mid-cycle, the downgrade takes effect at the next billing date. No partial refund or credit is issued for the remaining days on the higher plan.</p>
+    </div>
+
+    <!-- Annual -->
+    <div class="legal-section" id="annual">
+      <h2><span class="section-number">3</span>Annual Subscriptions</h2>
+      <h3>14-Day Refund Window</h3>
+      <div class="success-box">Annual plan subscribers may request a <strong>pro-rata refund</strong> within <strong>14 days</strong> of initial purchase, provided <strong>none</strong> of the following paid features have been used:<br><br>
+        <ul style="margin:10px 0 0 16px;">
+          <li>Processed or received any customer orders through the platform</li>
+          <li>Published more than 1 menu</li>
+          <li>Connected a live payment gateway</li>
+          <li>Generated and shared QR codes that have been scanned</li>
+          <li>Used the CSV import tool to import more than a test dataset</li>
+          <li>Added staff sub-accounts</li>
+        </ul>
+      </div>
+      <p>The refund amount is calculated as: <strong>(annual price ÷ 365) × unused days</strong>, rounded to the nearest cent, less any promotional discounts applied at purchase.</p>
+      <h3>After 14 Days</h3>
+      <p>After the 14-day window closes, or after any paid features have been used, annual subscriptions are <strong>non-refundable</strong>. Cancellation of an annual plan stops renewal at the end of the annual term; unused months are not refunded.</p>
+      <h3>Annual Plan Renewal</h3>
+      <p>Renewals of an existing annual subscription are treated identically: the 14-day, unused-features policy applies from the renewal date. We send a renewal reminder at least 7 days before billing; if you no longer wish to renew, cancel before the renewal date to avoid being charged.</p>
+      <h3>Upgrade Mid-Year</h3>
+      <p>If you upgrade from a monthly plan to an annual plan or upgrade between annual plan tiers, the unused balance may be applied as a pro-rata credit toward the new plan at our discretion. Contact <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> for assistance with upgrade credits.</p>
+    </div>
+
+    <!-- Free -->
+    <div class="legal-section" id="free">
+      <h2><span class="section-number">4</span>Free (Starter) Plan</h2>
+      <p>The Starter plan is free of charge. There are no fees and therefore no refunds applicable. You may downgrade to the Starter plan or close your account at any time without financial obligation.</p>
+      <p>If you were charged unexpectedly, please contact us immediately at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> — this would indicate a billing error which we will investigate and correct promptly.</p>
+    </div>
+
+    <!-- Non-refundable -->
+    <div class="legal-section" id="non-refundable">
+      <h2><span class="section-number">5</span>Non-Refundable Items</h2>
+      <p>The following are explicitly non-refundable regardless of circumstance:</p>
+      <ul>
+        <li><strong>Setup fees</strong> or any one-time onboarding charges</li>
+        <li><strong>Overage charges</strong> for exceeding plan limits (additional orders, menus, etc.)</li>
+        <li><strong>Add-on purchases</strong> (premium templates, branded QR packs, white-label add-ons)</li>
+        <li><strong>Promotional or discounted prices</strong> — discounts are applied at the time of purchase; they are not refundable</li>
+        <li><strong>Subscriptions on accounts terminated for policy violations</strong> — accounts closed due to violation of our <a href="/terms" style="color:var(--primary)">Terms of Service</a> or Acceptable Use Policy are not eligible for any refund</li>
+        <li><strong>Taxes</strong> — applicable taxes charged at time of billing are not refundable by RestOrder (you may be able to seek reimbursement through your local tax authority)</li>
+        <li><strong>Currency conversion losses</strong> — if a refund is issued in a currency different from the charge currency, exchange rate differences are not our responsibility</li>
+      </ul>
+      <div class="warn-box"><strong>Free trial accounts:</strong> If you used a free trial and then subscribed, the trial period does not count toward the 14-day annual refund window. The window starts on the date of your first paid charge.</div>
+    </div>
+
+    <!-- How to -->
+    <div class="legal-section" id="how-to">
+      <h2><span class="section-number">6</span>How to Request a Refund</h2>
+      <ul class="timeline">
+        <li>
+          <div class="tl-dot">1</div>
+          <div class="tl-body">
+            <strong>Cancel your subscription first</strong>
+            <span>Go to Settings → Subscription → Cancel Plan in your dashboard. This prevents further charges while your request is reviewed.</span>
+          </div>
+        </li>
+        <li>
+          <div class="tl-dot">2</div>
+          <div class="tl-body">
+            <strong>Email us at support@restorder.online</strong>
+            <span>Use the subject line: <em>"Refund Request – [your account email]"</em></span>
+          </div>
+        </li>
+        <li>
+          <div class="tl-dot">3</div>
+          <div class="tl-body">
+            <strong>Include the following in your email</strong>
+            <span>Account email address · Plan name and billing cycle · Date of charge · Transaction reference (from your invoice) · Reason for the refund request</span>
+          </div>
+        </li>
+        <li>
+          <div class="tl-dot">4</div>
+          <div class="tl-body">
+            <strong>Wait for our response</strong>
+            <span>We will respond within <strong>5 business days</strong>. We may ask follow-up questions to verify eligibility.</span>
+          </div>
+        </li>
+        <li>
+          <div class="tl-dot">5</div>
+          <div class="tl-body">
+            <strong>Refund issued (if approved)</strong>
+            <span>Approved refunds are returned to your original payment method within <strong>7–10 business days</strong>, depending on your bank or payment provider.</span>
+          </div>
+        </li>
+      </ul>
+      <h3>Exceptional Circumstances</h3>
+      <p>We understand that sometimes things happen. Requests outside the standard policy window (e.g., serious illness, billing errors, genuine technical faults that prevented use of the platform) will be reviewed on a case-by-case basis at our sole discretion. We will always aim to be fair.</p>
+    </div>
+
+    <!-- Processing -->
+    <div class="legal-section" id="processing">
+      <h2><span class="section-number">7</span>Refund Processing Times</h2>
+      <p>Once a refund is approved, processing times vary by payment method:</p>
+      <ul>
+        <li><strong>Credit / Debit Card:</strong> 5–10 business days to appear on your statement</li>
+        <li><strong>Flutterwave (Mobile Money / Bank Transfer):</strong> 3–7 business days</li>
+        <li><strong>PayPal:</strong> 3–5 business days to your PayPal balance; additional time may apply to transfer to a bank account</li>
+        <li><strong>ClickPesa:</strong> 2–5 business days</li>
+        <li><strong>Bank Transfer:</strong> 5–10 business days</li>
+      </ul>
+      <p>If you haven't received your refund after the stated window, first check with your bank or payment provider. Then contact us at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> with your refund confirmation reference.</p>
+    </div>
+
+    <!-- Chargebacks -->
+    <div class="legal-section" id="chargebacks">
+      <h2><span class="section-number">8</span>Chargebacks &amp; Payment Disputes</h2>
+      <div class="warn-box">
+        <strong>Please contact us before initiating a chargeback.</strong> Initiating a chargeback or payment dispute without first contacting our support team may result in the immediate suspension of your account and can affect your ability to use RestOrder in the future.
+      </div>
+      <p>If you believe you have been charged incorrectly, email us at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> and we will investigate promptly. Most billing errors can be resolved within 1–2 business days without involving your bank.</p>
+      <p>If a chargeback is filed, we reserve the right to:</p>
+      <ul>
+        <li>Suspend your account pending investigation</li>
+        <li>Provide evidence of service delivery to your bank or card network</li>
+        <li>Pass on any chargeback fees imposed on us by the payment processor</li>
+        <li>Decline future subscriptions if the dispute is found to be fraudulent</li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="legal-section" id="contact">
+      <h2><span class="section-number">9</span>Contact &amp; Questions</h2>
+      <p>For all refund requests or billing questions, please get in touch:</p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a></li>
+        <li><strong>Contact form:</strong> <a href="/contact" style="color:var(--primary)">restorder.online/contact</a></li>
+      </ul>
+      <p>Our billing support team responds within 5 business days (typically faster). For urgent billing issues, mark your email subject as <em>"Urgent – Billing"</em>.</p>
+      <p>For broader legal questions, see our <a href="/terms" style="color:var(--primary)">Terms of Service</a> or <a href="/privacy" style="color:var(--primary)">Privacy Policy</a>.</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span style="font-size:28px">✕</span>
+          <span>RestOrder</span>
+        </div>
+        <p class="footer-description">The complete digital menu platform for modern restaurants, cafes, bars &amp; eateries.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/register">Get Started</a></li>
+          <li><a href="/customer-login">Sign In</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/refund" style="color:white">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', function() {
+    header.classList.toggle('scrolled', window.pageYOffset > 50);
+  });
+</script>
+</body>
+</html>

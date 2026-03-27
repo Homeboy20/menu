@@ -834,7 +834,7 @@
           <div class="logo-icon">???</div>
           <span>RestOrder</span>
         </a>
-        <button class="mobile-menu-close" id="mobile-menu-close">×</button>
+        <button class="mobile-menu-close" id="mobile-menu-close">ï¿½</button>
       </div>
       
       <ul class="mobile-nav-links">
@@ -1129,6 +1129,7 @@
           <ul>
             <li><a href="/privacy">Privacy Policy</a></li>
             <li><a href="/terms">Terms of Service</a></li>
+            <li><a href="/refund">Refund Policy</a></li>
           </ul>
         </div>
       </div>
@@ -1262,7 +1263,7 @@
           priceNote = 'Free forever';
         } else if (isAnnual && hasAnnual) {
           const monthlySavings = (monthlyPrice * 12) - annualTotal;
-          priceNote = `Billed $${annualTotal}/year • Save $${monthlySavings}/year`;
+          priceNote = `Billed $${annualTotal}/year ï¿½ Save $${monthlySavings}/year`;
         } else {
           priceNote = origPrice ? `SAVE $${(origPrice - monthlyPrice) * 12}/year vs competitors` : '';
         }
