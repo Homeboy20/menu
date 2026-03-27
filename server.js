@@ -250,14 +250,14 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com'],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
       scriptSrcAttr: ["'unsafe-inline'"],   // allow onclick/oninput/onchange handlers
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com'],
+      connectSrc:    ["'self'", 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
-      frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com'],
+      frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       formAction:    ["'self'"],   // Restrict form submissions to same origin
       baseUri:       ["'self'"],   // Prevent base tag attacks
     },
@@ -1496,7 +1496,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.24'
+    version: '1.54.25'
   });
 });
 
@@ -2924,7 +2924,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.24' 
+      version: '1.54.25' 
     });
   } catch (err) {
     res.status(500).json({ 
