@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Checkout – RestOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#c2410c",
+          "primary-light": "#ea580c",
+          "primary-dark": "#9a3412",
+          "bg": "#fafaf9",
+        },
+        fontFamily: { 
+          display: ["Plus Jakarta Sans", "sans-serif"],
+          body: ["DM Sans", "sans-serif"],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "DM Sans", sans-serif; font-size: 16px; line-height: 1.65; letter-spacing: -0.01em; }
+  h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .gradient-text {
+    background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .step-dot.active { background: #c2410c; color: white; }
+  .step-dot.done { background: #16a34a; color: white; }
+  .step-dot.inactive { background: #e7e5e4; color: #78716c; }
+</style>
+</head>
+<body class="bg-bg text-stone-900 min-h-screen">
+
+<!-- Header -->
+<header class="border-b border-stone-200 bg-white/90 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3 no-underline">
+      <div class="size-10 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white">
+        <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+      </div>
+      <div>
+        <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
+        <p class="text-xs text-stone-500">Secure Checkout</p>
+      </div>
+    </a>
+    <div class="flex items-center gap-2 text-xs text-stone-500">
+      <span class="material-symbols-outlined text-green-600 text-[16px]">lock</span>
+      <span>SSL Secured</span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-10">
+
+  <!-- Selected plan banner (shown when plan is pre-selected) -->
+  <div id="plan-preselected-banner" class="hidden mb-6">
+    <div class="bg-gradient-to-r from-primary/5 to-primary-light/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-4">
+      <div class="size-12 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0">
+        <span class="material-symbols-outlined text-[24px]">workspace_premium</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs text-primary font-semibold uppercase tracking-wide">Your Selected Plan</p>
+        <p class="font-bold text-stone-900 text-lg truncate" id="banner-plan-name"></p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <p class="text-2xl font-bold text-primary" id="banner-plan-price"></p>
+        <p class="text-xs text-stone-500" id="banner-plan-interval"></p>
+      </div>
+      <a href="/pricing" class="text-xs text-stone-400 hover:text-stone-600 underline flex-shrink-0 ml-2">Change</a>
+    </div>
+  </div>
+
+  <!-- Steps indicator (2-step when plan pre-selected, 3-step otherwise) -->
+  <div class="flex items-center justify-center gap-3 mb-10" id="steps-bar">
+    <div class="flex items-center gap-2" id="step-wrap-1">
+      <div class="step-dot active" id="step-dot-1">1</div>
+      <span class="text-sm font-semibold text-stone-700" id="step-label-1">Your Plan</span>
+    </div>
+    <div class="h-px w-10 bg-stone-200" id="step-line-1"></div>
+    <div class="flex items-center gap-2">
+      <div class="step-dot inactive" id="step-dot-2">2</div>
+      <span class="text-sm text-stone-400" id="step-label-2">Account</span>
+    </div>
+    <div class="h-px w-10 bg-stone-200"></div>
+    <div class="flex items-center gap-2">
+      <div class="step-dot inactive" id="step-dot-3">3</div>
+      <span class="text-sm text-stone-400" id="step-label-3">Payment</span>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-5 gap-8 items-start">
+
+    <!-- Left: Main Content Area -->
+    <div class="lg:col-span-3 space-y-6">
+
+      <!-- Step 2: Account (shown when not logged in) -->
+      <div id="auth-section" class="hidden">
+        <div class="bg-white border border-stone-200 rounded-2xl p-7 shadow-sm">
+          <!-- Login / Register toggle -->
+          <div class="flex gap-1 p-1 bg-stone-100 rounded-xl mb-6">
+            <button id="tab-register" onclick="showTab('register')"
+              class="flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-stone-900">
+              Create Account
+            </button>
+            <button id="tab-login" onclick="showTab('login')"
+              class="flex-1 py-2 rounded-lg text-sm font-semibold transition text-stone-500 hover:text-stone-700">
+              Sign In
+            </button>
+          </div>
+
+          <!-- Register Form -->
+          <form id="register-form" class="space-y-4" onsubmit="handleRegister(event)">
+            <h3 class="text-lg font-bold text-stone-900">Create your free account</h3>
+            <p class="text-sm text-stone-500">Your 7-day trial starts immediately. No credit card needed until you pay.</p>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1">Business Name *</label>
+              <input id="reg-business" type="text" required placeholder="e.g., Joe's Pizza"
+                class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1">Email Address *</label>
+              <input id="reg-email" type="email" required placeholder="you@restaurant.com"
+                class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1">Password *</label>
+              <input id="reg-password" type="password" required placeholder="Min. 8 characters"
+                class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"/>
+            </div>
+            <div id="reg-error" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
+            <button type="submit" id="reg-btn"
+              class="w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
+              <span id="reg-btn-text">Create Account & Continue</span>
+              <span id="reg-spinner" class="hidden material-symbols-outlined spin text-[18px]">progress_activity</span>
+            </button>
+            <p class="text-xs text-stone-400 text-center">By registering you agree to our <a href="/terms" class="underline">Terms</a> and <a href="/privacy" class="underline">Privacy Policy</a></p>
+          </form>
+
+          <!-- Login Form -->
+          <form id="login-form" class="hidden space-y-4" onsubmit="handleLogin(event)">
+            <h3 class="text-lg font-bold text-stone-900">Welcome back</h3>
+            <p class="text-sm text-stone-500">Sign in to continue with your upgrade.</p>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1">Email Address</label>
+              <input id="login-email" type="email" required placeholder="you@restaurant.com"
+                class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1">Password</label>
+              <input id="login-password" type="password" required placeholder="Your password"
+                class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm"/>
+            </div>
+            <div id="login-error" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
+            <button type="submit" id="login-btn"
+              class="w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
+              <span id="login-btn-text">Sign In & Continue</span>
+              <span id="login-spinner" class="hidden material-symbols-outlined spin text-[18px]">progress_activity</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Step 3: Payment -->
+      <div id="payment-section" class="hidden">
+        <div class="bg-white border border-stone-200 rounded-2xl p-7 shadow-sm">
+          <h3 class="text-lg font-bold text-stone-900 mb-1">Complete Payment</h3>
+          <p class="text-sm text-stone-500 mb-5" id="payment-subtitle">Choose your payment method to activate your subscription.</p>
+
+          <!-- Menu selector (if user has multiple menus) -->
+          <div id="menu-selector-wrap" class="hidden mb-5">
+            <label class="block text-sm font-medium text-stone-700 mb-1">Apply subscription to menu:</label>
+            <select id="menu-selector"
+              class="w-full px-4 py-2.5 border border-stone-300 rounded-xl focus:ring-2 focus:ring-primary text-sm bg-white">
+            </select>
+          </div>
+
+          <!-- Gateway buttons -->
+          <div id="gateway-container">
+            <div class="flex items-center justify-center gap-3 py-6 text-stone-400 text-sm">
+              <span class="material-symbols-outlined spin text-[20px]">progress_activity</span>
+              Loading payment options…
+            </div>
+          </div>
+
+          <p class="text-xs text-stone-400 mt-4 text-center">🔒 Payments are encrypted and secure</p>
+        </div>
+      </div>
+
+      <!-- Already logged in notice -->
+      <div id="logged-in-notice" class="hidden">
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-5 flex items-center gap-4">
+          <span class="material-symbols-outlined text-green-600 text-[28px]">person</span>
+          <div class="flex-1">
+            <p class="font-semibold text-stone-900 text-sm" id="logged-in-name">You're signed in</p>
+            <p class="text-xs text-stone-500" id="logged-in-email"></p>
+          </div>
+          <button onclick="signOut()" class="text-xs text-stone-400 underline">Not you?</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Plan Summary -->
+    <div class="lg:col-span-2">
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm sticky top-24">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary text-[20px]">shopping_cart</span>
+          <h3 class="font-bold text-stone-900">Order Summary</h3>
+        </div>
+
+        <!-- Plan loading -->
+        <div id="plan-summary-loading" class="py-6 text-center text-stone-400 text-sm">
+          <span class="material-symbols-outlined spin text-[20px] block mb-2">progress_activity</span>
+          Loading plan details…
+        </div>
+
+        <!-- Plan details -->
+        <div id="plan-summary" class="hidden">
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <p class="font-bold text-stone-900 text-lg" id="ps-name"></p>
+              <p class="text-xs text-stone-500" id="ps-interval"></p>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-bold text-primary" id="ps-price"></p>
+            </div>
+          </div>
+
+          <ul class="space-y-1.5 mb-5 text-sm" id="ps-features"></ul>
+
+          <div class="border-t border-stone-100 pt-4 mt-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-stone-600">Subtotal</span>
+              <span class="font-semibold" id="ps-subtotal"></span>
+            </div>
+            <div id="trial-period-row" class="flex justify-between text-sm mb-1">
+              <span class="text-stone-600">Trial period</span>
+              <span class="font-semibold text-green-600">7 days FREE</span>
+            </div>
+            <div class="flex justify-between font-bold mt-3 text-base">
+              <span>Due today</span>
+              <span id="ps-due-today" class="text-primary"></span>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700">
+            <p class="font-semibold">✅ 30-Day Money-Back Guarantee</p>
+            <p class="mt-0.5 text-green-600">Not satisfied? Full refund, no questions asked.</p>
+          </div>
+        </div>
+
+        <!-- Plan not found -->
+        <div id="plan-not-found" class="hidden py-4 text-center">
+          <p class="text-stone-500 text-sm">Plan not found. <a href="/pricing" class="text-primary underline">View all plans →</a></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="border-t border-stone-200 bg-white mt-12 py-6">
+  <div class="max-w-5xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-stone-400">
+    <span>© 2025 RestOrder. All rights reserved.</span>
+    <div class="flex gap-4">
+      <a href="/terms" class="hover:text-stone-600">Terms</a>
+      <a href="/privacy" class="hover:text-stone-600">Privacy</a>
+      <a href="/contact" class="hover:text-stone-600">Support</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Utilities ────────────────────────────────────────────────────────────────
+function getToken() {
+  return localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken') || '';
+}
+function setToken(t) { localStorage.setItem('customerToken', t); }
+function clearToken() {
+  localStorage.removeItem('customerToken'); sessionStorage.removeItem('customerToken');
+  localStorage.removeItem('customerEmail'); localStorage.removeItem('customerBusiness');
+}
+
+function qs(key) {
+  return new URLSearchParams(window.location.search).get(key) || '';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let selectedPlan = null;   // plan object from /api/public/plans
+let selectedMenuId = null; // menu to apply subscription to
+let customerMenus = [];
+let isLoggedIn = false;
+let hasPlanPreselected = false; // tracks if plan came from URL
+let billingPrice = 0; // calculated price based on billing interval
+let detectedCountry = ''; // ISO country code from geo-detection
+const planSlug = qs('plan');       // e.g. "professional"
+const billingInterval = qs('billing') || 'monthly'; // 'monthly' or 'annual'
+const menuIdParam = qs('menu_id'); // pre-selected menu (from dashboard)
+
+async function detectCountry() {
+  try {
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    detectedCountry = (d.country_code || '').toUpperCase();
+  } catch(e) { detectedCountry = ''; }
+}
+
+// ── Step management ──────────────────────────────────────────────────────────
+function setStep(n) {
+  // If plan is preselected, we use 2-step flow: Account (1) → Payment (2)
+  // Otherwise 3-step: Plan (1) → Account (2) → Payment (3)
+  
+  if (hasPlanPreselected) {
+    // 2-step flow: n=1 is Account, n=2 is Payment
+    for (let i = 1; i <= 2; i++) {
+      const dot = document.getElementById(`step-dot-${i + 1}`); // Use dots 2,3
+      const lbl = document.getElementById(`step-label-${i + 1}`);
+      const displayNum = i; // Show as 1, 2
+      
+      if (i < n) {
+        dot.className = 'step-dot done';
+        lbl.className = 'text-sm font-semibold text-stone-700';
+        dot.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+      } else if (i === n) {
+        dot.className = 'step-dot active';
+        lbl.className = 'text-sm font-semibold text-stone-700';
+        dot.textContent = displayNum;
+      } else {
+        dot.className = 'step-dot inactive';
+        lbl.className = 'text-sm text-stone-400';
+        dot.textContent = displayNum;
+      }
+    }
+  } else {
+    // Original 3-step flow
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById(`step-dot-${i}`);
+      const lbl = document.getElementById(`step-label-${i}`);
+      if (i < n)  { dot.className = 'step-dot done'; lbl.className = 'text-sm font-semibold text-stone-700'; dot.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>'; }
+      else if (i === n) { dot.className = 'step-dot active'; lbl.className = 'text-sm font-semibold text-stone-700'; dot.textContent = i; }
+      else        { dot.className = 'step-dot inactive'; lbl.className = 'text-sm text-stone-400'; dot.textContent = i; }
+    }
+  }
+}
+
+function setupTwoStepFlow() {
+  // Hide step 1 (Plan selection) and its connector line
+  document.getElementById('step-wrap-1').style.display = 'none';
+  document.getElementById('step-line-1').style.display = 'none';
+  
+  // Renumber visible steps: Account becomes 1, Payment becomes 2
+  document.getElementById('step-dot-2').textContent = '1';
+  document.getElementById('step-dot-3').textContent = '2';
+  
+  // Show the prominent plan banner
+  document.getElementById('plan-preselected-banner').classList.remove('hidden');
+}
+
+// ── Fetch CSRF token ─────────────────────────────────────────────────────────
+let _csrfToken = null;
+async function getCsrf() {
+  if (_csrfToken) return _csrfToken;
+  try {
+    const r = await fetch('/api/csrf-token');
+    const d = await r.json();
+    _csrfToken = d.csrfToken || d.token || '';
+  } catch (_) { _csrfToken = ''; }
+  return _csrfToken;
+}
+
+// ── Auth tab toggle ──────────────────────────────────────────────────────────
+function showTab(tab) {
+  const isReg = tab === 'register';
+  document.getElementById('register-form').classList.toggle('hidden', !isReg);
+  document.getElementById('login-form').classList.toggle('hidden', isReg);
+  document.getElementById('tab-register').className = isReg
+    ? 'flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-stone-900'
+    : 'flex-1 py-2 rounded-lg text-sm font-semibold transition text-stone-500 hover:text-stone-700';
+  document.getElementById('tab-login').className = !isReg
+    ? 'flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-stone-900'
+    : 'flex-1 py-2 rounded-lg text-sm font-semibold transition text-stone-500 hover:text-stone-700';
+}
+
+// ── Registration ─────────────────────────────────────────────────────────────
+async function handleRegister(e) {
+  e.preventDefault();
+  const business = document.getElementById('reg-business').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const errEl    = document.getElementById('reg-error');
+  const btnText  = document.getElementById('reg-btn-text');
+  const spinner  = document.getElementById('reg-spinner');
+
+  errEl.classList.add('hidden');
+  btnText.textContent = 'Creating account…';
+  spinner.classList.remove('hidden');
+  document.getElementById('reg-btn').disabled = true;
+
+  try {
+    const csrf = await getCsrf();
+    const res = await fetch('/api/customers/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+      body: JSON.stringify({ email, password, businessName: business })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+    setToken(data.token);
+    localStorage.setItem('customerEmail', data.customer.email);
+    localStorage.setItem('customerBusiness', data.customer.businessName);
+
+    // Use the auto-created default menu if no menu_id param
+    if (data.defaultMenuId && !menuIdParam) {
+      selectedMenuId = data.defaultMenuId;
+    }
+
+    afterAuth(data.customer.email, data.customer.businessName);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btnText.textContent = 'Create Account & Continue';
+    spinner.classList.add('hidden');
+    document.getElementById('reg-btn').disabled = false;
+  }
+}
+
+// ── Login ────────────────────────────────────────────────────────────────────
+async function handleLogin(e) {
+  e.preventDefault();
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-error');
+  const btnText  = document.getElementById('login-btn-text');
+  const spinner  = document.getElementById('login-spinner');
+
+  errEl.classList.add('hidden');
+  btnText.textContent = 'Signing in…';
+  spinner.classList.remove('hidden');
+  document.getElementById('login-btn').disabled = true;
+
+  try {
+    const csrf = await getCsrf();
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    if (data.userType !== 'owner') throw new Error('Please use an owner account to subscribe.');
+
+    setToken(data.token);
+    localStorage.setItem('customerEmail', data.email || email);
+    localStorage.setItem('customerBusiness', data.businessName || '');
+
+    afterAuth(data.email || email, data.businessName || '');
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btnText.textContent = 'Sign In & Continue';
+    spinner.classList.add('hidden');
+    document.getElementById('login-btn').disabled = false;
+  }
+}
+
+function signOut() {
+  clearToken();
+  window.location.reload();
+}
+
+// ── Post-auth flow ───────────────────────────────────────────────────────────
+async function afterAuth(email, businessName) {
+  isLoggedIn = true;
+  document.getElementById('auth-section').classList.add('hidden');
+  document.getElementById('logged-in-notice').classList.remove('hidden');
+  document.getElementById('logged-in-email').textContent = email;
+  document.getElementById('logged-in-name').textContent = businessName || 'You\'re signed in';
+
+  // In 2-step flow: payment is step 2; in 3-step flow: payment is step 3
+  setStep(hasPlanPreselected ? 2 : 3);
+  document.getElementById('payment-section').classList.remove('hidden');
+
+  await loadMenusAndGateways();
+}
+
+// ── Load menus + gateways ────────────────────────────────────────────────────
+async function loadMenusAndGateways() {
+  const token = getToken();
+  try {
+    if (!detectedCountry) await detectCountry();
+    const [menusRes, gatewaysRes] = await Promise.all([
+      fetch('/api/menus', { headers: { 'x-customer-token': token } }),
+      fetch(`/api/payments/gateways?country=${encodeURIComponent(detectedCountry)}`)
+    ]);
+    customerMenus = menusRes.ok ? await menusRes.json() : [];
+    const gateways = gatewaysRes.ok ? await gatewaysRes.json() : {};
+
+    // Populate menu selector
+    const selector = document.getElementById('menu-selector');
+    const selectorWrap = document.getElementById('menu-selector-wrap');
+    if (customerMenus.length > 1) {
+      selector.innerHTML = customerMenus.map(m =>
+        `<option value="${escHtml(m.id)}" ${m.id === (selectedMenuId || menuIdParam) ? 'selected' : ''}>${escHtml(m.restaurantName)}</option>`
+      ).join('');
+      selectorWrap.classList.remove('hidden');
+      selectedMenuId = selector.value;
+      selector.onchange = () => { selectedMenuId = selector.value; };
+    } else if (customerMenus.length === 1) {
+      selectedMenuId = selectedMenuId || menuIdParam || customerMenus[0].id;
+    }
+    // selectedMenuId already set from register (defaultMenuId) if new user
+
+    renderGateways(gateways);
+  } catch (err) {
+    document.getElementById('gateway-container').innerHTML =
+      `<p class="text-red-500 text-sm text-center py-4">Failed to load payment options. <button onclick="loadMenusAndGateways()" class="underline">Retry</button></p>`;
+  }
+}
+
+// ── Render payment gateways ──────────────────────────────────────────────────
+async function renderGateways(gateways) {
+  const container = document.getElementById('gateway-container');
+  const hasFW = !!(gateways.flutterwave?.public_key);
+  const hasPP = !!(gateways.paypal?.client_id);
+
+  if (!hasFW && !hasPP) {
+    container.innerHTML = `
+      <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+        <p class="font-semibold mb-1">💬 Manual Payment</p>
+        <p>Our team will contact you within 24 hours with payment instructions after you confirm.</p>
+        <button onclick="doManualUpgrade()" class="mt-4 w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition">
+          Confirm Upgrade Request
+        </button>
+      </div>`;
+    return;
+  }
+
+  let html = '<div class="space-y-3">';
+  if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#f5a623;color:#fff;">
+    <span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
+  if (hasPP) html += `<div id="paypal-btn-wrap" class="mt-2"></div>`;
+  html += '</div>';
+  container.innerHTML = html;
+
+  if (hasFW) {
+    await loadScript('https://checkout.flutterwave.com/v3.js').catch(() => {});
+    document.getElementById('fw-pay-btn').onclick = () =>
+      doFlutterwave(gateways.flutterwave.public_key);
+  }
+
+  if (hasPP) {
+    let _pp = null;
+    function loadPayPalSDK(clientId, env) {
+      if (_pp) return _pp;
+      const base = env === 'sandbox' ? 'https://www.sandbox.paypal.com' : 'https://www.paypal.com';
+      _pp = loadScript(`${base}/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`);
+      return _pp;
+    }
+    try {
+      await loadPayPalSDK(gateways.paypal.client_id, gateways.paypal.environment);
+      window.paypal.Buttons({
+        style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+        createOrder: async () => {
+          const menuId = getTargetMenuId();
+          if (!menuId) throw new Error('No menu selected');
+          const r = await fetch('/api/payments/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            body: JSON.stringify({ plan_id: selectedPlan.id, menu_id: menuId })
+          });
+          const d = await r.json();
+          if (!d.order_id) throw new Error(d.error || 'Failed to create order');
+          return d.order_id;
+        },
+        onApprove: async (data) => {
+          showMsg('Processing payment…');
+          const menuId = getTargetMenuId();
+          const r = await fetch('/api/payments/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            body: JSON.stringify({ order_id: data.orderID, plan_id: selectedPlan.id, menu_id: menuId })
+          });
+          const d = await r.json();
+          if (d.success) onPaymentSuccess();
+          else showMsg('Payment capture failed: ' + d.error, true);
+        },
+        onError: () => showMsg('PayPal error. Please try again.', true)
+      }).render('#paypal-btn-wrap');
+    } catch(e) { /* paypal load failed silently */ }
+  }
+}
+
+function getTargetMenuId() {
+  const sel = document.getElementById('menu-selector');
+  return sel ? sel.value : selectedMenuId;
+}
+
+// ── Flutterwave ──────────────────────────────────────────────────────────────
+function doFlutterwave(publicKey) {
+  if (!window.FlutterwaveCheckout) { showMsg('Flutterwave SDK not loaded.', true); return; }
+  const menuId = getTargetMenuId();
+  if (!menuId) { showMsg('No menu selected. Please go back to your dashboard first.', true); return; }
+  const txRef = `${menuId}:${selectedPlan.id}:${Date.now()}`;
+  FlutterwaveCheckout({
+    public_key: publicKey,
+    tx_ref: txRef,
+    amount: billingPrice,
+    currency: 'USD',
+    payment_options: 'card,mobilemoney,ussd,banktransfer',
+    customer: {
+      email: localStorage.getItem('customerEmail') || sessionStorage.getItem('customerEmail') || '',
+      name: localStorage.getItem('customerBusiness') || sessionStorage.getItem('customerBusiness') || 'Customer'
+    },
+    customizations: { title: 'RestOrder', description: `${selectedPlan.display_name} Plan`, logo: '/icon-192.png' },
+    callback: async (response) => {
+      if (response.status === 'successful' || response.status === 'completed') {
+        showMsg('Verifying payment…');
+        const r = await fetch('/api/payments/flutterwave/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+          body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: selectedPlan.id })
+        });
+        const d = await r.json();
+        if (d.success) onPaymentSuccess();
+        else showMsg('Verification failed: ' + d.error, true);
+      } else {
+        showMsg('Payment was not completed.', true);
+      }
+    },
+    onclose: () => {}
+  });
+}
+
+// ── Manual upgrade ───────────────────────────────────────────────────────────
+async function doManualUpgrade() {
+  const menuId = getTargetMenuId();
+  if (!menuId) { showMsg('No menu selected.', true); return; }
+  try {
+    const csrf = await getCsrf();
+    const res = await fetch('/api/customers/subscription/change', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+      body: JSON.stringify({ menu_id: menuId, plan_id: selectedPlan.id })
+    });
+    const d = await res.json();
+    if (res.ok) {
+      showMsg(`Upgrade to ${selectedPlan.display_name} requested! We'll contact you with payment details within 24 hours.`);
+      setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
+    } else throw new Error(d.error);
+  } catch(err) { showMsg('Error: ' + err.message, true); }
+}
+
+// ── Payment success ──────────────────────────────────────────────────────────
+function onPaymentSuccess() {
+  document.getElementById('gateway-container').innerHTML = `
+    <div class="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
+      <span class="material-symbols-outlined text-green-600 text-[48px] block mb-3">check_circle</span>
+      <p class="font-bold text-green-800 text-lg">Payment Successful!</p>
+      <p class="text-green-700 text-sm mt-1">Your ${escHtml(selectedPlan?.display_name || '')} subscription is now active.</p>
+      <p class="text-stone-500 text-xs mt-3">Redirecting to dashboard…</p>
+    </div>`;
+  setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
+}
+
+// ── Toast / inline message ───────────────────────────────────────────────────
+function showMsg(msg, isErr = false) {
+  let el = document.getElementById('checkout-msg');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'checkout-msg';
+    el.className = 'fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold max-w-xs';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold max-w-xs ${isErr ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // 1. Load plan details
+  try {
+    const plans = await fetch('/api/public/plans').then(r => r.json());
+    selectedPlan = plans.find(p => p.name === planSlug) || null;
+
+    // Determine billing price based on interval
+    const isAnnual = billingInterval === 'annual' && selectedPlan && selectedPlan.annual_price > 0;
+    billingPrice = isAnnual ? selectedPlan.annual_price : (selectedPlan ? selectedPlan.price : 0);
+    const billingLabel = isAnnual ? 'year' : 'month';
+    const billingLabelShort = isAnnual ? 'yr' : 'mo';
+
+    document.getElementById('plan-summary-loading').classList.add('hidden');
+
+    if (!selectedPlan || selectedPlan.price === 0) {
+      // No paid plan found; redirect to pricing or register
+      document.getElementById('plan-not-found').classList.remove('hidden');
+      setStep(1);
+      return;
+    }
+
+    // Plan is preselected - use optimized 2-step flow
+    hasPlanPreselected = true;
+    setupTwoStepFlow();
+    
+    // Populate the plan banner
+    document.getElementById('banner-plan-name').textContent = selectedPlan.display_name;
+    document.getElementById('banner-plan-price').textContent = `$${billingPrice}`;
+    document.getElementById('banner-plan-interval').textContent = `per ${billingLabel}`;
+
+    // Render plan summary in sidebar
+    document.getElementById('plan-summary').classList.remove('hidden');
+    document.getElementById('ps-name').textContent = selectedPlan.display_name;
+    document.getElementById('ps-interval').textContent = `Billed ${billingInterval}`;
+    document.getElementById('ps-price').textContent = `$${billingPrice}/${billingLabelShort}`;
+    document.getElementById('ps-subtotal').textContent = `$${billingPrice}/${billingLabelShort}`;
+    // Trial plan ($3) is charged immediately; other plans get 7-day free trial
+    const isTrial = selectedPlan.name === 'trial';
+    document.getElementById('trial-period-row').style.display = isTrial ? 'none' : '';
+    document.getElementById('ps-due-today').textContent = isTrial ? `$${selectedPlan.price.toFixed(2)}` : '$0.00';
+
+    const feats = Array.isArray(selectedPlan.features) ? selectedPlan.features : [];
+    document.getElementById('ps-features').innerHTML = feats.map(f =>
+      `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[15px]">check_circle</span><span class="text-stone-600">${escHtml(f)}</span></li>`
+    ).join('');
+  } catch (_) {
+    document.getElementById('plan-summary-loading').innerHTML = '<p class="text-red-500 text-sm text-center">Failed to load plan.</p>';
+    return;
+  }
+
+  // 2. Check auth
+  const token = getToken();
+  const email = localStorage.getItem('customerEmail') || sessionStorage.getItem('customerEmail') || '';
+  const biz   = localStorage.getItem('customerBusiness') || sessionStorage.getItem('customerBusiness') || '';
+
+  if (token) {
+    // Verify token is still valid
+    try {
+      const verifyRes = await fetch('/api/customers/me', { headers: { 'x-customer-token': token } });
+      if (verifyRes.ok) {
+        const me = await verifyRes.json();
+        isLoggedIn = true;
+        document.getElementById('logged-in-notice').classList.remove('hidden');
+        document.getElementById('logged-in-email').textContent = me.email || email;
+        document.getElementById('logged-in-name').textContent = me.businessName || biz || 'You\'re signed in';
+        // Already logged in - go straight to payment (step 2 in 2-step flow)
+        setStep(2);
+        document.getElementById('payment-section').classList.remove('hidden');
+        selectedMenuId = menuIdParam || null;
+        await loadMenusAndGateways();
+        return;
+      }
+    } catch (_) {}
+    clearToken();
+  }
+
+  // Not logged in — show auth section (step 1 in 2-step flow)
+  setStep(1);
+  document.getElementById('auth-section').classList.remove('hidden');
+}
+
+init();
+</script>
+</body>
+</html>

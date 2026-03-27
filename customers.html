@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Customer Management – RestOrder Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols_Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -44,18 +44,23 @@
       </div>
       <div>
         <h2 class="font-bold text-lg">Admin Access</h2>
-        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+        <p class="text-slate-400 text-xs">Sign in with your admin credentials</p>
       </div>
     </div>
     <div>
-      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
-      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+      <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
         class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
     </div>
     <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
       Sign In
     </button>
-    <p id="login-error" class="text-red-400 text-sm hidden">Invalid password. Please try again.</p>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid email or password.</p>
   </div>
 </div>
 
@@ -72,7 +77,7 @@
   </div>
 
   <nav class="space-y-2 flex-1">
-    <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">dashboard</span>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
@@ -80,17 +85,37 @@
       <span class="material-symbols-outlined text-[20px]">groups</span>
       <span class="text-sm font-medium">Customers</span>
     </a>
+    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
     <a href="/subscriptions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">credit_card</span>
       <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="/payments" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
     </a>
     <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">analytics</span>
       <span class="text-sm font-medium">Analytics</span>
     </a>
+    <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <span class="text-sm font-medium">Settings</span>
+    </a>
+    <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">shield_person</span>
+      <span class="text-sm font-medium">Admin Users</span>
+    </a>
   </nav>
 
-  <div class="pt-4 border-t border-slate-700">
+  <div class="pt-4 border-t border-slate-700 space-y-2">
+    <div id="user-info" class="hidden px-4 py-2 rounded-xl bg-bg-dark/50">
+      <p class="text-sm font-medium text-slate-200 truncate" id="user-name"></p>
+      <p class="text-xs text-slate-400 truncate" id="user-role"></p>
+    </div>
     <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
       <span class="material-symbols-outlined text-[20px]">logout</span>
       <span class="text-sm font-medium">Logout</span>
@@ -103,39 +128,44 @@
   
   <!-- Header -->
   <div class="mb-8">
-    <div class="flex items-center gap-3 mb-2">
-      <h2 class="text-3xl font-bold">Customer Management</h2>
-      <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h2 class="text-3xl font-bold">Customer Management</h2>
+          <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+        </div>
+        <p class="text-slate-400">View and manage all restaurant customers and their subscriptions</p>
+      </div>
+      <button onclick="exportCSV()" class="px-4 py-2.5 bg-surface border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-bg-dark transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">download</span>
+        <span class="text-sm">Export CSV</span>
+      </button>
     </div>
-    <p class="text-slate-400">View and manage all restaurant customers and their subscriptions</p>
   </div>
 
   <!-- Stats Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6 cursor-pointer hover:border-primary/40 transition" onclick="setFilter('all')">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Total Customers</span>
         <span class="material-symbols-outlined text-primary text-[20px]">groups</span>
       </div>
       <p class="text-3xl font-bold" id="stat-total">0</p>
     </div>
-    
-    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6 cursor-pointer hover:border-green-500/40 transition" onclick="setFilter('active')">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Active</span>
         <span class="material-symbols-outlined text-green-500 text-[20px]">check_circle</span>
       </div>
       <p class="text-3xl font-bold text-green-500" id="stat-active">0</p>
     </div>
-    
-    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6 cursor-pointer hover:border-amber-500/40 transition" onclick="setFilter('all')">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Total Menus</span>
         <span class="material-symbols-outlined text-amber-500 text-[20px]">restaurant_menu</span>
       </div>
       <p class="text-3xl font-bold text-amber-500" id="stat-menus">0</p>
     </div>
-    
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Total Scans</span>
@@ -151,18 +181,31 @@
       <div class="flex-1 min-w-[200px]">
         <label class="block text-sm font-medium text-slate-300 mb-2">Status</label>
         <select id="filter-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
-          <option value="active">Active</option>
+          <option value="all">All Statuses</option>
+          <option value="active" selected>Active</option>
           <option value="inactive">Inactive</option>
           <option value="suspended">Suspended</option>
         </select>
       </div>
-      
       <div class="flex-1 min-w-[200px]">
         <label class="block text-sm font-medium text-slate-300 mb-2">Search</label>
-        <input id="search-input" type="text" placeholder="Search by business or email..." 
-          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        <div class="relative">
+          <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">search</span>
+          <input id="search-input" type="text" placeholder="Search by business, email, or contact name..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
       </div>
-      
+      <div class="flex-1 min-w-[150px]">
+        <label class="block text-sm font-medium text-slate-300 mb-2">Sort By</label>
+        <select id="sort-by" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="created_desc">Newest First</option>
+          <option value="created_asc">Oldest First</option>
+          <option value="name_asc">Business A–Z</option>
+          <option value="name_desc">Business Z–A</option>
+          <option value="scans_desc">Most Scans</option>
+          <option value="menus_desc">Most Menus</option>
+        </select>
+      </div>
       <button id="refresh-btn" class="px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
         <span class="material-symbols-outlined text-[20px]">refresh</span>
         Refresh
@@ -172,10 +215,10 @@
 
   <!-- Customers Table -->
   <div class="bg-surface border border-slate-700 rounded-2xl overflow-hidden">
-    <div class="p-6 border-b border-slate-700">
+    <div class="p-6 border-b border-slate-700 flex items-center justify-between">
       <h3 class="text-lg font-bold">All Customers</h3>
+      <span id="result-count" class="text-sm text-slate-400"></span>
     </div>
-    
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-bg-dark/50">
@@ -192,7 +235,7 @@
         <tbody id="customers-tbody" class="divide-y divide-slate-700">
           <tr>
             <td colspan="7" class="px-6 py-12 text-center text-slate-400">
-              <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">hourglass_empty</span>
+              <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30 spin">progress_activity</span>
               Loading customers...
             </td>
           </tr>
@@ -200,19 +243,165 @@
       </table>
     </div>
   </div>
-
 </main>
 
-<script>
-// Authentication
-let isAuthenticated = false;
+<!-- Customer Detail Drawer -->
+<div id="detail-drawer" class="fixed inset-0 z-40 hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDrawer()"></div>
+  <div class="absolute right-0 top-0 bottom-0 w-full max-w-2xl bg-surface border-l border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+    <!-- Drawer Header -->
+    <div class="p-6 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+      <h3 class="text-xl font-bold">Customer Details</h3>
+      <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-200 transition p-1">
+        <span class="material-symbols-outlined">close</span>
+      </button>    
+    </div>
+    <!-- Drawer Body -->
+    <div id="drawer-body" class="flex-1 overflow-y-auto p-6">
+      <div class="text-center py-12 text-slate-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30 spin">progress_activity</span>
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Edit Customer Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold">Edit Customer</h3>
+      <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="edit-form" class="space-y-4">
+      <input type="hidden" id="edit-id" />
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Business Name</label>
+        <input id="edit-business" type="text" required
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Contact Name</label>
+          <input id="edit-contact" type="text"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Phone</label>
+          <input id="edit-phone" type="text"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Address</label>
+        <input id="edit-address" type="text"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">City</label>
+          <input id="edit-city" type="text"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Country</label>
+          <input id="edit-country" type="text"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Status</label>
+        <select id="edit-status"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="suspended">Suspended</option>
+        </select>
+      </div>
+      <p id="edit-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+          class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+          Save Changes
+        </button>
+        <button type="button" onclick="closeEditModal()"
+          class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div id="reset-pw-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold">Reset Password</h3>
+      <button onclick="closeResetPwModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="reset-pw-form" class="space-y-4">
+      <input type="hidden" id="reset-pw-id" />
+      <p class="text-slate-400 text-sm">Set a new password for <strong id="reset-pw-name" class="text-slate-200"></strong>.</p>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">New Password</label>
+        <input id="reset-pw-input" type="password" required minlength="8" placeholder="Min 8 characters"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <p id="reset-pw-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+          class="flex-1 px-4 py-2.5 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition">
+          Reset Password
+        </button>
+        <button type="button" onclick="closeResetPwModal()"
+          class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ── State ───────────────────────────────────────────────────────────────────
+let isAuthenticated = false;
+let adminToken = null;
+let currentUser = null;
+let allCustomers = [];
+let displayedCustomers = [];
+
+// ── User UI ─────────────────────────────────────────────────────────────────
+function applyUserUI(user) {
+  currentUser = user;
+  if (!user) return;
+  document.getElementById('user-name').textContent = user.name || user.email;
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-info').classList.add('flex', 'flex-col');
+  if (user.role === 'super_admin') {
+    document.getElementById('nav-admin-users').classList.remove('hidden');
+    document.getElementById('nav-admin-users').classList.add('flex');
+  }
+}
+
+// ── Auth ────────────────────────────────────────────────────────────────────
 async function checkAuth() {
   try {
-    const res = await fetch('/api/auth/check');
-    if (res.ok) {
+    const token = localStorage.getItem('admin-token');
+    if (!token) return;
+    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
       isAuthenticated = true;
+      adminToken = token;
       document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
       loadCustomers();
     }
   } catch (err) {
@@ -221,21 +410,26 @@ async function checkAuth() {
 }
 
 document.getElementById('login-btn').addEventListener('click', async () => {
-  const secret = document.getElementById('login-secret').value;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
-  
+  errorEl.classList.add('hidden');
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret })
+      body: JSON.stringify({ email, password })
     });
-    
+    const data = await res.json();
     if (res.ok) {
       isAuthenticated = true;
+      adminToken = data.token;
+      localStorage.setItem('admin-token', adminToken);
       document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
       loadCustomers();
     } else {
+      errorEl.textContent = data.error || 'Invalid email or password.';
       errorEl.classList.remove('hidden');
     }
   } catch (err) {
@@ -244,115 +438,515 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   }
 });
 
+document.getElementById('login-email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+document.getElementById('login-password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await fetch('/api/auth/logout', { method: 'POST' });
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  localStorage.removeItem('admin-token');
   location.reload();
 });
 
-// Load customers
-let allCustomers = [];
+// ── API Helpers ─────────────────────────────────────────────────────────────
+function authHeaders(extra) {
+  return { 'x-admin-token': adminToken, 'Content-Type': 'application/json', ...extra };
+}
 
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  const bgColor = type === 'error' ? 'bg-red-500/90' : 'bg-primary/90';
+  toast.className = `fixed bottom-6 right-6 z-50 ${bgColor} text-white px-6 py-3 rounded-xl shadow-lg font-medium text-sm`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// ── Load Customers ──────────────────────────────────────────────────────────
 async function loadCustomers() {
   const status = document.getElementById('filter-status').value;
-  
   try {
-    const res = await fetch(`/api/admin/customers?status=${status}`);
+    const res = await fetch(`/api/admin/customers?status=${status}`, {
+      headers: { 'x-admin-token': adminToken }
+    });
     if (!res.ok) throw new Error('Failed to load customers');
-    
     allCustomers = await res.json();
-    renderCustomers(allCustomers);
-    updateStats(allCustomers);
+    applyFilters();
   } catch (err) {
     console.error('Error loading customers:', err);
     document.getElementById('customers-tbody').innerHTML = `
       <tr><td colspan="7" class="px-6 py-12 text-center text-red-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">error</span>
         Failed to load customers. Please refresh.
-      </td></tr>
-    `;
+      </td></tr>`;
   }
 }
 
+function applyFilters() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  let results = allCustomers;
+
+  if (query) {
+    results = results.filter(c =>
+      (c.business_name || '').toLowerCase().includes(query) ||
+      (c.email || '').toLowerCase().includes(query) ||
+      (c.contact_name || '').toLowerCase().includes(query) ||
+      (c.phone || '').toLowerCase().includes(query) ||
+      (c.city || '').toLowerCase().includes(query)
+    );
+  }
+
+  // Sort
+  const sortBy = document.getElementById('sort-by').value;
+  results = [...results].sort((a, b) => {
+    switch (sortBy) {
+      case 'created_asc': return (a.created_at || '').localeCompare(b.created_at || '');
+      case 'created_desc': return (b.created_at || '').localeCompare(a.created_at || '');
+      case 'name_asc': return (a.business_name || '').localeCompare(b.business_name || '');
+      case 'name_desc': return (b.business_name || '').localeCompare(a.business_name || '');
+      case 'scans_desc': return (parseInt(b.total_scans) || 0) - (parseInt(a.total_scans) || 0);
+      case 'menus_desc': return (parseInt(b.menu_count) || 0) - (parseInt(a.menu_count) || 0);
+      default: return 0;
+    }
+  });
+
+  displayedCustomers = results;
+  renderCustomers(results);
+  updateStats();
+}
+
+function setFilter(status) {
+  document.getElementById('filter-status').value = status;
+  loadCustomers();
+}
+
+// ── Render Table ────────────────────────────────────────────────────────────
 function renderCustomers(customers) {
   const tbody = document.getElementById('customers-tbody');
-  
+  document.getElementById('result-count').textContent = `${customers.length} customer${customers.length !== 1 ? 's' : ''}`;
+
   if (!customers.length) {
     tbody.innerHTML = `
       <tr><td colspan="7" class="px-6 py-12 text-center text-slate-400">
         <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">inbox</span>
         No customers found.
-      </td></tr>
-    `;
+      </td></tr>`;
     return;
   }
-  
-  tbody.innerHTML = customers.map(customer => `
-    <tr class="hover:bg-bg-dark/30 transition">
+
+  tbody.innerHTML = customers.map(c => {
+    const initial = (c.business_name || c.email || '?')[0].toUpperCase();
+    const statusColors = { active: 'badge-active', inactive: 'badge-inactive', suspended: 'badge-suspended' };
+    return `
+    <tr class="hover:bg-bg-dark/30 transition cursor-pointer" onclick="viewCustomer(${c.id})">
       <td class="px-6 py-4">
-        <div class="font-medium">${escapeHtml(customer.business_name)}</div>
-        <div class="text-xs text-slate-400">${escapeHtml(customer.email)}</div>
-      </td>
-      <td class="px-6 py-4">
-        <div class="text-sm">${escapeHtml(customer.contact_name || '—')}</div>
-        <div class="text-xs text-slate-400">${escapeHtml(customer.phone || '—')}</div>
-      </td>
-      <td class="px-6 py-4">
-        <div class="font-medium">${customer.menu_count || 0}</div>
-        <div class="text-xs text-slate-400">total menus</div>
-      </td>
-      <td class="px-6 py-4">
-        <div class="font-medium">${(customer.total_scans || 0).toLocaleString()}</div>
-        <div class="text-xs text-slate-400">total scans</div>
+        <div class="flex items-center gap-3">
+          <div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold flex-shrink-0">${escapeHtml(initial)}</div>
+          <div>
+            <div class="font-medium">${escapeHtml(c.business_name)}</div>
+            <div class="text-xs text-slate-400">${escapeHtml(c.email)}</div>
+          </div>
+        </div>
       </td>
       <td class="px-6 py-4">
-        <div class="text-sm">${formatDate(customer.created_at)}</div>
-        ${customer.last_login ? `<div class="text-xs text-slate-400">Last: ${formatDate(customer.last_login)}</div>` : ''}
+        <div class="text-sm">${escapeHtml(c.contact_name || '—')}</div>
+        <div class="text-xs text-slate-400">${escapeHtml(c.phone || '—')}</div>
       </td>
       <td class="px-6 py-4">
-        <span class="badge badge-${customer.status}">${customer.status}</span>
+        <div class="font-medium">${c.menu_count || 0}</div>
       </td>
-      <td class="px-6 py-4 text-right">
-        <button onclick="viewCustomer(${customer.id})" 
-          class="px-3 py-1.5 text-xs bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition">
-          View Details
-        </button>
+      <td class="px-6 py-4">
+        <div class="font-medium">${(parseInt(c.total_scans) || 0).toLocaleString()}</div>
       </td>
-    </tr>
-  `).join('');
+      <td class="px-6 py-4">
+        <div class="text-sm">${formatDate(c.created_at)}</div>
+        ${c.last_login ? `<div class="text-xs text-slate-400">Last: ${formatDate(c.last_login)}</div>` : '<div class="text-xs text-slate-500">Never logged in</div>'}
+      </td>
+      <td class="px-6 py-4">
+        <span class="badge ${statusColors[c.status] || 'badge-inactive'}">${c.status}</span>
+      </td>
+      <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-end gap-1">
+          <button onclick="viewCustomer(${c.id})" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-primary transition" title="View Details">
+            <span class="material-symbols-outlined text-[18px]">visibility</span>
+          </button>
+          <button onclick="openEditModal(${c.id})" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-primary transition" title="Edit">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="toggleStatus(${c.id}, '${c.status}')" 
+            class="p-2 rounded-lg hover:bg-bg-dark ${c.status === 'suspended' ? 'text-slate-400 hover:text-green-400' : 'text-slate-400 hover:text-red-400'} transition" 
+            title="${c.status === 'suspended' ? 'Activate' : 'Suspend'}">
+            <span class="material-symbols-outlined text-[18px]">${c.status === 'suspended' ? 'check_circle' : 'block'}</span>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-function updateStats(customers) {
-  const total = customers.length;
-  const active = customers.filter(c => c.status === 'active').length;
-  const totalMenus = customers.reduce((sum, c) => sum + (parseInt(c.menu_count) || 0), 0);
-  const totalScans = customers.reduce((sum, c) => sum + (parseInt(c.total_scans) || 0), 0);
-  
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-active').textContent = active;
+// ── Stats ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  const all = allCustomers;
+  const totalMenus = all.reduce((s, c) => s + (parseInt(c.menu_count) || 0), 0);
+  const totalScans = all.reduce((s, c) => s + (parseInt(c.total_scans) || 0), 0);
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-active').textContent = all.filter(c => c.status === 'active').length;
   document.getElementById('stat-menus').textContent = totalMenus;
   document.getElementById('stat-scans').textContent = totalScans.toLocaleString();
 }
 
-function viewCustomer(customerId) {
-  alert(`Customer details for ID ${customerId} - feature coming soon!`);
+// ── Customer Detail Drawer ──────────────────────────────────────────────────
+async function viewCustomer(customerId) {
+  const drawer = document.getElementById('detail-drawer');
+  const body = document.getElementById('drawer-body');
+  drawer.classList.remove('hidden');
+  body.innerHTML = `<div class="text-center py-12 text-slate-400"><span class="material-symbols-outlined text-[48px] block mb-2 opacity-30 spin">progress_activity</span>Loading...</div>`;
+
+  try {
+    const [custRes, menusRes] = await Promise.all([
+      fetch(`/api/admin/customers/${customerId}`, { headers: { 'x-admin-token': adminToken } }),
+      fetch(`/api/admin/customers/${customerId}/menus`, { headers: { 'x-admin-token': adminToken } })
+    ]);
+
+    if (!custRes.ok) throw new Error('Customer not found');
+    const customer = await custRes.json();
+    const menus = menusRes.ok ? await menusRes.json() : [];
+
+    const statusColors = { active: 'text-green-400 bg-green-500/15', inactive: 'text-slate-400 bg-slate-500/15', suspended: 'text-red-400 bg-red-500/15' };
+    const statusColor = statusColors[customer.status] || statusColors.inactive;
+    const isSuperAdmin = currentUser && currentUser.role === 'super_admin';
+
+    body.innerHTML = `
+      <!-- Customer Header -->
+      <div class="flex items-start gap-4 mb-8">
+        <div class="size-16 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl flex-shrink-0">
+          ${escapeHtml((customer.business_name || '?')[0].toUpperCase())}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-2xl font-bold mb-1">${escapeHtml(customer.business_name)}</h3>
+          <p class="text-slate-400 text-sm">${escapeHtml(customer.email)}</p>
+          <div class="flex items-center gap-3 mt-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">
+              <span class="size-1.5 rounded-full bg-current"></span>
+              ${customer.status}
+            </span>
+            ${customer.email_verified ? '<span class="text-xs text-primary">Email Verified</span>' : '<span class="text-xs text-slate-500">Email Not Verified</span>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex flex-wrap gap-2 mb-8">
+        <button onclick="openEditModal(${customer.id})" class="px-4 py-2 bg-bg-dark border border-slate-700 rounded-xl text-sm font-medium text-slate-300 hover:border-primary/50 hover:text-primary transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">edit</span> Edit Info
+        </button>
+        <button onclick="toggleStatus(${customer.id}, '${customer.status}')" class="px-4 py-2 bg-bg-dark border border-slate-700 rounded-xl text-sm font-medium text-slate-300 hover:border-primary/50 hover:text-primary transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">${customer.status === 'suspended' ? 'check_circle' : 'block'}</span>
+          ${customer.status === 'suspended' ? 'Activate' : 'Suspend'}
+        </button>
+        ${isSuperAdmin ? `
+        <button onclick="openResetPwModal(${customer.id}, '${escapeHtml(customer.business_name)}')" class="px-4 py-2 bg-bg-dark border border-slate-700 rounded-xl text-sm font-medium text-slate-300 hover:border-yellow-500/50 hover:text-yellow-400 transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">lock_reset</span> Reset Password
+        </button>
+        <button onclick="deleteCustomer(${customer.id}, '${escapeHtml(customer.business_name)}')" class="px-4 py-2 bg-bg-dark border border-red-500/30 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">delete</span> Delete
+        </button>
+        ` : ''}
+      </div>
+
+      <!-- Contact Details Grid -->
+      <div class="bg-bg-dark/50 rounded-2xl p-6 mb-6">
+        <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Contact Information</h4>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-slate-500">Contact</span>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.contact_name || '—')}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">Phone</span>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.phone || '—')}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">Address</span>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.address || '—')}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">City / Country</span>
+            <p class="font-medium mt-0.5">${escapeHtml([customer.city, customer.country].filter(Boolean).join(', ') || '—')}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="bg-bg-dark/50 rounded-2xl p-6 mb-6">
+        <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Account Details</h4>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-slate-500">Customer ID</span>
+            <p class="font-medium mt-0.5">#${customer.id}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">Registered</span>
+            <p class="font-medium mt-0.5">${formatDate(customer.created_at)}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">Last Login</span>
+            <p class="font-medium mt-0.5">${customer.last_login ? formatDateTime(customer.last_login) : 'Never'}</p>
+          </div>
+          <div>
+            <span class="text-slate-500">Total Scans</span>
+            <p class="font-medium mt-0.5">${(parseInt(customer.total_scans) || 0).toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menus Section -->
+      <div class="bg-bg-dark/50 rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Menus (${menus.length})</h4>
+        </div>
+        ${menus.length ? `
+          <div class="space-y-3">
+            ${menus.map(m => `
+              <div class="flex items-center justify-between p-3 bg-surface rounded-xl border border-slate-700">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="material-symbols-outlined text-[20px] text-amber-400 flex-shrink-0">restaurant_menu</span>
+                  <div class="min-w-0">
+                    <p class="font-medium text-sm truncate">${escapeHtml(m.restaurant_name)}</p>
+                    <p class="text-xs text-slate-400">${m.plan_name ? escapeHtml(m.plan_name) + (m.plan_price ? ' &middot; $' + m.plan_price + '/mo' : '') : 'No plan'}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 flex-shrink-0">
+                  <div class="text-right">
+                    <p class="text-sm font-medium">${(parseInt(m.total_scans) || 0).toLocaleString()}</p>
+                    <p class="text-xs text-slate-500">scans</p>
+                  </div>
+                  ${m.subscription_status ? `<span class="badge badge-${m.subscription_status === 'active' ? 'active' : 'inactive'}" style="font-size:11px">${m.subscription_status}</span>` : '<span class="text-xs text-slate-600">no sub</span>'}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : '<p class="text-slate-500 text-sm text-center py-4">No menus created yet.</p>'}
+      </div>
+    `;
+  } catch (err) {
+    body.innerHTML = `<div class="text-center py-12 text-red-400"><span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">error</span>${escapeHtml(err.message)}</div>`;
+  }
 }
 
-// Filters & Search
-document.getElementById('filter-status').addEventListener('change', loadCustomers);
+function closeDrawer() {
+  document.getElementById('detail-drawer').classList.add('hidden');
+}
 
-document.getElementById('search-input').addEventListener('input', (e) => {
-  const query = e.target.value.toLowerCase();
-  const filtered = allCustomers.filter(c => 
-    c.business_name.toLowerCase().includes(query) ||
-    c.email.toLowerCase().includes(query) ||
-    (c.contact_name && c.contact_name.toLowerCase().includes(query))
-  );
-  renderCustomers(filtered);
-  updateStats(filtered);
+// ── Toggle Status ───────────────────────────────────────────────────────────
+async function toggleStatus(id, currentStatus) {
+  const newStatus = currentStatus === 'suspended' ? 'active' : 'suspended';
+  const action = newStatus === 'suspended' ? 'suspend' : 'activate';
+  if (!confirm(`Are you sure you want to ${action} this customer?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/customers/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
+    showToast(`Customer ${action}d successfully.`);
+    await loadCustomers();
+    if (!document.getElementById('detail-drawer').classList.contains('hidden')) {
+      viewCustomer(id);
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// ── Edit Modal ──────────────────────────────────────────────────────────────
+function openEditModal(id) {
+  const c = allCustomers.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('edit-business').value = c.business_name || '';
+  document.getElementById('edit-contact').value = c.contact_name || '';
+  document.getElementById('edit-phone').value = c.phone || '';
+  document.getElementById('edit-address').value = c.address || '';
+  document.getElementById('edit-city').value = c.city || '';
+  document.getElementById('edit-country').value = c.country || '';
+  document.getElementById('edit-status').value = c.status || 'active';
+  document.getElementById('edit-error').classList.add('hidden');
+  const modal = document.getElementById('edit-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('edit-business').focus();
+}
+
+function closeEditModal() {
+  const modal = document.getElementById('edit-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const errorEl = document.getElementById('edit-error');
+  errorEl.classList.add('hidden');
+
+  const body = {
+    business_name: document.getElementById('edit-business').value.trim(),
+    contact_name: document.getElementById('edit-contact').value.trim(),
+    phone: document.getElementById('edit-phone').value.trim(),
+    address: document.getElementById('edit-address').value.trim(),
+    city: document.getElementById('edit-city').value.trim(),
+    country: document.getElementById('edit-country').value.trim(),
+    status: document.getElementById('edit-status').value,
+  };
+
+  try {
+    const res = await fetch(`/api/admin/customers/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Update failed');
+    closeEditModal();
+    showToast('Customer updated successfully.');
+    await loadCustomers();
+    if (!document.getElementById('detail-drawer').classList.contains('hidden')) {
+      viewCustomer(parseInt(id));
+    }
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
 });
 
+// ── Reset Password ──────────────────────────────────────────────────────────
+function openResetPwModal(id, name) {
+  document.getElementById('reset-pw-id').value = id;
+  document.getElementById('reset-pw-name').textContent = name;
+  document.getElementById('reset-pw-input').value = '';
+  document.getElementById('reset-pw-error').classList.add('hidden');
+  const modal = document.getElementById('reset-pw-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('reset-pw-input').focus();
+}
+
+function closeResetPwModal() {
+  const modal = document.getElementById('reset-pw-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('reset-pw-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('reset-pw-id').value;
+  const pw = document.getElementById('reset-pw-input').value;
+  const errorEl = document.getElementById('reset-pw-error');
+  errorEl.classList.add('hidden');
+
+  if (pw.length < 8) {
+    errorEl.textContent = 'Password must be at least 8 characters.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/customers/${id}/reset-password`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ newPassword: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    closeResetPwModal();
+    showToast('Password reset successfully.');
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// ── Delete Customer ─────────────────────────────────────────────────────────
+async function deleteCustomer(id, name) {
+  if (!confirm(`Are you sure you want to permanently delete "${name}"?\n\nThis will also remove all their menus and data. This action cannot be undone.`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/customers/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete');
+    closeDrawer();
+    showToast(data.message || 'Customer deleted.');
+    await loadCustomers();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// ── Export CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!displayedCustomers.length) { showToast('No customers to export.', 'error'); return; }
+
+  const headers = ['ID', 'Business Name', 'Email', 'Contact Name', 'Phone', 'Address', 'City', 'Country', 'Status', 'Menus', 'Scans', 'Joined', 'Last Login'];
+  const rows = displayedCustomers.map(c => [
+    c.id,
+    csvEscape(c.business_name),
+    csvEscape(c.email),
+    csvEscape(c.contact_name),
+    csvEscape(c.phone),
+    csvEscape(c.address),
+    csvEscape(c.city),
+    csvEscape(c.country),
+    c.status,
+    c.menu_count || 0,
+    c.total_scans || 0,
+    c.created_at || '',
+    c.last_login || ''
+  ]);
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `customers-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`Exported ${displayedCustomers.length} customers.`);
+}
+
+function csvEscape(str) {
+  if (!str) return '';
+  str = String(str);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+// ── Event Listeners ─────────────────────────────────────────────────────────
+document.getElementById('filter-status').addEventListener('change', loadCustomers);
+document.getElementById('search-input').addEventListener('input', applyFilters);
+document.getElementById('sort-by').addEventListener('change', applyFilters);
 document.getElementById('refresh-btn').addEventListener('click', loadCustomers);
 
-// Helpers
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeDrawer();
+    closeEditModal();
+    closeResetPwModal();
+  }
+});
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
@@ -361,12 +955,15 @@ function escapeHtml(str) {
 
 function formatDate(isoStr) {
   if (!isoStr) return '—';
-  return new Date(isoStr).toLocaleDateString('en-US', { 
-    year: 'numeric', month: 'short', day: 'numeric' 
-  });
+  return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-// Init
+function formatDateTime(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
 checkAuth();
 </script>
 

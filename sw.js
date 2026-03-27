@@ -1,9 +1,9 @@
 // Service Worker for aggressive caching and offline functionality
 // Version: 1.2.0 - Increment when updating cache strategy
 
-const CACHE_NAME = 'restorder-v1.2.0';
-const STATIC_CACHE = 'static-v1.2.0';
-const DYNAMIC_CACHE = 'dynamic-v1.2.0';
+const CACHE_NAME = 'restorder-v1.3.0';
+const STATIC_CACHE = 'static-v1.3.0';
+const DYNAMIC_CACHE = 'dynamic-v1.3.0';
 
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
@@ -22,7 +22,7 @@ const CACHE_STRATEGIES = {
   static: ['/index.html', '/menu.html', '/admin.html', '/sw.js'],
   
   // API calls - network first, cache fallback for offline
-  api: ['/api/menus', '/api/qr'],
+  api: ['/api/'],
   
   // External resources - cache first
   external: ['fonts.googleapis.com', 'fonts.gstatic.com']

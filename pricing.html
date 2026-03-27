@@ -7,7 +7,7 @@
   <meta name="description" content="Free forever plan available. Professional at $39/mo, Enterprise at $99/mo. No contracts, cancel anytime. 30-day money-back guarantee.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
   
   <style>
@@ -24,17 +24,29 @@
       --border: #e7e5e4;
       --surface: #ffffff;
       --gradient-1: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      --gradient-mesh: radial-gradient(at 40% 20%, #fef3c7 0px, transparent 50%), radial-gradient(at 80% 0%, #fed7aa 0px, transparent 50%), radial-gradient(at 0% 50%, #fecaca 0px, transparent 50%);
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
       --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
     }
     
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      line-height: 1.6;
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.65;
       color: var(--text);
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
     }
     
     .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
@@ -777,6 +789,11 @@
       .comparison-table { font-size: 14px; }
       .comparison-table th, .comparison-table td { padding: 12px; }
     }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -799,7 +816,7 @@
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <span class="material-symbols-outlined" style="font-size: 16px;">rocket_launch</span>
-          Start Free Trial
+          Get Started
         </a>
       </div>
       
@@ -829,7 +846,7 @@
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <span class="material-symbols-outlined" style="font-size: 18px;">rocket_launch</span>
-          Start Free Trial
+          Get Started
         </a>
       </div>
     </div>
@@ -839,7 +856,7 @@
   <section class="hero-pricing">
     <div class="container">
       <h1>Simple, Transparent Pricing</h1>
-      <p>Start free, upgrade as you grow. No contracts, cancel anytime. Save up to 20% with annual billing.</p>
+      <p>Start free, upgrade as you grow. No contracts, cancel anytime. Save with annual billing.</p>
       
       <div class="billing-toggle">
         <button class="active" id="monthlyBtn">Monthly</button>
@@ -851,90 +868,11 @@
   <!-- Pricing Cards -->
   <section class="pricing-section">
     <div class="container">
-      <div class="pricing-grid">
-        <!-- Free Plan -->
-        <div class="pricing-card">
-          <h3 class="plan-name">Starter</h3>
-          <p class="plan-description">Perfect for getting started with digital menus</p>
-          
-          <div class="plan-price">
-            <span class="current-price">$0</span>
-            <span class="price-period">/month</span>
-          </div>
-          <p class="price-note">Free forever</p>
-          
-          <a href="/register" class="plan-cta secondary">Get Started Free</a>
-          
-          <ul class="plan-features">
-            <li><span class="check material-symbols-outlined">check_circle</span> 1 Digital Menu</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> QR Code Generation</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Basic Analytics</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Mobile Optimized</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Up to 50 Menu Items</li>
-            <li><span class="cross material-symbols-outlined">cancel</span> Real-time Updates</li>
-            <li><span class="cross material-symbols-outlined">cancel</span> Custom Branding</li>
-            <li><span class="cross material-symbols-outlined">cancel</span> Advanced Analytics</li>
-            <li><span class="cross material-symbols-outlined">cancel</span> Priority Support</li>
-          </ul>
-        </div>
-        
-        <!-- Professional Plan -->
-        <div class="pricing-card popular">
-          <div class="popular-badge">⭐ MOST POPULAR</div>
-          <h3 class="plan-name">Professional</h3>
-          <p class="plan-description">Best for single-location restaurants & cafes</p>
-          
-          <div class="plan-price">
-            <span class="old-price monthly-price">$99</span>
-            <span class="current-price monthly-price">$39</span>
-            <span class="current-price annual-price" style="display:none;">$31</span>
-            <span class="price-period">/month</span>
-          </div>
-          <p class="price-note monthly-note">SAVE $720/year vs competitors</p>
-          <p class="price-note annual-note" style="display:none;">Billed annually ($372/year)</p>
-          
-          <a href="/register" class="plan-cta primary">Start 14-Day Free Trial</a>
-          
-          <ul class="plan-features">
-            <li><span class="check material-symbols-outlined">check_circle</span> Unlimited Menu Items</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Real-time Menu Updates</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Custom Branding & Colors</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Advanced Analytics</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> QR Code Customization</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Multi-language Support</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Image Optimization</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Email Support (24h)</li>
-            <li><span class="cross material-symbols-outlined">cancel</span> Multi-location Support</li>
-          </ul>
-        </div>
-        
-        <!-- Enterprise Plan -->
-        <div class="pricing-card">
-          <h3 class="plan-name">Enterprise</h3>
-          <p class="plan-description">For chains & multi-location businesses</p>
-          
-          <div class="plan-price">
-            <span class="old-price monthly-price">$249</span>
-            <span class="current-price monthly-price">$99</span>
-            <span class="current-price annual-price" style="display:none;">$79</span>
-            <span class="price-period">/month</span>
-          </div>
-          <p class="price-note monthly-note">SAVE $1,800/year vs competitors</p>
-          <p class="price-note annual-note" style="display:none;">Billed annually ($948/year)</p>
-          
-          <a href="/register" class="plan-cta primary">Start 14-Day Free Trial</a>
-          
-          <ul class="plan-features">
-            <li><span class="check material-symbols-outlined">check_circle</span> Everything in Professional</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Up to 10 Locations</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Centralized Management</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> White-Label Options</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> API Access</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Custom Integrations</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Dedicated Account Manager</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> Priority Support (2h)</li>
-            <li><span class="check material-symbols-outlined">check_circle</span> SLA Guarantee (99.9%)</li>
-          </ul>
+      <div class="pricing-grid" id="pricing-grid">
+        <!-- Plans loaded dynamically from API -->
+        <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+          <span class="material-symbols-outlined" style="font-size: 48px; animation: spin 1s linear infinite; color: var(--primary);">progress_activity</span>
+          <p style="margin-top: 16px; color: var(--text-light);">Loading plans...</p>
         </div>
       </div>
     </div>
@@ -962,12 +900,12 @@
             <tr>
               <td>Number of Menus</td>
               <td class="feature-value">1</td>
-              <td class="feature-value">Unlimited</td>
+              <td class="feature-value">5</td>
               <td class="feature-value">Unlimited</td>
             </tr>
             <tr>
               <td>Menu Items</td>
-              <td class="feature-value">Up to 50</td>
+              <td class="feature-value">Unlimited</td>
               <td class="feature-value">Unlimited</td>
               <td class="feature-value">Unlimited</td>
             </tr>
@@ -985,7 +923,7 @@
             </tr>
             <tr>
               <td>Real-time Updates</td>
-              <td><span class="cross-icon material-symbols-outlined">cancel</span></td>
+              <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
             </tr>
@@ -995,13 +933,13 @@
             </tr>
             <tr>
               <td>Custom Branding</td>
-              <td><span class="cross-icon material-symbols-outlined">cancel</span></td>
+              <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
             </tr>
             <tr>
               <td>Custom Colors & Fonts</td>
-              <td><span class="cross-icon material-symbols-outlined">cancel</span></td>
+              <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
               <td><span class="check-icon material-symbols-outlined">check_circle</span></td>
             </tr>
@@ -1070,8 +1008,8 @@
             <tr>
               <td>SLA Guarantee</td>
               <td><span class="cross-icon material-symbols-outlined">cancel</span></td>
-              <td><span class="cross-icon material-symbols-outlined">cancel</span></td>
               <td class="feature-value">99.9% uptime</td>
+              <td class="feature-value">99.99% uptime</td>
             </tr>
             
             <tr class="feature-category">
@@ -1080,8 +1018,8 @@
             <tr>
               <td>Number of Locations</td>
               <td class="feature-value">1</td>
-              <td class="feature-value">1</td>
-              <td class="feature-value">Up to 10</td>
+              <td class="feature-value">5</td>
+              <td class="feature-value">Unlimited</td>
             </tr>
             <tr>
               <td>Centralized Management</td>
@@ -1119,8 +1057,8 @@
       
       <div class="faq-grid">
         <div class="faq-item">
-          <h3>Do I need a credit card for the free trial?</h3>
-          <p>No! Start your 14-day free trial without entering any payment information. We only ask for a credit card if you decide to upgrade to a paid plan.</p>
+          <h3>Do I need a credit card to sign up?</h3>
+          <p>No! Get started with just your email. We only ask for a credit card when you choose a paid plan.</p>
         </div>
         
         <div class="faq-item">
@@ -1259,28 +1197,114 @@
     // Billing toggle
     const monthlyBtn = document.getElementById('monthlyBtn');
     const annualBtn = document.getElementById('annualBtn');
-    const monthlyPrices = document.querySelectorAll('.monthly-price');
-    const annualPrices = document.querySelectorAll('.annual-price');
-    const monthlyNotes = document.querySelectorAll('.monthly-note');
-    const annualNotes = document.querySelectorAll('.annual-note');
+    let isAnnual = false;
+    let loadedPlans = [];
+    
+    // Plan metadata for display
+    const planDescriptions = {
+      starter: 'Perfect for getting started with digital menus',
+      professional: 'Complete solution for growing restaurants',
+      enterprise: 'For chains & multi-location businesses'
+    };
+    
+    const planOriginalPrices = {
+      professional: 99,
+      enterprise: 249
+    };
+    
+    // Dynamic Pricing from API
+    async function loadDynamicPricing() {
+      const grid = document.getElementById('pricing-grid');
+      if (!grid) return;
+      
+      try {
+        const res = await fetch('/api/public/plans');
+        if (!res.ok) throw new Error('Failed to fetch plans');
+        loadedPlans = await res.json();
+        
+        if (!loadedPlans.length) throw new Error('No plans available');
+        renderPricingCards();
+      } catch (err) {
+        console.error('Error loading plans:', err);
+        grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;color:var(--text-light);">Unable to load pricing. Please refresh the page.</p>';
+      }
+    }
+    
+    function renderPricingCards() {
+      const grid = document.getElementById('pricing-grid');
+      grid.innerHTML = '';
+      
+      loadedPlans.forEach(plan => {
+        const isPopular = plan.name === 'professional';
+        const features = Array.isArray(plan.features) ? plan.features : (typeof plan.features === 'string' ? JSON.parse(plan.features || '[]') : []);
+        const desc = planDescriptions[plan.name] || plan.description || 'Great for your business';
+        const origPrice = planOriginalPrices[plan.name] || 0;
+        const monthlyPrice = plan.price;
+        const hasAnnual = plan.annual_price > 0;
+        const annualMonthly = hasAnnual ? Math.round(plan.annual_price / 12) : monthlyPrice;
+        const displayPrice = isAnnual && hasAnnual ? annualMonthly : monthlyPrice;
+        const annualTotal = hasAnnual ? plan.annual_price : 0;
+        const savingsPercent = hasAnnual ? Math.round((1 - plan.annual_price / (monthlyPrice * 12)) * 100) : 0;
+        
+        let ctaHtml = '';
+        if (plan.name === 'enterprise') {
+          ctaHtml = `<a href="mailto:sales@restorder.online" class="plan-cta secondary">Contact Sales</a>`;
+        } else if (plan.price === 0) {
+          ctaHtml = `<a href="/register" class="plan-cta secondary">Get Started Free</a>`;
+        } else {
+          ctaHtml = `<a href="/register?plan=${plan.name}${isAnnual && hasAnnual ? '&billing=annual' : ''}" class="plan-cta primary">Get Started</a>`;
+        }
+        
+        let priceNote = '';
+        if (plan.price === 0) {
+          priceNote = 'Free forever';
+        } else if (isAnnual && hasAnnual) {
+          const monthlySavings = (monthlyPrice * 12) - annualTotal;
+          priceNote = `Billed $${annualTotal}/year • Save $${monthlySavings}/year`;
+        } else {
+          priceNote = origPrice ? `SAVE $${(origPrice - monthlyPrice) * 12}/year vs competitors` : '';
+        }
+        
+        const card = document.createElement('div');
+        card.className = 'pricing-card' + (isPopular ? ' popular' : '');
+        card.innerHTML = `
+          ${isPopular ? '<div class="popular-badge">⭐ MOST POPULAR</div>' : ''}
+          <h3 class="plan-name">${plan.display_name}</h3>
+          <p class="plan-description">${desc}</p>
+          
+          <div class="plan-price">
+            ${isAnnual && hasAnnual ? `<span class="old-price">$${monthlyPrice}</span>` : (origPrice && !isAnnual ? `<span class="old-price">$${origPrice}</span>` : '')}
+            <span class="current-price">$${displayPrice}</span>
+            <span class="price-period">/${plan.interval || 'month'}</span>
+          </div>
+          <p class="price-note">${priceNote}</p>
+          
+          ${ctaHtml}
+          
+          <ul class="plan-features">
+            ${features.map(f => `<li><span class="check material-symbols-outlined">check_circle</span> ${f}</li>`).join('')}
+          </ul>
+        `;
+        grid.appendChild(card);
+      });
+    }
     
     annualBtn.addEventListener('click', () => {
       monthlyBtn.classList.remove('active');
       annualBtn.classList.add('active');
-      monthlyPrices.forEach(el => el.style.display = 'none');
-      annualPrices.forEach(el => el.style.display = 'inline');
-      monthlyNotes.forEach(el => el.style.display = 'none');
-      annualNotes.forEach(el => el.style.display = 'block');
+      isAnnual = true;
+      if (loadedPlans.length) renderPricingCards();
     });
     
     monthlyBtn.addEventListener('click', () => {
       annualBtn.classList.remove('active');
       monthlyBtn.classList.add('active');
-      annualPrices.forEach(el => el.style.display = 'none');
-      monthlyPrices.forEach(el => el.style.display = 'inline');
-      annualNotes.forEach(el => el.style.display = 'none');
-      monthlyNotes.forEach(el => el.style.display = 'block');
+      isAnnual = false;
+      if (loadedPlans.length) renderPricingCards();
     });
+    
+    // Load pricing on page load
+    document.addEventListener('DOMContentLoaded', loadDynamicPricing);
   </script>
 </body>
 </html>

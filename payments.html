@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Payments – RestOrder Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: { "primary": "#2dd4bf", "bg-dark": "#0d1b2a", "surface": "#132639" },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+  .badge-completed { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+  .badge-pending { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+  .badge-failed { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+  .badge-refunded { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- Login Overlay -->
+<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">lock</span>
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">Admin Access</h2>
+        <p class="text-slate-400 text-xs">Sign in with your admin credentials</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+      <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Sign In</button>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid email or password.</p>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+  <div class="flex items-center gap-3 mb-10">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-lg">RestOrder Admin</h1>
+      <p class="text-xs text-slate-400">Internal Management</p>
+    </div>
+  </div>
+  <nav class="space-y-2 flex-1">
+    <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="text-sm font-medium">Dashboard</span>
+    </a>
+    <a href="/customers" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <span class="text-sm font-medium">Customers</span>
+    </a>
+    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
+    <a href="/subscriptions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="/payments" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
+    </a>
+    <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">analytics</span>
+      <span class="text-sm font-medium">Analytics</span>
+    </a>
+    <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <span class="text-sm font-medium">Settings</span>
+    </a>
+    <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">shield_person</span>
+      <span class="text-sm font-medium">Admin Users</span>
+    </a>
+  </nav>
+  <div class="pt-4 border-t border-slate-700 space-y-2">
+    <div id="user-info" class="hidden px-4 py-2 rounded-xl bg-bg-dark/50">
+      <p class="text-sm font-medium text-slate-200 truncate" id="user-name"></p>
+      <p class="text-xs text-slate-400 truncate" id="user-role"></p>
+    </div>
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="text-sm font-medium">Logout</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-auto">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h2 class="text-3xl font-bold">Payments</h2>
+          <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+        </div>
+        <p class="text-slate-400">Track all payment transactions across subscriptions</p>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="openNewPaymentModal()" class="px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          <span class="text-sm">New Payment</span>
+        </button>
+        <button onclick="exportCSV()" class="px-4 py-2.5 bg-surface border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-bg-dark transition flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">download</span>
+          <span class="text-sm">Export CSV</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-slate-400 text-sm">Total Payments</span>
+        <span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+      </div>
+      <p class="text-3xl font-bold" id="stat-total">0</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-slate-400 text-sm">Completed</span>
+        <span class="material-symbols-outlined text-green-500 text-[20px]">check_circle</span>
+      </div>
+      <p class="text-3xl font-bold text-green-500" id="stat-completed">0</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-slate-400 text-sm">Total Revenue</span>
+        <span class="material-symbols-outlined text-amber-500 text-[20px]">attach_money</span>
+      </div>
+      <p class="text-3xl font-bold text-amber-500" id="stat-revenue">$0</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-slate-400 text-sm">Pending</span>
+        <span class="material-symbols-outlined text-yellow-500 text-[20px]">schedule</span>
+      </div>
+      <p class="text-3xl font-bold text-yellow-500" id="stat-pending">0</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-surface border border-slate-700 rounded-2xl p-6 mb-6">
+    <div class="flex gap-4 items-end flex-wrap">
+      <div class="flex-1 min-w-[180px]">
+        <label class="block text-sm font-medium text-slate-300 mb-2">Status</label>
+        <select id="filter-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="all">All Statuses</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Failed</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-sm font-medium text-slate-300 mb-2">Search</label>
+        <div class="relative">
+          <span class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">search</span>
+          <input id="search-input" type="text" placeholder="Search by restaurant, method..."
+            class="w-full pl-10 pr-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+      </div>
+      <button id="refresh-btn" class="px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">refresh</span>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="bg-surface border border-slate-700 rounded-2xl overflow-hidden">
+    <div class="p-6 border-b border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-bold">All Payments</h3>
+      <span id="result-count" class="text-sm text-slate-400"></span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-bg-dark/50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Restaurant</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Plan</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Method</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="payments-tbody" class="divide-y divide-slate-700">
+          <tr>
+            <td colspan="8" class="px-6 py-12 text-center text-slate-400">
+              <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30 spin">progress_activity</span>
+              Loading payments...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Update Payment Modal -->
+<div id="update-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-sm shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold">Update Payment</h3>
+      <button onclick="closeUpdateModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="update-form" class="space-y-4">
+      <input type="hidden" id="update-id" />
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Status</label>
+        <select id="update-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="failed">Failed</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Notes</label>
+        <textarea id="update-notes" rows="3" placeholder="Optional notes..."
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+      </div>
+      <p id="update-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Save</button>
+        <button type="button" onclick="closeUpdateModal()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- New Payment Modal -->
+<div id="new-payment-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-md shadow-2xl mx-4">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold">New Payment</h3>
+      <button onclick="closeNewPaymentModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="new-payment-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Subscription ID</label>
+        <input id="np-sub-id" type="number" min="1" required placeholder="Enter subscription ID"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        <p class="text-xs text-slate-500 mt-1">Find the ID in the Subscriptions page (Sub # column).</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Amount (USD)</label>
+          <input id="np-amount" type="number" min="0" step="0.01" required
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Status</label>
+          <select id="np-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="completed">Completed (activate sub)</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Payment Method</label>
+        <select id="np-method" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="manual">Manual</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+          <option value="crypto">Crypto</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Notes</label>
+        <textarea id="np-notes" rows="2" placeholder="Optional reference, receipt number..."
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+      </div>
+      <p id="np-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Create Payment</button>
+        <button type="button" onclick="closeNewPaymentModal()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ── State ───────────────────────────────────────────────────────────────────
+let isAuthenticated = false;
+let adminToken = null;
+let currentUser = null;
+let allPayments = [];
+let displayedPayments = [];
+
+// ── User UI ─────────────────────────────────────────────────────────────────
+function applyUserUI(user) {
+  currentUser = user;
+  if (!user) return;
+  document.getElementById('user-name').textContent = user.name || user.email;
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-info').classList.add('flex', 'flex-col');
+  if (user.role === 'super_admin') {
+    document.getElementById('nav-admin-users').classList.remove('hidden');
+    document.getElementById('nav-admin-users').classList.add('flex');
+  }
+}
+
+// ── Auth ────────────────────────────────────────────────────────────────────
+async function checkAuth() {
+  try {
+    const token = localStorage.getItem('admin-token');
+    if (!token) return;
+    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
+      isAuthenticated = true;
+      adminToken = token;
+      document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
+      loadPayments();
+    }
+  } catch (err) { console.error('Auth check failed:', err); }
+}
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.classList.add('hidden');
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      isAuthenticated = true;
+      adminToken = data.token;
+      localStorage.setItem('admin-token', adminToken);
+      document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
+      loadPayments();
+    } else {
+      errorEl.textContent = data.error || 'Invalid email or password.';
+      errorEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errorEl.textContent = 'Login failed. Please try again.';
+    errorEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('login-email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+document.getElementById('login-password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  localStorage.removeItem('admin-token');
+  location.reload();
+});
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function authHeaders() {
+  return { 'x-admin-token': adminToken, 'Content-Type': 'application/json' };
+}
+
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = `fixed bottom-6 right-6 z-50 ${type === 'error' ? 'bg-red-500/90' : 'bg-primary/90'} text-white px-6 py-3 rounded-xl shadow-lg font-medium text-sm`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateTime(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// ── Load Payments ───────────────────────────────────────────────────────────
+async function loadPayments() {
+  const status = document.getElementById('filter-status').value;
+  try {
+    const res = await fetch(`/api/admin/payments?status=${status}`, { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load payments');
+    allPayments = await res.json();
+    applyFilters();
+  } catch (err) {
+    console.error('Error loading payments:', err);
+    document.getElementById('payments-tbody').innerHTML = `
+      <tr><td colspan="8" class="px-6 py-12 text-center text-red-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">error</span>
+        Failed to load payments. Please refresh.
+      </td></tr>`;
+  }
+}
+
+function applyFilters() {
+  const query = document.getElementById('search-input').value.toLowerCase();
+  let results = allPayments;
+  if (query) {
+    results = results.filter(p =>
+      (p.restaurant_name || '').toLowerCase().includes(query) ||
+      (p.plan_name || '').toLowerCase().includes(query) ||
+      (p.payment_method || '').toLowerCase().includes(query) ||
+      (p.notes || '').toLowerCase().includes(query) ||
+      String(p.id).includes(query)
+    );
+  }
+  displayedPayments = results;
+  renderPayments(results);
+  updateStats();
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+function renderPayments(payments) {
+  const tbody = document.getElementById('payments-tbody');
+  document.getElementById('result-count').textContent = `${payments.length} payment${payments.length !== 1 ? 's' : ''}`;
+
+  if (!payments.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="8" class="px-6 py-12 text-center text-slate-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">inbox</span>
+        No payments found.
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = payments.map(p => `
+    <tr class="hover:bg-bg-dark/30 transition">
+      <td class="px-6 py-4 text-sm text-slate-400">#${p.id}</td>
+      <td class="px-6 py-4">
+        <div class="font-medium">${escapeHtml(p.restaurant_name)}</div>
+        <div class="text-xs text-slate-400">Sub #${p.subscription_id}</div>
+      </td>
+      <td class="px-6 py-4 text-sm">${escapeHtml(p.plan_name)}</td>
+      <td class="px-6 py-4">
+        <span class="font-semibold">$${parseFloat(p.amount).toFixed(2)}</span>
+        <span class="text-xs text-slate-400 ml-1">${p.currency}</span>
+      </td>
+      <td class="px-6 py-4 text-sm capitalize">${escapeHtml(p.payment_method)}</td>
+      <td class="px-6 py-4">
+        <span class="badge badge-${p.status}">${p.status}</span>
+      </td>
+      <td class="px-6 py-4">
+        <div class="text-sm">${formatDate(p.created_at)}</div>
+        ${p.paid_at ? `<div class="text-xs text-slate-400">Paid: ${formatDate(p.paid_at)}</div>` : ''}
+      </td>
+      <td class="px-6 py-4 text-right">
+        <button onclick="openUpdateModal(${p.id})" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-primary transition" title="Update">
+          <span class="material-symbols-outlined text-[18px]">edit</span>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── Stats ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  const all = allPayments;
+  const completed = all.filter(p => p.status === 'completed');
+  const pending = all.filter(p => p.status === 'pending');
+  const revenue = completed.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-completed').textContent = completed.length;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(0)}`;
+}
+
+// ── Update Payment Modal ────────────────────────────────────────────────────
+function openUpdateModal(id) {
+  const p = allPayments.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('update-id').value = p.id;
+  document.getElementById('update-status').value = p.status;
+  document.getElementById('update-notes').value = p.notes || '';
+  document.getElementById('update-error').classList.add('hidden');
+  const modal = document.getElementById('update-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeUpdateModal() {
+  const modal = document.getElementById('update-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('update-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('update-id').value;
+  const errorEl = document.getElementById('update-error');
+  errorEl.classList.add('hidden');
+  try {
+    const res = await fetch(`/api/admin/payments/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        status: document.getElementById('update-status').value,
+        notes: document.getElementById('update-notes').value.trim()
+      })
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Update failed'); }
+    closeUpdateModal();
+    showToast('Payment updated.');
+    loadPayments();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// ── Export CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!displayedPayments.length) { showToast('No payments to export.', 'error'); return; }
+  const headers = ['ID', 'Restaurant', 'Plan', 'Amount', 'Currency', 'Method', 'Status', 'Paid At', 'Notes', 'Created'];
+  const rows = displayedPayments.map(p => [
+    p.id, csvEsc(p.restaurant_name), csvEsc(p.plan_name),
+    p.amount, p.currency, p.payment_method, p.status,
+    p.paid_at || '', csvEsc(p.notes), p.created_at || ''
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `payments-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`Exported ${displayedPayments.length} payments.`);
+}
+
+function csvEsc(str) {
+  if (!str) return '';
+  str = String(str);
+  return str.includes(',') || str.includes('"') || str.includes('\n') ? '"' + str.replace(/"/g, '""') + '"' : str;
+}
+
+// ── Event Listeners ─────────────────────────────────────────────────────────
+document.getElementById('filter-status').addEventListener('change', loadPayments);
+document.getElementById('search-input').addEventListener('input', applyFilters);
+document.getElementById('refresh-btn').addEventListener('click', loadPayments);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeUpdateModal(); closeNewPaymentModal(); } });
+
+// ── New Payment ─────────────────────────────────────────────────────────────
+function openNewPaymentModal() {
+  document.getElementById('np-sub-id').value = '';
+  document.getElementById('np-amount').value = '';
+  document.getElementById('np-status').value = 'completed';
+  document.getElementById('np-method').value = 'manual';
+  document.getElementById('np-notes').value = '';
+  document.getElementById('np-error').classList.add('hidden');
+  const modal = document.getElementById('new-payment-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeNewPaymentModal() {
+  const modal = document.getElementById('new-payment-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('new-payment-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('np-error');
+  errorEl.classList.add('hidden');
+  const payload = {
+    subscription_id: parseInt(document.getElementById('np-sub-id').value),
+    amount: parseFloat(document.getElementById('np-amount').value),
+    payment_method: document.getElementById('np-method').value,
+    status: document.getElementById('np-status').value,
+    notes: document.getElementById('np-notes').value.trim(),
+    currency: 'USD'
+  };
+  try {
+    const res = await fetch('/api/admin/payments', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to create payment.'); }
+    closeNewPaymentModal();
+    const msg = payload.status === 'completed'
+      ? 'Payment created — subscription is now active!'
+      : 'Pending payment created.';
+    showToast(msg);
+    loadPayments();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// ── Init ────────────────────────────────────────────────────────────────────
+checkAuth();
+</script>
+
+</body>
+</html>

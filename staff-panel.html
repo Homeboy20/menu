@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Staff Panel – RestOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          primary:         '#c2410c',
+          'primary-light': '#ea580c',
+          'bg-dark':       '#fafaf9',
+          surface:         '#ffffff',
+        },
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+      },
+    },
+  };
+</script>
+<style>
+  /* ── CSS custom properties (light default = customer dashboard palette) ── */
+  :root {
+    --bg:           #fafaf9;  /* stone-50  */
+    --surface:      #ffffff;
+    --surface-2:    #f5f5f4;  /* stone-100 */
+    --border:       #e7e5e4;  /* stone-200 */
+    --text:         #1c1917;  /* stone-900 */
+    --text-muted:   #78716c;  /* stone-500 */
+    --text-light:   #a8a29e;  /* stone-400 */
+    --primary:      #c2410c;
+    --primary-l:    #ea580c;
+    --chip-pending-bg:   #fef3c7; --chip-pending-fg:   #92400e;
+    --chip-prep-bg:      #dbeafe; --chip-prep-fg:      #1e40af;
+    --chip-ready-bg:     #d1fae5; --chip-ready-fg:     #065f46;
+    --chip-done-bg:      #f0fdf4; --chip-done-fg:      #15803d;
+    --chip-done-border:  #bbf7d0;
+    --chip-dis-bg:       #f5f5f4; --chip-dis-fg:       #a8a29e;
+  }
+  html.dark {
+    --bg:           #1c1917;
+    --surface:      #292524;  /* stone-800 */
+    --surface-2:    #3d3734;  /* stone-700 */
+    --border:       #57534e;  /* stone-600 */
+    --text:         #fafaf9;
+    --text-muted:   #d6d3d1;  /* stone-300 */
+    --text-light:   #a8a29e;
+    --primary:      #ea580c;
+    --primary-l:    #fb923c;
+    --chip-pending-bg:   #451a03; --chip-pending-fg:   #fed7aa;
+    --chip-prep-bg:      #1e3a5f; --chip-prep-fg:      #bfdbfe;
+    --chip-ready-bg:     #14532d; --chip-ready-fg:     #bbf7d0;
+    --chip-done-bg:      #14532d; --chip-done-fg:      #86efac;
+    --chip-done-border:  #166534;
+    --chip-dis-bg:       #3d3734; --chip-dis-fg:       #78716c;
+  }
+
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+
+  /* Apply vars to common Tailwind-generated classes */
+  .bg-white          { background: var(--surface) !important; }
+  .bg-stone-50       { background: var(--bg)      !important; }
+  .bg-bg             { background: var(--bg)      !important; }
+  .border-stone-200  { border-color: var(--border) !important; }
+  .border-stone-100  { border-color: var(--border) !important; }
+  .text-stone-900    { color: var(--text)       !important; }
+  .text-stone-700    { color: var(--text)       !important; }
+  .text-stone-600    { color: var(--text-muted) !important; }
+  .text-stone-500    { color: var(--text-muted) !important; }
+  .text-stone-400    { color: var(--text-light) !important; }
+  .text-stone-300    { color: var(--text-light) !important; }
+  .hover\:bg-stone-50:hover { background: var(--surface-2) !important; }
+  .hover\:bg-stone-100:hover { background: var(--surface-2) !important; }
+  .divide-stone-100 > * + * { border-color: var(--border) !important; }
+
+  /* Inputs & selects */
+  select, input {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+  }
+  select option { background: var(--surface); color: var(--text); }
+
+  /* Primary color via vars */
+  .text-primary  { color: var(--primary) !important; }
+  .bg-primary    { background: var(--primary) !important; }
+  .from-primary  { --tw-gradient-from: var(--primary) !important; }
+  .to-primary-light { --tw-gradient-to: var(--primary-l) !important; }
+  .focus\:ring-primary:focus { --tw-ring-color: var(--primary) !important; }
+  .hover\:text-primary:hover { color: var(--primary) !important; }
+
+  /* Specific role-bar gradient */
+  #role-bar { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%) !important; }
+
+  /* Status chips via vars */
+  .chip-pending   { background: var(--chip-pending-bg); color: var(--chip-pending-fg); }
+  .chip-preparing { background: var(--chip-prep-bg);    color: var(--chip-prep-fg); }
+  .chip-ready     { background: var(--chip-ready-bg);   color: var(--chip-ready-fg); }
+  .chip-completed { background: var(--chip-done-bg);    color: var(--chip-done-fg); border: 1px solid var(--chip-done-border); }
+  .chip-dismissed { background: var(--chip-dis-bg);     color: var(--chip-dis-fg); }
+
+  /* Alert card override in dark */
+  html.dark .border-orange-300  { border-color: #9a3412 !important; }
+  html.dark .bg-orange-50\/30   { background: rgba(124,45,18,.2) !important; }
+  html.dark .bg-orange-100      { background: #431407 !important; }
+  html.dark .text-orange-600    { color: #fb923c !important; }
+  html.dark .bg-green-200       { background: #14532d !important; }
+  html.dark .border-green-200   { border-color: #166534 !important; }
+
+  /* Theme toggle button */
+  #theme-toggle { transition: transform .3s; }
+  #theme-toggle:hover { transform: rotate(20deg); }
+
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tab-active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-l) 100%);
+    color: #fff !important;
+  }
+  .tab-active .material-symbols-outlined { color: #fff !important; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card-in { animation: slideIn .25s ease forwards; }
+
+  .alert-dot { width:8px; height:8px; background:#dc2626; border-radius:50%;
+    animation: ap 1.8s infinite; }
+  @keyframes ap {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .6; transform: scale(1.4); }
+  }
+</style>
+</head>
+<body class="bg-bg text-stone-900 min-h-screen flex flex-col">
+
+<!-- ── Top bar ─────────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-30 bg-white border-b border-stone-200 shadow-sm">
+  <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <!-- Logo + title -->
+    <div class="flex items-center gap-3">
+      <a href="/" class="size-9 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0">
+        <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      </a>
+      <div class="hidden sm:block">
+        <p class="font-bold text-sm text-stone-900 leading-tight">Staff Panel</p>
+        <p class="text-xs text-stone-400" id="header-business">RestOrder</p>
+      </div>
+    </div>
+
+    <!-- Menu selector -->
+    <div class="flex-1 max-w-xs">
+      <select id="menu-select"
+        class="w-full text-sm border border-stone-300 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
+        <option value="">Loading menus…</option>
+      </select>
+    </div>
+
+    <!-- Staff badge + logout -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <div class="hidden sm:flex flex-col items-end">
+        <span class="text-sm font-semibold text-stone-900" id="header-name">Staff</span>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full" id="header-role-badge"></span>
+      </div>
+      <!-- Theme toggle -->
+      <button id="theme-toggle"
+        class="p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition"
+        title="Toggle light/dark theme">
+        <span class="material-symbols-outlined text-[22px]" id="theme-icon">light_mode</span>
+      </button>
+      <button id="logout-btn"
+        class="p-2 rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 transition"
+        title="Sign out">
+        <span class="material-symbols-outlined text-[22px]">logout</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Role info bar ────────────────────────────────────────────────────────── -->
+<div id="role-bar" class="bg-gradient-to-r from-primary to-primary-light text-white px-4 py-2.5 text-center text-sm font-medium hidden">
+  <span class="material-symbols-outlined text-[16px] align-middle mr-1">badge</span>
+  <span id="role-bar-text"></span>
+</div>
+
+<!-- ── Tab navigation ──────────────────────────────────────────────────────── -->
+<nav class="bg-white border-b border-stone-200 sticky top-16 z-20">
+  <div class="max-w-5xl mx-auto px-4">
+    <div class="flex gap-1 py-2" id="tab-nav">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main content ─────────────────────────────────────────────────────────── -->
+<main class="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
+
+  <!-- Orders section -->
+  <section id="section-orders" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-stone-900">Orders</h2>
+      <div class="flex items-center gap-2">
+        <select id="order-status-filter"
+          class="text-sm border border-stone-300 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-primary outline-none transition">
+          <option value="pending">Pending</option>
+          <option value="preparing">Preparing</option>
+          <option value="ready">Ready</option>
+          <option value="completed">Completed</option>
+          <option value="_all">All Active</option>
+        </select>
+        <button onclick="loadOrders()" class="p-2 rounded-xl border border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-primary transition" title="Refresh">
+          <span class="material-symbols-outlined text-[20px]">refresh</span>
+        </button>
+      </div>
+    </div>
+    <div id="orders-container">
+      <div class="p-12 text-center text-stone-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">receipt_long</span>
+        Select a menu to view orders
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts section (Waiter) -->
+  <section id="section-alerts" class="hidden">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-bold text-stone-900">Table Alerts</h2>
+        <span id="alerts-badge" class="hidden bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full"></span>
+      </div>
+      <button onclick="loadAlerts()" class="p-2 rounded-xl border border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-primary transition" title="Refresh">
+        <span class="material-symbols-outlined text-[20px]">refresh</span>
+      </button>
+    </div>
+    <div id="alerts-container">
+      <div class="p-12 text-center text-stone-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">notifications</span>
+        Select a menu to view alerts
+      </div>
+    </div>
+  </section>
+
+  <!-- Summary section (Cashier) -->
+  <section id="section-summary" class="hidden">
+    <h2 class="text-lg font-bold text-stone-900 mb-4">Today's Summary</h2>
+    <div id="summary-container">
+      <div class="p-12 text-center text-stone-400">
+        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">bar_chart</span>
+        Select a menu to view summary
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ── Theme ─────────────────────────────────────────────────────────────────────
+(function() {
+  // Default: light. Respect saved preference only if explicitly set.
+  const saved = localStorage.getItem('staffTheme');
+  if (saved === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
+  // 'light' or null → stay light (no class needed)
+})();
+
+function applyTheme(dark) {
+  const html = document.documentElement;
+  const icon = document.getElementById('theme-icon');
+  if (dark) {
+    html.classList.add('dark');
+    if (icon) icon.textContent = 'dark_mode';
+    localStorage.setItem('staffTheme', 'dark');
+  } else {
+    html.classList.remove('dark');
+    if (icon) icon.textContent = 'light_mode';
+    localStorage.setItem('staffTheme', 'light');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isDark = document.documentElement.classList.contains('dark');
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = isDark ? 'dark_mode' : 'light_mode';
+
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    applyTheme(!document.documentElement.classList.contains('dark'));
+  });
+});
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let customerToken = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
+let staffRole     = (localStorage.getItem('staffRole') || '').toLowerCase();
+let staffName     = localStorage.getItem('staffName') || 'Staff';
+let selectedMenuId = null;
+let menus = [];
+let pollTimer = null;
+
+// ── Role config ───────────────────────────────────────────────────────────────
+const ROLE_CONFIG = {
+  waiter: {
+    label: 'Waiter',
+    color: 'bg-blue-100 text-blue-700',
+    barText: 'Waiter — you can manage orders and respond to table alerts.',
+    tabs: [
+      { id: 'orders',  icon: 'receipt_long',   label: 'Orders'       },
+      { id: 'alerts',  icon: 'notifications',  label: 'Alerts'       },
+    ],
+    defaultStatusFilter: 'pending',
+    allowedStatusTransitions: {
+      pending:    ['preparing'],
+      preparing:  ['ready'],
+      ready:      [],
+      completed:  [],
+    },
+  },
+  cashier: {
+    label: 'Cashier',
+    color: 'bg-green-100 text-green-700',
+    barText: 'Cashier — you can view and complete orders and review daily totals.',
+    tabs: [
+      { id: 'orders',  icon: 'receipt_long',   label: 'Orders'       },
+      { id: 'summary', icon: 'bar_chart',       label: 'Summary'      },
+    ],
+    defaultStatusFilter: '_all',
+    allowedStatusTransitions: {
+      pending:    ['completed'],
+      preparing:  ['completed'],
+      ready:      ['completed'],
+      completed:  [],
+    },
+  },
+};
+
+const STATUS_LABELS = {
+  pending:    'Pending',
+  preparing:  'Preparing',
+  ready:      'Ready',
+  completed:  'Completed',
+};
+const STATUS_ICON = {
+  pending:   'schedule',
+  preparing: 'local_fire_department',
+  ready:     'check_circle',
+  completed: 'done_all',
+};
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatCurrency(amount, currency) {
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency || 'USD' }).format(amount);
+  } catch { return `${currency || '$'}${Number(amount).toFixed(2)}`; }
+}
+
+// ── Auth + init ───────────────────────────────────────────────────────────────
+async function init() {
+  if (!customerToken) { window.location.href = '/login'; return; }
+
+  try {
+    const res = await fetch('/api/customers/check', {
+      headers: { 'x-customer-token': customerToken }
+    });
+    const data = res.ok ? await res.json() : null;
+
+    if (!data?.authenticated || !data.customer?.isStaff) {
+      window.location.href = '/login';
+      return;
+    }
+
+    // Manager gets full menu editor
+    if (data.customer.staffRole === 'manager') {
+      window.location.href = '/menu-editor';
+      return;
+    }
+
+    staffRole = data.customer.staffRole || staffRole;
+    staffName = data.customer.staffName || staffName;
+
+    localStorage.setItem('staffRole', staffRole);
+    localStorage.setItem('staffName', staffName);
+  } catch {
+    window.location.href = '/login';
+    return;
+  }
+
+  const cfg = ROLE_CONFIG[staffRole];
+  if (!cfg) { window.location.href = '/login'; return; }
+
+  // Populate header
+  document.getElementById('header-name').textContent = staffName;
+  const badge = document.getElementById('header-role-badge');
+  badge.textContent = cfg.label;
+  badge.className = `text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.color}`;
+
+  // Role bar
+  const bar = document.getElementById('role-bar');
+  document.getElementById('role-bar-text').textContent = cfg.barText;
+  bar.classList.remove('hidden');
+
+  // Build tabs
+  const nav = document.getElementById('tab-nav');
+  nav.innerHTML = cfg.tabs.map(t => `
+    <button id="tab-btn-${t.id}" onclick="showTab('${t.id}')"
+      class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-all">
+      <span class="material-symbols-outlined text-[18px]">${t.icon}</span>
+      ${t.label}
+      ${t.id === 'alerts' ? '<span id="tab-alert-badge" class="hidden bg-red-600 text-white text-xs font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">0</span>' : ''}
+    </button>
+  `).join('');
+
+  // Set default order filter based on role
+  document.getElementById('order-status-filter').value = cfg.defaultStatusFilter;
+  document.getElementById('order-status-filter').addEventListener('change', loadOrders);
+
+  // Load menus
+  await loadMenus();
+
+  // Show first tab
+  showTab(cfg.tabs[0].id);
+
+  // Start polling
+  startPolling();
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+let currentTab = null;
+function showTab(id) {
+  currentTab = id;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('tab-active');
+    btn.classList.add('text-stone-500', 'hover:text-stone-900', 'hover:bg-stone-50');
+  });
+  const activeBtn = document.getElementById(`tab-btn-${id}`);
+  if (activeBtn) {
+    activeBtn.classList.add('tab-active');
+    activeBtn.classList.remove('text-stone-500', 'hover:text-stone-900', 'hover:bg-stone-50');
+  }
+
+  ['orders', 'alerts', 'summary'].forEach(s => {
+    document.getElementById(`section-${s}`)?.classList.add('hidden');
+  });
+  document.getElementById(`section-${id}`)?.classList.remove('hidden');
+
+  if (id === 'orders')  loadOrders();
+  if (id === 'alerts')  loadAlerts();
+  if (id === 'summary') loadSummary();
+}
+
+// ── Menu selector ─────────────────────────────────────────────────────────────
+async function loadMenus() {
+  try {
+    const res = await fetch('/api/menus', { headers: { 'x-customer-token': customerToken } });
+    if (!res.ok) throw new Error();
+    menus = await res.json();
+  } catch { menus = []; }
+
+  const sel = document.getElementById('menu-select');
+  if (!menus.length) {
+    sel.innerHTML = '<option value="">No menus available</option>';
+    return;
+  }
+  sel.innerHTML = menus.map(m =>
+    `<option value="${escapeHtml(m.id)}">${escapeHtml(m.restaurantName)}</option>`
+  ).join('');
+  selectedMenuId = menus[0].id;
+
+  // Show business name
+  const headerBusiness = document.getElementById('header-business');
+  if (headerBusiness) headerBusiness.textContent = menus[0].restaurantName;
+
+  sel.addEventListener('change', () => {
+    selectedMenuId = sel.value || null;
+    if (currentTab === 'orders')  loadOrders();
+    if (currentTab === 'alerts')  loadAlerts();
+    if (currentTab === 'summary') loadSummary();
+  });
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  const container = document.getElementById('orders-container');
+  if (!selectedMenuId) {
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">receipt_long</span>Select a menu to view orders</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+
+  try {
+    const filterVal = document.getElementById('order-status-filter').value;
+    const cfg = ROLE_CONFIG[staffRole];
+
+    // For "All Active" fetch pending+preparing+ready combined
+    let rows = [];
+    if (filterVal === '_all') {
+      const statuses = ['pending', 'preparing', 'ready'];
+      const results = await Promise.all(statuses.map(s =>
+        fetch(`/api/menus/${selectedMenuId}/orders?status=${s}`, {
+          headers: { 'x-customer-token': customerToken }
+        }).then(r => r.ok ? r.json() : [])
+      ));
+      rows = results.flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } else {
+      const res = await fetch(`/api/menus/${selectedMenuId}/orders?status=${filterVal}`, {
+        headers: { 'x-customer-token': customerToken }
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to load orders');
+      rows = await res.json();
+    }
+
+    if (!rows.length) {
+      container.innerHTML = `
+        <div class="p-12 text-center text-stone-400">
+          <span class="material-symbols-outlined text-[64px] block mb-2 text-stone-300">receipt_long</span>
+          <p class="font-medium text-stone-500">No ${filterVal === '_all' ? 'active' : filterVal} orders</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="space-y-3">${rows.map(order => {
+      const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
+      const transitions = cfg.allowedStatusTransitions[order.status] || [];
+      const actionBtns = transitions.map(nextStatus => `
+        <button onclick="updateOrderStatus(${order.id},'${nextStatus}')"
+          class="px-3 py-1.5 rounded-xl text-xs font-bold border transition
+            ${nextStatus === 'completed'
+              ? 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100'
+              : nextStatus === 'ready'
+              ? 'border-teal-300 bg-teal-50 text-teal-700 hover:bg-teal-100'
+              : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'}">
+          <span class="material-symbols-outlined text-[15px] align-middle mr-0.5">${STATUS_ICON[nextStatus]}</span>
+          Mark ${STATUS_LABELS[nextStatus]}
+        </button>`).join('');
+
+      return `
+        <div class="bg-white border border-stone-200 rounded-2xl p-5 card-in shadow-sm">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-bold text-stone-900 text-base">#${order.id}</span>
+                ${order.table_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-[13px] align-middle">table_restaurant</span> ${escapeHtml(order.table_label)}</span>` : ''}
+                ${order.customer_name ? `<span class="text-xs text-stone-500">${escapeHtml(order.customer_name)}</span>` : ''}
+              </div>
+              <p class="text-xs text-stone-400 mt-1">
+                <span class="material-symbols-outlined text-[13px] align-middle">schedule</span>
+                ${formatTime(order.created_at)}
+              </p>
+            </div>
+            <span class="chip-${order.status} px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
+              <span class="material-symbols-outlined text-[14px] align-middle mr-0.5">${STATUS_ICON[order.status]}</span>
+              ${STATUS_LABELS[order.status]}
+            </span>
+          </div>
+          <ul class="divide-y divide-stone-100 mb-3 text-sm">
+            ${items.map(it => `
+              <li class="flex items-center justify-between py-1.5">
+                <span class="text-stone-700"><span class="font-semibold text-stone-900">${escapeHtml(String(it.qty))}×</span> ${escapeHtml(it.name)}</span>
+                <span class="text-stone-500 text-xs">${formatCurrency(it.price * it.qty, order.currency)}</span>
+              </li>`).join('')}
+          </ul>
+          <div class="flex items-center justify-between gap-3">
+            <span class="font-bold text-base text-stone-900">Total: ${formatCurrency(order.total, order.currency)}</span>
+            <div class="flex gap-2 flex-wrap justify-end">${actionBtns}</div>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+  }
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const res = await fetch(`/api/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+    loadOrders();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────────────
+async function loadAlerts() {
+  const container = document.getElementById('alerts-container');
+  if (!selectedMenuId) {
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">notifications</span>Select a menu to view alerts</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+
+  try {
+    const res = await fetch(`/api/menus/${selectedMenuId}/alerts`, {
+      headers: { 'x-customer-token': customerToken }
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to load alerts');
+    const alerts = await res.json();
+    const pending = alerts.filter(a => a.status === 'pending');
+
+    // Update badges
+    const badge = document.getElementById('alerts-badge');
+    const tabBadge = document.getElementById('tab-alert-badge');
+    if (pending.length > 0) {
+      if (badge) { badge.textContent = pending.length; badge.classList.remove('hidden'); }
+      if (tabBadge) { tabBadge.textContent = pending.length; tabBadge.classList.remove('hidden'); }
+    } else {
+      badge?.classList.add('hidden');
+      tabBadge?.classList.add('hidden');
+    }
+
+    if (!alerts.length) {
+      container.innerHTML = `
+        <div class="p-12 text-center text-stone-400">
+          <span class="material-symbols-outlined text-[64px] block mb-2 text-stone-300">notifications_off</span>
+          <p class="font-medium text-stone-500">No alerts for this menu</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="space-y-3">${alerts.map(alert => `
+      <div class="bg-white border rounded-2xl p-5 shadow-sm card-in ${alert.status === 'pending' ? 'border-orange-300 bg-orange-50/30' : 'border-stone-200 opacity-60'}">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="size-9 rounded-xl flex-shrink-0 flex items-center justify-center
+              ${alert.status === 'pending' ? 'bg-orange-100' : 'bg-stone-100'}">
+              <span class="material-symbols-outlined text-[20px] ${alert.status === 'pending' ? 'text-orange-600' : 'text-stone-400'}">
+                ${alert.status === 'pending' ? 'campaign' : 'check_circle'}
+              </span>
+            </div>
+            <div>
+              <p class="font-semibold text-stone-900">
+                <span class="material-symbols-outlined text-[15px] align-middle text-stone-500 mr-0.5">table_restaurant</span>
+                ${escapeHtml(alert.table_label)}
+              </p>
+              <p class="text-sm text-stone-600 mt-0.5">${escapeHtml(alert.message)}</p>
+              <p class="text-xs text-stone-400 mt-1">
+                <span class="material-symbols-outlined text-[13px] align-middle">schedule</span>
+                ${formatTime(alert.created_at)}
+              </p>
+            </div>
+          </div>
+          ${alert.status === 'pending' ? `
+            <button onclick="dismissAlert(${alert.id})"
+              class="flex-shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl bg-green-50 text-green-700 border border-green-300 hover:bg-green-100 transition">
+              <span class="material-symbols-outlined text-[15px] align-middle">done</span>
+              Done
+            </button>` : '<span class="text-xs text-stone-400 font-medium">Dismissed</span>'}
+        </div>
+      </div>`).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+  }
+}
+
+async function dismissAlert(alertId) {
+  try {
+    const res = await fetch(`/api/alerts/${alertId}/dismiss`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      body: JSON.stringify({})
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to dismiss');
+    loadAlerts();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+// ── Summary (Cashier) ─────────────────────────────────────────────────────────
+async function loadSummary() {
+  const container = document.getElementById('summary-container');
+  if (!selectedMenuId) {
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">bar_chart</span>Select a menu to view summary</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+
+  try {
+    // Fetch all statuses for summary
+    const statuses = ['pending', 'preparing', 'ready', 'completed'];
+    const results = await Promise.all(statuses.map(s =>
+      fetch(`/api/menus/${selectedMenuId}/orders?status=${s}`, {
+        headers: { 'x-customer-token': customerToken }
+      }).then(r => r.ok ? r.json() : [])
+    ));
+    const all = results.flat();
+
+    const today = new Date().toDateString();
+    const todayOrders = all.filter(o => new Date(o.created_at).toDateString() === today);
+    const completed = todayOrders.filter(o => o.status === 'completed');
+    const active    = todayOrders.filter(o => o.status !== 'completed');
+
+    const revenue = completed.reduce((s, o) => s + (Number(o.total) || 0), 0);
+    const avgOrder = completed.length ? revenue / completed.length : 0;
+    const currency = todayOrders[0]?.currency || 'USD';
+
+    // Count by status across all orders
+    const pendingCount   = all.filter(o => o.status === 'pending').length;
+    const preparingCount = all.filter(o => o.status === 'preparing').length;
+    const readyCount     = all.filter(o => o.status === 'ready').length;
+    const completedAll   = all.filter(o => o.status === 'completed').length;
+
+    container.innerHTML = `
+      <!-- KPI cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white border border-stone-200 rounded-2xl p-5 text-center shadow-sm card-in">
+          <p class="text-2xl font-black text-stone-900">${todayOrders.length}</p>
+          <p class="text-xs text-stone-500 mt-1 font-medium">Today's Orders</p>
+        </div>
+        <div class="bg-white border border-green-200 rounded-2xl p-5 text-center shadow-sm card-in">
+          <p class="text-2xl font-black text-green-700">${formatCurrency(revenue, currency)}</p>
+          <p class="text-xs text-stone-500 mt-1 font-medium">Revenue (Completed)</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-2xl p-5 text-center shadow-sm card-in">
+          <p class="text-2xl font-black text-stone-900">${active.length}</p>
+          <p class="text-xs text-stone-500 mt-1 font-medium">Active Today</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-2xl p-5 text-center shadow-sm card-in">
+          <p class="text-2xl font-black text-stone-900">${formatCurrency(avgOrder, currency)}</p>
+          <p class="text-xs text-stone-500 mt-1 font-medium">Avg Order Value</p>
+        </div>
+      </div>
+
+      <!-- Status breakdown -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 mb-6 shadow-sm card-in">
+        <h3 class="font-bold text-stone-900 mb-4">Order Pipeline (All Time Today)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          ${[
+            { label: 'Pending',   count: pendingCount,   cls: 'chip-pending'   },
+            { label: 'Preparing', count: preparingCount, cls: 'chip-preparing' },
+            { label: 'Ready',     count: readyCount,     cls: 'chip-ready'     },
+            { label: 'Completed', count: completedAll,   cls: 'chip-completed' },
+          ].map(s => `
+            <div class="flex flex-col items-center p-3 rounded-xl border border-stone-100">
+              <span class="${s.cls} px-3 py-1 rounded-full text-xs font-bold mb-2">${s.label}</span>
+              <span class="text-xl font-black text-stone-900">${s.count}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Recent completed orders -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm card-in">
+        <h3 class="font-bold text-stone-900 mb-4">Recent Completed Orders</h3>
+        ${completed.length === 0 ? '<p class="text-stone-400 text-sm text-center py-4">No completed orders today yet.</p>' : `
+          <div class="divide-y divide-stone-100">
+            ${completed.slice(0, 20).map(o => {
+              const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
+              return `<div class="py-3 flex items-center justify-between gap-3">
+                <div>
+                  <p class="font-semibold text-stone-900 text-sm">#${o.id}${o.table_label ? ` · <span class="text-stone-500 font-normal">${escapeHtml(o.table_label)}</span>` : ''}</p>
+                  <p class="text-xs text-stone-400">${items.length} item${items.length !== 1 ? 's' : ''} · ${formatTime(o.created_at)}</p>
+                </div>
+                <span class="font-bold text-stone-900">${formatCurrency(o.total, o.currency)}</span>
+              </div>`;
+            }).join('')}
+          </div>`}
+      </div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// ── Polling ───────────────────────────────────────────────────────────────────
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    if (currentTab === 'orders')  loadOrders();
+    if (currentTab === 'alerts')  loadAlerts();
+    if (currentTab === 'summary') loadSummary();
+  }, 20000); // refresh every 20 seconds
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  if (pollTimer) clearInterval(pollTimer);
+  try {
+    await fetch('/api/customers/logout', {
+      method: 'POST',
+      headers: { 'x-customer-token': customerToken }
+    });
+  } catch { /* ignore */ }
+  ['customerToken','staffName','staffRole','customerEmail','customerBusiness']
+    .forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+  window.location.href = '/login';
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

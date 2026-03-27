@@ -96,26 +96,112 @@
 <!-- ── Login Overlay ──────────────────────────────────────────────────────── -->
 <div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
   <div class="bg-white border border-stone-200 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
-    <div class="flex items-center gap-3">
-      <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
-        <span class="material-symbols-outlined text-[22px]">lock</span>
+    <!-- Tab switcher -->
+    <div class="flex rounded-xl border border-stone-200 overflow-hidden">
+      <button id="tab-customer" onclick="switchLoginTab('customer')"
+        class="flex-1 py-2 text-sm font-semibold transition-colors bg-primary text-white">
+        My Account
+      </button>
+      <button id="tab-staff" onclick="switchLoginTab('staff')"
+        class="flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50">
+        Staff
+      </button>
+      <button id="tab-admin" onclick="switchLoginTab('admin')"
+        class="flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50">
+        Admin
+      </button>
+    </div>
+
+    <!-- Customer login panel -->
+    <div id="panel-customer" class="space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+        </div>
+        <div>
+          <h2 class="font-bold text-lg text-stone-900">Menu Editor</h2>
+          <p class="text-stone-500 text-xs">Sign in to create &amp; manage your menus</p>
+        </div>
       </div>
       <div>
-        <h2 class="font-bold text-lg text-stone-900">Admin Access</h2>
-        <p class="text-stone-600 text-xs">Enter your admin secret to continue</p>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
+        <input id="cust-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')document.getElementById('cust-password').focus()"/>
       </div>
+      <div>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
+        <input id="cust-password" type="password" autocomplete="current-password" placeholder="Enter password"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')doCustomerLogin()"/>
+      </div>
+      <p id="cust-login-error" class="text-red-600 text-sm hidden"></p>
+      <button onclick="doCustomerLogin()"
+              class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">login</span> Sign In
+      </button>
+      <p class="text-center text-xs text-stone-500">Don't have an account? <a href="/register" class="text-primary hover:underline font-medium">Register free</a></p>
     </div>
-    <div>
-      <label class="block text-sm font-medium text-stone-700 mb-1.5">Admin Password</label>
-      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
-             class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-             onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <!-- Staff login panel -->
+    <div id="panel-staff" class="space-y-4 hidden">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[22px]">badge</span>
+        </div>
+        <div>
+          <h2 class="font-bold text-lg text-stone-900">Staff Login</h2>
+          <p class="text-stone-500 text-xs">Sign in with your staff credentials</p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
+        <input id="staff-email" type="email" autocomplete="email" placeholder="staff@restaurant.com"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')document.getElementById('staff-password').focus()"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
+        <input id="staff-password" type="password" autocomplete="current-password" placeholder="Enter password"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')doStaffLogin()"/>
+      </div>
+      <p id="staff-login-error" class="text-red-600 text-sm hidden"></p>
+      <button onclick="doStaffLogin()"
+              class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">login</span> Sign In
+      </button>
     </div>
-    <p id="login-error" class="text-red-600 text-sm hidden"></p>
-    <button onclick="doLogin()"
-            class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
-      <span class="material-symbols-outlined text-[18px]">login</span> Sign In
-    </button>
+
+    <!-- Admin login panel -->
+    <div id="panel-admin" class="space-y-4 hidden">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[22px]">lock</span>
+        </div>
+        <div>
+          <h2 class="font-bold text-lg text-stone-900">Admin Access</h2>
+          <p class="text-stone-600 text-xs">Sign in with your admin credentials</p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
+        <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
+        <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
+               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
+               onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <p id="login-error" class="text-red-600 text-sm hidden"></p>
+      <button onclick="doLogin()"
+              class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">login</span> Sign In
+      </button>
+    </div>
   </div>
 </div>
 
@@ -125,8 +211,12 @@
     <div class="size-8 rounded bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
       <span class="material-symbols-outlined text-[20px]">restaurant</span>
     </div>
-    <span class="text-base font-bold tracking-tight text-stone-900">MenuAdmin</span>
+    <span id="sidebar-app-title" class="text-base font-bold tracking-tight text-stone-900">MenuAdmin</span>
   </div>
+  <!-- Back to Dashboard link (shown only in customer mode) -->
+  <a id="back-to-dashboard" href="/dashboard" class="hidden mx-3 mt-3 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:bg-orange-50 hover:text-primary transition-colors border border-stone-200">
+    <span class="material-symbols-outlined text-[18px]">arrow_back</span> My Dashboard
+  </a>
   <nav class="flex-1 px-3 py-5 space-y-1">
     <a id="nav-upload"    href="#upload"   onclick="showSection('upload')"   class="nav-link active flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors">
       <span class="material-symbols-outlined text-[20px]">file_upload</span> Upload Menu
@@ -892,6 +982,31 @@
             </button>
           </div>
 
+          <!-- Cover Banner -->
+          <div>
+            <label class="block text-sm text-stone-600 mb-1.5">Cover Banner</label>
+            <div class="flex items-start gap-3">
+              <div id="s-cover-preview-wrap"
+                   class="shrink-0 w-[100px] h-[60px] rounded-xl border border-stone-300 bg-stone-50 flex items-center justify-center overflow-hidden">
+                <span id="s-cover-ph" class="material-symbols-outlined text-2xl text-stone-400">panorama</span>
+                <img id="s-cover-img" src="" alt="" class="hidden w-full h-full object-cover"/>
+              </div>
+              <div class="flex-1 space-y-2">
+                <button type="button" onclick="document.getElementById('s-cover-file').click()"
+                        class="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-stone-300 text-sm text-stone-700 hover:border-primary hover:text-primary transition-colors">
+                  <span class="material-symbols-outlined text-[16px]">upload</span> Upload Banner
+                </button>
+                <input id="s-cover-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsCoverFile(event)"/>
+                <input id="s-cover-url" type="url" placeholder="…or paste banner URL" oninput="handleSettingsCoverUrl()"
+                       class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
+              </div>
+            </div>
+            <button id="s-cover-clear" onclick="clearSettingsCover()"
+                    class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">close</span> Remove banner
+            </button>
+          </div>
+
           <!-- Tagline -->
           <div>
             <label class="block text-sm text-stone-600 mb-1.5">Tagline</label>
@@ -1094,6 +1209,17 @@
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
 let sessionToken   = localStorage.getItem('adminToken') || '';
+let customerToken  = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken') || '';
+let isCustomerMode = false;
+
+// Returns the appropriate auth header depending on who is logged in
+function authHeaders(extra) {
+  const base = isCustomerMode
+    ? { 'x-customer-token': customerToken }
+    : { 'X-Admin-Token': sessionToken };
+  return Object.assign({}, base, extra || {});
+}
+function authJsonHeaders() { return authHeaders({ 'Content-Type': 'application/json' }); }
 let extractedItems = [];
 let currentMenuUrl = '';
 let currentQrDataUrl = '';
@@ -1331,13 +1457,11 @@ async function uploadFile() {
   fd.append('menuFile', selectedFile);
 
   try {
-    const res  = await fetch('/api/upload', { method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd });
+    const res  = await fetch('/api/upload', { method: 'POST', headers: authHeaders(), body: fd });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
 
     extractedItems = data.items.map(item => ({ ...item, _selected: true }));
-
-    // Auto-apply detected currency from the uploaded file
     if (data.detectedCurrency && CURRENCIES[data.detectedCurrency]) {
       document.getElementById('currency-select').value = data.detectedCurrency;
       setCurrency(data.detectedCurrency);
@@ -1379,7 +1503,7 @@ async function handleReupload(e) {
   fd.append('menuFile', file);
 
   try {
-    const res  = await fetch('/api/upload', { method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd });
+    const res  = await fetch('/api/upload', { method: 'POST', headers: authHeaders(), body: fd });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Upload failed');
 
@@ -1502,7 +1626,7 @@ async function uploadItemImage(idx, input) {
   fd.append('image', file);
   try {
     const res = await fetch('/api/upload-item-image', {
-      method: 'POST', headers: { 'X-Admin-Token': sessionToken }, body: fd
+      method: 'POST', headers: authHeaders(), body: fd
     });
     if (!res.ok) throw new Error('Upload failed');
     const { imageUrl } = await res.json();
@@ -1895,7 +2019,7 @@ async function proceedToPublish() {
     const method = isEditing ? 'PUT' : 'POST';
     const res    = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body:    JSON.stringify({ restaurantName, currency, ...getBranding(), items }),
     });
     const data = await res.json();
@@ -1950,7 +2074,11 @@ function copyLink() {
 function exportMenuCSV(menuId) {
   if (!menuId) return;
   const a = document.createElement('a');
-  a.href = '/api/menus/' + encodeURIComponent(menuId) + '/export-csv?token=' + encodeURIComponent(sessionToken);
+  if (isCustomerMode) {
+    a.href = '/api/menus/' + encodeURIComponent(menuId) + '/export-csv?ctoken=' + encodeURIComponent(customerToken);
+  } else {
+    a.href = '/api/menus/' + encodeURIComponent(menuId) + '/export-csv?token=' + encodeURIComponent(sessionToken);
+  }
   a.click();
 }
 
@@ -1959,7 +2087,7 @@ async function loadPublished() {
   const el = document.getElementById('published-list');
   el.innerHTML = '<p class="text-stone-600 text-sm">Loading…</p>';
   try {
-    const res  = await fetch('/api/menus');
+    const res  = await fetch('/api/menus', { headers: authHeaders() });
     const list = await res.json();
     if (!list.length) {
       el.innerHTML = '<p class="text-stone-600 text-sm">No published menus yet.</p>';
@@ -2030,7 +2158,7 @@ async function showAnalytics(menuId) {
   showLoading('Loading analytics…');
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/analytics', {
-      headers: { 'X-Admin-Token': sessionToken }
+      headers: authHeaders()
     });
     if (!res.ok) throw new Error('Failed to load analytics');
     const data = await res.json();
@@ -2120,7 +2248,7 @@ async function regenerateQR(menuId) {
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(menuId) + '/regenerate-qr', {
       method: 'POST',
-      headers: { 'X-Admin-Token': sessionToken }
+      headers: authHeaders()
     });
     if (!res.ok) throw new Error('Failed to regenerate QR');
     const data = await res.json();
@@ -2139,7 +2267,7 @@ async function deleteMenu(id, btn) {
   if (!confirm('Delete this menu? Customers will no longer be able to view it.')) return;
   btn.disabled = true;
   try {
-    await fetch('/api/menus/' + id, { method: 'DELETE', headers: { 'X-Admin-Token': sessionToken } });
+    await fetch('/api/menus/' + id, { method: 'DELETE', headers: authHeaders() });
     loadPublished();
   } catch {
     btn.disabled = false;
@@ -2277,7 +2405,7 @@ async function saveLinkQR(targetMenuId) {
   try {
     const res = await fetch('/api/qr-redirects', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ sourceMenuId, targetMenuId, label })
     });
     const data = await res.json();
@@ -2296,7 +2424,7 @@ async function saveLinkQR(targetMenuId) {
 
 async function loadLinkedQRs() {
   try {
-    const res = await fetch('/api/qr-redirects', { headers: { 'X-Admin-Token': sessionToken } });
+    const res = await fetch('/api/qr-redirects', { headers: authHeaders() });
     const list = await res.json();
     const section = document.getElementById('linked-qr-section');
     const el = document.getElementById('linked-qr-list');
@@ -2323,7 +2451,7 @@ async function loadLinkedQRs() {
 async function unlinkQR(id) {
   if (!confirm('Remove this QR link? The QR code will no longer serve the menu.')) return;
   try {
-    await fetch('/api/qr-redirects/' + id, { method: 'DELETE', headers: { 'X-Admin-Token': sessionToken } });
+    await fetch('/api/qr-redirects/' + id, { method: 'DELETE', headers: authHeaders() });
     showStatusBadge('QR link removed', 'green');
     loadLinkedQRs();
   } catch (_) {}
@@ -2349,35 +2477,177 @@ function showStatusBadge(msg, color) {
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 async function initAuth() {
+  // 1. Try admin token
   if (sessionToken) {
     try {
       const res  = await fetch('/api/auth/check', { headers: { 'X-Admin-Token': sessionToken } });
       const data = await res.json();
       if (data.authenticated) { showApp(); return; }
-    } catch { /* fall through to login */ }
+    } catch { /* fall through */ }
+    sessionToken = '';
+    localStorage.removeItem('adminToken');
   }
-  sessionToken = '';
-  localStorage.removeItem('adminToken');
+  // 2. Try customer token
+  if (customerToken) {
+    try {
+      const res = await fetch('/api/customers/me', { headers: { 'x-customer-token': customerToken } });
+      if (res.ok) {
+        const custData = await res.json().catch(() => null);
+        isCustomerMode = true;
+        // Keep business name / staff info fresh
+        if (custData) {
+          if (custData.isStaff) {
+            localStorage.setItem('staffName', custData.staffName || '');
+            localStorage.setItem('staffRole', custData.staffRole || '');
+            if (custData.business_name) localStorage.setItem('customerBusiness', custData.business_name);
+          } else if (custData.business_name) {
+            localStorage.setItem('customerBusiness', custData.business_name);
+            localStorage.removeItem('staffName');
+            localStorage.removeItem('staffRole');
+          }
+        }
+        showApp(custData);
+        return;
+      }
+    } catch { /* fall through */ }
+    customerToken = '';
+    localStorage.removeItem('customerToken');
+    sessionStorage.removeItem('customerToken');
+  }
+  // 3. No valid auth — show admin login overlay (admins can log in here; customers should come from /login)
   showLogin();
 }
 
 function showLogin() {
   document.getElementById('login-overlay').classList.remove('hidden');
   document.getElementById('logout-btn').classList.add('hidden');
-  setTimeout(() => document.getElementById('login-secret')?.focus(), 150);
+  // Default to customer tab unless it looks like an admin-only context
+  switchLoginTab('customer');
+  setTimeout(() => document.getElementById('cust-email')?.focus(), 150);
 }
 
-function showApp() {
+function switchLoginTab(tab) {
+  const active   = 'flex-1 py-2 text-sm font-semibold transition-colors bg-primary text-white';
+  const inactive = 'flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50';
+  ['customer', 'staff', 'admin'].forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+    document.getElementById(`tab-${t}`).className = t === tab ? active : inactive;
+  });
+  if (tab === 'customer') setTimeout(() => document.getElementById('cust-email')?.focus(), 50);
+  else if (tab === 'staff') setTimeout(() => document.getElementById('staff-email')?.focus(), 50);
+  else setTimeout(() => document.getElementById('login-email')?.focus(), 50);
+}
+
+function showApp(custData) {
   document.getElementById('login-overlay').classList.add('hidden');
   document.getElementById('logout-btn').classList.remove('hidden');
+  if (isCustomerMode) {
+    // Show Back to Dashboard link
+    const backLink = document.getElementById('back-to-dashboard');
+    if (backLink) backLink.classList.remove('hidden');
+    const titleEl = document.getElementById('sidebar-app-title');
+    if (titleEl) {
+      const staffName = custData?.staffName || localStorage.getItem('staffName');
+      const staffRole = custData?.staffRole || localStorage.getItem('staffRole');
+      if (staffName && staffRole) {
+        const roleLabels = { manager: 'Manager', waiter: 'Waiter', cashier: 'Cashier' };
+        titleEl.textContent = `${staffName} (${roleLabels[staffRole] || staffRole})`;
+      } else {
+        const business = localStorage.getItem('customerBusiness');
+        titleEl.textContent = business || 'Menu Admin';
+      }
+    }
+  }
+}
+
+async function doCustomerLogin() {
+  const errEl    = document.getElementById('cust-login-error');
+  const email    = document.getElementById('cust-email').value.trim();
+  const password = document.getElementById('cust-password').value;
+  errEl.classList.add('hidden');
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    const res  = await fetch('/api/customers/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password, csrfToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    customerToken = data.token;
+    localStorage.setItem('customerToken', customerToken);
+    localStorage.setItem('customerEmail', data.customer.email);
+    localStorage.setItem('customerBusiness', data.customer.businessName);
+    localStorage.removeItem('staffName');
+    localStorage.removeItem('staffRole');
+    isCustomerMode = true;
+    document.getElementById('cust-email').value    = '';
+    document.getElementById('cust-password').value = '';
+    showApp();
+    // If a menu was requested, load it now
+    const menuParam = new URLSearchParams(window.location.search).get('menu');
+    if (menuParam) loadMenuForEditing(menuParam);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function doStaffLogin() {
+  const errEl    = document.getElementById('staff-login-error');
+  const email    = document.getElementById('staff-email').value.trim();
+  const password = document.getElementById('staff-password').value;
+  errEl.classList.add('hidden');
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    const res = await fetch('/api/staff/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, csrfToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    customerToken = data.token;
+    localStorage.setItem('customerToken', customerToken);
+    localStorage.setItem('staffName', data.staff.name);
+    localStorage.setItem('staffRole', data.staff.role);
+    localStorage.removeItem('customerBusiness');
+    isCustomerMode = true;
+    document.getElementById('staff-email').value    = '';
+    document.getElementById('staff-password').value = '';
+    // Non-manager staff get their own panel; managers stay on menu editor
+    if (data.staff.role !== 'manager') {
+      window.location.href = '/staff-panel';
+      return;
+    }
+    showApp({ staffName: data.staff.name, staffRole: data.staff.role, isStaff: true });
+    const menuParam = new URLSearchParams(window.location.search).get('menu');
+    if (menuParam) loadMenuForEditing(menuParam);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
 }
 
 async function doLogin() {
-  const errEl  = document.getElementById('login-error');
-  const secret = document.getElementById('login-secret').value;
+  const errEl   = document.getElementById('login-error');
+  const email   = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
   errEl.classList.add('hidden');
-  if (!secret) {
-    errEl.textContent = 'Please enter your admin secret.';
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
     errEl.classList.remove('hidden');
     return;
   }
@@ -2385,13 +2655,14 @@ async function doLogin() {
     const res  = await fetch('/api/auth/login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ secret }),
+      body:    JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     sessionToken = data.token;
     localStorage.setItem('adminToken', sessionToken);
-    document.getElementById('login-secret').value = '';
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
     showApp();
   } catch (err) {
     errEl.textContent = err.message;
@@ -2400,6 +2671,21 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  if (isCustomerMode) {
+    try {
+      await fetch('/api/customers/logout', {
+        method: 'POST',
+        headers: { 'x-customer-token': customerToken },
+      });
+    } catch { /* ignore */ }
+    customerToken = '';
+    localStorage.removeItem('customerToken');
+    localStorage.removeItem('customerEmail');
+    localStorage.removeItem('customerBusiness');
+    sessionStorage.removeItem('customerToken');
+    window.location.href = '/dashboard';
+    return;
+  }
   try {
     await fetch('/api/auth/logout', {
       method:  'POST',
@@ -2438,12 +2724,10 @@ async function changePassword() {
   }
 
   try {
-    const res = await fetch('/api/auth/change-password', {
+    const pwUrl = isCustomerMode ? '/api/customers/change-password' : '/api/auth/change-password';
+    const res = await fetch(pwUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Token': sessionToken,
-      },
+      headers: authJsonHeaders(),
       body: JSON.stringify({ currentPassword: current, newPassword: newPw }),
     });
     const data = await res.json();
@@ -2461,12 +2745,14 @@ async function changePassword() {
 
 // ── Settings Branding ──────────────────────────────────────────────────────────
 let settingsLogoSrc = '';
+let settingsCoverSrc = '';
 let settingsLayout = 'logo-left';
 let settingsMenuData = null; // full menu data for the currently selected menu
 
 async function loadSettingsMenuList() {
   try {
-    const res  = await fetch('/api/menus');
+    const url = isCustomerMode ? '/api/customer/menus' : '/api/menus';
+    const res  = await fetch(url, isCustomerMode ? { headers: authHeaders() } : {});
     const list = await res.json();
     const sel  = document.getElementById('settings-menu-select');
     const current = sel.value;
@@ -2519,6 +2805,11 @@ async function loadSettingsBranding(menuId) {
     applySettingsLogo(settingsLogoSrc);
     document.getElementById('s-logo-url').value = settingsLogoSrc.startsWith('data:') ? '' : settingsLogoSrc;
 
+    // Cover banner
+    settingsCoverSrc = d.coverImage || '';
+    applySettingsCover(settingsCoverSrc);
+    document.getElementById('s-cover-url').value = settingsCoverSrc.startsWith('data:') ? '' : settingsCoverSrc;
+
     // Layout
     settingsLayout = d.headerLayout || 'logo-left';
     document.querySelectorAll('.s-layout-opt').forEach(btn => {
@@ -2566,6 +2857,39 @@ function sSetLayout(layout) {
     btn.classList.toggle('border-slate-700', !active);
     btn.classList.toggle('text-stone-500', !active);
   });
+}
+
+function applySettingsCover(src) {
+  const img = document.getElementById('s-cover-img');
+  const ph  = document.getElementById('s-cover-ph');
+  const clr = document.getElementById('s-cover-clear');
+  if (src) {
+    img.src = src; img.classList.remove('hidden'); ph.classList.add('hidden'); clr.classList.remove('hidden');
+  } else {
+    img.src = ''; img.classList.add('hidden'); ph.classList.remove('hidden'); clr.classList.add('hidden');
+  }
+}
+
+function handleSettingsCoverFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  resizeAndCompressLogo(file, 1200, 0.85).then(dataUrl => {
+    settingsCoverSrc = dataUrl;
+    document.getElementById('s-cover-url').value = '';
+    applySettingsCover(dataUrl);
+  }).catch(() => alert('Could not process image.'));
+}
+
+function handleSettingsCoverUrl() {
+  settingsCoverSrc = document.getElementById('s-cover-url').value.trim();
+  applySettingsCover(settingsCoverSrc);
+}
+
+function clearSettingsCover() {
+  settingsCoverSrc = '';
+  document.getElementById('s-cover-url').value = '';
+  document.getElementById('s-cover-file').value = '';
+  applySettingsCover('');
 }
 
 function applySettingsLogo(src) {
@@ -2622,6 +2946,7 @@ async function saveSettingsBranding() {
     currency:       document.getElementById('s-currency').value,
     brandColor:     document.getElementById('s-brand-color').value,
     logoUrl:        settingsLogoSrc,
+    coverImage:     settingsCoverSrc,
     tagline:        document.getElementById('s-tagline').value.trim(),
     fontStyle:      document.getElementById('s-font-style').value,
     bgStyle:        document.getElementById('s-bg-style').value,
@@ -2646,7 +2971,7 @@ async function saveSettingsBranding() {
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(menuId), {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
@@ -2666,7 +2991,8 @@ let tablesEnabled = false;
 
 async function loadTablesMenuList() {
   try {
-    const res  = await fetch('/api/menus');
+    const url = isCustomerMode ? '/api/customer/menus' : '/api/menus';
+    const res  = await fetch(url, isCustomerMode ? { headers: authHeaders() } : {});
     const list = await res.json();
     const sel  = document.getElementById('tables-menu-select');
     const cur  = sel.value;
@@ -2731,7 +3057,7 @@ async function renderTables() {
   const el = document.getElementById('tables-list');
   el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   try {
-    const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', { headers: { 'X-Admin-Token': sessionToken } });
+    const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', { headers: authHeaders() });
     const rows = await res.json();
     if (!rows.length) {
       el.innerHTML = '<p class="text-stone-500 text-sm">No tables yet. Add one above.</p>';
@@ -2767,7 +3093,7 @@ async function addTable() {
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ label }),
     });
     const d = await res.json();
@@ -2784,7 +3110,7 @@ async function deleteTable(tableId) {
   if (!confirm('Delete this table?')) return;
   try {
     await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables/' + tableId, {
-      method: 'DELETE', headers: { 'X-Admin-Token': sessionToken },
+      method: 'DELETE', headers: authHeaders(),
     });
     await renderTables();
   } catch (err) { alert(err.message); }
@@ -2795,7 +3121,7 @@ async function loadAlerts() {
   const el = document.getElementById('alerts-list');
   el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   try {
-    const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/alerts', { headers: { 'X-Admin-Token': sessionToken } });
+    const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/alerts', { headers: authHeaders() });
     const rows = await res.json();
     const pending = rows.filter(r => r.status === 'pending');
     if (!pending.length) {
@@ -2822,7 +3148,7 @@ async function loadAlerts() {
 
 async function dismissAlert(alertId) {
   try {
-    await fetch('/api/alerts/' + alertId + '/dismiss', { method: 'PUT', headers: { 'X-Admin-Token': sessionToken } });
+    await fetch('/api/alerts/' + alertId + '/dismiss', { method: 'PUT', headers: authHeaders() });
     knownAlertIds.delete(alertId);
     await loadAlerts();
     pollAlerts();
@@ -2838,7 +3164,7 @@ async function loadOrders() {
   el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
   const status = document.getElementById('orders-status-filter').value || 'pending';
   try {
-    const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: { 'X-Admin-Token': sessionToken } });
+    const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: authHeaders() });
     const rows = await res.json();
     if (!rows.length) {
       el.innerHTML = '<p class="text-stone-500 text-sm">No ' + esc(status) + ' orders.</p>';
@@ -2881,7 +3207,7 @@ async function completeOrder(orderId) {
   try {
     await fetch('/api/orders/' + orderId + '/status', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': sessionToken },
+      headers: authJsonHeaders(),
       body: JSON.stringify({ status: 'completed' }),
     });
     await loadOrders();
@@ -2892,8 +3218,8 @@ async function printOrderBill(orderId) {
   // Fetch all orders for this menu and find the one we want
   try {
     const allRes = await Promise.all([
-      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=pending', { headers: { 'X-Admin-Token': sessionToken } }),
-      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=completed', { headers: { 'X-Admin-Token': sessionToken } }),
+      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=pending', { headers: authHeaders() }),
+      fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=completed', { headers: authHeaders() }),
     ]);
     const all = [...await allRes[0].json(), ...await allRes[1].json()];
     const order = all.find(o => o.id === orderId);
@@ -3009,9 +3335,9 @@ function sendBrowserNotification(alert) {
 }
 
 async function pollAlerts() {
-  if (!sessionToken) return;
+  if (!sessionToken && !customerToken) return;
   try {
-    const res = await fetch('/api/alerts/pending', { headers: { 'X-Admin-Token': sessionToken } });
+    const res = await fetch('/api/alerts/pending', { headers: authHeaders() });
     if (!res.ok) return;
     const rows = await res.json();
 
@@ -3059,7 +3385,11 @@ function stopAlertPolling() {
 }
 
 // init
-initAuth();
+initAuth().then(() => {
+  // If a menu ID was passed in the URL (e.g. from customer-dashboard Edit button), load it for editing
+  const menuParam = new URLSearchParams(window.location.search).get('menu');
+  if (menuParam) loadMenuForEditing(menuParam);
+});
 showSection('upload');
 initCurrencySelect();
 startAlertPolling();

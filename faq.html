@@ -7,7 +7,7 @@
   <meta name="description" content="Get answers to common questions about RestOrder digital menus. Setup,pricing, features, and support.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
   
   <style>
@@ -20,14 +20,25 @@
       --text: #1c1917;
       --text-light: #78716c;
       --border: #e7e5e4;
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
     }
     
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystem, 'Segoe UI', sans-serif;
-      line-height: 1.6;
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.65;
       color: var(--text);
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
     }
     
     .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
@@ -481,7 +492,7 @@
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <span class="material-symbols-outlined" style="font-size: 16px;">rocket_launch</span>
-          Start Free Trial
+          Get Started
         </a>
       </div>
       
@@ -511,7 +522,7 @@
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <span class="material-symbols-outlined" style="font-size: 18px;">rocket_launch</span>
-          Start Free Trial
+          Get Started
         </a>
       </div>
     </div>
@@ -533,7 +544,7 @@
           
           <div class="faq-item">
             <h3>How do I sign up for RestOrder?</h3>
-            <p>Click "Start Free Trial" on any page, enter your email and business details, and you're in! No credit card required for the 14-day trial. You can create your first menu in under 10 minutes.</p>
+            <p>Click "Get Started" on any page, enter your email and business details, and you're in! No credit card required. You can create your first menu in under 10 minutes.</p>
           </div>
           
           <div class="faq-item">
@@ -592,8 +603,8 @@
           </div>
           
           <div class="faq-item">
-            <h3>Do I need a credit card for the free trial?</h3>
-            <p>No! Start your 14-day Professional trial with just an email. We only ask for payment if you decide to upgrade after the trial ends.</p>
+            <h3>Do I need a credit card to sign up?</h3>
+            <p>No! Get started with just your email. We only ask for payment when you choose a paid plan.</p>
           </div>
           
           <div class="faq-item">

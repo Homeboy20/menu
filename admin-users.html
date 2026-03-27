@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Users – RestOrder Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2dd4bf",
+          "bg-dark":  "#0d1b2a",
+          "surface":  "#132639",
+        },
+        fontFamily: { display: ["Work Sans", "sans-serif"] },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: "Work Sans", sans-serif; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+  .badge-super_admin { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+  .badge-admin { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; }
+  .badge-viewer { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+  .badge-active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+  .badge-disabled { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+</style>
+</head>
+<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+
+<!-- Login Overlay -->
+<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+  <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
+    <div class="flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+        <span class="material-symbols-outlined text-[22px]">lock</span>
+      </div>
+      <div>
+        <h2 class="font-bold text-lg">Admin Access</h2>
+        <p class="text-slate-400 text-xs">Sign in with your admin credentials</p>
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+      <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+      Sign In
+    </button>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid email or password.</p>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+  <div class="flex items-center gap-3 mb-10">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+      <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+    </div>
+    <div>
+      <h1 class="font-bold text-lg">RestOrder Admin</h1>
+      <p class="text-xs text-slate-400">Internal Management</p>
+    </div>
+  </div>
+
+  <nav class="space-y-2 flex-1">
+    <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <span class="text-sm font-medium">Dashboard</span>
+    </a>
+    <a href="/customers" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <span class="text-sm font-medium">Customers</span>
+    </a>
+    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
+    <a href="/subscriptions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="/payments" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
+    </a>
+    <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">analytics</span>
+      <span class="text-sm font-medium">Analytics</span>
+    </a>
+    <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <span class="text-sm font-medium">Settings</span>
+    </a>
+    <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+      <span class="material-symbols-outlined text-[20px]">shield_person</span>
+      <span class="text-sm font-medium">Admin Users</span>
+    </a>
+  </nav>
+
+  <div class="pt-4 border-t border-slate-700 space-y-2">
+    <div id="user-info" class="hidden px-4 py-2 rounded-xl bg-bg-dark/50">
+      <p class="text-sm font-medium text-slate-200 truncate" id="user-name"></p>
+      <p class="text-xs text-slate-400 truncate" id="user-role"></p>
+    </div>
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <span class="text-sm font-medium">Logout</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-auto">
+  
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h2 class="text-3xl font-bold">Admin Users</h2>
+          <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full border border-yellow-500/30">SUPER ADMIN</span>
+        </div>
+        <p class="text-slate-400">Manage admin accounts, roles, and access permissions</p>
+      </div>
+      <button onclick="showCreateModal()" class="px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">person_add</span>
+        <span class="text-sm">Add Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-primary text-[28px]">group</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-total">0</p>
+      <p class="text-slate-400 text-sm">Total Admins</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-yellow-400 text-[28px]">shield</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-super">0</p>
+      <p class="text-slate-400 text-sm">Super Admins</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-green-400 text-[28px]">check_circle</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-active">0</p>
+      <p class="text-slate-400 text-sm">Active</p>
+    </div>
+    <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="material-symbols-outlined text-red-400 text-[28px]">block</span>
+      </div>
+      <p class="text-3xl font-bold mb-1" id="stat-disabled">0</p>
+      <p class="text-slate-400 text-sm">Disabled</p>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="bg-surface border border-slate-700 rounded-2xl overflow-hidden">
+    <div class="p-6 border-b border-slate-700">
+      <h3 class="text-xl font-bold">All Admin Users</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-slate-700 text-slate-400">
+            <th class="text-left px-6 py-3 font-medium">User</th>
+            <th class="text-left px-6 py-3 font-medium">Role</th>
+            <th class="text-left px-6 py-3 font-medium">Status</th>
+            <th class="text-left px-6 py-3 font-medium">Last Login</th>
+            <th class="text-left px-6 py-3 font-medium">Created</th>
+            <th class="text-right px-6 py-3 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-table">
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+              <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30 spin">progress_activity</span>
+              Loading admin users...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Create/Edit User Modal -->
+<div id="user-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <h3 id="modal-title" class="text-xl font-bold">Add Admin User</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="user-form" class="space-y-4">
+      <input type="hidden" id="edit-user-id" />
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
+        <input id="form-name" type="text" required placeholder="John Doe"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
+        <input id="form-email" type="email" required placeholder="john@restorder.online"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div id="password-group">
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">
+          Password <span id="password-hint" class="text-slate-500 text-xs">(min 8 characters)</span>
+        </label>
+        <input id="form-password" type="password" minlength="8" placeholder="••••••••"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Role</label>
+        <select id="form-role"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="admin">Admin – Full management access</option>
+          <option value="viewer">Viewer – Read-only access</option>
+          <option value="super_admin">Super Admin – Full access + user management</option>
+        </select>
+      </div>
+      <div id="status-group" class="hidden">
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Status</label>
+        <select id="form-status"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="active">Active</option>
+          <option value="disabled">Disabled</option>
+        </select>
+      </div>
+      <p id="form-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" id="form-submit-btn"
+          class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+          Create User
+        </button>
+        <button type="button" onclick="closeModal()"
+          class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+let adminToken = null;
+let currentUser = null;
+let allUsers = [];
+
+function applyUserUI(user) {
+  currentUser = user;
+  if (!user) return;
+  document.getElementById('user-name').textContent = user.name || user.email;
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-info').classList.add('flex', 'flex-col');
+}
+
+// Login
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.classList.add('hidden');
+  
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Invalid email or password.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    adminToken = data.token;
+    localStorage.setItem('admin-token', adminToken);
+    document.getElementById('login-overlay').classList.add('hidden');
+    applyUserUI(data.user);
+    if (data.user?.role !== 'super_admin') {
+      document.querySelector('main').innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center"><span class="material-symbols-outlined text-red-400 text-[64px] block mb-4">gpp_bad</span><h2 class="text-2xl font-bold mb-2">Access Denied</h2><p class="text-slate-400 mb-6">Only Super Admins can manage admin users.</p><a href="/admin-dashboard" class="px-6 py-3 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Back to Dashboard</a></div></div>';
+      return;
+    }
+    await loadUsers();
+  } catch (err) {
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  localStorage.removeItem('admin-token');
+  location.reload();
+});
+
+// Check existing session
+(async () => {
+  const token = localStorage.getItem('admin-token');
+  if (!token) return;
+  try {
+    const res = await fetch('/api/admin/check', { headers: { 'x-admin-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
+      adminToken = token;
+      document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
+      if (data.user?.role !== 'super_admin') {
+        document.querySelector('main').innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center"><span class="material-symbols-outlined text-red-400 text-[64px] block mb-4">gpp_bad</span><h2 class="text-2xl font-bold mb-2">Access Denied</h2><p class="text-slate-400 mb-6">Only Super Admins can manage admin users.</p><a href="/admin-dashboard" class="px-6 py-3 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Back to Dashboard</a></div></div>';
+        return;
+      }
+      await loadUsers();
+    } else {
+      localStorage.removeItem('admin-token');
+    }
+  } catch (e) {
+    localStorage.removeItem('admin-token');
+  }
+})();
+
+// Enter key handling for login
+document.getElementById('login-email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+document.getElementById('login-password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+// Load users
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (!res.ok) {
+      if (res.status === 403) {
+        document.querySelector('main').innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-center"><span class="material-symbols-outlined text-red-400 text-[64px] block mb-4">gpp_bad</span><h2 class="text-2xl font-bold mb-2">Access Denied</h2><p class="text-slate-400 mb-6">Only Super Admins can access this page.</p><a href="/admin-dashboard" class="px-6 py-3 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Back to Dashboard</a></div></div>';
+        return;
+      }
+      throw new Error('Failed to load users');
+    }
+    allUsers = await res.json();
+    renderUsers(allUsers);
+    updateStats(allUsers);
+  } catch (err) {
+    console.error(err);
+    document.getElementById('users-table').innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-red-400">Failed to load users. Please try again.</td></tr>`;
+  }
+}
+
+function updateStats(users) {
+  document.getElementById('stat-total').textContent = users.length;
+  document.getElementById('stat-super').textContent = users.filter(u => u.role === 'super_admin').length;
+  document.getElementById('stat-active').textContent = users.filter(u => u.status === 'active').length;
+  document.getElementById('stat-disabled').textContent = users.filter(u => u.status === 'disabled').length;
+}
+
+function renderUsers(users) {
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  
+  if (!users.length) {
+    document.getElementById('users-table').innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No admin users found.</td></tr>`;
+    return;
+  }
+
+  const html = users.map(user => {
+    const isMe = currentUser && currentUser.id === user.id;
+    const initial = (user.name || user.email || '?')[0].toUpperCase();
+    return `
+      <tr class="border-b border-slate-700/50 hover:bg-bg-dark/30 transition">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">${escapeHtml(initial)}</div>
+            <div>
+              <p class="font-semibold">${escapeHtml(user.name)}${isMe ? ' <span class="text-xs text-primary">(You)</span>' : ''}</p>
+              <p class="text-sm text-slate-400">${escapeHtml(user.email)}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4"><span class="badge badge-${user.role}">${roleLabels[user.role] || user.role}</span></td>
+        <td class="px-6 py-4"><span class="badge badge-${user.status}">${user.status === 'active' ? 'Active' : 'Disabled'}</span></td>
+        <td class="px-6 py-4 text-slate-400">${user.last_login ? formatDate(user.last_login) : 'Never'}</td>
+        <td class="px-6 py-4 text-slate-400">${formatDate(user.created_at)}</td>
+        <td class="px-6 py-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button onclick="editUser(${user.id})" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-primary transition" title="Edit">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            ${!isMe ? `
+              <button onclick="toggleStatus(${user.id}, '${user.status === 'active' ? 'disabled' : 'active'}')" 
+                class="p-2 rounded-lg hover:bg-bg-dark ${user.status === 'active' ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 hover:text-green-400'} transition" 
+                title="${user.status === 'active' ? 'Disable' : 'Enable'}">
+                <span class="material-symbols-outlined text-[18px]">${user.status === 'active' ? 'block' : 'check_circle'}</span>
+              </button>
+              <button onclick="deleteUser(${user.id}, '${escapeHtml(user.name)}')" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-red-400 transition" title="Delete">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            ` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  
+  document.getElementById('users-table').innerHTML = html;
+}
+
+// Modal
+function showCreateModal() {
+  document.getElementById('modal-title').textContent = 'Add Admin User';
+  document.getElementById('form-submit-btn').textContent = 'Create User';
+  document.getElementById('edit-user-id').value = '';
+  document.getElementById('form-name').value = '';
+  document.getElementById('form-email').value = '';
+  document.getElementById('form-email').disabled = false;
+  document.getElementById('form-password').value = '';
+  document.getElementById('form-password').required = true;
+  document.getElementById('password-hint').textContent = '(min 8 characters)';
+  document.getElementById('form-role').value = 'admin';
+  document.getElementById('status-group').classList.add('hidden');
+  document.getElementById('form-error').classList.add('hidden');
+  const modal = document.getElementById('user-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('form-name').focus();
+}
+
+function editUser(userId) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+  document.getElementById('modal-title').textContent = 'Edit Admin User';
+  document.getElementById('form-submit-btn').textContent = 'Save Changes';
+  document.getElementById('edit-user-id').value = user.id;
+  document.getElementById('form-name').value = user.name;
+  document.getElementById('form-email').value = user.email;
+  document.getElementById('form-email').disabled = true;
+  document.getElementById('form-password').value = '';
+  document.getElementById('form-password').required = false;
+  document.getElementById('password-hint').textContent = '(leave blank to keep current)';
+  document.getElementById('form-role').value = user.role;
+  document.getElementById('form-status').value = user.status;
+  document.getElementById('status-group').classList.remove('hidden');
+  document.getElementById('form-error').classList.add('hidden');
+  const modal = document.getElementById('user-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('form-name').focus();
+}
+
+function closeModal() {
+  const modal = document.getElementById('user-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// Create / Update user
+document.getElementById('user-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById('form-error');
+  errorEl.classList.add('hidden');
+  const id = document.getElementById('edit-user-id').value;
+  const name = document.getElementById('form-name').value.trim();
+  const email = document.getElementById('form-email').value.trim();
+  const password = document.getElementById('form-password').value;
+  const role = document.getElementById('form-role').value;
+  const status = document.getElementById('form-status').value;
+
+  try {
+    let res;
+    if (id) {
+      // Update
+      const body = { name, role, status };
+      if (password) body.password = password;
+      res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify(body)
+      });
+    } else {
+      // Create
+      if (!password || password.length < 8) {
+        errorEl.textContent = 'Password must be at least 8 characters.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+        body: JSON.stringify({ email, password, name, role })
+      });
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Operation failed.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    closeModal();
+    await loadUsers();
+  } catch (err) {
+    errorEl.textContent = 'Network error. Please try again.';
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// Toggle status
+async function toggleStatus(userId, newStatus) {
+  const action = newStatus === 'disabled' ? 'disable' : 'enable';
+  if (!confirm(`Are you sure you want to ${action} this admin user?`)) return;
+  
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+      body: JSON.stringify({ status: newStatus })
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Failed to update status.'); return; }
+    await loadUsers();
+  } catch (err) {
+    alert('Network error.');
+  }
+}
+
+// Delete user
+async function deleteUser(userId, userName) {
+  if (!confirm(`Are you sure you want to permanently delete "${userName}"?\n\nThis action cannot be undone.`)) return;
+  
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Failed to delete user.'); return; }
+    await loadUsers();
+  } catch (err) {
+    alert('Network error.');
+  }
+}
+
+// Helpers
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return '—';
+  return new Date(isoStr).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric'
+  });
+}
+</script>
+
+</body>
+</html>

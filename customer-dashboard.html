@@ -1,75 +1,78 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dashboard – RestOrder</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols_Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<title>Dashboard � RestOrder</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
-    darkMode: "class",
     theme: {
       extend: {
         colors: {
-          "primary": "#2dd4bf",
-          "bg-dark":  "#0d1b2a",
-          "surface":  "#132639",
+          "primary": "#c2410c",
+          "bg-dark":  "#fafaf9",
+          "surface":  "#ffffff",
         },
-        fontFamily: { display: ["Work Sans", "sans-serif"] },
+        fontFamily: { sans: ["Inter", "sans-serif"] },
       },
     },
   };
 </script>
 <style>
-  body { font-family: "Work Sans", sans-serif; }
+  body { font-family: "Inter", sans-serif; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  
+
   .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
-  .badge-active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-  .badge-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-  .badge-free { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
-  .badge-pro { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
-  .badge-enterprise { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+  .badge-active { background: rgba(22, 163, 74, 0.10); color: #16a34a; }
+  .badge-cancelled { background: rgba(220, 38, 38, 0.10); color: #dc2626; }
+  .badge-free { background: rgba(8, 145, 178, 0.10); color: #0891b2; }
+  .badge-pro { background: rgba(124, 58, 237, 0.10); color: #7c3aed; }
+  .badge-enterprise { background: rgba(217, 119, 6, 0.10); color: #d97706; }
 </style>
 </head>
-<body class="bg-bg-dark text-slate-100 min-h-screen flex">
+<body class="bg-stone-50 text-stone-900 min-h-screen flex">
 
 <!-- Sidebar -->
-<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+<aside class="w-64 bg-white border-r border-stone-200 p-6 flex flex-col shadow-sm">
   <div class="flex items-center gap-3 mb-10">
-    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-white">
       <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
     </div>
     <div>
-      <h1 class="font-bold text-lg">RestOrder</h1>
-      <p class="text-xs text-slate-400" id="sidebar-business">Loading...</p>
+      <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
+      <p class="text-xs text-stone-500" id="sidebar-business">Loading...</p>
     </div>
   </div>
 
-  <nav class="space-y-2 flex-1">
-    <a href="#" class="nav-link active flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+  <nav class="space-y-1 flex-1">
+    <a href="#" onclick="showSection('dashboard'); return false;" data-section="dashboard" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl bg-orange-50 text-primary transition">
       <span class="material-symbols-outlined text-[20px]">dashboard</span>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
-    <a href="/admin" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="/menu-editor" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
       <span class="material-symbols-outlined text-[20px]">add_circle</span>
       <span class="text-sm font-medium">Create Menu</span>
     </a>
-    <a href="#" onclick="showSection('subscription'); return false;" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="#" onclick="showSection('subscription'); return false;" data-section="subscription" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
       <span class="material-symbols-outlined text-[20px]">credit_card</span>
       <span class="text-sm font-medium">Subscription</span>
     </a>
-    <a href="#" onclick="showSection('profile'); return false;" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="#" onclick="showSection('profile'); return false;" data-section="profile" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
       <span class="material-symbols-outlined text-[20px]">person</span>
       <span class="text-sm font-medium">Profile</span>
     </a>
+    <a href="#" onclick="showSection('team'); return false;" data-section="team" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
+      <span class="material-symbols-outlined text-[20px]">group</span>
+      <span class="text-sm font-medium">Team</span>
+    </a>
   </nav>
 
-  <div class="pt-4 border-t border-slate-700">
-    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
+  <div class="pt-4 border-t border-stone-200">
+    <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-500 hover:bg-stone-100 w-full transition">
       <span class="material-symbols-outlined text-[20px]">logout</span>
       <span class="text-sm font-medium">Logout</span>
     </button>
@@ -77,105 +80,105 @@
 </aside>
 
 <!-- Main Content -->
-<main class="flex-1 p-8 overflow-auto">
+<main class="flex-1 p-8 overflow-auto bg-stone-50">
   
   <!-- Dashboard Section -->
   <div id="dashboard-section">
     <!-- Header -->
     <div class="mb-8">
-      <h2 class="text-3xl font-bold mb-2">Dashboard</h2>
-      <p class="text-slate-400">Welcome back! Here's your restaurant overview.</p>
+      <h2 class="text-3xl font-bold mb-2 text-stone-900">Dashboard</h2>
+      <p class="text-stone-500">Welcome back! Here's your restaurant overview.</p>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-slate-400 text-sm">Total Menus</span>
+          <span class="text-stone-500 text-sm">Total Menus</span>
           <span class="material-symbols-outlined text-primary text-[20px]">restaurant_menu</span>
         </div>
-        <p class="text-3xl font-bold" id="stat-menus">0</p>
-        <p class="text-xs text-slate-500 mt-1">Active digital menus</p>
+        <p class="text-3xl font-bold text-stone-900" id="stat-menus">0</p>
+        <p class="text-xs text-stone-400 mt-1">Active digital menus</p>
       </div>
-      
-      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-slate-400 text-sm">Total Scans</span>
+          <span class="text-stone-500 text-sm">Total Scans</span>
           <span class="material-symbols-outlined text-amber-500 text-[20px]">qr_code_scanner</span>
         </div>
-        <p class="text-3xl font-bold text-amber-500" id="stat-scans">0</p>
-        <p class="text-xs text-slate-500 mt-1">QR code scans</p>
+        <p class="text-3xl font-bold text-amber-600" id="stat-scans">0</p>
+        <p class="text-xs text-stone-400 mt-1">QR code scans</p>
       </div>
       
-      <div class="bg-surface border border-slate-700 rounded-2xl p-6">
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-slate-400 text-sm">Current Plan</span>
-          <span class="material-symbols-outlined text-green-500 text-[20px]">workspace_premium</span>
+          <span class="text-stone-500 text-sm">Current Plan</span>
+          <span class="material-symbols-outlined text-green-600 text-[20px]">workspace_premium</span>
         </div>
-        <p class="text-2xl font-bold text-green-500" id="stat-plan">Loading...</p>
-        <p class="text-xs text-slate-500 mt-1">Subscription tier</p>
+        <p class="text-2xl font-bold text-green-600" id="stat-plan">Loading...</p>
+        <p class="text-xs text-stone-400 mt-1">Subscription tier</p>
       </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-surface border border-slate-700 rounded-2xl p-6 mb-8">
-      <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+    <div class="bg-white border border-stone-200 rounded-2xl p-6 mb-8 shadow-sm">
+      <h3 class="text-lg font-bold mb-4 text-stone-900">Quick Actions</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="/admin" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
-          <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+        <a href="/menu-editor" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-primary/50 hover:bg-orange-50 transition">
+          <div class="size-10 rounded-lg bg-orange-100 flex items-center justify-center">
             <span class="material-symbols-outlined text-primary text-[20px]">add</span>
           </div>
           <div>
-            <p class="font-semibold text-sm">Create Menu</p>
-            <p class="text-xs text-slate-400">Upload or create new</p>
+            <p class="font-semibold text-sm text-stone-800">Create Menu</p>
+            <p class="text-xs text-stone-400">Upload or create new</p>
           </div>
         </a>
         
-        <a href="#" onclick="showSection('subscription'); return false;" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
-          <div class="size-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-amber-500 text-[20px]">upgrade</span>
+        <a href="#" onclick="showSection('subscription'); return false;" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-amber-300 hover:bg-amber-50 transition">
+          <div class="size-10 rounded-lg bg-amber-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-amber-600 text-[20px]">upgrade</span>
           </div>
           <div>
-            <p class="font-semibold text-sm">Upgrade Plan</p>
-            <p class="text-xs text-slate-400">Get more features</p>
+            <p class="font-semibold text-sm text-stone-800">Upgrade Plan</p>
+            <p class="text-xs text-stone-400">Get more features</p>
           </div>
         </a>
         
-        <a href="/#pricing" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
-          <div class="size-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-green-500 text-[20px]">info</span>
+        <a href="/#pricing" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition">
+          <div class="size-10 rounded-lg bg-green-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-600 text-[20px]">info</span>
           </div>
           <div>
-            <p class="font-semibold text-sm">View Pricing</p>
-            <p class="text-xs text-slate-400">Compare plans</p>
+            <p class="font-semibold text-sm text-stone-800">View Pricing</p>
+            <p class="text-xs text-stone-400">Compare plans</p>
           </div>
         </a>
         
-        <a href="mailto:support@restorder.online" class="flex items-center gap-3 p-4 bg-bg-dark border border-slate-700 rounded-xl hover:border-primary/50 transition">
-          <div class="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-blue-500 text-[20px]">support_agent</span>
+        <a href="mailto:support@restorder.online" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition">
+          <div class="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-600 text-[20px]">support_agent</span>
           </div>
           <div>
-            <p class="font-semibold text-sm">Get Support</p>
-            <p class="text-xs text-slate-400">Contact our team</p>
+            <p class="font-semibold text-sm text-stone-800">Get Support</p>
+            <p class="text-xs text-stone-400">Contact our team</p>
           </div>
         </a>
       </div>
     </div>
 
     <!-- Menus List -->
-    <div class="bg-surface border border-slate-700 rounded-2xl overflow-hidden">
-      <div class="p-6 border-b border-slate-700 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Your Menus</h3>
-        <a href="/admin" class="px-4 py-2 bg-primary text-bg-dark text-sm font-semibold rounded-lg hover:bg-primary/90 transition">
+    <div class="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+      <div class="p-6 border-b border-stone-200 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-stone-900">Your Menus</h3>
+        <a href="/menu-editor" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition">
           + New Menu
         </a>
       </div>
       
       <div id="menus-container">
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3">hourglass_empty</span>
-          <p class="text-slate-400">Loading your menus...</p>
+          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">hourglass_empty</span>
+          <p class="text-stone-400">Loading your menus...</p>
         </div>
       </div>
     </div>
@@ -184,18 +187,18 @@
   <!-- Subscription Section -->
   <div id="subscription-section" class="hidden">
     <div class="mb-8">
-      <button onclick="showSection('dashboard')" class="text-slate-400 hover:text-primary transition mb-4 flex items-center gap-2">
+      <button onclick="showSection('dashboard')" class="text-stone-500 hover:text-primary transition mb-4 flex items-center gap-2 text-sm">
         <span class="material-symbols-outlined text-[18px]">arrow_back</span>
         Back to Dashboard
       </button>
-      <h2 class="text-3xl font-bold mb-2">Subscription</h2>
-      <p class="text-slate-400">Manage your subscription and billing</p>
+      <h2 class="text-3xl font-bold mb-2 text-stone-900">Subscription</h2>
+      <p class="text-stone-500">Manage your subscription and billing</p>
     </div>
 
     <div id="subscription-content">
       <div class="p-12 text-center">
-        <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span>
-        <p class="text-slate-400">Loading subscription details...</p>
+        <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin">progress_activity</span>
+        <p class="text-stone-400">Loading subscription details...</p>
       </div>
     </div>
   </div>
@@ -203,76 +206,365 @@
   <!-- Profile Section -->
   <div id="profile-section" class="hidden">
     <div class="mb-8">
-      <button onclick="showSection('dashboard')" class="text-slate-400 hover:text-primary transition mb-4 flex items-center gap-2">
+      <button onclick="showSection('dashboard')" class="text-stone-500 hover:text-primary transition mb-4 flex items-center gap-2 text-sm">
         <span class="material-symbols-outlined text-[18px]">arrow_back</span>
         Back to Dashboard
       </button>
-      <h2 class="text-3xl font-bold mb-2">Profile Settings</h2>
-      <p class="text-slate-400">Update your business information</p>
+      <h2 class="text-3xl font-bold mb-2 text-stone-900">Profile Settings</h2>
+      <p class="text-stone-500">Manage your account information and security</p>
     </div>
 
-    <div class="bg-surface border border-slate-700 rounded-2xl p-8 max-w-2xl">
-      <form id="profile-form" class="space-y-6">
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Business Name</label>
-            <input id="profile-business-name" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Contact Name</label>
-            <input id="profile-contact-name" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
-          </div>
-        </div>
+    <div class="max-w-3xl space-y-6">
 
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
-            <input id="profile-email" type="email" disabled class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-400 cursor-not-allowed" />
-            <p class="text-xs text-slate-500 mt-1">Email cannot be changed</p>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Phone</label>
-            <input id="profile-phone" type="tel" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
-          </div>
+      <!-- Avatar + Name Card -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex items-center gap-6">
+        <div id="profile-avatar" class="size-20 rounded-2xl bg-orange-100 flex items-center justify-center text-primary text-3xl font-bold flex-shrink-0">
+          ?
         </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-xl font-bold text-stone-900 truncate" id="profile-display-name">Loading...</h3>
+          <p class="text-stone-500 text-sm truncate" id="profile-display-email"></p>
+          <span id="profile-status-badge" class="badge badge-active mt-2">Active</span>
+        </div>
+      </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">Address</label>
-          <input id="profile-address" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">City</label>
-            <input id="profile-city" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      <!-- Business Information Card -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+        <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">business</span>
+          Business Information
+        </h4>
+        <form id="profile-form" class="space-y-5">
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Business Name</label>
+              <input id="profile-business-name" type="text" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Your Restaurant"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Contact Name</label>
+              <input id="profile-contact-name" type="text" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Your Name"/>
+            </div>
           </div>
-          
+
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Email Address</label>
+              <input id="profile-email" type="email" disabled class="w-full px-4 py-2.5 bg-stone-100 border border-stone-200 rounded-xl text-stone-400 cursor-not-allowed"/>
+              <p class="text-xs text-stone-400 mt-1">Email cannot be changed</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Phone Number</label>
+              <input id="profile-phone" type="tel" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="+1 (555) 000-0000"/>
+            </div>
+          </div>
+
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2">Country</label>
-            <input id="profile-country" type="text" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+            <label class="block text-sm font-medium text-stone-700 mb-1.5">Street / Area</label>
+            <select id="profile-street" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
+              <option value="">Select street / area</option>
+            </select>
+            <input id="profile-street-other" type="text" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Enter your street or area" style="display:none;margin-top:8px"/>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">City</label>
+              <select id="profile-city" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
+                <option value="">Select city</option>
+              </select>
+              <input id="profile-city-other" type="text" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Enter your city" style="display:none;margin-top:8px"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Country</label>
+              <select id="profile-country" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition">
+                <option value="">Select country</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="profile-save-msg" class="hidden px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+          <div class="flex gap-3 pt-1">
+            <button type="submit" id="profile-save-btn" class="px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-orange-700 transition">
+              Save Changes
+            </button>
+            <button type="button" onclick="loadProfile()" class="px-6 py-2.5 bg-stone-100 text-stone-700 border border-stone-200 font-semibold rounded-xl hover:bg-stone-200 transition">
+              Reset
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+        <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">lock</span>
+          Change Password
+        </h4>
+        <form id="password-form" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-stone-700 mb-1.5">Current Password</label>
+            <input id="current-password" type="password" autocomplete="current-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="��������"/>
+          </div>
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">New Password</label>
+              <input id="new-password" type="password" autocomplete="new-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Min. 8 characters"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-stone-700 mb-1.5">Confirm New Password</label>
+              <input id="confirm-password" type="password" autocomplete="new-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition" placeholder="Repeat new password"/>
+            </div>
+          </div>
+
+          <div id="password-msg" class="hidden px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+          <div>
+            <button type="submit" id="password-btn" class="px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-orange-700 transition">
+              Update Password
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Account Security Card -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+        <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+          Account Security
+        </h4>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between py-3 border-b border-stone-100">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-stone-400">mark_email_read</span>
+              <div>
+                <p class="text-sm font-medium text-stone-800">Email Verified</p>
+                <p class="text-xs text-stone-400">Your email address confirmation status</p>
+              </div>
+            </div>
+            <span id="email-verified-badge" class="badge">�</span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-b border-stone-100">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-stone-400">login</span>
+              <div>
+                <p class="text-sm font-medium text-stone-800">Last Login</p>
+                <p class="text-xs text-stone-400">Most recent session start</p>
+              </div>
+            </div>
+            <span id="last-login-text" class="text-sm text-stone-600">�</span>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-[20px] text-stone-400">calendar_today</span>
+              <div>
+                <p class="text-sm font-medium text-stone-800">Member Since</p>
+                <p class="text-xs text-stone-400">Account creation date</p>
+              </div>
+            </div>
+            <span id="member-since-text" class="text-sm text-stone-600">�</span>
           </div>
         </div>
+      </div>
 
-        <div class="pt-4 flex gap-3">
-          <button type="submit" class="px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
-            Save Changes
-          </button>
-          <button type="button" onclick="loadProfile()" class="px-6 py-2.5 bg-bg-dark text-slate-300 border border-slate-700 font-semibold rounded-xl hover:bg-slate-800 transition">
-            Cancel
-          </button>
+      <!-- Danger Zone -->
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+        <h4 class="text-base font-semibold text-red-700 mb-2 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px]">warning</span>
+          Danger Zone
+        </h4>
+        <p class="text-sm text-red-600 mb-4">Permanently delete your account and all associated menus. This action cannot be undone.</p>
+        <button onclick="confirmDeleteAccount()" class="px-5 py-2.5 bg-white border border-red-300 text-red-600 text-sm font-semibold rounded-xl hover:bg-red-600 hover:text-white transition">
+          Delete Account
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Team Section -->
+  <div id="team-section" class="hidden">
+    <div class="mb-8">
+      <h2 class="text-3xl font-bold mb-2 text-stone-900">Team</h2>
+      <p class="text-stone-500">Manage your staff — Managers, Waiters, and Cashiers.</p>
+    </div>
+    <div class="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+      <div class="p-6 border-b border-stone-200 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-stone-900">Staff Members</h3>
+        <button onclick="openStaffModal()" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition">+ Add Staff</button>
+      </div>
+      <div id="staff-list-container">
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">hourglass_empty</span>
+          <p class="text-stone-400">Loading staff members...</p>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 
 </main>
 
+<!-- Staff Modal (Add / Edit) -->
+<div id="staff-modal" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center hidden" onclick="if(event.target===this)closeStaffModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 m-4">
+    <div class="flex items-center justify-between">
+      <h3 id="staff-modal-title" class="text-lg font-bold text-stone-900">Add Staff Member</h3>
+      <button onclick="closeStaffModal()" class="text-stone-400 hover:text-stone-700 transition"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <input type="hidden" id="staff-modal-id"/>
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Full Name</label>
+      <input id="staff-modal-name" type="text" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="John Doe"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Email Address</label>
+      <input id="staff-modal-email" type="email" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="john@yourrestaurant.com"/>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Role</label>
+      <select id="staff-modal-role" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition">
+        <option value="manager">Manager — full menu access</option>
+        <option value="waiter">Waiter — tables &amp; orders</option>
+        <option value="cashier">Cashier — orders &amp; payments</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5" id="staff-modal-pwd-label">Password</label>
+      <input id="staff-modal-password" type="password" autocomplete="new-password" class="w-full px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition" placeholder="Min. 8 characters"/>
+      <p id="staff-modal-pwd-hint" class="text-xs text-stone-400 mt-1 hidden">Leave blank to keep current password</p>
+    </div>
+    <p id="staff-modal-error" class="text-red-600 text-sm hidden"></p>
+    <div class="flex gap-3 pt-1">
+      <button onclick="saveStaffMember()" id="staff-modal-save-btn" class="flex-1 px-4 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-orange-700 transition">Save</button>
+      <button onclick="closeStaffModal()" class="px-4 py-2.5 bg-stone-100 text-stone-700 border border-stone-200 font-semibold rounded-xl hover:bg-stone-200 transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // Authentication
 let customerToken = null;
 let customerId = null;
+
+const COUNTRIES=[
+["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AO","Angola"],["AR","Argentina"],["AU","Australia"],["AT","Austria"],["BH","Bahrain"],["BD","Bangladesh"],["BE","Belgium"],["BJ","Benin"],["BW","Botswana"],["BR","Brazil"],["BF","Burkina Faso"],["BI","Burundi"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CO","Colombia"],["KM","Comoros"],["CG","Congo"],["CD","Congo (DRC)"],["CR","Costa Rica"],["CI","Côte d'Ivoire"],["HR","Croatia"],["CZ","Czech Republic"],["DK","Denmark"],["DJ","Djibouti"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["ET","Ethiopia"],["FI","Finland"],["FR","France"],["GA","Gabon"],["GM","Gambia"],["DE","Germany"],["GH","Ghana"],["GR","Greece"],["GT","Guatemala"],["GN","Guinea"],["HK","Hong Kong"],["HU","Hungary"],["IN","India"],["ID","Indonesia"],["IQ","Iraq"],["IE","Ireland"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JO","Jordan"],["KE","Kenya"],["KW","Kuwait"],["LB","Lebanon"],["LR","Liberia"],["LY","Libya"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["ML","Mali"],["MR","Mauritania"],["MU","Mauritius"],["MX","Mexico"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NP","Nepal"],["NL","Netherlands"],["NZ","New Zealand"],["NE","Niger"],["NG","Nigeria"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PL","Poland"],["PT","Portugal"],["QA","Qatar"],["RO","Romania"],["RW","Rwanda"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SL","Sierra Leone"],["SG","Singapore"],["SK","Slovakia"],["SI","Slovenia"],["SO","Somalia"],["ZA","South Africa"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SE","Sweden"],["CH","Switzerland"],["TW","Taiwan"],["TZ","Tanzania"],["TH","Thailand"],["TG","Togo"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TR","Turkey"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UY","Uruguay"],["VN","Vietnam"],["ZM","Zambia"],["ZW","Zimbabwe"]
+];
+
+const COUNTRY_CITIES={AF:["Kabul","Kandahar","Herat","Mazar-i-Sharif","Jalalabad"],AL:["Tirana","Durres","Vlore","Elbasan","Shkoder"],DZ:["Algiers","Oran","Constantine","Annaba","Blida"],AO:["Luanda","Huambo","Lobito","Benguela","Lubango"],AR:["Buenos Aires","Cordoba","Rosario","Mendoza","La Plata","Tucuman"],AU:["Sydney","Melbourne","Brisbane","Perth","Adelaide","Gold Coast","Canberra","Hobart","Darwin"],AT:["Vienna","Graz","Linz","Salzburg","Innsbruck"],BH:["Manama","Riffa","Muharraq","Hamad Town"],BD:["Dhaka","Chittagong","Khulna","Rajshahi","Sylhet","Rangpur"],BE:["Brussels","Antwerp","Ghent","Charleroi","Liege"],BJ:["Cotonou","Porto-Novo","Parakou","Djougou"],BW:["Gaborone","Francistown","Molepolole","Maun","Serowe"],BR:["Sao Paulo","Rio de Janeiro","Brasilia","Salvador","Fortaleza","Belo Horizonte","Manaus","Curitiba","Recife"],BF:["Ouagadougou","Bobo-Dioulasso","Koudougou","Banfora"],BI:["Bujumbura","Gitega","Muyinga","Ngozi","Rumonge"],KH:["Phnom Penh","Siem Reap","Battambang","Sihanoukville"],CM:["Douala","Yaounde","Bamenda","Bafoussam","Garoua","Maroua"],CA:["Toronto","Montreal","Vancouver","Calgary","Edmonton","Ottawa","Winnipeg","Quebec City","Hamilton","Halifax"],CF:["Bangui","Bimbo","Berberati","Carnot"],TD:["NDjamena","Moundou","Abeche","Sarh"],CL:["Santiago","Valparaiso","Concepcion","Antofagasta","Temuco"],CN:["Shanghai","Beijing","Guangzhou","Shenzhen","Chengdu","Hangzhou","Wuhan","Xian","Nanjing","Chongqing"],CO:["Bogota","Medellin","Cali","Barranquilla","Cartagena","Bucaramanga"],KM:["Moroni","Mutsamudu","Fomboni"],CG:["Brazzaville","Pointe-Noire","Dolisie","Nkayi"],CD:["Kinshasa","Lubumbashi","Mbuji-Mayi","Kisangani","Kananga","Bukavu","Goma"],CR:["San Jose","Alajuela","Cartago","Heredia"],CI:["Abidjan","Bouake","Daloa","Yamoussoukro","Korhogo"],HR:["Zagreb","Split","Rijeka","Osijek","Zadar"],CZ:["Prague","Brno","Ostrava","Plzen"],DK:["Copenhagen","Aarhus","Odense","Aalborg"],DJ:["Djibouti City","Ali Sabieh","Tadjoura","Obock","Dikhil"],DO:["Santo Domingo","Santiago","San Pedro de Macoris","La Romana"],EC:["Quito","Guayaquil","Cuenca","Machala","Ambato"],EG:["Cairo","Alexandria","Giza","Port Said","Suez","Luxor","Aswan","Mansoura"],SV:["San Salvador","Santa Ana","San Miguel","Mejicanos"],GQ:["Malabo","Bata","Ebebiyin"],ER:["Asmara","Keren","Massawa","Assab","Mendefera"],ET:["Addis Ababa","Dire Dawa","Mekelle","Gondar","Adama","Hawassa","Bahir Dar","Jimma","Dessie","Harar"],FI:["Helsinki","Espoo","Tampere","Vantaa","Oulu","Turku"],FR:["Paris","Marseille","Lyon","Toulouse","Nice","Nantes","Strasbourg","Bordeaux","Lille"],GA:["Libreville","Port-Gentil","Franceville","Oyem"],GM:["Banjul","Serekunda","Brikama","Bakau"],DE:["Berlin","Hamburg","Munich","Cologne","Frankfurt","Stuttgart","Dusseldorf","Leipzig","Dortmund"],GH:["Accra","Kumasi","Tamale","Takoradi","Cape Coast","Tema","Sunyani","Obuasi","Koforidua"],GR:["Athens","Thessaloniki","Patras","Heraklion","Larissa"],GT:["Guatemala City","Mixco","Villa Nueva","Quetzaltenango"],GN:["Conakry","Nzerekore","Kankan","Kindia"],HK:["Central","Tsim Sha Tsui","Wan Chai","Mong Kok","Causeway Bay","Kowloon"],HU:["Budapest","Debrecen","Szeged","Miskolc","Pecs"],IN:["Mumbai","Delhi","Bangalore","Hyderabad","Ahmedabad","Chennai","Kolkata","Pune","Jaipur","Lucknow","Surat","Kochi"],ID:["Jakarta","Surabaya","Bandung","Medan","Semarang","Makassar","Denpasar","Yogyakarta"],IQ:["Baghdad","Basra","Erbil","Mosul","Sulaymaniyah","Najaf"],IE:["Dublin","Cork","Limerick","Galway","Waterford"],IL:["Tel Aviv","Jerusalem","Haifa","Rishon LeZion","Beersheba"],IT:["Rome","Milan","Naples","Turin","Palermo","Genoa","Bologna","Florence","Venice"],JM:["Kingston","Montego Bay","Spanish Town","Portmore"],JP:["Tokyo","Osaka","Yokohama","Nagoya","Sapporo","Fukuoka","Kobe","Kyoto","Sendai"],JO:["Amman","Zarqa","Irbid","Aqaba","Madaba"],KE:["Nairobi","Mombasa","Kisumu","Nakuru","Eldoret","Thika","Malindi","Kitale","Garissa","Nyeri","Machakos","Meru","Lamu","Nanyuki","Naivasha"],KW:["Kuwait City","Hawalli","Salmiya","Farwaniya"],LB:["Beirut","Tripoli","Sidon","Tyre","Jounieh"],LR:["Monrovia","Gbarnga","Kakata","Buchanan"],LY:["Tripoli","Benghazi","Misrata","Sabha"],MG:["Antananarivo","Toamasina","Antsirabe","Fianarantsoa","Mahajanga"],MW:["Lilongwe","Blantyre","Mzuzu","Zomba","Mangochi","Karonga"],MY:["Kuala Lumpur","George Town","Johor Bahru","Ipoh","Shah Alam","Kota Kinabalu","Kuching"],ML:["Bamako","Sikasso","Mopti","Koutiala","Segou"],MR:["Nouakchott","Nouadhibou","Kaedi","Rosso"],MU:["Port Louis","Beau Bassin-Rose Hill","Vacoas-Phoenix","Curepipe"],MX:["Mexico City","Guadalajara","Monterrey","Puebla","Tijuana","Cancun","Merida","Leon","Queretaro"],MA:["Casablanca","Rabat","Marrakech","Fez","Tangier","Agadir","Meknes"],MZ:["Maputo","Matola","Beira","Nampula","Chimoio"],MM:["Yangon","Mandalay","Naypyidaw","Mawlamyine"],NA:["Windhoek","Walvis Bay","Swakopmund","Oshakati","Rundu"],NP:["Kathmandu","Pokhara","Lalitpur","Bharatpur","Biratnagar"],NL:["Amsterdam","Rotterdam","The Hague","Utrecht","Eindhoven","Groningen"],NZ:["Auckland","Wellington","Christchurch","Hamilton","Tauranga","Dunedin","Queenstown"],NE:["Niamey","Zinder","Maradi","Tahoua"],NG:["Lagos","Abuja","Kano","Ibadan","Port Harcourt","Benin City","Kaduna","Enugu","Calabar","Warri","Owerri","Jos","Ilorin","Uyo"],NO:["Oslo","Bergen","Trondheim","Stavanger","Tromso"],OM:["Muscat","Salalah","Sohar","Nizwa"],PK:["Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Peshawar","Multan","Quetta"],PA:["Panama City","Colon","David","Santiago"],PG:["Port Moresby","Lae","Mount Hagen","Madang"],PY:["Asuncion","Ciudad del Este","San Lorenzo","Luque"],PE:["Lima","Arequipa","Trujillo","Chiclayo","Cusco","Piura","Iquitos"],PH:["Manila","Quezon City","Davao","Cebu City","Makati","Taguig","Cagayan de Oro","Zamboanga"],PL:["Warsaw","Krakow","Lodz","Wroclaw","Poznan","Gdansk"],PT:["Lisbon","Porto","Braga","Coimbra","Funchal"],QA:["Doha","Al Wakrah","Al Khor","Umm Salal","Al Rayyan"],RO:["Bucharest","Cluj-Napoca","Timisoara","Iasi","Constanta","Brasov"],RW:["Kigali","Butare","Gitarama","Musanze","Rubavu","Muhanga","Huye","Nyagatare"],SA:["Riyadh","Jeddah","Mecca","Medina","Dammam","Khobar","Tabuk"],SN:["Dakar","Touba","Thies","Saint-Louis","Kaolack"],RS:["Belgrade","Novi Sad","Nis","Kragujevac"],SL:["Freetown","Bo","Kenema","Makeni"],SG:["Singapore","Jurong East","Tampines","Woodlands"],SK:["Bratislava","Kosice","Presov","Zilina"],SI:["Ljubljana","Maribor","Celje","Kranj"],SO:["Mogadishu","Hargeisa","Kismayo","Marka","Berbera","Baidoa","Garowe"],ZA:["Johannesburg","Cape Town","Durban","Pretoria","Port Elizabeth","Bloemfontein","East London","Polokwane"],SS:["Juba","Malakal","Wau","Bor","Yambio","Rumbek"],ES:["Madrid","Barcelona","Valencia","Seville","Zaragoza","Malaga","Bilbao"],LK:["Colombo","Kandy","Galle","Jaffna","Negombo"],SD:["Khartoum","Omdurman","Port Sudan","Kassala","El Obeid","Nyala"],SE:["Stockholm","Gothenburg","Malmo","Uppsala","Linkoping"],CH:["Zurich","Geneva","Basel","Bern","Lausanne","Lucerne"],TW:["Taipei","Kaohsiung","Taichung","Tainan","Hsinchu"],TZ:["Dar es Salaam","Dodoma","Mwanza","Arusha","Zanzibar City","Mbeya","Morogoro","Tanga","Iringa","Kigoma","Tabora","Moshi","Songea","Bukoba","Musoma"],TH:["Bangkok","Chiang Mai","Pattaya","Nonthaburi","Hat Yai","Phuket","Udon Thani"],TG:["Lome","Sokode","Kara","Kpalime"],TT:["Port of Spain","Chaguanas","San Fernando","Arima"],TN:["Tunis","Sfax","Sousse","Kairouan","Bizerte"],TR:["Istanbul","Ankara","Izmir","Bursa","Antalya","Adana","Konya","Gaziantep"],UG:["Kampala","Gulu","Lira","Mbarara","Jinja","Mbale","Mukono","Masaka","Entebbe","Fort Portal","Kabale","Soroti","Arua","Hoima"],UA:["Kyiv","Kharkiv","Odesa","Dnipro","Lviv"],AE:["Dubai","Abu Dhabi","Sharjah","Ajman","Al Ain","Ras Al Khaimah","Fujairah"],GB:["London","Birmingham","Manchester","Leeds","Glasgow","Liverpool","Edinburgh","Bristol","Cardiff","Belfast"],US:["New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Francisco","Austin","Seattle","Denver","Miami","Atlanta"],UY:["Montevideo","Salto","Paysandu","Las Piedras"],VN:["Ho Chi Minh City","Hanoi","Da Nang","Hai Phong","Can Tho","Nha Trang","Hue"],ZM:["Lusaka","Kitwe","Ndola","Kabwe","Livingstone","Chipata","Kasama","Solwezi"],ZW:["Harare","Bulawayo","Chitungwiza","Mutare","Gweru","Masvingo","Kwekwe"]};
+
+
+const CITY_STREETS={"Kabul":["Wazir Akbar Khan","Shahr-e-Naw","Karte-e-Mamorin","Karte-e-Se","Macroyan","Khair Khana"],"Algiers":["Bab El Oued","Hussein Dey","Bir Mourad Rais","El Biar","Hydra","Kouba"],"Luanda":["Maianga","Ingombota","Sambizanga","Rangel","Maculusso","Talatona"],"Buenos Aires":["Palermo","Recoleta","San Telmo","La Boca","Belgrano","Puerto Madero","Microcentro"],"Sydney":["CBD","Surry Hills","Bondi","Newtown","Parramatta","Manly","Darlinghurst","Chatswood"],"Melbourne":["CBD","South Yarra","Fitzroy","St Kilda","Richmond","Carlton","Brunswick","Docklands"],"Brisbane":["CBD","South Bank","Fortitude Valley","New Farm","West End","Paddington"],"Perth":["CBD","Northbridge","Subiaco","Fremantle","Leederville","Mount Lawley"],"Toronto":["Downtown","Yorkville","Queen West","Kensington Market","The Annex","Liberty Village","Distillery District"],"Montreal":["Old Montreal","Plateau Mont-Royal","Mile End","Griffintown","Downtown","Outremont"],"Vancouver":["Downtown","Gastown","Kitsilano","Yaletown","Mount Pleasant","Commercial Drive"],"Shanghai":["Pudong","Jing An","Xuhui","Huangpu","Hongkou","Changning"],"Beijing":["Chaoyang","Haidian","Dongcheng","Xicheng","Fengtai","Shunyi"],"Bogota":["Chapinero","Usaquen","La Candelaria","Zona Rosa","Teusaquillo","Suba"],"Cairo":["Zamalek","Maadi","Heliopolis","Nasr City","Downtown","New Cairo","Garden City","Dokki","Mohandessin"],"Alexandria":["Stanley","Sidi Gaber","Smouha","Sporting","Roushdy","Montazah"],"Addis Ababa":["Bole","Kirkos","Arada","Yeka","Lideta","Akaky Kaliti","Nifas Silk-Lafto","Kolfe Keranio","Gulele","Addis Ketema"],"Dire Dawa":["Kezira","Megala","Sabian","Lege Hare","Gendekore"],"Mekelle":["Hawelti","Semien","Adi Haki","Kedamay Weyane","Quiha"],"Gondar":["Piazza","Azezo","Maraki","Kebele 14","Fasil"],"Adama":["Dabe","Boku","Lugo","Dechatu","Migra"],"Hawassa":["Piazza","Tabor","Atote","Menahria","Dato Desso"],"Paris":["Le Marais","Montmartre","Saint-Germain","Champs-Elysees","Bastille","Belleville","Oberkampf","Latin Quarter"],"Marseille":["Vieux-Port","Le Panier","La Joliette","Castellane","Prado","Noailles"],"Lyon":["Presqu ile","Vieux Lyon","Part-Dieu","Confluence","Croix-Rousse","Guillotiere"],"Berlin":["Mitte","Kreuzberg","Prenzlauer Berg","Friedrichshain","Charlottenburg","Neukolln","Schoneberg"],"Hamburg":["Altona","St Pauli","HafenCity","Eimsbuttel","Wandsbek","Barmbek"],"Munich":["Schwabing","Maxvorstadt","Haidhausen","Glockenbachviertel","Altstadt","Sendling"],"Accra":["Osu","East Legon","Airport Residential","Cantonments","Labone","Adabraka","Dansoman","Tema","Madina","Spintex","Achimota","Nungua","Tesano","Asylum Down","Ridge"],"Kumasi":["Adum","Bantama","Asafo","Suame","Nhyiaeso","Manhyia","Atonsu","Tafo"],"Tamale":["Central","Lamashegu","Vittin","Sakasaka","Kalpohin","Changli"],"New Delhi":["Connaught Place","Hauz Khas","Saket","Lajpat Nagar","Defence Colony","Greater Kailash","Karol Bagh","Dwarka"],"Mumbai":["Bandra","Andheri","Colaba","Lower Parel","Juhu","Powai","Worli","Fort","Dadar"],"Bangalore":["Koramangala","Indiranagar","Whitefield","HSR Layout","Jayanagar","MG Road","Electronic City","Marathahalli"],"Jakarta":["Menteng","Kemang","Senopati","SCBD","Kelapa Gading","Kuningan","Tebet","Blok M"],"Dublin":["Temple Bar","Ranelagh","Rathmines","Ballsbridge","Drumcondra","Clontarf","Smithfield"],"Tel Aviv":["Rothschild","Florentin","Neve Tzedek","Dizengoff","Sarona","Ramat Aviv"],"Rome":["Trastevere","Monti","Testaccio","Prati","Esquilino","San Lorenzo","Parioli"],"Milan":["Brera","Navigli","Porta Venezia","Isola","CityLife","Duomo","Porta Romana"],"Tokyo":["Shibuya","Shinjuku","Roppongi","Ginza","Asakusa","Ikebukuro","Ebisu","Harajuku","Akihabara"],"Osaka":["Namba","Umeda","Shinsaibashi","Tennoji","Doyama","Shinsekai"],"Amman":["Abdoun","Sweifieh","Jabal Amman","Rainbow Street","Shmeisani","Dabouq","Khalda"],"Nairobi":["Westlands","Kilimani","Karen","Lavington","Kileleshwa","CBD","Upper Hill","South B","South C","Langata","Parklands","Hurlingham","Runda","Spring Valley","Ngong Road","Kasarani","Roysambu","Eastleigh","Kahawa","Embakasi","Donholm","Umoja","Buruburu","Ruaka","Kitisuru","Muthaiga","Gigiri","Loresho","Kangemi","Dagoretti"],"Mombasa":["Nyali","Bamburi","Tudor","Old Town","Likoni","Shanzu","Kisauni","Changamwe","Mvita","Mtwapa","Kizingo","Ganjoni","Mkomani","English Point"],"Kisumu":["Milimani","Kondele","Nyalenda","CBD","Tom Mboya","Mamboleo","Riat","Obunga","Lolwe","Nyamasaria"],"Nakuru":["Milimani","CBD","Section 58","London","Lanet","Naka","Free Area","Bondeni","Pangani","Shabab"],"Eldoret":["CBD","Elgon View","Langas","Pioneer","Kapseret","West Indies","Huruma","Annex","Kipkenyo"],"Thika":["CBD","Makongeni","Kiandutu","Section 9","Landless","Ngoingwa","Kiganjo"],"Malindi":["CBD","Shella","Watamu","Casuarina","Silversand","Scorpio Villas","Lamu Road"],"Kitale":["CBD","Milimani","Kipsongo","Airport","Maili Saba","Bidii"],"Garissa":["CBD","Section 3","Bula Pesa","Iftin","Bula Hawa","Galbet"],"Nyeri":["CBD","Ruring u","Kamuyu","King ong o","Skuta","Kamakwa","Ruringu"],"Machakos":["CBD","Katoloni","Mwala","Mumbuni","Mutituni","Kola"],"Meru":["CBD","Makutano","Gakoromone","Kinoru","Kaaga","Gitimbine"],"Nanyuki":["CBD","Likii","Sweetwaters","Baraka","Matanya","Nturukuma"],"Naivasha":["CBD","South Lake","Karagita","Longonot Gate","Diani","Kasarani","Kamere"],"Kuwait City":["Sharq","Salmiya","Hawalli","Bneid Al-Gar","Dasman","Mirqab"],"Beirut":["Hamra","Gemmayzeh","Mar Mikhael","Achrafieh","Verdun","Downtown","Badaro"],"Kuala Lumpur":["Bukit Bintang","KLCC","Bangsar","Mont Kiara","Cheras","Damansara","Sri Hartamas"],"Mexico City":["Roma Norte","Condesa","Polanco","Coyoacan","Centro Historico","Del Valle","Juarez","Narvarte"],"Casablanca":["Maarif","Anfa","Gauthier","Ain Diab","Bourgogne","Habous","Racine"],"Lagos":["Victoria Island","Ikoyi","Lekki","Ikeja","Surulere","Yaba","Ajah","Apapa","Festac","Maryland","Gbagada","Magodo","Ogba","Oshodi","Mushin"],"Abuja":["Maitama","Wuse","Garki","Asokoro","Gwarinpa","Jabi","Central Area","Utako","Kubwa"],"Kano":["Nassarawa","Fagge","Tarauni","Gwale","Sabon Gari","Bompai"],"Islamabad":["F-6","F-7","F-8","G-9","G-10","E-11","Blue Area","I-8","Bahria Town"],"Lahore":["Gulberg","DHA","Model Town","Johar Town","Liberty","Mall Road","Bahria Town","Garden Town"],"Lima":["Miraflores","Barranco","San Isidro","Surco","La Molina","Lince","Magdalena","Jesus Maria"],"Manila":["Makati","BGC","Quezon City","Ortigas","Poblacion","Ermita","Malate","Intramuros"],"Doha":["West Bay","The Pearl","Souq Waqif","Al Sadd","Lusail","Katara","Musheireb"],"Riyadh":["Olaya","Al Malaz","Al Rawdah","Sulaymaniyah","Al Sahafah","Al Nakheel","DQ","Hittin"],"Jeddah":["Al Hamra","Al Rawdah","Al Zahra","Corniche","Al Andalus","Al Salamah","Al Faisaliyyah"],"Singapore":["Orchard","Marina Bay","Bugis","Tiong Bahru","Tanjong Pagar","Holland Village","Dempsey","Katong","Clarke Quay"],"Mogadishu":["Hodan","Hawl Wadag","Karaan","Wadajir","Shangani","Hamar Jajab","Yaqshid","Bondhere","Daynile","Abdiaziz"],"Hargeisa":["CBD","26 June","Ahmed Dhagah","Sha ab","Koodbuur","Jigjigayar","Mohamed Mooge"],"Johannesburg":["Sandton","Rosebank","Braamfontein","Maboneng","Melville","Fourways","Midrand","Parkhurst","Greenside"],"Cape Town":["City Bowl","Sea Point","Green Point","Woodstock","Observatory","Camps Bay","Century City","Stellenbosch"],"Durban":["Umhlanga","Berea","Musgrave","Morningside","Durban North","Point","Florida Road"],"Madrid":["Sol","Malasana","Chueca","La Latina","Salamanca","Lavapies","Chamberi","Retiro"],"Barcelona":["Gothic Quarter","El Born","Gracia","Eixample","Barceloneta","Raval","Poble Sec"],"Dar es Salaam":["Masaki","Oyster Bay","Mikocheni","Kinondoni","Kariakoo","Sinza","Msasani","Posta","Ilala","Upanga","Mwenge","Kijitonyama","Tegeta","Mbezi Beach","Ada Estate","Regent Estate","Magomeni","Buguruni","Temeke","Kurasini","Kawe","Kunduchi","Kimara","Ubungo","Tabata","Segerea","Tandika","Mbagala","Makumbusho","Manzese"],"Dodoma":["CBD","Kikuyu","Nzuguni","Chamwino","Viwandani","Makole","Hazina"],"Mwanza":["CBD","Nyamagana","Pasiansi","Capri Point","Ilemela","Buswelu","Nyakato","Mkuyuni"],"Arusha":["CBD","Njiro","Sakina","Themi","Kijenge","Sanawari","Ngarenaro","Sekei","Unga Ltd","Sombetini","Kimandolu"],"Zanzibar City":["Stone Town","Shangani","Mlandege","Hurumzi","Amani","Mlandizi","Bububu"],"Mbeya":["CBD","Mwakibete","Iyunga","Sisimba","Maendeleo","Ilomba","Nzovwe"],"Morogoro":["CBD","Chamwino","Kihonda","Mazimbu","Msamvu","Old Dar es Salaam Road","Mafiga"],"Tanga":["CBD","Ngamiani","Usagara","Pongwe","Raskazone","Chumbageni","Makorora"],"Moshi":["CBD","Shantytown","Kiboriloni","Pasua","Kaloleni","Mawenzi","Rau"],"Bangkok":["Sukhumvit","Silom","Sathorn","Thonglor","Ari","Ekkamai","Siam","Asoke","Prakanong","Ratchathewi"],"Chiang Mai":["Old City","Nimmanhaemin","Night Bazaar","Santitham","Chang Phueak","Hang Dong"],"Istanbul":["Beyoglu","Kadikoy","Besiktas","Sisli","Bakirkoy","Fatih","Uskudar","Taksim"],"Ankara":["Cankaya","Kizilay","Tunali","Ulus","Bahcelievler","Gaziosmanpasa"],"Kampala":["Kololo","Nakasero","Bugolobi","Ntinda","Bukoto","Naguru","Muyenga","Kamwokya","Wandegeya","Mengo","Old Kampala","Makindye","Lubaga","Kansanga","Kisementi","Naalya","Kyanja","Kira","Namugongo","Bweyogerere","Luzira","Butabika","Kabalagala","Ggaba"],"Gulu":["CBD","Laroo","Pece","Bardege","Layibi","Kasubi"],"Lira":["CBD","Adyel","Railway","Ojwina","Stonepark","Ober"],"Mbarara":["CBD","Kamukuzi","Kakoba","Nyamitanga","Ruharo","Biharwe"],"Jinja":["CBD","Walukuba","Mpumudde","Bugembe","Masese","Nalufenya"],"Mbale":["CBD","Maluku","Namatala","Industrial Area","Wanale","Nkoma"],"Entebbe":["CBD","Kitoro","Kigungu","Katabi","Nakiwogo","Bugonga"],"Fort Portal":["CBD","Njara","Kagote","Kabarole","Rwengaju","Saaka"],"Dubai":["Downtown","Dubai Marina","JBR","Business Bay","DIFC","JLT","Deira","Bur Dubai","Al Barsha","Palm Jumeirah","City Walk","Al Quoz"],"Abu Dhabi":["Corniche","Al Reem Island","Saadiyat Island","Khalifa City","Al Maryah Island","Tourist Club"],"London":["Soho","Shoreditch","Covent Garden","Mayfair","Notting Hill","Camden","Brixton","Islington","Hackney","Kensington"],"Birmingham":["City Centre","Digbeth","Jewellery Quarter","Moseley","Harborne","Edgbaston"],"Manchester":["City Centre","Northern Quarter","Ancoats","Deansgate","Didsbury","Chorlton"],"New York":["Manhattan","Brooklyn","SoHo","East Village","Williamsburg","Harlem","Lower East Side","Chelsea","Midtown","Upper West Side","Tribeca","Astoria"],"Los Angeles":["Hollywood","Santa Monica","Silver Lake","Downtown","Venice","West Hollywood","Beverly Hills","Echo Park","Culver City"],"Chicago":["Loop","Wicker Park","Lincoln Park","Logan Square","River North","West Loop","Lakeview","Pilsen"],"Houston":["Montrose","Midtown","Heights","Downtown","EaDo","River Oaks","Galleria","Memorial"],"San Francisco":["Mission","SoMa","Marina","Castro","Hayes Valley","North Beach","Nob Hill","Sunset"],"Austin":["Downtown","East Austin","South Congress","Rainey Street","Mueller","Domain","Zilker"],"Seattle":["Capitol Hill","Ballard","Fremont","Pioneer Square","Queen Anne","Georgetown","Wallingford"],"Miami":["Wynwood","Brickell","South Beach","Little Havana","Coral Gables","Coconut Grove","Design District"],"Atlanta":["Midtown","Buckhead","Decatur","Inman Park","Virginia-Highland","Old Fourth Ward","East Atlanta"],"Kigali":["Kimihurura","Kacyiru","Nyarutarama","Remera","Gikondo","Kicukiro","Kanombe","Nyamirambo","Muhima","Kimisagara","Gisozi","Kibagabaga","Rugando","Kagugu","Masaka","Kabeza"],"Butare":["CBD","Ngoma","Tumba","Huye Campus","Matyazo","Mbazi"],"Musanze":["CBD","Muhoza","Cyuve","Kimonyi","Ruhengeri","Kinigi"],"Rubavu":["CBD","Gisenyi","Rugerero","Kanama","Nyamyumba"],"Bujumbura":["Centre Ville","Buyenzi","Bwiza","Rohero","Kinama","Musaga","Ngagara","Mutanga"],"Gitega":["CBD","Mushasha","Magarama","Buraza","Gitega Centre"],"Djibouti City":["Plateau du Serpent","Heron","Quartier 1","Gabode","Balbala","Marabout"],"Juba":["Gudele","Munuki","Tongping","Hai Malakal","Kator","Nyakuron","Thongpiny"],"Khartoum":["Bahri","Omdurman","Riyadh","Khartoum 2","Arkaweet","Amarat","Garden City"],"Ho Chi Minh City":["District 1","District 2","District 3","District 7","Binh Thanh","Phu Nhuan","Thu Duc"],"Hanoi":["Hoan Kiem","Ba Dinh","Tay Ho","Dong Da","Hai Ba Trung","Cau Giay"],"Lusaka":["Kabulonga","Woodlands","Rhodes Park","Northmead","Chelston","Roma","Ibex Hill","Twin Palms"],"Kitwe":["Nkana East","Parklands","Riverside","Buchi","Chimwemwe","Mindolo"],"Ndola":["Kansenshi","Itawa","Northrise","Hillcrest","Masala","Lubuto"],"Harare":["CBD","Avondale","Borrowdale","Mount Pleasant","Mbare","Eastlea","Belvedere","Highlands","Glen Lorne"],"Bulawayo":["CBD","Hillside","Suburbs","Burnside","Matsheumhlope","Kumalo","Bradfield"]};
+
+function populateCountrySelect(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel || sel.options.length > 1) return;
+  COUNTRIES.forEach(([code, name]) => {
+    const o = document.createElement('option');
+    o.value = code;
+    o.textContent = name;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => {
+    const citySelectId = selectId.replace('country','city');
+    const cityOtherId = citySelectId + '-other';
+    populateCitySelect(citySelectId, cityOtherId, sel.value);
+  });
+}
+
+function populateCitySelect(selectId, otherId, countryCode) {
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Select city</option>';
+  if (other) { other.style.display = 'none'; other.value = ''; }
+  const cities = COUNTRY_CITIES[countryCode] || [];
+  cities.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+  const oo = document.createElement('option');
+  oo.value = '__other__'; oo.textContent = 'Other (type below)';
+  sel.appendChild(oo);
+  sel.onchange = () => {
+    if (other) {
+      other.style.display = sel.value === '__other__' ? '' : 'none';
+      if (sel.value !== '__other__') other.value = '';
+    }
+    const streetSelId = selectId.replace('city', 'street');
+    const streetOtherId = streetSelId + '-other';
+    const cityVal = sel.value === '__other__' ? (other ? other.value.trim() : '') : sel.value;
+    populateStreetSelect(streetSelId, streetOtherId, cityVal);
+  };
+}
+
+function getCityValue(selectId, otherId) {
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (sel && sel.value === '__other__' && other) return other.value.trim();
+  return sel ? sel.value : '';
+}
+
+function setCityValue(selectId, otherId, countryCode, cityValue) {
+  populateCitySelect(selectId, otherId, countryCode);
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (!sel || !cityValue) return;
+  // Check if city is in the list
+  let found = false;
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === cityValue) { sel.value = cityValue; found = true; break; }
+  }
+  if (!found) {
+    sel.value = '__other__';
+    if (other) { other.style.display = ''; other.value = cityValue; }
+  }
+}
+
+function populateStreetSelect(selectId, otherId, cityName) {
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Select street / area</option>';
+  if (other) { other.style.display = 'none'; other.value = ''; }
+  const streets = CITY_STREETS[cityName] || [];
+  streets.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    sel.appendChild(o);
+  });
+  const oo = document.createElement('option');
+  oo.value = '__other__'; oo.textContent = 'Other (type below)';
+  sel.appendChild(oo);
+  sel.onchange = () => {
+    if (other) {
+      other.style.display = sel.value === '__other__' ? '' : 'none';
+      if (sel.value !== '__other__') other.value = '';
+    }
+  };
+}
+
+function getStreetValue(selectId, otherId) {
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (sel && sel.value === '__other__' && other) return other.value.trim();
+  return sel ? sel.value : '';
+}
+
+function setStreetValue(selectId, otherId, cityName, streetValue) {
+  populateStreetSelect(selectId, otherId, cityName);
+  const sel = document.getElementById(selectId);
+  const other = document.getElementById(otherId);
+  if (!sel || !streetValue) return;
+  let found = false;
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === streetValue) { sel.value = streetValue; found = true; break; }
+  }
+  if (!found) {
+    sel.value = '__other__';
+    if (other) { other.style.display = ''; other.value = streetValue; }
+  }
+}
 
 function getToken() {
   return localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
@@ -293,6 +585,13 @@ async function checkAuth() {
 
     if (!data.authenticated) {
       window.location.href = '/login';
+      return false;
+    }
+
+    // Staff members belong to a business but have their own role-specific panels
+    if (data.customer.isStaff) {
+      const role = data.customer.staffRole;
+      window.location.href = role === 'manager' ? '/menu-editor' : '/staff-panel';
       return false;
     }
 
@@ -350,35 +649,35 @@ async function loadDashboard() {
     if (menus.length === 0) {
       container.innerHTML = `
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3">restaurant</span>
-          <p class="text-slate-400 mb-4">No menus yet</p>
-          <a href="/admin" class="inline-block px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
+          <span class="material-symbols-outlined text-[64px] text-stone-600 block mb-3">restaurant</span>
+          <p class="text-stone-400 mb-4">No menus yet</p>
+          <a href="/menu-editor" class="inline-block px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition">
             Create Your First Menu
           </a>
         </div>
       `;
     } else {
       container.innerHTML = `
-        <div class="divide-y divide-slate-700">
+        <div class="divide-y divide-stone-100">
           ${menus.map(menu => `
-            <div class="p-6 hover:bg-bg-dark/30 transition">
+            <div class="p-6 hover:bg-stone-50/30 transition">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-3 mb-2">
                     <h4 class="font-bold text-lg">${escapeHtml(menu.restaurant_name)}</h4>
                     ${menu.plan_name ? `<span class="badge badge-${menu.plan_name.toLowerCase()}">${menu.plan_name}</span>` : ''}
                   </div>
-                  <div class="flex items-center gap-4 text-sm text-slate-400">
+                  <div class="flex items-center gap-4 text-sm text-stone-400">
                     <span><span class="material-symbols-outlined text-[16px] align-middle">menu_book</span> ${menu.item_count} items</span>
                     <span><span class="material-symbols-outlined text-[16px] align-middle">qr_code_scanner</span> ${menu.total_scans.toLocaleString()} scans</span>
                     <span><span class="material-symbols-outlined text-[16px] align-middle">calendar_today</span> Created ${formatDate(menu.created_at)}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <a href="/menu?id=${menu.id}" target="_blank" class="px-4 py-2 text-sm bg-bg-dark border border-slate-700 rounded-lg hover:border-primary/50 transition">
+                  <a href="/menu?id=${menu.id}" target="_blank" class="px-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600">
                     View Menu
                   </a>
-                  <a href="/admin?menu=${menu.id}" class="px-4 py-2 text-sm bg-primary/10 text-primary border border-primary/30 rounded-lg hover:bg-primary/20 transition">
+                  <a href="/menu-editor?menu=${menu.id}" class="px-4 py-2 text-sm bg-orange-50 text-primary border border-orange-200 rounded-lg hover:bg-orange-100 transition">
                     Edit
                   </a>
                 </div>
@@ -404,28 +703,62 @@ async function loadProfile() {
     const res = await fetch('/api/customers/me', {
       headers: { 'x-customer-token': customerToken }
     });
-    
+
     if (!res.ok) throw new Error('Failed to load profile');
-    
+
     const customer = await res.json();
-    
+
+    // Fill form
     document.getElementById('profile-email').value = customer.email || '';
     document.getElementById('profile-business-name').value = customer.business_name || '';
     document.getElementById('profile-contact-name').value = customer.contact_name || '';
     document.getElementById('profile-phone').value = customer.phone || '';
-    document.getElementById('profile-address').value = customer.address || '';
-    document.getElementById('profile-city').value = customer.city || '';
+    // Address loaded via setStreetValue below
+    populateCountrySelect('profile-country');
     document.getElementById('profile-country').value = customer.country || '';
+    setCityValue('profile-city', 'profile-city-other', customer.country || '', customer.city || '');
+    setStreetValue('profile-street', 'profile-street-other', customer.city || '', customer.address || '');
+
+    // Avatar: first letter of business name or email
+    const initial = (customer.business_name || customer.email || '?')[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent = initial;
+
+    // Header display
+    document.getElementById('profile-display-name').textContent = customer.business_name || customer.email || '�';
+    document.getElementById('profile-display-email').textContent = customer.email || '';
+
+    // Status badge
+    const statusBadge = document.getElementById('profile-status-badge');
+    statusBadge.textContent = (customer.status || 'active').charAt(0).toUpperCase() + (customer.status || 'active').slice(1);
+    statusBadge.className = 'badge ' + (customer.status === 'cancelled' ? 'badge-cancelled' : 'badge-active');
+
+    // Security section
+    const verifiedBadge = document.getElementById('email-verified-badge');
+    if (customer.email_verified) {
+      verifiedBadge.textContent = 'Verified';
+      verifiedBadge.className = 'badge badge-active';
+    } else {
+      verifiedBadge.textContent = 'Not Verified';
+      verifiedBadge.className = 'badge badge-cancelled';
+    }
+    document.getElementById('last-login-text').textContent = customer.last_login ? formatDate(customer.last_login) : 'Never';
+    document.getElementById('member-since-text').textContent = customer.created_at ? formatDate(customer.created_at) : '�';
+
   } catch (err) {
     console.error('Error loading profile:', err);
-    alert('Failed to load profile');
   }
 }
 
 // Save profile
 document.getElementById('profile-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+  const btn = document.getElementById('profile-save-btn');
+  const msg = document.getElementById('profile-save-msg');
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  msg.className = 'hidden';
+
   try {
     const res = await fetch('/api/customers/me', {
       method: 'PUT',
@@ -437,229 +770,755 @@ document.getElementById('profile-form').addEventListener('submit', async (e) => 
         businessName: document.getElementById('profile-business-name').value,
         contactName: document.getElementById('profile-contact-name').value,
         phone: document.getElementById('profile-phone').value,
-        address: document.getElementById('profile-address').value,
-        city: document.getElementById('profile-city').value,
+        address: getStreetValue('profile-street', 'profile-street-other'),
+        city: getCityValue('profile-city', 'profile-city-other'),
         country: document.getElementById('profile-country').value
       })
     });
-    
-    if (!res.ok) throw new Error('Failed to save profile');
-    
-    // Update local storage
-    localStorage.setItem('customerBusiness', document.getElementById('profile-business-name').value);
-    document.getElementById('sidebar-business').textContent = document.getElementById('profile-business-name').value;
-    
-    alert('Profile updated successfully!');
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save profile');
+
+    const bizName = document.getElementById('profile-business-name').value;
+    localStorage.setItem('customerBusiness', bizName);
+    document.getElementById('sidebar-business').textContent = bizName;
+    document.getElementById('profile-display-name').textContent = bizName;
+    const initial = (bizName || '?')[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent = initial;
+
+    msg.textContent = '? Profile saved successfully!';
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
   } catch (err) {
-    console.error('Error saving profile:', err);
-    alert('Failed to save profile. Please try again.');
+    msg.textContent = '? ' + (err.message || 'Failed to save profile');
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+    setTimeout(() => { msg.className = 'hidden'; }, 4000);
   }
 });
 
+// Change password
+document.getElementById('password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('password-btn');
+  const msg = document.getElementById('password-msg');
+  const current = document.getElementById('current-password').value;
+  const newPwd  = document.getElementById('new-password').value;
+  const confirm = document.getElementById('confirm-password').value;
+
+  if (newPwd !== confirm) {
+    msg.textContent = '? New passwords do not match.';
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+    return;
+  }
+  if (newPwd.length < 8) {
+    msg.textContent = '? Password must be at least 8 characters.';
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  msg.className = 'hidden';
+
+  try {
+    const res = await fetch('/api/customers/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-customer-token': customerToken
+      },
+      body: JSON.stringify({ currentPassword: current, newPassword: newPwd })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update password');
+
+    document.getElementById('password-form').reset();
+    msg.textContent = '? Password updated successfully!';
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+  } catch (err) {
+    msg.textContent = '? ' + (err.message || 'Failed to update password');
+    msg.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update Password';
+    setTimeout(() => { msg.className = 'hidden'; }, 5000);
+  }
+});
+
+// Delete account
+function confirmDeleteAccount() {
+  if (!confirm('Are you absolutely sure you want to delete your account?\n\nThis will permanently remove your account and ALL your menus. This action cannot be undone.')) return;
+  const email = document.getElementById('profile-email').value;
+  const typed = prompt(`To confirm, type your email address (${email}):`);
+  if (typed !== email) {
+    alert('Email did not match. Account not deleted.');
+    return;
+  }
+  alert('Account deletion is not yet available. Please contact support@restorder.online to proceed.');
+}
+
 // Section navigation
 function showSection(section) {
-  document.getElementById('dashboard-section').classList.add('hidden');
-  document.getElementById('subscription-section').classList.add('hidden');
-  document.getElementById('profile-section').classList.add('hidden');
-  
-  document.getElementById(`${section}-section`).classList.remove('hidden');
-  
-  // Update nav
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.classList.remove('active', 'bg-primary/10', 'text-primary');
-    link.classList.add('text-slate-300');
+  ['dashboard', 'subscription', 'profile', 'team'].forEach(s => {
+    document.getElementById(`${s}-section`).classList.add('hidden');
   });
-  
-  if (section === 'profile') {
-    loadProfile();
-  } else if (section === 'subscription') {
-    loadSubscription();
-  }
+  document.getElementById(`${section}-section`).classList.remove('hidden');
+
+  // Update nav links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const linkSection = link.dataset.section;
+    if (linkSection === section) {
+      link.classList.add('bg-orange-50', 'text-primary');
+      link.classList.remove('text-stone-600', 'hover:bg-stone-100');
+    } else {
+      link.classList.remove('bg-orange-50', 'text-primary');
+      link.classList.add('text-stone-600', 'hover:bg-stone-100');
+    }
+  });
+
+  if (section === 'profile') loadProfile();
+  else if (section === 'subscription') loadSubscription();
+  else if (section === 'team') loadTeam();
 }
 
 // Load subscription info
 async function loadSubscription() {
   const container = document.getElementById('subscription-content');
-  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-slate-600 block mb-3 spin">progress_activity</span><p class="text-slate-400">Loading subscription details...</p></div>';
-  
+  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin">progress_activity</span><p class="text-stone-400">Loading subscription details...</p></div>';
+
   try {
-    // Fetch available plans and customer's subscriptions
-    const [plansRes, subsRes] = await Promise.all([
+    const [plansRes, subsRes, paymentsRes] = await Promise.all([
       fetch('/api/subscription-plans'),
-      fetch('/api/customers/subscriptions', {
-        headers: { 'x-customer-token': getToken() }
-      })
+      fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } }),
+      fetch('/api/customers/payments', { headers: { 'x-customer-token': getToken() } })
     ]);
-    
+
     if (!plansRes.ok || !subsRes.ok) throw new Error('Failed to load subscription data');
-    
+
     const plans = await plansRes.json();
     const subscriptions = await subsRes.json();
-    
-    // Get primary subscription (first menu's subscription)
+    const payments = paymentsRes.ok ? await paymentsRes.json() : [];
+
     const currentSub = subscriptions.find(s => s.subscription_id) || subscriptions[0];
     const currentPlanId = currentSub?.plan_id || plans.find(p => p.name === 'starter')?.id;
     const currentPlan = plans.find(p => p.id === currentPlanId);
-    
-    // Render subscription UI
+
+    const statusColors = {
+      active: 'bg-green-100 text-green-700',
+      trial: 'bg-blue-100 text-blue-700',
+      inactive: 'bg-stone-100 text-stone-500',
+      cancelled: 'bg-red-100 text-red-700',
+      expired: 'bg-yellow-100 text-yellow-700'
+    };
+    const statusColor = statusColors[currentSub?.status] || statusColors.inactive;
+
+    const nextBilling = currentSub?.next_billing_date;
+    const nextBillingDisplay = nextBilling
+      ? new Date(nextBilling).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      : null;
+    const isOverdue = nextBilling && new Date(nextBilling) < new Date();
+
     container.innerHTML = `
-      <!-- Current Plan Overview -->
-      <div class="bg-surface border border-slate-700 rounded-2xl p-8 mb-8">
-        <div class="flex items-start justify-between mb-4">
+      <!-- Current Plan Card -->
+      <div class="bg-white border border-stone-200 rounded-2xl p-8 mb-6 shadow-sm">
+        <div class="flex items-start justify-between mb-6">
           <div>
-            <h3 class="text-2xl font-bold mb-2">${escapeHtml(currentPlan?.display_name || 'Starter')}</h3>
-            <p class="text-3xl font-bold text-primary mb-1">
-              ${currentPlan?.price === 0 ? 'FREE' : `$${currentPlan?.price || 0}`}
-              ${currentPlan?.price > 0 ? `<span class="text-lg text-slate-400 font-normal">/${currentPlan?.interval || 'month'}</span>` : ''}
+            <p class="text-stone-400 text-sm mb-1">Current Plan</p>
+            <h3 class="text-2xl font-bold text-stone-900">${escapeHtml(currentPlan?.display_name || 'Starter')}</h3>
+            <p class="text-3xl font-bold text-primary mt-1">
+              ${currentPlan?.price === 0 ? 'FREE' : '$' + (currentPlan?.price || 0)}
+              ${currentPlan?.price > 0 ? '<span class="text-base text-stone-400 font-normal">/' + (currentPlan?.interval || 'month') + '</span>' : ''}
             </p>
           </div>
-          <div class="px-4 py-2 bg-primary/20 text-primary rounded-xl border border-primary/30 text-sm font-semibold">
-            Current Plan
+          <span class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${statusColor}">
+            ${currentSub?.status || 'inactive'}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-stone-100">
+          <div>
+            <p class="text-stone-400 text-xs mb-1">Menu Limit</p>
+            <p class="text-lg font-bold text-stone-900">${currentPlan?.menu_limit === 999 ? 'Unlimited' : (currentPlan?.menu_limit || 1)}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs mb-1">Locations</p>
+            <p class="text-lg font-bold text-stone-900">${currentPlan?.location_limit === 999 ? 'Unlimited' : (currentPlan?.location_limit || 1)}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs mb-1">Member Since</p>
+            <p class="text-lg font-bold text-stone-900">${currentSub?.start_date ? new Date(currentSub.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs mb-1">Next Billing</p>
+            ${nextBillingDisplay
+              ? `<p class="text-lg font-bold ${isOverdue ? 'text-red-600' : 'text-stone-900'}">${nextBillingDisplay}${isOverdue ? ' <span class="text-xs font-normal text-red-500">(overdue)</span>' : ''}</p>`
+              : `<p class="text-lg font-bold text-stone-400">—</p>`}
           </div>
         </div>
-        
-        ${currentSub?.menu_id ? `
-          <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-700">
-            <div>
-              <p class="text-slate-400 text-sm mb-1">Menu Limit</p>
-              <p class="text-lg font-semibold">${currentPlan?.menu_limit === 999 ? 'Unlimited' : currentPlan?.menu_limit || 1}</p>
+
+        ${currentPlan?.price > 0 && currentSub?.subscription_id ? `
+        <div class="mt-6 flex gap-3">
+          <button onclick="openCancelModal('${currentSub.menu_id}', '${escapeHtml(currentPlan.display_name)}')"
+            class="px-5 py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-semibold rounded-xl text-sm transition">
+            Cancel Subscription
+          </button>
+        </div>` : ''}
+
+        ${currentSub?.status === 'trial' && currentSub?.trial_end ? (() => {
+          const trialEndDate = new Date(currentSub.trial_end);
+          const daysLeft = Math.max(0, Math.ceil((trialEndDate - new Date()) / (1000 * 60 * 60 * 24)));
+          const expired = trialEndDate < new Date();
+          return `<div class="mt-5 p-4 ${expired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'} border rounded-xl flex items-center gap-3">
+            <span class="material-symbols-outlined ${expired ? 'text-red-500' : 'text-amber-500'} text-[24px]">timer</span>
+            <div class="flex-1">
+              <p class="font-semibold text-sm ${expired ? 'text-red-800' : 'text-amber-800'}">${expired ? 'Your trial has expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left in your free trial`}</p>
+              <p class="text-xs ${expired ? 'text-red-600' : 'text-amber-600'} mt-0.5">${expired ? 'Upgrade now to keep your menu online.' : `Trial ends ${trialEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}</p>
             </div>
-            <div>
-              <p class="text-slate-400 text-sm mb-1">Location Limit</p>
-              <p class="text-lg font-semibold">${currentPlan?.location_limit === 999 ? 'Unlimited' : currentPlan?.location_limit || 1}</p>
-            </div>
-            <div>
-              <p class="text-slate-400 text-sm mb-1">Status</p>
-              <p class="text-lg font-semibold text-green-500">${currentSub?.status || 'Active'}</p>
-            </div>
-          </div>
-        ` : ''}
+            <a href="/checkout?plan=professional&menu_id=${currentSub.menu_id}" class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition flex-shrink-0">Upgrade Now</a>
+          </div>`;
+        })() : ''}
       </div>
 
       <!-- Available Plans -->
-      <div class="mb-6">
-        <h3 class="text-xl font-bold mb-4">Available Plans</h3>
-        <p class="text-slate-400 mb-6">Upgrade or downgrade your subscription at any time. Changes take effect immediately.</p>
+      <div class="mb-4">
+        <h3 class="text-xl font-bold text-stone-900 mb-1">Available Plans</h3>
+        <p class="text-stone-500 text-sm">Upgrade anytime. Our team will contact you with payment details within 24 hours.</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-6">
-        ${plans.map(plan => {
+      <div class="grid md:grid-cols-3 gap-5 mb-8">
+        ${plans.filter(plan => (plan.price > 0 || plan.id === currentPlanId) && (plan.name !== 'trial' || plan.id === currentPlanId)).map(plan => {
           const isCurrent = plan.id === currentPlanId;
           const isUpgrade = plan.price > (currentPlan?.price || 0);
-          const isDowngrade = plan.price < (currentPlan?.price || 0);
-          
           return `
-            <div class="bg-surface border ${isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-slate-700'} rounded-2xl p-6 relative">
-              ${isCurrent ? '<div class="absolute top-4 right-4 px-3 py-1 bg-primary text-bg-dark text-xs font-bold rounded-full">CURRENT</div>' : ''}
-              
-              <h4 class="text-xl font-bold mb-2">${escapeHtml(plan.display_name)}</h4>
+            <div class="bg-white border ${isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-stone-200 hover:border-stone-300'} rounded-2xl p-6 relative shadow-sm transition">
+              ${isCurrent ? '<div class="absolute top-4 right-4 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full">CURRENT</div>' : ''}
+              <h4 class="text-lg font-bold text-stone-900 mb-1">${escapeHtml(plan.display_name)}</h4>
               <div class="mb-4">
-                <span class="text-3xl font-bold">${plan.price === 0 ? 'FREE' : `$${plan.price}`}</span>
-                ${plan.price > 0 ? `<span class="text-slate-400">/${plan.interval}</span>` : ''}
+                <span class="text-2xl font-bold text-stone-900">${plan.price === 0 ? 'FREE' : '$' + plan.price}</span>
+                ${plan.price > 0 ? '<span class="text-stone-400 text-sm">/' + plan.interval + '</span>' : '<span class="text-stone-400 text-sm">/month</span>'}
               </div>
-              
-              <div class="space-y-2 mb-6">
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                  <span class="text-slate-300">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                  <span class="text-slate-300">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span>
-                </div>
-                ${plan.features && Array.isArray(plan.features) ? plan.features.map(f => `
-                  <div class="flex items-center gap-2 text-sm">
-                    <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
-                    <span class="text-slate-300">${escapeHtml(f)}</span>
-                  </div>
-                `).join('') : ''}
+              <div class="space-y-1.5 mb-5 text-sm">
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span></div>
+                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span></div>
+                ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
               </div>
-              
               ${!isCurrent ? `
-                <button 
-                  onclick="changePlan(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price})"
-                  class="w-full px-4 py-3 ${isUpgrade ? 'bg-primary hover:bg-primary/90 text-bg-dark' : 'bg-slate-700 hover:bg-slate-600 text-slate-200'} font-semibold rounded-xl transition"
-                >
-                  ${isUpgrade ? 'Upgrade' : isDowngrade ? 'Downgrade' : 'Select'} Plan
-                </button>
-              ` : `
-                <button disabled class="w-full px-4 py-3 bg-slate-800 text-slate-500 font-semibold rounded-xl cursor-not-allowed">
-                  Current Plan
-                </button>
-              `}
-            </div>
-          `;
+                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}', '${escapeHtml(plan.name)}')"
+                  class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
+                  ${isUpgrade ? '⬆ Upgrade' : '⬇ Downgrade'} to ${escapeHtml(plan.display_name)}
+                </button>` : `
+                <button disabled class="w-full px-4 py-2.5 bg-stone-100 text-stone-400 font-semibold rounded-xl cursor-not-allowed text-sm">✓ Current Plan</button>`}
+            </div>`;
         }).join('')}
       </div>
 
-      <!-- Need Help? -->
-      <div class="mt-8 p-6 bg-slate-800/50 border border-slate-700 rounded-2xl">
-        <div class="flex items-start gap-4">
-          <span class="material-symbols-outlined text-primary text-[32px]">help</span>
-          <div class="flex-1">
-            <h4 class="font-bold mb-2">Need help choosing a plan?</h4>
-            <p class="text-slate-400 text-sm mb-4">Our team is here to help you find the perfect plan for your business needs.</p>
-            <a href="mailto:support@restorder.online" class="text-primary hover:underline text-sm font-semibold">
-              Contact Support →
-            </a>
-          </div>
+      <!-- Payment History -->
+      <div class="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-stone-100">
+          <h3 class="text-lg font-bold text-stone-900">Payment History</h3>
         </div>
+        ${payments.length === 0 ? `
+          <div class="p-10 text-center">
+            <span class="material-symbols-outlined text-[48px] text-stone-300 block mb-3">receipt_long</span>
+            <p class="text-stone-400 text-sm">No payment records yet.</p>
+          </div>` : `
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-stone-50 border-b border-stone-100">
+                <th class="text-left px-6 py-3 text-stone-500 font-medium">Date</th>
+                <th class="text-left px-6 py-3 text-stone-500 font-medium">Plan</th>
+                <th class="text-left px-6 py-3 text-stone-500 font-medium">Method</th>
+                <th class="text-right px-6 py-3 text-stone-500 font-medium">Amount</th>
+                <th class="text-left px-6 py-3 text-stone-500 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-50">
+              ${payments.map(p => {
+                const pStatusColors = { completed: 'bg-green-100 text-green-700', pending: 'bg-yellow-100 text-yellow-700', failed: 'bg-red-100 text-red-700', refunded: 'bg-blue-100 text-blue-700' };
+                const pColor = pStatusColors[p.status] || 'bg-stone-100 text-stone-500';
+                return `<tr class="hover:bg-stone-50/50 transition">
+                  <td class="px-6 py-4 text-stone-600">${new Date(p.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                  <td class="px-6 py-4 font-medium text-stone-900">${escapeHtml(p.plan_name || '—')}</td>
+                  <td class="px-6 py-4 text-stone-500 capitalize">${(p.payment_method || '—').replace(/_/g,' ')}</td>
+                  <td class="px-6 py-4 text-right font-bold text-stone-900">$${Number(p.amount).toFixed(2)}</td>
+                  <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${pColor}">${p.status}</span></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>`}
+      </div>
+
+      <!-- Need help box -->
+      <div class="mt-6 p-5 bg-orange-50 border border-orange-200 rounded-2xl flex items-center gap-4">
+        <span class="material-symbols-outlined text-primary text-[28px]">support_agent</span>
+        <div class="flex-1">
+          <p class="font-semibold text-stone-900 text-sm">Questions about your subscription?</p>
+          <p class="text-stone-500 text-xs mt-0.5">Our team responds within 24 hours.</p>
+        </div>
+        <a href="mailto:support@restorder.online" class="px-4 py-2 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-orange-700 transition flex-shrink-0">
+          Contact Support
+        </a>
       </div>
     `;
-    
+
   } catch (err) {
     container.innerHTML = `
-      <div class="bg-red-900/20 border border-red-800 rounded-2xl p-8 text-center">
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
         <span class="material-symbols-outlined text-red-500 text-[48px] block mb-3">error</span>
-        <p class="text-red-400 mb-4">Failed to load subscription details</p>
-        <button onclick="loadSubscription()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded-xl transition">
-          Try Again
-        </button>
+        <p class="text-red-600 mb-4">Failed to load subscription details</p>
+        <button onclick="loadSubscription()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition">Try Again</button>
       </div>
     `;
   }
 }
 
-async function changePlan(planId, planName, planPrice) {
-  // Get the customer's first menu ID
+// ── Payment gateway helpers ─────────────────────────────────────────────────
+let detectedCountry = '';
+async function detectCountry() {
+  if (detectedCountry) return;
+  try {
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    detectedCountry = (d.country_code || '').toUpperCase();
+  } catch(e) { detectedCountry = ''; }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+let _paypalLoaded = null;
+function loadPayPalSDK(clientId, environment) {
+  if (_paypalLoaded) return _paypalLoaded;
+  const base = environment === 'sandbox' ? 'https://www.sandbox.paypal.com' : 'https://www.paypal.com';
+  _paypalLoaded = loadScript(`${base}/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`);
+  return _paypalLoaded;
+}
+
+// Plan click: redirect to checkout for paid plans, use modal for free downgrade
+function handlePlanClick(planId, planName, planPrice, menuId, planSlug) {
+  if (planPrice > 0) {
+    const slug = planSlug || planName.toLowerCase();
+    const params = new URLSearchParams({ plan: slug });
+    if (menuId) params.set('menu_id', menuId);
+    window.location.href = `/checkout?${params.toString()}`;
+    return;
+  }
+  // Free downgrade — use existing modal
+  openChangePlanModal(planId, planName, planPrice, menuId);
+}
+
+// Plan change modal
+async function openChangePlanModal(planId, planName, planPrice, menuId) {
+  const modal = document.getElementById('plan-change-modal');
   const menus = window.customerMenus || [];
-  if (!menus.length) {
-    alert('No menus found. Please create a menu first.');
+  const targetMenuId = menuId || menus[0]?.id;
+
+  document.getElementById('pcm-plan-name').textContent = planName;
+  document.getElementById('pcm-price').textContent = planPrice === 0 ? 'FREE' : `$${planPrice}/month`;
+  document.getElementById('pcm-note').textContent = '';
+  document.getElementById('pcm-payment-section').innerHTML = '';
+
+  const confirmBtn = document.getElementById('pcm-confirm-btn');
+  confirmBtn.classList.remove('hidden');
+  confirmBtn.textContent = 'Confirm';
+  confirmBtn.disabled = false;
+
+  modal.classList.remove('hidden');
+
+  if (planPrice === 0) {
+    document.getElementById('pcm-note').textContent = 'You will be moved to the free plan immediately.';
+    confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId);
     return;
   }
-  
-  const menuId = menus[0].id;
-  
-  // Confirm plan change
-  const action = planPrice > 0 ? 'upgrade to' : 'downgrade to';
-  const priceText = planPrice === 0 ? 'FREE' : `$${planPrice}/month`;
-  if (!confirm(`Are you sure you want to ${action} ${planName} (${priceText})?\n\nChanges will take effect immediately.`)) {
-    return;
+
+  // Paid plan — load available gateways
+  confirmBtn.classList.add('hidden');
+  document.getElementById('pcm-payment-section').innerHTML =
+    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><span class="material-symbols-outlined spin text-[20px]">progress_activity</span>Loading payment options…</div>';
+
+  try {
+    await detectCountry();
+    const gateways = await fetch('/api/payments/gateways').then(r => r.json());
+    const hasFW = !!(gateways.flutterwave?.public_key);
+    const hasPP = !!(gateways.paypal?.client_id);
+    const hasBT = !!(gateways.bank_transfer?.bank_name);
+    const hasCP = !!(gateways.clickpesa?.merchant_id);
+    const section = document.getElementById('pcm-payment-section');
+
+    if (!hasFW && !hasPP && !hasBT && !hasCP) {
+      // No live gateway configured – fallback to manual
+      section.innerHTML = '';
+      document.getElementById('pcm-note').textContent = 'Our team will contact you within 24 hours with payment instructions.';
+      confirmBtn.classList.remove('hidden');
+      confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId);
+      return;
+    }
+
+    let html = '<p class="text-stone-500 text-xs mb-3">Choose a payment method:</p>';
+    if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mb-2 font-semibold text-sm transition" style="background:#f5a623;color:#fff;"><span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
+    if (hasPP) html += `<div id="paypal-button-container" class="mt-2"></div>`;
+    if (hasBT) {
+      const bt = gateways.bank_transfer;
+      let bankInfo = '';
+      if (bt.bank_name) bankInfo += `<div><strong>Bank:</strong> ${bt.bank_name}</div>`;
+      if (bt.account_name) bankInfo += `<div><strong>Account Name:</strong> ${bt.account_name}</div>`;
+      if (bt.account_number) bankInfo += `<div><strong>Account Number:</strong> ${bt.account_number}</div>`;
+      if (bt.swift_code) bankInfo += `<div><strong>SWIFT/BIC:</strong> ${bt.swift_code}</div>`;
+      if (bt.routing_number) bankInfo += `<div><strong>Routing Number:</strong> ${bt.routing_number}</div>`;
+      if (bt.instructions) bankInfo += `<div class="mt-2 italic">${bt.instructions}</div>`;
+      html += `<div class="mt-3 p-4 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-600 leading-relaxed">${bankInfo}<p class="mt-2 text-stone-400">Transfer the exact amount. Your subscription will be activated once payment is confirmed (usually within 24 hours).</p></div>`;
+      html += `<button id="bt-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#10b981;color:#fff;"><span class="material-symbols-outlined text-[18px]">account_balance</span>I've Sent $${planPrice.toFixed(2)} via Bank Transfer</button>`;
+    }
+    if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#3b82f6;color:#fff;"><span class="material-symbols-outlined text-[18px]">payments</span>Pay $${planPrice.toFixed(2)} with ClickPesa</button>`;
+    section.innerHTML = html;
+
+    if (hasFW) {
+      await loadScript('https://checkout.flutterwave.com/v3.js');
+      document.getElementById('fw-pay-btn').onclick = () =>
+        handleFlutterwavePayment(planId, planPrice, planName, targetMenuId, gateways.flutterwave.public_key);
+    }
+
+    if (hasPP) {
+      await loadPayPalSDK(gateways.paypal.client_id, gateways.paypal.environment);
+      window.paypal.Buttons({
+        style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+        createOrder: async () => {
+          const r = await fetch('/api/payments/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            body: JSON.stringify({ plan_id: planId, menu_id: targetMenuId })
+          });
+          const d = await r.json();
+          if (!d.order_id) throw new Error(d.error || 'Failed to create order');
+          return d.order_id;
+        },
+        onApprove: async (data) => {
+          showSubToast('Processing payment…');
+          const r = await fetch('/api/payments/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: targetMenuId })
+          });
+          const d = await r.json();
+          closePlanChangeModal();
+          if (d.success) {
+            showSubToast('Payment successful! Subscription activated.');
+            await loadSubscription(); await loadDashboard();
+          } else { showSubToast('Capture failed: ' + d.error, true); }
+        },
+        onError: (err) => showSubToast('PayPal error. Please try again.', true)
+      }).render('#paypal-button-container');
+    }
+
+    if (hasBT) {
+      document.getElementById('bt-pay-btn').onclick = () => {
+        doChangePlan(planId, planName, planPrice, targetMenuId, 'bank_transfer');
+      };
+    }
+
+    if (hasCP) {
+      document.getElementById('cp-pay-btn').onclick = async () => {
+        const btn = document.getElementById('cp-pay-btn');
+        btn.disabled = true; btn.textContent = 'Processing…';
+        try {
+          const r = await fetch('/api/payments/clickpesa/create-order-public', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: planId, email: localStorage.getItem('customerEmail') || '', name: localStorage.getItem('customerBusiness') || '' })
+          });
+          const d = await r.json();
+          if (d.redirect_url) { window.location.href = d.redirect_url; }
+          else if (d.reference) { showSubToast('Payment initiated (ref: ' + d.reference + '). Complete payment via ClickPesa.'); }
+          else { showSubToast(d.error || 'Failed to initiate ClickPesa payment.', true); }
+        } catch(e) { showSubToast('Failed to initiate payment.', true); }
+        finally { btn.disabled = false; btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">payments</span>Pay $${planPrice.toFixed(2)} with ClickPesa`; }
+      };
+    }
+  } catch(err) {
+    document.getElementById('pcm-payment-section').innerHTML =
+      '<p class="text-red-500 text-sm text-center py-2">Failed to load payment options. Please refresh.</p>';
   }
-  
+}
+
+function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey) {
+  if (!window.FlutterwaveCheckout) { showSubToast('Flutterwave SDK not loaded.', true); return; }
+  const txRef = `${menuId}:${planId}:${Date.now()}`;
+  FlutterwaveCheckout({
+    public_key: publicKey,
+    tx_ref: txRef,
+    amount: planPrice,
+    currency: 'USD',
+    payment_options: 'card,mobilemoney,ussd,banktransfer',
+    customer: {
+      email: localStorage.getItem('customerEmail') || '',
+      name: localStorage.getItem('customerBusiness') || 'Customer'
+    },
+    customizations: { title: 'RestOrder', description: `${planName} Plan`, logo: '/icon-192.png' },
+    callback: async (response) => {
+      if (response.status === 'successful' || response.status === 'completed') {
+        showSubToast('Verifying payment…');
+        const r = await fetch('/api/payments/flutterwave/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+          body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: planId })
+        });
+        const d = await r.json();
+        closePlanChangeModal();
+        if (d.success) { showSubToast('Payment successful! Subscription activated.'); await loadSubscription(); await loadDashboard(); }
+        else showSubToast('Verification failed: ' + d.error, true);
+      } else {
+        showSubToast('Payment was not completed.', true);
+      }
+    },
+    onclose: () => {}
+  });
+}
+
+function closePlanChangeModal() {
+  document.getElementById('plan-change-modal').classList.add('hidden');
+}
+
+async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) {
+  const btn = document.getElementById('pcm-confirm-btn');
+  const menus = window.customerMenus || [];
+  const targetMenuId = menuId || (menus[0]?.id);
+  if (!targetMenuId) { showSubToast('No menu found. Please create a menu first.', true); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
   try {
     const res = await fetch('/api/customers/subscription/change', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-customer-token': getToken()
-      },
-      body: JSON.stringify({ menu_id: menuId, plan_id: planId })
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+      body: JSON.stringify({ menu_id: targetMenuId, plan_id: planId, payment_method: paymentMethod || 'manual' })
     });
-    
     const data = await res.json();
-    
     if (!res.ok) throw new Error(data.error || 'Failed to change plan');
-    
-    alert(`✅ Successfully changed to ${planName} plan!`);
-    
-    // Reload subscription and dashboard
+
+    closePlanChangeModal();
+    showSubToast(paymentMethod === 'bank_transfer'
+      ? `Bank transfer received! Your ${planName} plan will be activated once payment is confirmed.`
+      : planPrice > 0
+      ? `Upgrade to ${planName} requested! We'll contact you with payment details.`
+      : `Downgraded to ${planName} successfully.`);
     await loadSubscription();
     await loadDashboard();
-    
   } catch (err) {
-    alert(`❌ Error: ${err.message}`);
+    showSubToast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirm';
   }
+}
+
+// Cancel modal
+function openCancelModal(menuId, planName) {
+  document.getElementById('cancel-menu-id').value = menuId;
+  document.getElementById('cancel-plan-name').textContent = planName;
+  document.getElementById('cancel-modal').classList.remove('hidden');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancel-modal').classList.add('hidden');
+}
+
+async function doCancel() {
+  const menuId = document.getElementById('cancel-menu-id').value;
+  const btn = document.getElementById('cancel-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Cancelling...';
+  try {
+    const res = await fetch('/api/customers/subscription/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+      body: JSON.stringify({ menu_id: menuId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to cancel');
+    closeCancelModal();
+    showSubToast('Subscription cancelled. You have been moved to the free plan.');
+    await loadSubscription();
+    await loadDashboard();
+  } catch (err) {
+    showSubToast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Yes, Cancel';
+  }
+}
+
+function showSubToast(msg, isError = false) {
+  let toast = document.getElementById('sub-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'sub-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;max-width:380px;box-shadow:0 8px 24px rgba(0,0,0,.15);transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.style.background = isError ? '#fef2f2' : '#f0fdf4';
+  toast.style.color = isError ? '#dc2626' : '#16a34a';
+  toast.style.border = `1px solid ${isError ? '#fecaca' : '#bbf7d0'}`;
+  toast.textContent = (isError ? '✗ ' : '✓ ') + msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+}
+
+// Team management
+const ROLE_COLORS = { manager: 'bg-purple-100 text-purple-700', waiter: 'bg-blue-100 text-blue-700', cashier: 'bg-green-100 text-green-700' };
+let staffMap = {};
+let currentStaffEditId = null;
+
+async function loadTeam() {
+  const container = document.getElementById('staff-list-container');
+  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[48px] text-stone-300 block mb-3 spin">progress_activity</span><p class="text-stone-400">Loading...</p></div>';
+  try {
+    const res = await fetch('/api/staff', { headers: { 'x-customer-token': customerToken } });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to load staff');
+    const staff = await res.json();
+    staffMap = {};
+    staff.forEach(s => { staffMap[s.id] = s; });
+    if (!staff.length) {
+      container.innerHTML = `
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">group_add</span>
+          <p class="text-stone-600 font-medium mb-1">No staff members yet</p>
+          <p class="text-stone-400 text-sm mb-4">Add managers, waiters, or cashiers to your team.</p>
+          <button onclick="openStaffModal()" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-orange-700 transition">+ Add First Staff Member</button>
+        </div>`;
+      return;
+    }
+    container.innerHTML = `<div class="divide-y divide-stone-100">${staff.map(s => `
+      <div class="p-5 flex items-center gap-4">
+        <div class="size-10 rounded-xl bg-stone-100 flex items-center justify-center text-stone-600 font-bold text-sm flex-shrink-0">${escapeHtml(s.name[0].toUpperCase())}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-stone-900">${escapeHtml(s.name)}</p>
+          <p class="text-sm text-stone-400 truncate">${escapeHtml(s.email)}</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-semibold ${ROLE_COLORS[s.role] || 'bg-stone-100 text-stone-600'}">${s.role.charAt(0).toUpperCase() + s.role.slice(1)}</span>
+        <span class="px-2 py-1 rounded-full text-xs font-semibold ${s.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${s.status}</span>
+        <div class="flex items-center gap-1">
+          <button onclick="editStaff(${s.id})" class="p-2 text-stone-400 hover:text-primary hover:bg-orange-50 rounded-lg transition" title="Edit">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="toggleStaffStatus(${s.id},'${s.status === 'active' ? 'disabled' : 'active'}')" class="p-2 text-stone-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition" title="${s.status === 'active' ? 'Disable' : 'Enable'}">
+            <span class="material-symbols-outlined text-[18px]">${s.status === 'active' ? 'block' : 'check_circle'}</span>
+          </button>
+          <button onclick="deleteStaff(${s.id},'${escapeHtml(s.name)}')" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div>`).join('')}</div>`;
+  } catch (err) {
+    container.innerHTML = `<div class="p-12 text-center text-red-400">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function openStaffModal() {
+  currentStaffEditId = null;
+  document.getElementById('staff-modal-title').textContent = 'Add Staff Member';
+  document.getElementById('staff-modal-id').value = '';
+  document.getElementById('staff-modal-name').value = '';
+  document.getElementById('staff-modal-email').value = '';
+  document.getElementById('staff-modal-email').disabled = false;
+  document.getElementById('staff-modal-role').value = 'waiter';
+  document.getElementById('staff-modal-password').value = '';
+  document.getElementById('staff-modal-pwd-label').textContent = 'Password';
+  document.getElementById('staff-modal-pwd-hint').classList.add('hidden');
+  document.getElementById('staff-modal-error').classList.add('hidden');
+  document.getElementById('staff-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('staff-modal-name').focus(), 50);
+}
+
+function editStaff(id) {
+  const s = staffMap[id];
+  if (!s) return;
+  currentStaffEditId = id;
+  document.getElementById('staff-modal-title').textContent = 'Edit Staff Member';
+  document.getElementById('staff-modal-id').value = id;
+  document.getElementById('staff-modal-name').value = s.name || '';
+  document.getElementById('staff-modal-email').value = s.email || '';
+  document.getElementById('staff-modal-email').disabled = true;
+  document.getElementById('staff-modal-role').value = s.role || 'waiter';
+  document.getElementById('staff-modal-password').value = '';
+  document.getElementById('staff-modal-pwd-label').textContent = 'New Password';
+  document.getElementById('staff-modal-pwd-hint').classList.remove('hidden');
+  document.getElementById('staff-modal-error').classList.add('hidden');
+  document.getElementById('staff-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('staff-modal-name').focus(), 50);
+}
+
+function closeStaffModal() {
+  document.getElementById('staff-modal').classList.add('hidden');
+  currentStaffEditId = null;
+}
+
+async function saveStaffMember() {
+  const btn     = document.getElementById('staff-modal-save-btn');
+  const errEl   = document.getElementById('staff-modal-error');
+  const name     = document.getElementById('staff-modal-name').value.trim();
+  const email    = document.getElementById('staff-modal-email').value.trim();
+  const role     = document.getElementById('staff-modal-role').value;
+  const password = document.getElementById('staff-modal-password').value;
+  errEl.classList.add('hidden');
+  if (!name) { errEl.textContent = 'Name is required.'; errEl.classList.remove('hidden'); return; }
+  const isEdit = !!currentStaffEditId;
+  if (!isEdit && !email) { errEl.textContent = 'Email is required.'; errEl.classList.remove('hidden'); return; }
+  if (!isEdit && !password) { errEl.textContent = 'Password is required.'; errEl.classList.remove('hidden'); return; }
+  if (password && password.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.classList.remove('hidden'); return; }
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const body = isEdit
+      ? { name, role, ...(password ? { password } : {}) }
+      : { name, email, role, password };
+    const res = await fetch(isEdit ? `/api/staff/${currentStaffEditId}` : '/api/staff', {
+      method: isEdit ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save');
+    closeStaffModal();
+    await loadTeam();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+async function toggleStaffStatus(id, newStatus) {
+  const action = newStatus === 'disabled' ? 'disable' : 'enable';
+  if (!confirm(`Are you sure you want to ${action} this staff member?`)) return;
+  try {
+    const res = await fetch(`/api/staff/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to update');
+    await loadTeam();
+  } catch (err) { alert('Error: ' + err.message); }
+}
+
+async function deleteStaff(id, name) {
+  if (!confirm(`Remove "${name}" from your team? Their login will be revoked immediately.`)) return;
+  try {
+    const res = await fetch(`/api/staff/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-customer-token': customerToken },
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to delete');
+    await loadTeam();
+  } catch (err) { alert('Error: ' + err.message); }
 }
 
 // Helpers
@@ -670,10 +1529,42 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '—';
+  if (!isoStr) return '�';
   return new Date(isoStr).toLocaleDateString('en-US', { 
     year: 'numeric', month: 'short', day: 'numeric' 
   });
+}
+
+// Show trial-expired overlay with upgrade options
+async function showTrialExpiredOverlay(menuId) {
+  try {
+    const plansRes = await fetch('/api/subscription-plans');
+    if (plansRes.ok) {
+      const plans = await plansRes.json();
+      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise');
+      const container = document.getElementById('trial-expired-plans');
+      container.innerHTML = paidPlans.map(p => {
+        const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
+        return `
+          <div class="border border-stone-200 rounded-xl p-4 hover:border-primary/50 transition">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
+                <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
+              </div>
+              <a href="/checkout?plan=${encodeURIComponent(p.name)}${menuId ? '&menu_id=' + menuId : ''}" class="px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition">Upgrade</a>
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>✓ ' + escapeHtml(f) + '</span>').join('')}</div>
+          </div>`;
+      }).join('');
+      // Also add enterprise contact option
+      container.innerHTML += `
+        <div class="border border-stone-200 rounded-xl p-4 text-center">
+          <p class="font-semibold text-stone-700 text-sm">Need a custom plan? <a href="mailto:sales@restorder.online" class="text-primary hover:underline">Contact Sales</a></p>
+        </div>`;
+    }
+  } catch(e) { console.error('Failed to load plans for trial overlay:', e); }
+  document.getElementById('trial-expired-overlay').classList.remove('hidden');
 }
 
 // Init
@@ -681,9 +1572,82 @@ function formatDate(isoStr) {
   const authed = await checkAuth();
   if (authed) {
     await loadDashboard();
+    // Check trial expiry — load subscription data and show overlay if expired
+    try {
+      const subsRes = await fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } });
+      if (subsRes.ok) {
+        const subs = await subsRes.json();
+        const trialSub = subs.find(s => s.status === 'trial' && s.trial_end);
+        if (trialSub && new Date(trialSub.trial_end) < new Date()) {
+          showSection('subscription');
+          showTrialExpiredOverlay(trialSub.menu_id);
+        }
+      }
+    } catch(e) { /* subscription check failed, proceed normally */ }
   }
 })();
 </script>
 
+<!-- Plan Change Modal -->
+<div id="plan-change-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePlanChangeModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <button onclick="closePlanChangeModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+    <h3 class="text-xl font-bold text-stone-900 mb-1">Upgrade Plan</h3>
+    <p class="text-stone-500 text-sm mb-5">You are switching to:</p>
+    <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-5">
+      <p class="font-bold text-stone-900 text-lg" id="pcm-plan-name"></p>
+      <p class="text-primary font-semibold text-xl" id="pcm-price"></p>
+      <p class="text-stone-500 text-sm mt-1" id="pcm-note"></p>
+    </div>
+    <!-- Gateway payment options rendered here -->
+    <div id="pcm-payment-section"></div>
+    <!-- Fallback confirm for free plans / manual billing -->
+    <div class="flex gap-3 mt-3">
+      <button id="pcm-confirm-btn" class="flex-1 px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl transition">Confirm</button>
+      <button onclick="closePlanChangeModal()" class="flex-1 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Subscription Modal -->
+
+<!-- Trial Expired Overlay -->
+<div id="trial-expired-overlay" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
+  <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
+    <div class="size-20 mx-auto mb-5 rounded-full bg-red-100 flex items-center justify-center">
+      <span class="material-symbols-outlined text-red-500 text-[40px]">timer_off</span>
+    </div>
+    <h2 class="text-2xl font-bold text-stone-900 mb-2">Your Free Trial Has Ended</h2>
+    <p class="text-stone-500 mb-6">Your 7-day trial has expired. Upgrade to a paid plan to keep your menu online and continue using all features.</p>
+    <div id="trial-expired-plans" class="grid gap-3 mb-6 text-left"></div>
+    <p class="text-xs text-stone-400">Need help? <a href="mailto:support@restorder.online" class="text-primary hover:underline">Contact support</a></p>
+  </div>
+</div>
+<div id="cancel-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCancelModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <input type="hidden" id="cancel-menu-id"/>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="size-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-red-600 text-[24px]">cancel</span>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-stone-900">Cancel Subscription</h3>
+        <p class="text-stone-500 text-sm">Are you sure?</p>
+      </div>
+    </div>
+    <p class="text-stone-600 text-sm mb-2">You are about to cancel your <strong id="cancel-plan-name"></strong> subscription.</p>
+    <p class="text-stone-500 text-sm mb-6">You will be moved to the free Starter plan immediately. All your menus and data will be preserved.</p>
+    <div class="flex gap-3">
+      <button id="cancel-confirm-btn" onclick="doCancel()" class="flex-1 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition">Yes, Cancel</button>
+      <button onclick="closeCancelModal()" class="flex-1 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl transition">Keep Plan</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
+

@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Subscription Management – RestOrder Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -51,18 +51,23 @@
       </div>
       <div>
         <h2 class="font-bold text-lg">Admin Access</h2>
-        <p class="text-slate-400 text-xs">Enter your admin secret to continue</p>
+        <p class="text-slate-400 text-xs">Sign in with your admin credentials</p>
       </div>
     </div>
     <div>
-      <label class="block text-sm font-medium text-slate-300 mb-1.5">Admin Password</label>
-      <input id="login-secret" type="password" autocomplete="current-password" placeholder="Enter admin password"
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+      <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
+        class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
         class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
     </div>
     <button id="login-btn" class="w-full px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
       Sign In
     </button>
-    <p id="login-error" class="text-red-400 text-sm hidden">Invalid password. Please try again.</p>
+    <p id="login-error" class="text-red-400 text-sm hidden">Invalid email or password.</p>
   </div>
 </div>
 
@@ -79,7 +84,7 @@
   </div>
 
   <nav class="space-y-2 flex-1">
-    <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">dashboard</span>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
@@ -87,17 +92,37 @@
       <span class="material-symbols-outlined text-[20px]">groups</span>
       <span class="text-sm font-medium">Customers</span>
     </a>
+    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <span class="text-sm font-medium">All Menus</span>
+    </a>
     <a href="/subscriptions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
       <span class="material-symbols-outlined text-[20px]">credit_card</span>
       <span class="text-sm font-medium">Subscriptions</span>
+    </a>
+    <a href="/payments" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <span class="text-sm font-medium">Payments</span>
     </a>
     <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">analytics</span>
       <span class="text-sm font-medium">Analytics</span>
     </a>
+    <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <span class="text-sm font-medium">Settings</span>
+    </a>
+    <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+      <span class="material-symbols-outlined text-[20px]">shield_person</span>
+      <span class="text-sm font-medium">Admin Users</span>
+    </a>
   </nav>
 
-  <div class="pt-4 border-t border-slate-700">
+  <div class="pt-4 border-t border-slate-700 space-y-2">
+    <div id="user-info" class="hidden px-4 py-2 rounded-xl bg-bg-dark/50">
+      <p class="text-sm font-medium text-slate-200 truncate" id="user-name"></p>
+      <p class="text-xs text-slate-400 truncate" id="user-role"></p>
+    </div>
     <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
       <span class="material-symbols-outlined text-[20px]">logout</span>
       <span class="text-sm font-medium">Logout</span>
@@ -113,6 +138,14 @@
     <div class="flex items-center gap-3 mb-2">
       <h2 class="text-3xl font-bold">Subscription Management</h2>
       <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
+      <button id="manage-plans-btn" class="ml-6 px-4 py-2 bg-surface border border-primary/30 text-primary font-semibold rounded-xl hover:bg-bg-dark transition flex items-center gap-2 hidden">
+        <span class="material-symbols-outlined text-[20px]">settings</span>
+        <span class="text-sm">Manage Plans</span>
+      </button>
+      <button id="manage-promos-btn" class="px-4 py-2 bg-surface border border-primary/30 text-primary font-semibold rounded-xl hover:bg-bg-dark transition flex items-center gap-2 hidden">
+        <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
+        <span class="text-sm">Promotions</span>
+      </button>
     </div>
     <p class="text-slate-400">Manage customer subscriptions, billing, and payment processing</p>
   </div>
@@ -158,10 +191,10 @@
       <div class="flex-1 min-w-[200px]">
         <label class="block text-sm font-medium text-slate-300 mb-2">Status</label>
         <select id="filter-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="all">All Statuses</option>
           <option value="active">Active</option>
           <option value="cancelled">Cancelled</option>
           <option value="expired">Expired</option>
-          <option value="trial">Trial</option>
         </select>
       </div>
       
@@ -193,12 +226,13 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Scans</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Started</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Next Billing</th>
             <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody id="subscriptions-tbody" class="divide-y divide-slate-700">
           <tr>
-            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+              <td colspan="7" class="px-6 py-12 text-center text-slate-400">
               <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">hourglass_empty</span>
               Loading subscriptions...
             </td>
@@ -207,6 +241,157 @@
       </table>
     </div>
   </div>
+
+
+<!-- ── Plan Management Modal ─────────────────────────────────────────────── -->
+<div id="plans-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold">Manage Subscription Plans</h3>
+      <button onclick="closePlansModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="mb-6">
+      <button id="add-plan-btn" class="px-4 py-2 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span>Add Plan</span>
+      </button>
+    </div>
+    <div id="plans-list">
+      <!-- Plans table rendered here -->
+    </div>
+    <div id="plan-form-section" class="hidden mt-8">
+      <h4 class="text-lg font-bold mb-4" id="plan-form-title">Create Plan</h4>
+      <form id="plan-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="plan-id" />
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Name (unique)</label>
+          <input id="plan-name" type="text" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Display Name</label>
+          <input id="plan-display-name" type="text" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Price (USD)</label>
+          <input id="plan-price" type="number" min="0" step="0.01" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Interval</label>
+          <select id="plan-interval" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200">
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Menu Limit</label>
+          <input id="plan-menu-limit" type="number" min="1" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Location Limit</label>
+          <input id="plan-location-limit" type="number" min="1" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Features (one per line)</label>
+          <textarea id="plan-features" rows="3" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Sort Order</label>
+          <input id="plan-sort-order" type="number" min="0" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200" />
+        </div>
+        <div class="flex items-center gap-2 mt-6">
+          <input id="plan-active" type="checkbox" class="accent-primary" />
+          <label for="plan-active" class="text-sm text-slate-300">Active</label>
+        </div>
+        <div class="md:col-span-2 flex gap-3 mt-6">
+          <button type="submit" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Save</button>
+          <button type="button" onclick="hidePlanForm()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+        </div>
+        <p id="plan-form-error" class="text-red-400 text-sm md:col-span-2 hidden"></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Promotions Modal ───────────────────────────────────────────────────── -->
+<div id="promos-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-xl font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[22px]">confirmation_number</span>
+        Promo Codes
+      </h3>
+      <button onclick="closePromosModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="mb-5">
+      <button onclick="showPromoForm()" class="px-4 py-2 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px]">add</span>
+        <span>Add Promo Code</span>
+      </button>
+    </div>
+    <div id="promos-list">
+      <!-- Promo table rendered here -->
+    </div>
+    <!-- Promo Form -->
+    <div id="promo-form-section" class="hidden mt-8">
+      <h4 class="text-lg font-bold mb-4" id="promo-form-title">Create Promo Code</h4>
+      <form id="promo-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="promo-edit-id"/>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Code *</label>
+          <input id="pf-code" type="text" required maxlength="50" placeholder="SAVE20"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 uppercase"
+            oninput="this.value=this.value.toUpperCase()"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Description</label>
+          <input id="pf-description" type="text" maxlength="500" placeholder="20% off for new users"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Discount Type *</label>
+          <select id="pf-discount-type" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200">
+            <option value="percentage">Percentage (%)</option>
+            <option value="fixed">Fixed Amount ($)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Discount Value *</label>
+          <input id="pf-discount-value" type="number" min="0" step="0.01" required placeholder="20"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Max Uses <span class="text-slate-500">(0 = unlimited)</span></label>
+          <input id="pf-max-uses" type="number" min="0" value="0"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Expires At <span class="text-slate-500">(optional)</span></label>
+          <input id="pf-expires-at" type="date"
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-slate-300 mb-2">Applicable Plans <span class="text-slate-500">(leave blank for all plans)</span></label>
+          <div id="pf-plans-checkboxes" class="flex flex-wrap gap-3">
+            <!-- loaded dynamically -->
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-2">
+          <input id="pf-active" type="checkbox" checked class="accent-primary"/>
+          <label for="pf-active" class="text-sm text-slate-300">Active</label>
+        </div>
+        <div class="md:col-span-2 flex gap-3 mt-4">
+          <button type="submit" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">Save</button>
+          <button type="button" onclick="hidePromoForm()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+        </div>
+        <p id="promo-form-error" class="text-red-400 text-sm md:col-span-2 hidden"></p>
+      </form>
+    </div>
+  </div>
+</div>
 
 </main>
 
@@ -224,27 +409,129 @@
       <!-- Content loaded via JS -->
     </div>
     
-    <div class="sticky bottom-0 bg-surface border-t border-slate-700 p-6 flex gap-3">
-      <button id="upgrade-btn" class="flex-1 px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition">
-        Upgrade Plan
-      </button>
-      <button id="cancel-sub-btn" class="flex-1 px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/30 font-semibold rounded-xl hover:bg-red-500/20 transition">
+    <div class="sticky bottom-0 bg-surface border-t border-slate-700 p-6 space-y-3">
+      <div class="flex gap-3">
+        <button id="upgrade-btn" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">upgrade</span>
+          Change Plan
+        </button>
+        <button id="record-payment-btn" class="flex-1 px-4 py-2.5 bg-green-500/10 text-green-400 border border-green-500/30 font-semibold rounded-xl hover:bg-green-500/20 transition flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">payments</span>
+          Record Payment
+        </button>
+      </div>
+      <button id="cancel-sub-btn" class="w-full px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/30 font-semibold rounded-xl hover:bg-red-500/20 transition">
         Cancel Subscription
       </button>
     </div>
   </div>
 </div>
 
+<!-- ── Change Plan Modal ──────────────────────────────────────────────────── -->
+<div id="upgrade-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="bg-surface border border-primary/20 rounded-2xl w-full max-w-lg shadow-2xl mx-4">
+    <div class="border-b border-slate-700 p-6 flex items-center justify-between">
+      <h3 class="text-xl font-bold">Change Plan</h3>
+      <button onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-6">
+      <p class="text-slate-400 text-sm mb-5">Select a new plan. A pending payment will be created — mark it completed in Payments to activate.</p>
+      <div id="upgrade-plans-list" class="space-y-3">
+        <div class="text-center py-4 text-slate-400">Loading plans...</div>
+      </div>
+      <p id="upgrade-error" class="text-red-400 text-sm mt-3 hidden"></p>
+    </div>
+    <div class="border-t border-slate-700 p-6 flex gap-3">
+      <button id="upgrade-confirm-btn" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition" disabled>
+        Confirm Change
+      </button>
+      <button onclick="closeUpgradeModal()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Record Payment Modal ──────────────────────────────────────────────── -->
+<div id="record-payment-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="bg-surface border border-primary/20 rounded-2xl w-full max-w-md shadow-2xl mx-4">
+    <div class="border-b border-slate-700 p-6 flex items-center justify-between">
+      <h3 class="text-xl font-bold">Record Payment</h3>
+      <button onclick="closeRecordPaymentModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <form id="record-payment-form" class="p-6 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Amount (USD)</label>
+          <input id="rp-amount" type="number" min="0" step="0.01" required
+            class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1.5">Status</label>
+          <select id="rp-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+            <option value="completed">Completed (activate sub)</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Payment Method</label>
+        <select id="rp-method" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="manual">Manual</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+          <option value="crypto">Crypto</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1.5">Notes</label>
+        <textarea id="rp-notes" rows="2" placeholder="Optional reference, receipt number..."
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+      </div>
+      <p id="rp-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 px-4 py-2.5 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition">Record Payment</button>
+        <button type="button" onclick="closeRecordPaymentModal()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 // ── Authentication ──────────────────────────────────────────────────────────
 let isAuthenticated = false;
+let adminToken = null;
+let currentUser = null;
+
+function applyUserUI(user) {
+  currentUser = user;
+  if (!user) return;
+  document.getElementById('user-name').textContent = user.name || user.email;
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('user-info').classList.remove('hidden');
+  document.getElementById('user-info').classList.add('flex', 'flex-col');
+  if (user.role === 'super_admin') {
+    document.getElementById('nav-admin-users').classList.remove('hidden');
+    document.getElementById('nav-admin-users').classList.add('flex');
+  }
+}
 
 async function checkAuth() {
   try {
-    const res = await fetch('/api/auth/check');
-    if (res.ok) {
+    const token = localStorage.getItem('admin-token');
+    if (!token) return;
+    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
       isAuthenticated = true;
+      adminToken = token;
       document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
       loadSubscriptions();
     }
   } catch (err) {
@@ -253,21 +540,28 @@ async function checkAuth() {
 }
 
 document.getElementById('login-btn').addEventListener('click', async () => {
-  const secret = document.getElementById('login-secret').value;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
+  errorEl.classList.add('hidden');
   
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret })
+      body: JSON.stringify({ email, password })
     });
     
+    const data = await res.json();
     if (res.ok) {
       isAuthenticated = true;
+      adminToken = data.token;
+      localStorage.setItem('admin-token', adminToken);
       document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
       loadSubscriptions();
     } else {
+      errorEl.textContent = data.error || 'Invalid email or password.';
       errorEl.classList.remove('hidden');
     }
   } catch (err) {
@@ -276,8 +570,16 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   }
 });
 
+document.getElementById('login-email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+document.getElementById('login-password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await fetch('/api/auth/logout', { method: 'POST' });
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  localStorage.removeItem('admin-token');
   location.reload();
 });
 
@@ -288,7 +590,9 @@ async function loadSubscriptions() {
   const status = document.getElementById('filter-status').value;
   
   try {
-    const res = await fetch(`/api/subscriptions?status=${status}`);
+    const res = await fetch(`/api/subscriptions?status=${status}`, {
+      headers: { 'x-admin-token': adminToken }
+    });
     if (!res.ok) throw new Error('Failed to load subscriptions');
     
     allSubscriptions = await res.json();
@@ -309,7 +613,7 @@ function renderSubscriptions(subscriptions) {
   
   if (!subscriptions.length) {
     tbody.innerHTML = `
-      <tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">
+      <tr><td colspan="7" class="px-6 py-12 text-center text-slate-400">
         <span class="material-symbols-outlined text-[48px] block mb-2 opacity-30">inbox</span>
         No subscriptions found.
       </td></tr>
@@ -324,18 +628,23 @@ function renderSubscriptions(subscriptions) {
         <div class="text-xs text-slate-400">ID: ${escapeHtml(sub.menu_id).slice(0, 8)}...</div>
       </td>
       <td class="px-6 py-4">
-        <span class="font-semibold plan-${sub.plan_name.toLowerCase()}">${sub.plan_name}</span>
-        <div class="text-xs text-slate-400">$${sub.plan_price}/mo</div>
+        <span class="font-semibold plan-${(sub.plan_name||'').toLowerCase()}">${sub.plan_name}</span>
+        <div class="text-xs text-slate-400">$${sub.plan_price}/${sub.plan_interval||'mo'}</div>
       </td>
       <td class="px-6 py-4">
         <span class="badge badge-${sub.status}">${sub.status}</span>
       </td>
       <td class="px-6 py-4">
-        <div class="font-medium">${sub.total_scans.toLocaleString()}</div>
+        <div class="font-medium">${(sub.total_scans||0).toLocaleString()}</div>
         <div class="text-xs text-slate-400">total scans</div>
       </td>
       <td class="px-6 py-4">
         <div class="text-sm">${formatDate(sub.start_date)}</div>
+      </td>
+      <td class="px-6 py-4">
+        ${sub.next_billing_date
+          ? `<div class="text-sm font-medium ${isOverdue(sub.next_billing_date) && sub.status === 'active' ? 'text-red-400' : sub.status === 'active' ? 'text-green-400' : 'text-slate-400'}">${formatDate(sub.next_billing_date)}</div>`
+          : `<div class="text-xs text-slate-500">—</div>`}
       </td>
       <td class="px-6 py-4 text-right">
         <button onclick="event.stopPropagation(); showDetails(${sub.id})" 
@@ -371,8 +680,8 @@ async function showDetails(subId) {
   
   try {
     const [subRes, paymentsRes] = await Promise.all([
-      fetch(`/api/subscriptions/${subId}`),
-      fetch(`/api/subscriptions/${subId}/payments`)
+      fetch(`/api/subscriptions/${subId}`, { headers: { 'x-admin-token': adminToken } }),
+      fetch(`/api/subscriptions/${subId}/payments`, { headers: { 'x-admin-token': adminToken } })
     ]);
     
     if (!subRes.ok) throw new Error('Failed to load subscription');
@@ -432,6 +741,12 @@ async function showDetails(subId) {
                 <span class="font-medium">${formatDate(sub.end_date)}</span>
               </div>
             ` : ''}
+            ${sub.next_billing_date ? `
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Next Billing</span>
+                <span class="font-medium ${isOverdue(sub.next_billing_date) ? 'text-red-400' : 'text-green-400'}">${formatDate(sub.next_billing_date)}</span>
+              </div>
+            ` : ''}
             ${sub.cancel_at_end ? '<div class="text-amber-500 text-sm">⚠ Subscription will cancel at period end</div>' : ''}
           </div>
         </div>
@@ -488,41 +803,170 @@ document.getElementById('close-modal').addEventListener('click', () => {
 
 document.getElementById('cancel-sub-btn').addEventListener('click', async () => {
   if (!window.currentSubId) return;
-  
   if (!confirm('Are you sure you want to cancel this subscription?')) return;
-  
   try {
     const res = await fetch(`/api/subscriptions/${window.currentSubId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
     });
-    
     if (res.ok) {
-      alert('Subscription cancelled successfully');
+      showToast('Subscription cancelled.');
       document.getElementById('detail-modal').classList.add('hidden');
       loadSubscriptions();
     } else {
-      alert('Failed to cancel subscription');
+      showToast('Failed to cancel subscription.', 'error');
     }
   } catch (err) {
-    alert('Error cancelling subscription');
+    showToast('Error cancelling subscription.', 'error');
   }
 });
 
-// ── Filters & Search ────────────────────────────────────────────────────────
-document.getElementById('filter-status').addEventListener('change', loadSubscriptions);
+// ── Change Plan (Upgrade) ────────────────────────────────────────────────────
+let selectedUpgradePlanId = null;
+let availablePlans = [];
 
-document.getElementById('search-input').addEventListener('input', (e) => {
-  const query = e.target.value.toLowerCase();
-  const filtered = allSubscriptions.filter(sub => 
-    sub.restaurant_name.toLowerCase().includes(query) ||
-    sub.menu_id.toLowerCase().includes(query)
-  );
-  renderSubscriptions(filtered);
+async function openUpgradeModal() {
+  if (!window.currentSubId) return;
+  selectedUpgradePlanId = null;
+  const confirmBtn = document.getElementById('upgrade-confirm-btn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Confirm Change';
+  document.getElementById('upgrade-error').classList.add('hidden');
+  const modal = document.getElementById('upgrade-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  try {
+    const res = await fetch('/api/subscription-plans', { headers: { 'x-admin-token': adminToken } });
+    availablePlans = await res.json();
+    const currentPlanId = window.currentSub ? window.currentSub.plan_id : 0;
+    document.getElementById('upgrade-plans-list').innerHTML = availablePlans.map(p => `
+      <label class="flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition ${p.id === currentPlanId ? 'border-primary bg-primary/10' : 'border-slate-700 hover:border-slate-500'}" id="plan-label-${p.id}">
+        <input type="radio" name="upgrade-plan" value="${p.id}" ${p.id === currentPlanId ? 'checked' : ''}
+          class="accent-primary"
+          onchange="selectedUpgradePlanId=${p.id}; document.getElementById('upgrade-confirm-btn').disabled=(${p.id}===${currentPlanId}); document.querySelectorAll('[id^=plan-label-]').forEach(el=>el.classList.remove('border-primary','bg-primary/10')); document.getElementById('plan-label-${p.id}').classList.add('border-primary','bg-primary/10');" />
+        <div class="flex-1">
+          <div class="font-semibold">${escapeHtml(p.display_name)}</div>
+          <div class="text-xs text-slate-400">${p.menu_limit === 999 ? 'Unlimited' : p.menu_limit} menus · ${p.location_limit === 999 ? 'Unlimited' : p.location_limit} locations</div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-primary">$${parseFloat(p.price).toFixed(2)}</div>
+          <div class="text-xs text-slate-400">/${p.interval}</div>
+        </div>
+      </label>
+    `).join('');
+  } catch (err) {
+    document.getElementById('upgrade-plans-list').innerHTML = '<div class="text-red-400 text-sm">Failed to load plans.</div>';
+  }
+}
+
+function closeUpgradeModal() {
+  document.getElementById('upgrade-modal').classList.add('hidden');
+  document.getElementById('upgrade-modal').classList.remove('flex');
+}
+
+document.getElementById('upgrade-btn').addEventListener('click', openUpgradeModal);
+
+document.getElementById('upgrade-confirm-btn').addEventListener('click', async () => {
+  if (!window.currentSubId || !selectedUpgradePlanId) return;
+  const btn = document.getElementById('upgrade-confirm-btn');
+  const errorEl = document.getElementById('upgrade-error');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  errorEl.classList.add('hidden');
+  try {
+    const res = await fetch(`/api/subscriptions/${window.currentSubId}`, {
+      method: 'PUT',
+      headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan_id: selectedUpgradePlanId })
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to change plan.'); }
+    closeUpgradeModal();
+    document.getElementById('detail-modal').classList.add('hidden');
+    showToast('Plan changed! A pending payment was created — mark it completed in Payments to activate.');
+    loadSubscriptions();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Change';
+  }
 });
 
+// ── Record Payment ──────────────────────────────────────────────────────────
+function openRecordPaymentModal() {
+  if (!window.currentSub) return;
+  document.getElementById('rp-amount').value = parseFloat(window.currentSub.plan_price || 0).toFixed(2);
+  document.getElementById('rp-status').value = 'completed';
+  document.getElementById('rp-method').value = 'manual';
+  document.getElementById('rp-notes').value = '';
+  document.getElementById('rp-error').classList.add('hidden');
+  const modal = document.getElementById('record-payment-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeRecordPaymentModal() {
+  document.getElementById('record-payment-modal').classList.add('hidden');
+  document.getElementById('record-payment-modal').classList.remove('flex');
+}
+
+document.getElementById('record-payment-btn').addEventListener('click', openRecordPaymentModal);
+
+document.getElementById('record-payment-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!window.currentSubId) return;
+  const errorEl = document.getElementById('rp-error');
+  errorEl.classList.add('hidden');
+  const payload = {
+    subscription_id: window.currentSubId,
+    amount: parseFloat(document.getElementById('rp-amount').value),
+    payment_method: document.getElementById('rp-method').value,
+    status: document.getElementById('rp-status').value,
+    notes: document.getElementById('rp-notes').value.trim(),
+    currency: 'USD'
+  };
+  try {
+    const res = await fetch('/api/admin/payments', {
+      method: 'POST',
+      headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to record payment.'); }
+    closeRecordPaymentModal();
+    document.getElementById('detail-modal').classList.add('hidden');
+    const msg = payload.status === 'completed'
+      ? 'Payment recorded — subscription is now active!'
+      : 'Pending payment recorded.';
+    showToast(msg);
+    loadSubscriptions();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeUpgradeModal(); closeRecordPaymentModal(); }
+});
+
+// ── Filters & Search ────────────────────────────────────────────────────────
+document.getElementById('filter-status').addEventListener('change', filterAndRender);
+document.getElementById('search-input').addEventListener('input', filterAndRender);
 document.getElementById('refresh-btn').addEventListener('click', loadSubscriptions);
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `fixed bottom-6 right-6 z-[100] ${type === 'error' ? 'bg-red-500/90 text-white' : 'bg-primary/90 text-bg-dark'} px-6 py-3 rounded-xl shadow-lg font-medium text-sm`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function isOverdue(dateStr) {
+  if (!dateStr) return false;
+  return new Date(dateStr) < new Date();
+}
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -536,8 +980,339 @@ function formatDate(isoStr) {
   });
 }
 
+// ── Plan Management UI ─────────────────────────────────────────────────────-
+let allPlans = [];
+function showPlansModal() {
+  document.getElementById('plans-modal').classList.remove('hidden');
+  document.getElementById('plans-modal').classList.add('flex');
+  loadPlans();
+  hidePlanForm();
+}
+function closePlansModal() {
+  document.getElementById('plans-modal').classList.add('hidden');
+  document.getElementById('plans-modal').classList.remove('flex');
+}
+function renderPlansTable(plans) {
+  const list = document.getElementById('plans-list');
+  if (!plans.length) {
+    list.innerHTML = '<div class="text-slate-400 text-center py-8">No plans found.</div>';
+    return;
+  }
+  list.innerHTML = `<table class="w-full text-sm">
+    <thead><tr>
+      <th class="px-4 py-2 text-left">Name</th>
+      <th class="px-4 py-2 text-left">Display</th>
+      <th class="px-4 py-2 text-right">Price</th>
+      <th class="px-4 py-2 text-center">Interval</th>
+      <th class="px-4 py-2 text-center">Menus</th>
+      <th class="px-4 py-2 text-center">Locations</th>
+      <th class="px-4 py-2 text-center">Active</th>
+      <th class="px-4 py-2 text-right">Actions</th>
+    </tr></thead>
+    <tbody>
+      ${plans.map(p => `
+        <tr class="border-b border-slate-700">
+          <td class="px-4 py-2 font-semibold">${escapeHtml(p.name)}</td>
+          <td class="px-4 py-2">${escapeHtml(p.display_name)}</td>
+          <td class="px-4 py-2 text-right">$${parseFloat(p.price).toFixed(2)}</td>
+          <td class="px-4 py-2 text-center">${escapeHtml(p.interval)}</td>
+          <td class="px-4 py-2 text-center">${p.menu_limit === 999 ? '∞' : p.menu_limit}</td>
+          <td class="px-4 py-2 text-center">${p.location_limit === 999 ? '∞' : p.location_limit}</td>
+          <td class="px-4 py-2 text-center">${p.is_active ? '<span class="badge badge-active">Yes</span>' : '<span class="badge badge-expired">No</span>'}</td>
+          <td class="px-4 py-2 text-right">
+            <button onclick="editPlan(${p.id})" class="p-1 rounded hover:bg-bg-dark text-primary" title="Edit"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+            <button onclick="deletePlan(${p.id})" class="p-1 rounded hover:bg-bg-dark text-red-400" title="Delete"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>`;
+}
+async function loadPlans() {
+  try {
+    const res = await fetch('/api/admin/subscription-plans', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load plans');
+    allPlans = await res.json();
+    renderPlansTable(allPlans);
+  } catch (err) {
+    document.getElementById('plans-list').innerHTML = '<div class="text-red-400 text-center py-8">Failed to load plans.</div>';
+  }
+}
+function showPlanForm(editId) {
+  const form = document.getElementById('plan-form-section');
+  form.classList.remove('hidden');
+  if (editId) {
+    const p = allPlans.find(x => x.id === editId);
+    document.getElementById('plan-form-title').textContent = 'Edit Plan';
+    document.getElementById('plan-id').value = p.id;
+    document.getElementById('plan-name').value = p.name;
+    document.getElementById('plan-display-name').value = p.display_name;
+    document.getElementById('plan-price').value = p.price;
+    document.getElementById('plan-interval').value = p.interval;
+    document.getElementById('plan-menu-limit').value = p.menu_limit;
+    document.getElementById('plan-location-limit').value = p.location_limit;
+    document.getElementById('plan-features').value = (p.features || []).join('\n');
+    document.getElementById('plan-sort-order').value = p.sort_order;
+    document.getElementById('plan-active').checked = !!p.is_active;
+  } else {
+    document.getElementById('plan-form-title').textContent = 'Create Plan';
+    document.getElementById('plan-id').value = '';
+    document.getElementById('plan-name').value = '';
+    document.getElementById('plan-display-name').value = '';
+    document.getElementById('plan-price').value = '';
+    document.getElementById('plan-interval').value = 'month';
+    document.getElementById('plan-menu-limit').value = '';
+    document.getElementById('plan-location-limit').value = '';
+    document.getElementById('plan-features').value = '';
+    document.getElementById('plan-sort-order').value = '';
+    document.getElementById('plan-active').checked = true;
+  }
+  document.getElementById('plan-form-error').classList.add('hidden');
+}
+function hidePlanForm() {
+  document.getElementById('plan-form-section').classList.add('hidden');
+}
+function editPlan(id) { showPlanForm(id); }
+async function deletePlan(id) {
+  if (!confirm('Delete this plan? Plans in use cannot be deleted.')) return;
+  try {
+    const res = await fetch(`/api/admin/subscription-plans/${id}`, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Delete failed'); }
+    loadPlans();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+document.getElementById('manage-plans-btn').addEventListener('click', showPlansModal);
+document.getElementById('manage-promos-btn').addEventListener('click', showPromosModal);
+document.getElementById('add-plan-btn').addEventListener('click', () => showPlanForm());
+document.getElementById('plan-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('plan-id').value;
+  const plan = {
+    name: document.getElementById('plan-name').value.trim(),
+    display_name: document.getElementById('plan-display-name').value.trim(),
+    price: parseFloat(document.getElementById('plan-price').value),
+    interval: document.getElementById('plan-interval').value,
+    menu_limit: parseInt(document.getElementById('plan-menu-limit').value),
+    location_limit: parseInt(document.getElementById('plan-location-limit').value),
+    features: document.getElementById('plan-features').value.split('\n').map(f => f.trim()).filter(Boolean),
+    sort_order: parseInt(document.getElementById('plan-sort-order').value),
+    is_active: document.getElementById('plan-active').checked ? 1 : 0
+  };
+  const errorEl = document.getElementById('plan-form-error');
+  errorEl.classList.add('hidden');
+  try {
+    let res;
+    if (id) {
+      res = await fetch(`/api/admin/subscription-plans/${id}`, { method: 'PUT', headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
+    } else {
+      res = await fetch('/api/admin/subscription-plans', { method: 'POST', headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
+    }
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Save failed'); }
+    hidePlanForm();
+    loadPlans();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+});
+
+// Show manage plans button only for super_admin
+function showManagePlansIfSuperAdmin() {
+  if (currentUser && currentUser.role === 'super_admin') {
+    document.getElementById('manage-plans-btn').classList.remove('hidden');
+    document.getElementById('manage-plans-btn').classList.add('flex');
+    document.getElementById('manage-promos-btn').classList.remove('hidden');
+    document.getElementById('manage-promos-btn').classList.add('flex');
+  }
+}
+
+// ── Promotions ───────────────────────────────────────────────────────────────
+function showPromosModal() {
+  document.getElementById('promos-modal').classList.remove('hidden');
+  document.getElementById('promos-modal').classList.add('flex');
+  loadPromos();
+}
+function closePromosModal() {
+  document.getElementById('promos-modal').classList.add('hidden');
+  document.getElementById('promos-modal').classList.remove('flex');
+  hidePromoForm();
+}
+
+async function loadPromos() {
+  document.getElementById('promos-list').innerHTML = '<div class="text-center text-slate-400 py-6"><span class="material-symbols-outlined spin">progress_activity</span></div>';
+  try {
+    const res = await fetch('/api/admin/promo-codes', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load promo codes');
+    const promos = await res.json();
+    renderPromosTable(promos);
+  } catch (err) {
+    document.getElementById('promos-list').innerHTML = '<p class="text-red-400 text-sm">' + err.message + '</p>';
+  }
+}
+
+function renderPromosTable(promos) {
+  if (!promos.length) {
+    document.getElementById('promos-list').innerHTML = '<p class="text-slate-400 text-sm py-4 text-center">No promo codes yet. Click "Add Promo Code" to create one.</p>';
+    return;
+  }
+  const now = new Date();
+  document.getElementById('promos-list').innerHTML = `
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-slate-400 border-b border-slate-700 text-left">
+            <th class="pb-3 pr-4 font-medium">Code</th>
+            <th class="pb-3 pr-4 font-medium">Discount</th>
+            <th class="pb-3 pr-4 font-medium">Uses</th>
+            <th class="pb-3 pr-4 font-medium">Expires</th>
+            <th class="pb-3 pr-4 font-medium">Status</th>
+            <th class="pb-3 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700/50">
+          ${promos.map(p => {
+            const expired = p.expires_at && new Date(p.expires_at) < now;
+            const usesStr = p.max_uses > 0 ? `${p.uses_count}/${p.max_uses}` : `${p.uses_count} (∞)`;
+            const discStr = p.discount_type === 'percentage' ? `${p.discount_value}% off` : `$${p.discount_value} off`;
+            const statusBadge = !p.is_active ? '<span class="px-2 py-0.5 bg-slate-700 text-slate-400 rounded-full text-xs">Inactive</span>'
+              : expired ? '<span class="px-2 py-0.5 bg-red-900/30 text-red-400 rounded-full text-xs">Expired</span>'
+              : '<span class="px-2 py-0.5 bg-green-900/30 text-green-400 rounded-full text-xs">Active</span>';
+            return `<tr class="hover:bg-slate-800/30 transition">
+              <td class="py-3 pr-4 font-mono font-bold text-primary">${escHtml(p.code)}</td>
+              <td class="py-3 pr-4 text-slate-300">${discStr}</td>
+              <td class="py-3 pr-4 text-slate-400">${usesStr}</td>
+              <td class="py-3 pr-4 text-slate-400">${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '—'}</td>
+              <td class="py-3 pr-4">${statusBadge}</td>
+              <td class="py-3">
+                <div class="flex items-center gap-2">
+                  <button onclick="editPromo(${p.id})" class="text-slate-400 hover:text-primary transition" title="Edit">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button onclick="deletePromo(${p.id})" class="text-slate-400 hover:text-red-400 transition" title="Delete">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let _allPlansForPromo = [];
+async function showPromoForm(promoId) {
+  document.getElementById('promo-form-section').classList.remove('hidden');
+  document.getElementById('promo-edit-id').value = promoId || '';
+  document.getElementById('promo-form-title').textContent = promoId ? 'Edit Promo Code' : 'Create Promo Code';
+  document.getElementById('promo-form-error').classList.add('hidden');
+
+  // Load plans for checkboxes
+  if (!_allPlansForPromo.length) {
+    try {
+      const res = await fetch('/api/public/plans');
+      _allPlansForPromo = await res.json();
+    } catch {}
+  }
+  document.getElementById('pf-plans-checkboxes').innerHTML = _allPlansForPromo.map(p =>
+    `<label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+      <input type="checkbox" value="${p.id}" class="accent-primary promo-plan-chk"/>
+      ${escHtml(p.display_name)}
+    </label>`
+  ).join('');
+
+  if (promoId) {
+    try {
+      const res = await fetch('/api/admin/promo-codes', { headers: { 'x-admin-token': adminToken } });
+      const promos = await res.json();
+      const promo = promos.find(p => p.id === promoId);
+      if (promo) {
+        document.getElementById('pf-code').value = promo.code;
+        document.getElementById('pf-description').value = promo.description || '';
+        document.getElementById('pf-discount-type').value = promo.discount_type || 'percentage';
+        document.getElementById('pf-discount-value').value = promo.discount_value;
+        document.getElementById('pf-max-uses').value = promo.max_uses;
+        document.getElementById('pf-expires-at').value = promo.expires_at ? promo.expires_at.split('T')[0] : '';
+        document.getElementById('pf-active').checked = !!promo.is_active;
+        const applicablePlans = Array.isArray(promo.applicable_plans) ? promo.applicable_plans : [];
+        document.querySelectorAll('.promo-plan-chk').forEach(chk => {
+          chk.checked = applicablePlans.map(Number).includes(parseInt(chk.value));
+        });
+      }
+    } catch {}
+  } else {
+    document.getElementById('promo-form').reset();
+    document.getElementById('pf-active').checked = true;
+    document.getElementById('pf-max-uses').value = '0';
+  }
+  document.getElementById('pf-code').disabled = !!promoId;
+}
+
+function hidePromoForm() {
+  document.getElementById('promo-form-section').classList.add('hidden');
+}
+
+async function editPromo(id) {
+  await showPromoForm(id);
+}
+
+async function deletePromo(id) {
+  if (!confirm('Delete this promo code? This cannot be undone.')) return;
+  try {
+    const res = await fetch(`/api/admin/promo-codes/${id}`, { method: 'DELETE', headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Delete failed'); }
+    loadPromos();
+  } catch (err) { alert(err.message); }
+}
+
+document.getElementById('promo-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('promo-form-error');
+  errEl.classList.add('hidden');
+  const id = document.getElementById('promo-edit-id').value;
+  const applicablePlans = Array.from(document.querySelectorAll('.promo-plan-chk:checked')).map(c => parseInt(c.value));
+  const payload = {
+    description: document.getElementById('pf-description').value.trim(),
+    discount_type: document.getElementById('pf-discount-type').value,
+    discount_value: parseFloat(document.getElementById('pf-discount-value').value) || 0,
+    applicable_plans: applicablePlans,
+    max_uses: parseInt(document.getElementById('pf-max-uses').value) || 0,
+    expires_at: document.getElementById('pf-expires-at').value || null,
+    is_active: document.getElementById('pf-active').checked ? 1 : 0
+  };
+  if (!id) payload.code = document.getElementById('pf-code').value.trim().toUpperCase();
+
+  try {
+    let res;
+    if (id) {
+      res = await fetch(`/api/admin/promo-codes/${id}`, { method: 'PUT', headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    } else {
+      res = await fetch('/api/admin/promo-codes', { method: 'POST', headers: { 'x-admin-token': adminToken, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    }
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Save failed'); }
+    hidePromoForm();
+    loadPromos();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+});
+
 // ── Init ────────────────────────────────────────────────────────────────────
 checkAuth();
+// Patch: show manage plans button if super_admin
+window.applyUserUI = (function(orig) {
+  return function(user) {
+    orig(user);
+    showManagePlansIfSuperAdmin();
+  }
+})(applyUserUI);
 </script>
 
 </body>

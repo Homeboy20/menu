@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sign In – RestOrder</title>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -18,13 +18,17 @@
           "bg": "#fafaf9",
           "surface": "#ffffff",
         },
-        fontFamily: { display: ["Inter", "sans-serif"] },
+        fontFamily: { 
+          display: ["Plus Jakarta Sans", "sans-serif"],
+          body: ["DM Sans", "sans-serif"],
+        },
       },
     },
   };
 </script>
 <style>
-  body { font-family: "Inter", sans-serif; }
+  body { font-family: "DM Sans", sans-serif; font-size: 16px; line-height: 1.65; letter-spacing: -0.01em; }
+  h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   
@@ -71,10 +75,9 @@
       <p class="text-stone-600">Sign in to your RestOrder account</p>
     </div>
 
-    <!-- Login Form -->
+    <!-- Unified Login Form -->
     <div class="bg-white border border-stone-200 rounded-2xl p-8 shadow-lg">
       <form id="login-form" class="space-y-6">
-        <!-- Email -->
         <div>
           <label class="block text-sm font-medium text-stone-700 mb-2">
             <span class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary">email</span>
@@ -83,8 +86,6 @@
           <input id="email" type="email" required placeholder="you@restaurant.com" autocomplete="email"
             class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
         </div>
-
-        <!-- Password -->
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="block text-sm font-medium text-stone-700">
@@ -96,25 +97,22 @@
           <input id="password" type="password" required placeholder="Enter your password" autocomplete="current-password"
             class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
         </div>
-
-        <!-- Remember Me -->
         <div class="flex items-center">
           <input id="remember" type="checkbox"
             class="rounded border-stone-300 bg-white text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0" />
           <label for="remember" class="ml-2 text-sm text-stone-600">Remember me for 30 days</label>
         </div>
-
-        <!-- Error Message -->
         <div id="error-message" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl">
           <div class="flex items-start gap-3">
             <span class="material-symbols-outlined text-red-600 text-[20px]">error</span>
-            <div class="flex-1">
-              <p class="text-sm text-red-700" id="error-text"></p>
-            </div>
+            <p class="text-sm text-red-700" id="error-text"></p>
           </div>
         </div>
-
-        <!-- Submit Button -->
+        <!-- Role detected badge — shown after successful lookup -->
+        <div id="role-badge" class="hidden p-3 bg-stone-50 border border-stone-200 rounded-xl flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary text-[20px]" id="role-icon">person</span>
+          <p class="text-sm font-medium text-stone-700" id="role-text"></p>
+        </div>
         <button type="submit" id="submit-btn"
           class="w-full px-6 py-3.5 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
           <span id="submit-text">Sign In</span>
@@ -122,17 +120,62 @@
         </button>
       </form>
 
-      <!-- Divider -->
-      <div class="relative my-8">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-stone-200"></div>
+      <!-- ── Social sign-in divider ── -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-4 bg-white text-stone-500">or continue with</span>
         </div>
+      </div>
+
+      <!-- Google Sign-In -->
+      <button id="google-btn" onclick="signInWithGoogle()"
+        class="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition mb-3"
+        style="display:none">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <span id="google-btn-text">Sign in with Google</span>
+        <span id="google-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+      </button>
+
+      <!-- Phone OTP Sign-In -->
+      <button id="phone-btn" onclick="showPhoneSignIn()"
+        class="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition"
+        style="display:none">
+        <span class="material-symbols-outlined text-[18px] text-primary">phone</span>
+        <span>Sign in with Phone</span>
+      </button>
+
+      <!-- Phone OTP Panel -->
+      <div id="phone-panel" class="hidden mt-4 space-y-3">
+        <div class="flex gap-2">
+          <input id="phone-input" type="tel" placeholder="+1 555 123 4567" autocomplete="tel"
+            class="flex-1 px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition"/>
+          <button onclick="sendPhoneOTP()" id="send-otp-btn"
+            class="px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition flex items-center gap-1">
+            <span id="send-otp-text">Send OTP</span>
+            <span id="otp-spinner" class="hidden material-symbols-outlined spin text-[16px]">progress_activity</span>
+          </button>
+        </div>
+        <div id="otp-section" class="hidden space-y-3">
+          <input id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code"
+            class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition text-center text-lg font-mono tracking-widest"/>
+          <button onclick="verifyPhoneOTP()" id="verify-otp-btn"
+            class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition flex items-center justify-center gap-2">
+            <span id="verify-otp-text">Verify &amp; Sign In</span>
+            <span id="verify-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+          </button>
+        </div>
+        <div id="recaptcha-container"></div>
+      </div>
+
+      <div id="firebase-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
+
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
         <div class="relative flex justify-center text-sm">
           <span class="px-4 bg-white text-stone-500">Don't have an account?</span>
         </div>
       </div>
-
-      <!-- Register Link -->
       <a href="/register"
         class="block w-full px-6 py-3.5 bg-white text-primary font-semibold rounded-xl border border-primary/30 hover:bg-primary/5 transition text-center">
         Create Free Account
@@ -149,84 +192,219 @@
 </main>
 
 <script>
-// Handle login form
 document.getElementById('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const submitBtn = document.getElementById('submit-btn');
-  const submitText = document.getElementById('submit-text');
+
+  const submitBtn     = document.getElementById('submit-btn');
+  const submitText    = document.getElementById('submit-text');
   const submitSpinner = document.getElementById('submit-spinner');
-  const errorMessage = document.getElementById('error-message');
-  const errorText = document.getElementById('error-text');
-  
-  // Get form values
-  const email = document.getElementById('email').value.trim();
+  const errorMessage  = document.getElementById('error-message');
+  const errorText     = document.getElementById('error-text');
+  const roleBadge     = document.getElementById('role-badge');
+
+  const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const remember = document.getElementById('remember').checked;
-  
-  // Hide error
+
   errorMessage.classList.add('hidden');
-  
-  // Show loading
+  roleBadge.classList.add('hidden');
   submitBtn.disabled = true;
   submitText.textContent = 'Signing In...';
   submitSpinner.classList.remove('hidden');
-  
+
   try {
-    // Fetch CSRF token
-    const csrfResponse = await fetch('/api/csrf-token');
-    const { csrfToken } = await csrfResponse.json();
-    
-    const response = await fetch('/api/customers/login', {
+    const { csrfToken } = await fetch('/api/csrf-token').then(r => r.json());
+
+    const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, csrfToken })
     });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || 'Login failed');
-    }
-    
-    // Store token
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Invalid email or password.');
+
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem('customerToken', data.token);
-    storage.setItem('customerEmail', data.customer.email);
-    storage.setItem('customerBusiness', data.customer.businessName);
-    
-    // Redirect to dashboard
-    window.location.href = '/dashboard';
-    
+
+    if (data.userType === 'owner') {
+      storage.setItem('customerEmail', data.customer.email);
+      storage.setItem('customerBusiness', data.customer.businessName);
+      localStorage.removeItem('staffName');
+      localStorage.removeItem('staffRole');
+      document.getElementById('role-icon').textContent = 'store';
+      document.getElementById('role-text').textContent = 'Account Owner — redirecting…';
+    } else {
+      localStorage.setItem('staffName', data.staff.name);
+      localStorage.setItem('staffRole', data.staff.role);
+      localStorage.removeItem('customerEmail');
+      localStorage.removeItem('customerBusiness');
+      const roleLabel = data.staff.role === 'manager' ? 'Manager' : 'Staff Member';
+      document.getElementById('role-icon').textContent = 'badge';
+      document.getElementById('role-text').textContent = `${roleLabel} — redirecting…`;
+    }
+
+    roleBadge.classList.remove('hidden');
+    window.location.href = data.redirectTo;
+
   } catch (err) {
     errorText.textContent = err.message;
     errorMessage.classList.remove('hidden');
-    
-    // Reset button
     submitBtn.disabled = false;
     submitText.textContent = 'Sign In';
     submitSpinner.classList.add('hidden');
   }
 });
 
-// Check if already logged in
+// Redirect if already authenticated
 window.addEventListener('load', async () => {
   const token = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
-  if (token) {
-    try {
-      const response = await fetch('/api/customers/check', {
-        headers: { 'x-customer-token': token }
-      });
-      const data = await response.json();
-      
-      if (data.authenticated) {
+  if (!token) return;
+  try {
+    const res = await fetch('/api/customers/check', { headers: { 'x-customer-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
+      if (data.customer?.isStaff) {
+        window.location.href = data.customer?.staffRole === 'manager' ? '/menu-editor' : '/staff-panel';
+      } else {
         window.location.href = '/dashboard';
       }
-    } catch (err) {
-      // Continue with login
     }
-  }
+  } catch (_) { /* stay on login */ }
+
+  // Initialise Firebase if configured
+  try {
+    const cfg = await fetch('/api/firebase-config').then(r => r.json());
+    if (cfg.enabled) {
+      await initFirebase(cfg);
+    }
+  } catch (_) {}
 });
+
+// ── Firebase ──────────────────────────────────────────────────────────────────
+let firebaseApp = null, firebaseAuth = null, phoneConfirmation = null;
+
+async function initFirebase(cfg) {
+  // Load Firebase modular SDK from CDN
+  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier }
+    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+
+  firebaseApp  = initializeApp(cfg);
+  firebaseAuth = getAuth(firebaseApp);
+  firebaseAuth._googleProvider = new GoogleAuthProvider();
+  firebaseAuth._RecaptchaVerifier = RecaptchaVerifier;
+  firebaseAuth._signInWithPopup = signInWithPopup;
+  firebaseAuth._signInWithPhoneNumber = signInWithPhoneNumber;
+
+  // Show social buttons only after Firebase is ready
+  document.getElementById('google-btn').style.display = '';
+  document.getElementById('phone-btn').style.display  = '';
+}
+
+function firebaseErr(msg) {
+  const el = document.getElementById('firebase-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 6000);
+}
+
+async function signInWithGoogle() {
+  if (!firebaseAuth) return;
+  const btn = document.getElementById('google-btn');
+  document.getElementById('google-btn-text').textContent = 'Signing in…';
+  document.getElementById('google-spinner').classList.remove('hidden');
+  btn.disabled = true;
+  try {
+    const result = await firebaseAuth._signInWithPopup(firebaseAuth, firebaseAuth._googleProvider);
+    const idToken = await result.user.getIdToken();
+    await handleFirebaseToken(idToken);
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') firebaseErr(err.message || 'Google sign-in failed.');
+    document.getElementById('google-btn-text').textContent = 'Sign in with Google';
+    document.getElementById('google-spinner').classList.add('hidden');
+    btn.disabled = false;
+  }
+}
+
+function showPhoneSignIn() {
+  document.getElementById('phone-panel').classList.remove('hidden');
+  document.getElementById('phone-btn').style.display = 'none';
+  document.getElementById('phone-input').focus();
+}
+
+async function sendPhoneOTP() {
+  if (!firebaseAuth) return;
+  const phone = document.getElementById('phone-input').value.trim();
+  if (!phone) { firebaseErr('Please enter a phone number with country code.'); return; }
+
+  document.getElementById('send-otp-text').textContent = 'Sending…';
+  document.getElementById('otp-spinner').classList.remove('hidden');
+  document.getElementById('send-otp-btn').disabled = true;
+  try {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new firebaseAuth._RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
+    }
+    phoneConfirmation = await firebaseAuth._signInWithPhoneNumber(firebaseAuth, phone, window.recaptchaVerifier);
+    document.getElementById('otp-section').classList.remove('hidden');
+    document.getElementById('send-otp-text').textContent = 'Resend';
+    document.getElementById('otp-spinner').classList.add('hidden');
+    document.getElementById('send-otp-btn').disabled = false;
+  } catch (err) {
+    firebaseErr(err.message || 'Could not send OTP. Check the phone number.');
+    document.getElementById('send-otp-text').textContent = 'Send OTP';
+    document.getElementById('otp-spinner').classList.add('hidden');
+    document.getElementById('send-otp-btn').disabled = false;
+  }
+}
+
+async function verifyPhoneOTP() {
+  if (!phoneConfirmation) return;
+  const code = document.getElementById('otp-input').value.trim();
+  if (!/^\d{6}$/.test(code)) { firebaseErr('Enter the 6-digit code.'); return; }
+
+  document.getElementById('verify-otp-text').textContent = 'Verifying…';
+  document.getElementById('verify-spinner').classList.remove('hidden');
+  document.getElementById('verify-otp-btn').disabled = true;
+  try {
+    const result = await phoneConfirmation.confirm(code);
+    const idToken = await result.user.getIdToken();
+    await handleFirebaseToken(idToken);
+  } catch (err) {
+    firebaseErr(err.message || 'Invalid code. Please try again.');
+    document.getElementById('verify-otp-text').textContent = 'Verify & Sign In';
+    document.getElementById('verify-spinner').classList.add('hidden');
+    document.getElementById('verify-otp-btn').disabled = false;
+  }
+}
+
+async function handleFirebaseToken(idToken) {
+  const res = await fetch('/api/customers/firebase-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken })
+  });
+  const data = await res.json();
+
+  if (res.status === 422 && data.requiresRegistration) {
+    // New user — need business name
+    const biz = prompt('Welcome! What is your restaurant / business name?');
+    if (!biz) return;
+    const res2 = await fetch('/api/customers/firebase-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken, businessName: biz.trim() })
+    });
+    const data2 = await res2.json();
+    if (!res2.ok) { firebaseErr(data2.error || 'Registration failed.'); return; }
+    localStorage.setItem('customerToken', data2.token);
+    window.location.href = data2.redirectTo || '/dashboard';
+    return;
+  }
+  if (!res.ok) { firebaseErr(data.error || 'Sign-in failed.'); return; }
+  localStorage.setItem('customerToken', data.token);
+  window.location.href = data.redirectTo || '/dashboard';
+}
 </script>
 
 </body>
