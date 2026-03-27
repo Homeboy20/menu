@@ -261,20 +261,21 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 // Redirect if already authenticated
 window.addEventListener('load', async () => {
   const token = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
-  if (!token) return;
-  try {
-    const res = await fetch('/api/customers/check', { headers: { 'x-customer-token': token } });
-    const data = await res.json();
-    if (data.authenticated) {
-      if (data.customer?.isStaff) {
-        window.location.href = data.customer?.staffRole === 'manager' ? '/menu-editor' : '/staff-panel';
-      } else {
-        window.location.href = '/dashboard';
+  if (token) {
+    try {
+      const res = await fetch('/api/customers/check', { headers: { 'x-customer-token': token } });
+      const data = await res.json();
+      if (data.authenticated) {
+        if (data.customer?.isStaff) {
+          window.location.href = data.customer?.staffRole === 'manager' ? '/menu-editor' : '/staff-panel';
+        } else {
+          window.location.href = '/dashboard';
+        }
       }
-    }
-  } catch (_) { /* stay on login */ }
+    } catch (_) { /* stay on login */ }
+  }
 
-  // Initialise Firebase if configured
+  // Initialise Firebase if configured (always, so Google/Phone buttons appear)
   try {
     const cfg = await fetch('/api/firebase-config').then(r => r.json());
     if (cfg.enabled) {

@@ -741,6 +741,9 @@ document.addEventListener("DOMContentLoaded",function(){
     origGoToStep(step);
     if (step === 2) initRegisterFirebase();
   };
+
+  // Pre-load Firebase config on page load so button is ready at step 2
+  initRegisterFirebase();
 });
 init();
 })();
