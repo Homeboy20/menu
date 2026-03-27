@@ -417,7 +417,7 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 </div>
 </main>
-<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://checkout.flutterwave.com/v3.js" async></script>
 <script>
 (function(){
 "use strict";
@@ -434,9 +434,12 @@ function showAlert(id,msg){var a=el(id);a.querySelector("span:last-child").textC
 function hideAlert(id){var a=el(id);a.classList.remove("shown");a.style.display="none";}
 async function init(){
   try{
-    var r1=await fetch("/api/public/plans");
-    var r2=await fetch("/api/csrf-token");
-    plans=await r1.json();
+    var ctrl=new AbortController();var tid=setTimeout(function(){ctrl.abort();},10000);
+    var [r1,r2]=await Promise.all([fetch("/api/public/plans",{signal:ctrl.signal}),fetch("/api/csrf-token")]);
+    clearTimeout(tid);
+    if(!r1.ok)throw new Error('Plans API error '+r1.status);
+    var data=await r1.json();
+    plans=Array.isArray(data)?data:[];
     var cd=await r2.json();csrfToken=cd.csrfToken||"";
     renderPlans();
     loadGateways();
@@ -446,7 +449,8 @@ async function init(){
     if(planParam){var match=plans.find(function(p){return p.name===planParam;});if(match)selectPlan(match.id);}
     if(promoParam)urlPromoParam=promoParam.toUpperCase();
   }catch(e){
-    el("plans-grid").innerHTML='<div style="grid-column:1/-1;text-align:center;color:#dc2626;padding:40px">Failed to load plans. Please refresh.</div>';
+    var grid=el("plans-grid");
+    if(grid)grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#dc2626;padding:40px">Failed to load plans. <a href="" style="color:#c2410c">Refresh</a></div>';
   }
   populateCountrySelect();
 }
