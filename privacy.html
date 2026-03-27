@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+  <title>Privacy Policy – RestOrder</title>
+  <meta name="description" content="RestOrder Privacy Policy. Learn how we collect, use, and protect your personal data.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+  <style>
+.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#c2410c;--primary-dark:#9a3412;--primary-light:#ea580c;
+  --bg:#fafaf9;--text:#1c1917;--text-light:#78716c;--border:#e7e5e4;--surface:#ffffff;
+  --gradient-1:linear-gradient(135deg,#c2410c 0%,#ea580c 100%);
+  --font-display:'Plus Jakarta Sans',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+body{font-family:var(--font-body);font-size:16px;line-height:1.7;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-0.025em;line-height:1.25;}
+.container{max-width:860px;margin:0 auto;padding:0 24px;}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-bottom:1px solid transparent;z-index:1000;transition:all 0.4s ease;}
+header.scrolled{box-shadow:0 2px 20px rgba(0,0,0,0.06);border-bottom-color:var(--border);}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;max-width:1280px;margin:0 auto;padding-left:24px;padding-right:24px;transition:padding 0.4s ease;}
+header.scrolled nav{padding-top:12px;padding-bottom:12px;}
+.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:900;color:var(--primary);text-decoration:none;letter-spacing:-0.5px;}
+.logo-icon{width:42px;height:42px;background:var(--gradient-1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;filter:drop-shadow(0 3px 8px rgba(194,65,12,0.3));transition:all 0.3s ease;}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.btn-nav{color:var(--primary);text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;border-radius:10px;border:2px solid var(--border);background:white;transition:all 0.2s ease;}
+.btn-nav:hover{border-color:var(--primary);color:var(--primary);}
+.btn-nav-primary{background:var(--gradient-1);color:white;border-color:transparent;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;transition:all 0.2s ease;}
+.btn-nav-primary:hover{opacity:0.9;transform:translateY(-1px);}
+
+/* Page */
+.page-hero{padding:140px 0 60px;text-align:center;border-bottom:1px solid var(--border);background:white;}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;padding:6px 14px;border-radius:100px;border:1px solid #bbf7d0;margin-bottom:20px;}
+.page-hero h1{font-size:42px;color:var(--text);margin-bottom:12px;}
+.page-hero .meta{font-size:14px;color:var(--text-light);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.page-hero .meta span{display:flex;align-items:center;gap:5px;}
+
+/* TOC */
+.toc-bar{background:white;border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:70px;z-index:100;overflow-x:auto;}
+.toc-inner{display:flex;gap:6px;white-space:nowrap;}
+.toc-inner a{color:var(--text-light);text-decoration:none;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;transition:all 0.2s ease;}
+.toc-inner a:hover{color:var(--primary);background:#fff7ed;}
+
+/* Content */
+.legal-body{padding:60px 0 100px;}
+.legal-section{margin-bottom:56px;}
+.section-number{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#15803d;color:white;border-radius:10px;font-family:var(--font-display);font-weight:800;font-size:15px;flex-shrink:0;margin-right:12px;vertical-align:middle;}
+.legal-section h2{font-size:24px;color:var(--text);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #bbf7d0;display:flex;align-items:center;}
+.legal-section h3{font-size:17px;color:var(--text);margin:24px 0 10px;font-weight:700;}
+.legal-section p{color:#44403c;margin-bottom:14px;font-size:15.5px;}
+.legal-section ul,
+.legal-section ol{padding-left:20px;margin-bottom:14px;color:#44403c;}
+.legal-section li{margin-bottom:7px;font-size:15.5px;}
+.legal-section strong{color:var(--text);}
+
+.highlight-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#14532d;}
+.highlight-box strong{color:#15803d;}
+.warn-box{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#713f12;}
+.table-wrap{overflow-x:auto;margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;font-size:14.5px;}
+th{background:#f5f5f4;color:var(--text);font-weight:700;text-align:left;padding:12px 14px;border:1px solid var(--border);}
+td{padding:11px 14px;border:1px solid var(--border);color:#44403c;vertical-align:top;}
+tr:nth-child(even) td{background:#fafaf9;}
+
+/* Footer */
+footer{background:#1c1917;color:#a8a29e;padding:60px 0 30px;}
+footer .container{max-width:1280px;}
+.footer-grid{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:40px;margin-bottom:40px;}
+.footer-brand .footer-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:20px;font-weight:800;color:white;margin-bottom:12px;}
+.footer-description{font-size:14px;line-height:1.6;max-width:280px;}
+.footer-links h4{color:white;font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:14px;letter-spacing:0.02em;}
+.footer-links ul{list-style:none;}
+.footer-links li{margin-bottom:8px;}
+.footer-links a{color:#a8a29e;text-decoration:none;font-size:14px;transition:color 0.2s ease;}
+.footer-links a:hover{color:white;}
+.footer-bottom{border-top:1px solid #292524;padding-top:24px;text-align:center;font-size:13px;}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px;}.page-hero h1{font-size:30px;}.legal-section h2{font-size:20px;}.toc-bar{display:none;}}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header id="header">
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-icon">✕</div>
+      RestOrder
+    </a>
+    <div class="nav-actions">
+      <a href="/customer-login" class="btn-nav">Sign In</a>
+      <a href="/register" class="btn-nav-primary">Get Started Free</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="badge"><span class="material-symbols-outlined" style="font-size:15px">shield</span> Privacy First</div>
+    <h1>Privacy Policy</h1>
+    <div class="meta">
+      <span><span class="material-symbols-outlined" style="font-size:15px">calendar_today</span> Effective: January 1, 2026</span>
+      <span><span class="material-symbols-outlined" style="font-size:15px">update</span> Last updated: March 27, 2026</span>
+      <span><span class="material-symbols-outlined" style="font-size:15px">language</span> English</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOC -->
+<div class="toc-bar">
+  <div class="container">
+    <div class="toc-inner">
+      <a href="#overview">1. Overview</a>
+      <a href="#collection">2. Data We Collect</a>
+      <a href="#use">3. How We Use Data</a>
+      <a href="#sharing">4. Data Sharing</a>
+      <a href="#cookies">5. Cookies</a>
+      <a href="#retention">6. Retention</a>
+      <a href="#security">7. Security</a>
+      <a href="#rights">8. Your Rights</a>
+      <a href="#third-party">9. Third-Party Links</a>
+      <a href="#children">10. Children</a>
+      <a href="#international">11. International Transfers</a>
+      <a href="#changes">12. Changes</a>
+      <a href="#contact">13. Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- Body -->
+<main class="legal-body">
+  <div class="container">
+
+    <div class="highlight-box">
+      <strong>Your privacy matters to us.</strong> This policy explains what personal data RestOrder collects, why we collect it, how it is used, and your rights. Where we use plain language and something is unclear, please <a href="/contact" style="color:var(--primary)">contact us</a>.
+    </div>
+
+    <!-- 1 -->
+    <div class="legal-section" id="overview">
+      <h2><span class="section-number">1</span>Overview &amp; Controller</h2>
+      <p>This Privacy Policy applies to RestOrder ("we," "us," "our") and covers the personal data we process when you visit our website at <strong>restorder.online</strong>, create an account, or use our Services.</p>
+      <p>RestOrder acts as the <strong>data controller</strong> for the personal data of registered restaurant operators and website visitors. For personal data relating to your restaurant's end customers (e.g., order data), RestOrder acts as a <strong>data processor</strong> on your instructions as the data controller.</p>
+      <p>This policy should be read alongside our <a href="/terms" style="color:#15803d">Terms of Service</a>.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="legal-section" id="collection">
+      <h2><span class="section-number">2</span>Data We Collect</h2>
+      <p>We collect data in the following categories. The table below summarises what we collect and why.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Examples</th><th>Collected when</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Account Data</strong></td><td>Name, email address, phone number, business name</td><td>You register or update profile</td></tr>
+            <tr><td><strong>Authentication Data</strong></td><td>Hashed password; Google OAuth token; OTP codes (not stored)</td><td>You sign up or log in</td></tr>
+            <tr><td><strong>Business / Menu Data</strong></td><td>Restaurant name, address, menu items, prices, images, categories</td><td>You use the platform</td></tr>
+            <tr><td><strong>Subscription &amp; Payment Data</strong></td><td>Plan type, billing dates, payment status; payment methods processed by gateways (not stored by us)</td><td>You subscribe or pay</td></tr>
+            <tr><td><strong>Order Data</strong></td><td>Customer name, table/room number, items ordered, order status, timestamps</td><td>Your customers place orders</td></tr>
+            <tr><td><strong>Usage &amp; Analytics Data</strong></td><td>Pages visited, features used, device/browser type, IP address, session duration</td><td>You use the platform</td></tr>
+            <tr><td><strong>Communications Data</strong></td><td>Support emails, contact form messages, survey responses</td><td>You contact us</td></tr>
+            <tr><td><strong>Uploaded Content</strong></td><td>CSV files, logo images, menu photos</td><td>You upload files</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Data We Do NOT Store</h3>
+      <ul>
+        <li>Full card numbers, CVV codes, or banking credentials — these are handled exclusively by our payment processors (Flutterwave, PayPal, ClickPesa)</li>
+        <li>Plain-text passwords — all passwords are hashed with bcrypt before storage</li>
+        <li>Government-issued ID or national identification numbers</li>
+      </ul>
+      <h3>Data from Third-Party Sign-In (Google)</h3>
+      <p>If you choose to sign in with Google via Firebase Authentication, we receive your Google account name, email address, and profile photo URL. We use this information only to create and identify your RestOrder account. We do not receive your Google password or access to other Google services.</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="legal-section" id="use">
+      <h2><span class="section-number">3</span>How We Use Your Data</h2>
+      <p>We use personal data only for legitimate purposes under one of the following lawful bases:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Purpose</th><th>Lawful Basis</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Providing and operating the Services</td><td>Contract performance</td></tr>
+            <tr><td>Account creation and authentication</td><td>Contract performance</td></tr>
+            <tr><td>Processing subscription payments</td><td>Contract performance</td></tr>
+            <tr><td>Customer support and responding to queries</td><td>Legitimate interest / Contract</td></tr>
+            <tr><td>Sending transactional emails (order confirmations, invoices)</td><td>Contract performance</td></tr>
+            <tr><td>Sending product updates and security alerts</td><td>Legitimate interest</td></tr>
+            <tr><td>Sending marketing emails (new features, promotions)</td><td>Consent (opt-out any time)</td></tr>
+            <tr><td>Platform analytics and performance monitoring</td><td>Legitimate interest</td></tr>
+            <tr><td>Fraud detection and security</td><td>Legal obligation / Legitimate interest</td></tr>
+            <tr><td>Complying with legal obligations</td><td>Legal obligation</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Marketing Communications</h3>
+      <p>We may send you product news, tips, and promotional offers by email. You can opt out at any time by clicking "Unsubscribe" in any email, or by updating your preferences in Settings → Notifications. We will not send you marketing communications if you opt out, but we will continue to send service-critical communications.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="legal-section" id="sharing">
+      <h2><span class="section-number">4</span>Data Sharing &amp; Disclosure</h2>
+      <p>We do not sell, rent, or trade your personal data to any third parties. We share data only in the circumstances below.</p>
+      <h3>Payment Processors</h3>
+      <p>When you or your customers complete a payment, transaction data is shared with the relevant payment processor (Flutterwave, PayPal, or ClickPesa). These processors have their own privacy policies and are independently responsible for data they collect. We receive only confirmation of transaction success/failure and a transaction reference.</p>
+      <h3>Service Providers (Subprocessors)</h3>
+      <p>We use selected third-party service providers to operate the platform. These providers are bound by data processing agreements and may only process data on our behalf and for specified purposes. Current categories include:</p>
+      <ul>
+        <li>Cloud infrastructure &amp; hosting (server and database hosting)</li>
+        <li>Transactional email delivery (for account notifications and receipts)</li>
+        <li>Firebase / Google (authentication services)</li>
+        <li>Analytics (aggregate, anonymised platform usage data)</li>
+      </ul>
+      <h3>Legal Requirements</h3>
+      <p>We may disclose your data when required to do so by law, court order, or government authority, or when we believe in good faith that disclosure is necessary to protect our rights, your safety, or the safety of others.</p>
+      <h3>Business Transfers</h3>
+      <p>If RestOrder is involved in a merger, acquisition, or asset sale, your data may be transferred as part of that transaction. We will notify you by email and/or prominent site notice before your data is subject to a different privacy policy.</p>
+      <h3>Aggregated / Anonymised Data</h3>
+      <p>We may share aggregated, anonymised data (e.g., industry benchmarks, platform usage statistics) publicly or with partners. This data cannot be used to identify you.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="legal-section" id="cookies">
+      <h2><span class="section-number">5</span>Cookies &amp; Tracking</h2>
+      <p>We use cookies and similar technologies to make the platform work and to understand how it is used.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Cookie Type</th><th>Purpose</th><th>Duration</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Essential</strong></td><td>Authentication session, CSRF protection, preference storage</td><td>Session / 30 days</td></tr>
+            <tr><td><strong>Functional</strong></td><td>Remembering your language, dashboard layout, selected plan</td><td>1 year</td></tr>
+            <tr><td><strong>Analytics</strong></td><td>Aggregate usage metrics (pages viewed, features used); no personal profiles</td><td>Up to 2 years</td></tr>
+            <tr><td><strong>Marketing</strong></td><td>Understanding which marketing channels bring users to us</td><td>90 days</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>You can control cookies through your browser settings. Disabling essential cookies will prevent you from using the authenticated features of the platform.</p>
+      <p>We use local storage (not cookies) for storing your JWT authentication token client-side. This is strictly necessary for the Services to function.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="legal-section" id="retention">
+      <h2><span class="section-number">6</span>Data Retention</h2>
+      <p>We retain personal data for as long as your account is active or as needed to provide the Services, comply with legal obligations, resolve disputes, and enforce agreements.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Data Type</th><th>Retention Period</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Active account data</td><td>Duration of subscription + 30 days after deletion request</td></tr>
+            <tr><td>Menu data &amp; uploads</td><td>Duration of subscription + 30 days after account deletion</td></tr>
+            <tr><td>Order records</td><td>7 years (financial record-keeping requirements)</td></tr>
+            <tr><td>Payment transaction references</td><td>7 years (legal/tax compliance)</td></tr>
+            <tr><td>Support communications</td><td>3 years after ticket closure</td></tr>
+            <tr><td>Server access logs</td><td>90 days (security monitoring)</td></tr>
+            <tr><td>Analytics data (anonymised)</td><td>3 years</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>When an account is deleted, personal data is anonymised or purged within 30 days, except where retention is required by applicable law. Anonymised aggregate data may be retained indefinitely.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="legal-section" id="security">
+      <h2><span class="section-number">7</span>Security</h2>
+      <p>We implement technical and organisational measures designed to protect your data against unauthorised access, loss, destruction, or alteration, including:</p>
+      <ul>
+        <li><strong>Encryption in transit:</strong> All data transmitted between your browser and our servers is encrypted via TLS 1.2+</li>
+        <li><strong>Password security:</strong> Passwords are hashed using bcrypt with a strong work factor — we never store plain-text passwords</li>
+        <li><strong>Access controls:</strong> Role-based access limits what each staff account can see and do; super-admin functions require elevated privileges</li>
+        <li><strong>No card data storage:</strong> We do not store, transmit, or process raw payment card data — all payment flows go directly through our PCI-compliant payment processors</li>
+        <li><strong>Infrastructure security:</strong> Our hosting environments use firewall rules, automated vulnerability scanning, and regular backups</li>
+        <li><strong>Dependency management:</strong> We monitor for and patch security vulnerabilities in third-party dependencies</li>
+      </ul>
+      <div class="warn-box"><strong>Important:</strong> No security system is impenetrable. In the event of a data breach that affects your personal data and poses a risk to your rights, we will notify you without undue delay and in accordance with applicable breach notification laws.</div>
+      <h3>Responsible Disclosure</h3>
+      <p>If you discover a security vulnerability in our platform, please report it responsibly to <a href="mailto:support@restorder.online" style="color:#15803d">support@restorder.online</a>. We will acknowledge your report within 48 hours and work to remediate confirmed issues promptly.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="legal-section" id="rights">
+      <h2><span class="section-number">8</span>Your Privacy Rights</h2>
+      <p>Depending on your location, you may have the following rights regarding your personal data under laws such as the GDPR, UK GDPR, CCPA/CPRA, and similar regulations:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Right</th><th>What it means</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Access</strong></td><td>Request a copy of the personal data we hold about you</td></tr>
+            <tr><td><strong>Rectification</strong></td><td>Correct inaccurate or incomplete data</td></tr>
+            <tr><td><strong>Erasure ("Right to be forgotten")</strong></td><td>Request deletion of your personal data (subject to legal retention requirements)</td></tr>
+            <tr><td><strong>Portability</strong></td><td>Receive your data in a structured, machine-readable format</td></tr>
+            <tr><td><strong>Objection</strong></td><td>Object to processing based on legitimate interests, including profiling</td></tr>
+            <tr><td><strong>Restriction</strong></td><td>Request we restrict processing while a dispute is resolved</td></tr>
+            <tr><td><strong>Withdraw Consent</strong></td><td>Withdraw consent for marketing or other consent-based processing at any time</td></tr>
+            <tr><td><strong>Lodge a Complaint</strong></td><td>Complain to your local data protection authority if you believe we've mishandled your data</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>How to Exercise Your Rights</h3>
+      <p>Submit a request by emailing <a href="mailto:support@restorder.online" style="color:#15803d">support@restorder.online</a> with the subject line "Privacy Request – [Your Right]". We will respond within 30 days (or as required by applicable law). We may ask you to verify your identity before processing the request.</p>
+      <h3>California Residents (CCPA/CPRA)</h3>
+      <p>California residents have additional rights including the right to know what personal information is sold or disclosed and to whom, and the right to opt out of sale. RestOrder does not sell personal information. To exercise CCPA rights, contact us as above.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="legal-section" id="third-party">
+      <h2><span class="section-number">9</span>Third-Party Links &amp; Services</h2>
+      <p>Our platform may contain links to third-party websites (e.g., payment processors, social media). These sites are governed by their own privacy policies and we are not responsible for their privacy practices.</p>
+      <p>Payment processing is handled by independent third parties. Their privacy policies apply to information collected during payment:</p>
+      <ul>
+        <li><strong>Flutterwave:</strong> <a href="https://flutterwave.com/us/privacy-policy" target="_blank" rel="noopener" style="color:#15803d">flutterwave.com/us/privacy-policy</a></li>
+        <li><strong>PayPal:</strong> <a href="https://www.paypal.com/webapps/mpp/ua/privacy-full" target="_blank" rel="noopener" style="color:#15803d">paypal.com privacy full</a></li>
+        <li><strong>Google / Firebase:</strong> <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:#15803d">policies.google.com/privacy</a></li>
+      </ul>
+    </div>
+
+    <!-- 10 -->
+    <div class="legal-section" id="children">
+      <h2><span class="section-number">10</span>Children's Privacy</h2>
+      <p>The RestOrder platform is intended for use by businesses and adults (18 years and older). We do not knowingly collect personal data from children under the age of 16. If you believe we have inadvertently collected data from a child, please contact us immediately and we will delete it promptly.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="legal-section" id="international">
+      <h2><span class="section-number">11</span>International Data Transfers</h2>
+      <p>RestOrder operates globally and your data may be stored and processed in countries outside your home country. Where we transfer personal data outside of regions with strict data protection laws (e.g., the EEA, UK), we ensure appropriate safeguards are in place, including:</p>
+      <ul>
+        <li>Standard Contractual Clauses (SCCs) approved by the relevant authority</li>
+        <li>Working with service providers certified to recognised frameworks (e.g., EU-US Data Privacy Framework where applicable)</li>
+        <li>Conducting transfer impact assessments where required</li>
+      </ul>
+      <p>For questions about data transfers, contact us at <a href="mailto:support@restorder.online" style="color:#15803d">support@restorder.online</a>.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="legal-section" id="changes">
+      <h2><span class="section-number">12</span>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy periodically. We will notify you of material changes by:</p>
+      <ul>
+        <li>Emailing your registered account address</li>
+        <li>Displaying a banner in the admin dashboard</li>
+        <li>Updating the "Last updated" date at the top of this page</li>
+      </ul>
+      <p>We encourage you to review this policy periodically. Your continued use of the Services after changes are posted constitutes acceptance of the updated policy.</p>
+    </div>
+
+    <!-- 13 -->
+    <div class="legal-section" id="contact">
+      <h2><span class="section-number">13</span>Contact Us</h2>
+      <p>For any privacy-related questions, requests, or concerns, please contact us:</p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@restorder.online" style="color:#15803d">support@restorder.online</a></li>
+        <li><strong>Website:</strong> <a href="/contact" style="color:#15803d">restorder.online/contact</a></li>
+      </ul>
+      <p>We aim to respond to all enquiries within 5 business days (30 days for formal rights requests).</p>
+      <div class="highlight-box">If you are not satisfied with our response to a privacy complaint, you have the right to lodge a complaint with your local data protection authority. For EU residents, this is the supervisory authority in your member state. For UK residents, this is the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener" style="color:#15803d">ico.org.uk</a>.</div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span style="font-size:28px">✕</span>
+          <span>RestOrder</span>
+        </div>
+        <p class="footer-description">The complete digital menu platform for modern restaurants, cafes, bars &amp; eateries.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/register">Get Started</a></li>
+          <li><a href="/customer-login">Sign In</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/privacy" style="color:white">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', function() {
+    header.classList.toggle('scrolled', window.pageYOffset > 50);
+  });
+</script>
+</body>
+</html>

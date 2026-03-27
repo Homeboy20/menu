@@ -1590,6 +1590,14 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// GET /terms and /privacy – legal pages
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'terms.html'));
+});
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'privacy.html'));
+});
+
 // ── Auth routes ────────────────────────────────────────────────────────────────
 
 // Shared login handler – authenticates against admin_users table

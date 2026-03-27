@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+  <title>Terms of Service – RestOrder</title>
+  <meta name="description" content="RestOrder Terms of Service. Read our terms governing your use of the RestOrder digital menu platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+  <style>
+.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#c2410c;--primary-dark:#9a3412;--primary-light:#ea580c;
+  --bg:#fafaf9;--text:#1c1917;--text-light:#78716c;--border:#e7e5e4;--surface:#ffffff;
+  --gradient-1:linear-gradient(135deg,#c2410c 0%,#ea580c 100%);
+  --font-display:'Plus Jakarta Sans',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+body{font-family:var(--font-body);font-size:16px;line-height:1.7;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;letter-spacing:-0.025em;line-height:1.25;}
+.container{max-width:860px;margin:0 auto;padding:0 24px;}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-bottom:1px solid transparent;z-index:1000;transition:all 0.4s ease;}
+header.scrolled{box-shadow:0 2px 20px rgba(0,0,0,0.06);border-bottom-color:var(--border);}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;max-width:1280px;margin:0 auto;padding-left:24px;padding-right:24px;transition:padding 0.4s ease;}
+header.scrolled nav{padding-top:12px;padding-bottom:12px;}
+.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:900;color:var(--primary);text-decoration:none;letter-spacing:-0.5px;}
+.logo-icon{width:42px;height:42px;background:var(--gradient-1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;filter:drop-shadow(0 3px 8px rgba(194,65,12,0.3));transition:all 0.3s ease;}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.btn-nav{color:var(--primary);text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;border-radius:10px;border:2px solid var(--border);background:white;transition:all 0.2s ease;}
+.btn-nav:hover{border-color:var(--primary);color:var(--primary);}
+.btn-nav-primary{background:var(--gradient-1);color:white;border-color:transparent;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;padding:10px 20px;transition:all 0.2s ease;}
+.btn-nav-primary:hover{opacity:0.9;transform:translateY(-1px);}
+
+/* Page */
+.page-hero{padding:140px 0 60px;text-align:center;border-bottom:1px solid var(--border);background:white;}
+.page-hero .badge{display:inline-flex;align-items:center;gap:6px;background:#fff7ed;color:var(--primary);font-size:13px;font-weight:700;padding:6px 14px;border-radius:100px;border:1px solid #fed7aa;margin-bottom:20px;}
+.page-hero h1{font-size:42px;color:var(--text);margin-bottom:12px;}
+.page-hero .meta{font-size:14px;color:var(--text-light);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.page-hero .meta span{display:flex;align-items:center;gap:5px;}
+
+/* TOC */
+.toc-bar{background:white;border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:70px;z-index:100;overflow-x:auto;}
+.toc-inner{display:flex;gap:6px;white-space:nowrap;}
+.toc-inner a{color:var(--text-light);text-decoration:none;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;transition:all 0.2s ease;}
+.toc-inner a:hover{color:var(--primary);background:#fff7ed;}
+
+/* Content */
+.legal-body{padding:60px 0 100px;}
+.legal-section{margin-bottom:56px;}
+.section-number{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:var(--gradient-1);color:white;border-radius:10px;font-family:var(--font-display);font-weight:800;font-size:15px;flex-shrink:0;margin-right:12px;vertical-align:middle;}
+.legal-section h2{font-size:24px;color:var(--text);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #fed7aa;display:flex;align-items:center;}
+.legal-section h3{font-size:17px;color:var(--text);margin:24px 0 10px;font-weight:700;}
+.legal-section p{color:#44403c;margin-bottom:14px;font-size:15.5px;}
+.legal-section ul,
+.legal-section ol{padding-left:20px;margin-bottom:14px;color:#44403c;}
+.legal-section li{margin-bottom:7px;font-size:15.5px;}
+.legal-section strong{color:var(--text);}
+
+.highlight-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#7c2d12;}
+.highlight-box strong{color:#9a3412;}
+.info-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#14532d;}
+.warn-box{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:18px 20px;margin-bottom:20px;font-size:15px;color:#713f12;}
+
+/* Footer */
+footer{background:#1c1917;color:#a8a29e;padding:60px 0 30px;}
+footer .container{max-width:1280px;}
+.footer-grid{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:40px;margin-bottom:40px;}
+.footer-brand .footer-logo{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:20px;font-weight:800;color:white;margin-bottom:12px;}
+.footer-description{font-size:14px;line-height:1.6;max-width:280px;}
+.footer-links h4{color:white;font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:14px;letter-spacing:0.02em;}
+.footer-links ul{list-style:none;}
+.footer-links li{margin-bottom:8px;}
+.footer-links a{color:#a8a29e;text-decoration:none;font-size:14px;transition:color 0.2s ease;}
+.footer-links a:hover{color:white;}
+.footer-bottom{border-top:1px solid #292524;padding-top:24px;text-align:center;font-size:13px;}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px;}.page-hero h1{font-size:30px;}.legal-section h2{font-size:20px;}.toc-bar{display:none;}}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header id="header">
+  <nav>
+    <a href="/" class="logo">
+      <div class="logo-icon">✕</div>
+      RestOrder
+    </a>
+    <div class="nav-actions">
+      <a href="/customer-login" class="btn-nav">Sign In</a>
+      <a href="/register" class="btn-nav-primary">Get Started Free</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="badge"><span class="material-symbols-outlined" style="font-size:15px">gavel</span> Legal Document</div>
+    <h1>Terms of Service</h1>
+    <div class="meta">
+      <span><span class="material-symbols-outlined" style="font-size:15px">calendar_today</span> Effective: January 1, 2026</span>
+      <span><span class="material-symbols-outlined" style="font-size:15px">update</span> Last updated: March 27, 2026</span>
+      <span><span class="material-symbols-outlined" style="font-size:15px">language</span> English</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOC -->
+<div class="toc-bar">
+  <div class="container">
+    <div class="toc-inner">
+      <a href="#acceptance">1. Acceptance</a>
+      <a href="#services">2. Services</a>
+      <a href="#accounts">3. Accounts</a>
+      <a href="#subscriptions">4. Subscriptions & Billing</a>
+      <a href="#refunds">5. Refunds</a>
+      <a href="#acceptable-use">6. Acceptable Use</a>
+      <a href="#content">7. Your Content</a>
+      <a href="#ip">8. Intellectual Property</a>
+      <a href="#liability">9. Liability</a>
+      <a href="#termination">10. Termination</a>
+      <a href="#data">11. Data & Privacy</a>
+      <a href="#disputes">12. Disputes</a>
+      <a href="#changes">13. Changes</a>
+      <a href="#contact">14. Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- Body -->
+<main class="legal-body">
+  <div class="container">
+
+    <div class="highlight-box">
+      <strong>Please read these Terms carefully.</strong> By creating an account or using RestOrder, you confirm you have read, understood, and agree to be bound by these Terms. If you are accepting on behalf of a company, you represent you have authority to bind that company.
+    </div>
+
+    <!-- 1 -->
+    <div class="legal-section" id="acceptance">
+      <h2><span class="section-number">1</span>Acceptance of Terms</h2>
+      <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "Customer," or "you") and RestOrder ("RestOrder," "we," "us," or "our") governing your access to and use of the RestOrder platform, website, APIs, and related services (collectively, the "Services").</p>
+      <p>By clicking "I agree," checking the Terms acceptance box, or otherwise accessing or using the Services, you agree to these Terms and our <a href="/privacy" style="color:var(--primary)">Privacy Policy</a>. If you do not agree, do not use the Services.</p>
+      <p>You must be at least 18 years of age and have the legal capacity to enter into a binding contract to use the Services. Use of the Services is void where prohibited by applicable law.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="legal-section" id="services">
+      <h2><span class="section-number">2</span>Description of Services</h2>
+      <p>RestOrder is a Software-as-a-Service (SaaS) platform providing digital menu management, QR code generation, online ordering infrastructure, and analytics tools for restaurants, cafes, bars, and food service businesses.</p>
+      <h3>What We Provide</h3>
+      <ul>
+        <li>Digital menu creation, hosting, and management</li>
+        <li>QR code generation linked to your menus</li>
+        <li>Customer-facing ordering pages</li>
+        <li>Order and payment processing facilitation (via third-party payment processors)</li>
+        <li>Analytics and reporting dashboards</li>
+        <li>Staff management tools</li>
+        <li>CSV/Excel menu import tools</li>
+        <li>API access (on eligible plans)</li>
+      </ul>
+      <h3>Service Availability</h3>
+      <p>We aim for 99.9% uptime on paid plans. However, we do not guarantee uninterrupted, error-free service. Scheduled maintenance windows will be announced at least 24 hours in advance where possible. We are not liable for downtime caused by third-party services, internet infrastructure failures, or force majeure events.</p>
+      <div class="warn-box"><strong>Food Allergen Disclaimer:</strong> RestOrder is a menu display and ordering tool. We are not responsible for the accuracy of allergen, nutritional, or ingredient information displayed on menus. It is solely your responsibility as the restaurant operator to ensure all food information is accurate, current, and compliant with local food labelling laws.</div>
+    </div>
+
+    <!-- 3 -->
+    <div class="legal-section" id="accounts">
+      <h2><span class="section-number">3</span>Accounts & Registration</h2>
+      <h3>Account Creation</h3>
+      <p>To use the Services you must register for an account and provide accurate, complete, and current information. You agree to keep your account information up to date.</p>
+      <h3>Account Security</h3>
+      <p>You are solely responsible for maintaining the confidentiality of your account credentials (email, password, API keys). You agree to:</p>
+      <ul>
+        <li>Use a strong, unique password and enable any available 2FA options</li>
+        <li>Not share your credentials with unauthorised persons</li>
+        <li>Notify us immediately at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> if you suspect unauthorised access</li>
+        <li>Not circumvent or attempt to circumvent authentication mechanisms</li>
+      </ul>
+      <p>We are not liable for losses arising from your failure to maintain account security.</p>
+      <h3>One Account Per Business</h3>
+      <p>Each legal business entity may maintain one primary account. You may add staff sub-accounts within your plan limits. Creating multiple accounts to circumvent plan limits is prohibited.</p>
+      <h3>Business Accounts</h3>
+      <p>If you register on behalf of a business, you represent and warrant that you are authorised to accept these Terms on behalf of that legal entity, and the entity is bound by these Terms.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="legal-section" id="subscriptions">
+      <h2><span class="section-number">4</span>Subscriptions & Billing</h2>
+      <h3>Plans</h3>
+      <p>RestOrder offers various subscription plans including a free tier ("Starter") and paid plans. Plan features, pricing, and limits are described on the <a href="/pricing" style="color:var(--primary)">Pricing page</a> and within your account dashboard.</p>
+      <h3>Billing Cycle</h3>
+      <p>Paid subscriptions are billed on a monthly or annual basis as selected at checkout. Billing begins on the date you upgrade to a paid plan. Annual plans are billed upfront for the full year.</p>
+      <h3>Automatic Renewal</h3>
+      <p>Subscriptions automatically renew at the end of each billing period unless you cancel before the renewal date. We will send a renewal reminder at least 7 days before renewal on annual plans. You authorise us to charge your payment method on file for the renewal amount.</p>
+      <h3>Price Changes</h3>
+      <p>We may change subscription pricing with at least 30 days' written notice (by email). Continued use after the price change takes effect constitutes acceptance of the new pricing. If you disagree, you may cancel before the new pricing applies.</p>
+      <h3>Taxes</h3>
+      <p>Subscription prices are exclusive of applicable taxes (including VAT, GST, and sales tax) unless stated otherwise. You are responsible for paying all applicable taxes in your jurisdiction.</p>
+      <h3>Failed Payments</h3>
+      <p>If a payment fails, we will retry up to 3 times. After exhausting retries, your account may be downgraded to the free tier or suspended. You remain responsible for all outstanding balances. A late payment fee of up to 1.5% per month may apply to overdue amounts at our discretion.</p>
+      <h3>Promotional & Trial Offers</h3>
+      <p>Free trials, promotional codes, and discounted periods are offered at our sole discretion and may be withdrawn or modified at any time. Trial periods do not require a payment method unless explicitly stated. At the end of a trial, your account reverts to the free tier unless you upgrade.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="legal-section" id="refunds">
+      <h2><span class="section-number">5</span>Cancellations & Refunds</h2>
+      <h3>Cancellation</h3>
+      <p>You may cancel your paid subscription at any time from your account dashboard (Settings → Subscription). Cancellation takes effect at the end of the current billing period; you retain access to paid features until then.</p>
+      <h3>Refund Policy</h3>
+      <div class="highlight-box"><strong>Monthly plans:</strong> No refunds are issued for monthly subscriptions. You may cancel at any time to prevent future charges.<br><br><strong>Annual plans:</strong> If you cancel an annual plan within 14 days of the initial purchase and have not used the paid features (processed orders, uploaded more than 1 menu, or integrated payment gateways), you are eligible for a pro-rata refund of the unused period. After 14 days or after using paid features, no refund is issued.<br><br><strong>Exceptional circumstances:</strong> Refund requests outside these conditions will be reviewed on a case-by-case basis at our sole discretion.</div>
+      <h3>How to Request a Refund</h3>
+      <p>Email <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> with your account email, order reference, and reason. We will respond within 5 business days. Approved refunds are processed to the original payment method within 10 business days.</p>
+      <h3>Non-Refundable Items</h3>
+      <ul>
+        <li>Setup fees or any one-time charges</li>
+        <li>Charges for overages beyond plan limits</li>
+        <li>Subscriptions cancelled after the refund-eligible window</li>
+        <li>Accounts terminated for violations of these Terms</li>
+      </ul>
+      <h3>Chargebacks</h3>
+      <p>Initiating a chargeback or payment dispute instead of contacting us first may result in immediate account suspension pending investigation. We reserve the right to provide evidence of service delivery to your bank or card network.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="legal-section" id="acceptable-use">
+      <h2><span class="section-number">6</span>Acceptable Use Policy</h2>
+      <p>You agree to use the Services only for lawful purposes and in accordance with these Terms. You must not use the Services to:</p>
+      <h3>Prohibited Activities</h3>
+      <ul>
+        <li>Violate any applicable local, national, or international law or regulation</li>
+        <li>Upload, publish, or transmit content that is illegal, defamatory, obscene, fraudulent, or harmful</li>
+        <li>Represent an unlicensed food business or operate a business that is not authorised by applicable food safety authorities</li>
+        <li>Display false, misleading, or deceptive menu information (including prices, allergens, or availability)</li>
+        <li>Engage in phishing, spam, or distribute malware</li>
+        <li>Attempt to gain unauthorised access to any system, account, or data</li>
+        <li>Reverse-engineer, decompile, or attempt to derive the source code of the platform</li>
+        <li>Resell, sublicense, or white-label the Services without written permission</li>
+        <li>Circumvent any technical restrictions, rate limits, or usage caps</li>
+        <li>Use automated scripts to scrape data from the platform</li>
+        <li>Create accounts for bots or automated agents without our express consent</li>
+        <li>Use the Services to compete directly with RestOrder (e.g., building a competing SaaS)</li>
+        <li>Process payments for goods or services not listed on your menus</li>
+        <li>List prohibited items including alcohol sold to minors, controlled substances, weapons, or other regulated goods without appropriate licences</li>
+      </ul>
+      <h3>Fair Use</h3>
+      <p>We reserve the right to limit or throttle your use of the Services if your usage materially exceeds the normal usage pattern for your plan, in a way that adversely affects other users or the platform's infrastructure.</p>
+      <h3>Consequences</h3>
+      <p>Violation of this policy may result in immediate suspension or termination of your account without refund, and we reserve the right to report violations to appropriate law enforcement authorities.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="legal-section" id="content">
+      <h2><span class="section-number">7</span>Your Content & Data</h2>
+      <h3>Ownership</h3>
+      <p>You retain full ownership of all content you upload to RestOrder, including menu items, descriptions, images, business names, and logos ("Your Content").</p>
+      <h3>License to Us</h3>
+      <p>By uploading Your Content, you grant RestOrder a non-exclusive, worldwide, royalty-free licence to store, display, reproduce, and transmit Your Content solely as necessary to provide the Services to you and your customers. This licence ends when you delete the content or terminate your account (subject to data retention periods).</p>
+      <h3>Your Responsibilities</h3>
+      <p>You represent and warrant that:</p>
+      <ul>
+        <li>You own or have necessary rights to all content you upload</li>
+        <li>Your Content does not infringe any third-party intellectual property, privacy, or other rights</li>
+        <li>Menu information is accurate, truthful, and compliant with applicable food safety and consumer protection laws</li>
+        <li>All prices are inclusive of applicable taxes where required by local law</li>
+        <li>You have the necessary licences, permits, and regulatory approvals to operate your food business</li>
+      </ul>
+      <h3>Content Moderation</h3>
+      <p>We reserve the right (but have no obligation) to review, refuse, or remove any content that violates these Terms or applicable law, without notice.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="legal-section" id="ip">
+      <h2><span class="section-number">8</span>Intellectual Property</h2>
+      <h3>RestOrder's IP</h3>
+      <p>The RestOrder platform, brand, software, documentation, and all associated intellectual property are owned by RestOrder or its licensors and protected by copyright, trademark, and other laws. Your subscription grants you a limited, non-exclusive, non-transferable, revocable licence to use the platform for your business purposes during the subscription term.</p>
+      <h3>Restrictions</h3>
+      <p>You may not copy, modify, distribute, sell, or lease any part of RestOrder's software or Services, nor reverse-engineer or attempt to extract source code, unless applicable law prohibits this restriction or you have our written permission.</p>
+      <h3>Feedback</h3>
+      <p>If you provide suggestions, feedback, or ideas about the Services ("Feedback"), you grant us an irrevocable, perpetual, royalty-free licence to use that Feedback in any way without obligation or compensation to you.</p>
+      <h3>Trademarks</h3>
+      <p>"RestOrder" and its logo are trademarks of RestOrder. You may not use our trademarks without our prior written consent, except as reasonably necessary to identify your use of the Services (e.g., "Powered by RestOrder").</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="legal-section" id="liability">
+      <h2><span class="section-number">9</span>Disclaimers & Limitation of Liability</h2>
+      <h3>Disclaimer of Warranties</h3>
+      <p>THE SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICES WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.</p>
+      <h3>Limitation of Liability</h3>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, RESTORDER'S TOTAL LIABILITY TO YOU FOR ANY CLAIMS ARISING UNDER OR RELATED TO THESE TERMS OR THE SERVICES SHALL NOT EXCEED THE GREATER OF: (A) THE AMOUNT YOU PAID TO RESTORDER IN THE 12 MONTHS PRECEDING THE CLAIM, OR (B) USD $100.</p>
+      <p>IN NO EVENT SHALL RESTORDER BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, GOODWILL, OR BUSINESS OPPORTUNITIES, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+      <h3>Specific Exclusions</h3>
+      <p>We are specifically not liable for:</p>
+      <ul>
+        <li>Losses caused by customer orders based on inaccurate menu data you published</li>
+        <li>Allergic reactions or health incidents resulting from food described on your menu</li>
+        <li>Chargebacks, payment disputes, or fraud by your customers</li>
+        <li>Losses resulting from third-party payment processor failures or errors</li>
+        <li>Data loss resulting from your own account actions (deletion, overwriting)</li>
+        <li>Revenue loss due to platform downtime or technical errors</li>
+        <li>Losses arising from your violation of applicable laws</li>
+      </ul>
+      <h3>Indemnification</h3>
+      <p>You agree to indemnify, defend, and hold harmless RestOrder and its officers, employees, and agents from any claims, damages, losses, and expenses (including legal fees) arising from: (a) your use of the Services; (b) Your Content; (c) your violation of these Terms; or (d) your violation of any applicable law or third-party rights.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="legal-section" id="termination">
+      <h2><span class="section-number">10</span>Suspension & Termination</h2>
+      <h3>Termination by You</h3>
+      <p>You may terminate your account at any time by cancelling your subscription and contacting us to delete your account. Your data will be deleted in accordance with our data retention policy (see <a href="#data" style="color:var(--primary)">Section 11</a>).</p>
+      <h3>Termination or Suspension by Us</h3>
+      <p>We may suspend or terminate your account immediately, without prior notice or refund, if:</p>
+      <ul>
+        <li>You materially breach these Terms</li>
+        <li>We have reasonable grounds to suspect fraud, security risks, or illegal activity</li>
+        <li>You fail to pay outstanding fees after repeated notices</li>
+        <li>Continued operation of your account creates legal or regulatory risk for RestOrder</li>
+        <li>You are in violation of the Acceptable Use Policy</li>
+      </ul>
+      <h3>Effect of Termination</h3>
+      <p>Upon termination: (a) your right to access the Services ends immediately; (b) your published menus become inaccessible to customers; (c) outstanding fees remain due; (d) provisions of these Terms that by their nature survive termination shall continue.</p>
+      <h3>Data Retrieval</h3>
+      <p>If your account is terminated by you, you have 30 days to request an export of your content (menu data, analytics). After this period, data may be permanently deleted. We are not obligated to provide data retrieval for accounts terminated for Terms violations.</p>
+      <h3>Reactivation</h3>
+      <p>Accounts suspended for non-payment may be reactivated within 60 days by settling outstanding balances. Accounts terminated for policy violations may not be reactivated at our discretion.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="legal-section" id="data">
+      <h2><span class="section-number">11</span>Data, Privacy & Security</h2>
+      <p>Our collection and use of personal data is governed by our <a href="/privacy" style="color:var(--primary)">Privacy Policy</a>, which is incorporated into these Terms by reference.</p>
+      <h3>Data Processing</h3>
+      <p>In providing the Services, we act as a data processor for information you (the data controller) provide about your customers. You are responsible for having an appropriate legal basis to share such data with us and for maintaining your own privacy notices to your customers.</p>
+      <h3>Security</h3>
+      <p>We implement commercially reasonable technical and organisational security measures, including encrypted connections (TLS), hashed password storage, and access controls. However, no system is perfectly secure. You are responsible for securing access to your account and promptly reporting any suspected security incidents.</p>
+      <h3>Data Portability</h3>
+      <p>You may export your menu data (as CSV) and order history from the admin dashboard at any time. We do not lock your data — it's yours.</p>
+      <h3>Subprocessors</h3>
+      <p>We use third-party subprocessors including cloud hosting, payment processors (Flutterwave, PayPal, ClickPesa), and analytics providers. A current list is available upon request at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a>.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="legal-section" id="disputes">
+      <h2><span class="section-number">12</span>Governing Law & Dispute Resolution</h2>
+      <h3>Governing Law</h3>
+      <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which RestOrder is registered, without regard to its conflict of law provisions. If you are accessing the Services from a different jurisdiction, you remain responsible for compliance with all local laws.</p>
+      <h3>Informal Resolution First</h3>
+      <p>Before filing any formal legal proceeding, you agree to contact us at <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a> and attempt to resolve the dispute informally for at least 30 days. Many disputes can be resolved this way quickly.</p>
+      <h3>Arbitration</h3>
+      <p>If the dispute cannot be resolved informally, it shall be submitted to binding arbitration in accordance with the rules of a recognised arbitration body in the applicable jurisdiction. The arbitrator's decision shall be final and binding. You waive any right to a jury trial for disputes arising from these Terms.</p>
+      <h3>Class Action Waiver</h3>
+      <p>You agree that disputes will be resolved only on an individual basis and not as a class, consolidated, or representative action. You waive any right to participate in a class-action lawsuit.</p>
+      <h3>Exceptions</h3>
+      <p>Either party may seek emergency injunctive or other equitable relief in any court of competent jurisdiction to prevent irreparable harm without first undertaking informal resolution or arbitration.</p>
+    </div>
+
+    <!-- 13 -->
+    <div class="legal-section" id="changes">
+      <h2><span class="section-number">13</span>Changes to These Terms</h2>
+      <p>We may update these Terms from time to time to reflect changes in our Services, legal requirements, or business practices. We will notify you of material changes by:</p>
+      <ul>
+        <li>Sending an email to your registered address at least 14 days before changes take effect</li>
+        <li>Displaying a prominent notice in the admin dashboard</li>
+        <li>Updating the "Last updated" date at the top of this page</li>
+      </ul>
+      <p>Your continued use of the Services after the effective date constitutes acceptance of the revised Terms. If you disagree, you may terminate your account before the changes take effect.</p>
+      <div class="info-box">Minor changes (typo fixes, clarifications that don't materially affect your rights) may be made without notice. We encourage you to review these Terms periodically.</div>
+    </div>
+
+    <!-- 14 -->
+    <div class="legal-section" id="contact">
+      <h2><span class="section-number">14</span>Contact & Notices</h2>
+      <p>For any questions regarding these Terms, please contact us:</p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@restorder.online" style="color:var(--primary)">support@restorder.online</a></li>
+        <li><strong>Website:</strong> <a href="/contact" style="color:var(--primary)">restorder.online/contact</a></li>
+      </ul>
+      <p>Legal notices to RestOrder must be sent in writing by email to the address above with "Legal Notice" in the subject line. We will acknowledge receipt within 5 business days.</p>
+      <p>We will send notices to you at your registered account email address. It is your responsibility to keep this address current.</p>
+
+      <h3>Miscellaneous</h3>
+      <ul>
+        <li><strong>Entire Agreement:</strong> These Terms, together with the Privacy Policy and any plan-specific agreements, constitute the entire agreement between you and RestOrder regarding the Services.</li>
+        <li><strong>Severability:</strong> If any provision is found unenforceable, the remaining provisions continue in full force.</li>
+        <li><strong>No Waiver:</strong> Failure to enforce any right does not waive our ability to enforce it in the future.</li>
+        <li><strong>Assignment:</strong> You may not assign your rights under these Terms without our written consent. We may assign our rights to a successor in a merger or acquisition.</li>
+        <li><strong>Force Majeure:</strong> Neither party is liable for delays caused by events beyond their reasonable control (natural disasters, government actions, internet outages, pandemics).</li>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span style="font-size:28px">✕</span>
+          <span>RestOrder</span>
+        </div>
+        <p class="footer-description">The complete digital menu platform for modern restaurants, cafes, bars &amp; eateries.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/register">Get Started</a></li>
+          <li><a href="/customer-login">Sign In</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/terms" style="color:white">Terms of Service</a></li>
+          <li><a href="/privacy">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', function() {
+    header.classList.toggle('scrolled', window.pageYOffset > 50);
+  });
+</script>
+</body>
+</html>
