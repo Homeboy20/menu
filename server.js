@@ -1496,7 +1496,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.22'
+    version: '1.54.23'
   });
 });
 
@@ -2924,7 +2924,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.22' 
+      version: '1.54.23' 
     });
   } catch (err) {
     res.status(500).json({ 
