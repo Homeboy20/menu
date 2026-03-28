@@ -7,7 +7,8 @@
 <title>Admin Users � RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -34,6 +35,7 @@
   .badge-super_admin { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
   .badge-admin { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; }
   .badge-viewer { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+  .badge-customer { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
   .badge-active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
   .badge-disabled { background: rgba(248, 113, 113, 0.15); color: #f87171; }
 </style>
@@ -244,6 +246,7 @@
           class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
           <option value="admin">Admin � Full management access</option>
           <option value="viewer">Viewer � Read-only access</option>
+          <option value="customer">Customer � No admin portal access</option>
           <option value="super_admin">Super Admin � Full access + user management</option>
         </select>
       </div>
@@ -279,7 +282,7 @@ function applyUserUI(user) {
   currentUser = user;
   if (!user) return;
   document.getElementById('user-name').textContent = user.name || user.email;
-  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer', customer: 'Customer' };
   document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
   document.getElementById('user-info').classList.remove('hidden');
   document.getElementById('user-info').classList.add('flex', 'flex-col');
@@ -387,7 +390,7 @@ function updateStats(users) {
 }
 
 function renderUsers(users) {
-  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer' };
+  const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer', customer: 'Customer' };
   
   if (!users.length) {
     document.getElementById('users-table').innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No admin users found.</td></tr>`;

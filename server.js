@@ -997,12 +997,33 @@ async function initDB() {
         email           TEXT NOT NULL UNIQUE,
         password_hash   TEXT NOT NULL,
         name            TEXT NOT NULL DEFAULT '',
-        role            TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('super_admin', 'admin', 'viewer')),
+        role            TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('super_admin', 'admin', 'viewer', 'customer')),
         status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'disabled')),
         last_login      TEXT,
         created_at      TEXT NOT NULL,
         updated_at      TEXT NOT NULL
       );
+    `);
+
+    // Ensure role constraint includes customer for existing deployments.
+    await client.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM pg_constraint
+          WHERE conname = 'admin_users_role_check'
+            AND conrelid = 'admin_users'::regclass
+        ) THEN
+          ALTER TABLE admin_users DROP CONSTRAINT admin_users_role_check;
+        END IF;
+
+        ALTER TABLE admin_users
+          ADD CONSTRAINT admin_users_role_check
+          CHECK (role IN ('super_admin', 'admin', 'viewer', 'customer'));
+      EXCEPTION
+        WHEN duplicate_object THEN NULL;
+      END $$;
     `);
 
     // Seed default super admin if no admin users exist
@@ -1550,7 +1571,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.38'
+    version: '1.54.39'
   });
 });
 
@@ -1707,6 +1728,10 @@ async function handleAdminLogin(req, res) {
       return res.status(403).json({ error: 'This account has been disabled. Contact a super admin.' });
     }
 
+    if (user.role === 'customer') {
+      return res.status(403).json({ error: 'This account is assigned to customer role. Please use customer login.' });
+    }
+
     // For email-based login, verify password
     if (loginEmail) {
       const match = await bcrypt.compare(loginPassword, user.password_hash);
@@ -1842,7 +1867,7 @@ app.post('/api/admin/users', requireRole('super_admin'), async (req, res) => {
     if (typeof password !== 'string' || password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
-    const validRoles = ['super_admin', 'admin', 'viewer'];
+    const validRoles = ['super_admin', 'admin', 'viewer', 'customer'];
     const userRole = validRoles.includes(role) ? role : 'admin';
 
     // Check for duplicate email
@@ -1869,12 +1894,28 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
   try {
     const userId = parseInt(req.params.id);
     const { name, role, status, password } = req.body || {};
-    const validRoles = ['super_admin', 'admin', 'viewer'];
+    const validRoles = ['super_admin', 'admin', 'viewer', 'customer'];
     const validStatuses = ['active', 'disabled'];
+
+    const { rows: targetRows } = await pool.query('SELECT id, role, status FROM admin_users WHERE id = $1', [userId]);
+    if (!targetRows.length) return res.status(404).json({ error: 'Admin user not found.' });
+    const targetUser = targetRows[0];
 
     // Prevent disabling yourself
     if (req.adminUser && req.adminUser.id === userId && status === 'disabled') {
       return res.status(400).json({ error: 'You cannot disable your own account.' });
+    }
+
+    const roleChangingAwayFromSuper = role && validRoles.includes(role) && role !== 'super_admin';
+    const disablingTarget = status === 'disabled';
+    if (targetUser.role === 'super_admin' && (roleChangingAwayFromSuper || disablingTarget)) {
+      const { rows: remainingSupers } = await pool.query(
+        "SELECT COUNT(*)::int AS count FROM admin_users WHERE role = 'super_admin' AND status = 'active' AND id != $1",
+        [userId]
+      );
+      if ((remainingSupers[0]?.count || 0) === 0) {
+        return res.status(400).json({ error: 'Cannot modify the last active super admin.' });
+      }
     }
 
     const updates = [];
@@ -1905,8 +1946,10 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
 
     if (!rows.length) return res.status(404).json({ error: 'Admin user not found.' });
 
-    // If status changed to disabled, invalidate their sessions
-    if (status === 'disabled') {
+    const roleChanged = role && validRoles.includes(role) && role !== targetUser.role;
+
+    // Invalidate sessions after disabling or role changes so new permissions apply immediately.
+    if (status === 'disabled' || roleChanged) {
       for (const [tok, sess] of sessions.entries()) {
         if (sess.user && sess.user.id === userId) sessions.delete(tok);
       }
@@ -2978,7 +3021,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.38' 
+      version: '1.54.39' 
     });
   } catch (err) {
     res.status(500).json({ 
