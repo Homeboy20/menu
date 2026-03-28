@@ -91,7 +91,7 @@ body {
 <!-- Fonts loaded with display=swap for better performance -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var F='24px "Material Symbols Outlined"';function s(){document.documentElement.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function p(){document.fonts.check(F)?s():setTimeout(p,50)}p();setTimeout(s,5000)})();</script>
+<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
 <!-- Service Worker for caching -->

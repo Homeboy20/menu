@@ -1,9 +1,9 @@
 // Service Worker for aggressive caching and offline functionality
-// Version: 1.2.0 - Increment when updating cache strategy
+// Version: 1.3.0 - Increment when updating cache strategy
 
-const CACHE_NAME = 'restorder-v1.3.0';
-const STATIC_CACHE = 'static-v1.3.0';
-const DYNAMIC_CACHE = 'dynamic-v1.3.0';
+const CACHE_NAME = 'restorder-v1.4.0';
+const STATIC_CACHE = 'static-v1.4.0';
+const DYNAMIC_CACHE = 'dynamic-v1.4.0';
 
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
