@@ -4,8 +4,13 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Staff Panel – RestOrder</title>
+<title>Staff Panel ï¿½ RestOrder</title>
+<!-- Preconnect to Google Fonts for faster icon loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
+<script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -162,7 +167,7 @@
     <div class="flex-1 max-w-xs">
       <select id="menu-select"
         class="w-full text-sm border border-stone-300 rounded-xl px-3 py-2 bg-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition">
-        <option value="">Loading menus…</option>
+        <option value="">Loading menusï¿½</option>
       </select>
     </div>
 
@@ -311,7 +316,7 @@ const ROLE_CONFIG = {
   waiter: {
     label: 'Waiter',
     color: 'bg-blue-100 text-blue-700',
-    barText: 'Waiter — you can manage orders and respond to table alerts.',
+    barText: 'Waiter ï¿½ you can manage orders and respond to table alerts.',
     tabs: [
       { id: 'orders',  icon: 'receipt_long',   label: 'Orders'       },
       { id: 'alerts',  icon: 'notifications',  label: 'Alerts'       },
@@ -327,7 +332,7 @@ const ROLE_CONFIG = {
   cashier: {
     label: 'Cashier',
     color: 'bg-green-100 text-green-700',
-    barText: 'Cashier — you can view and complete orders and review daily totals.',
+    barText: 'Cashier ï¿½ you can view and complete orders and review daily totals.',
     tabs: [
       { id: 'orders',  icon: 'receipt_long',   label: 'Orders'       },
       { id: 'summary', icon: 'bar_chart',       label: 'Summary'      },
@@ -573,7 +578,7 @@ async function loadOrders() {
           <ul class="divide-y divide-stone-100 mb-3 text-sm">
             ${items.map(it => `
               <li class="flex items-center justify-between py-1.5">
-                <span class="text-stone-700"><span class="font-semibold text-stone-900">${escapeHtml(String(it.qty))}×</span> ${escapeHtml(it.name)}</span>
+                <span class="text-stone-700"><span class="font-semibold text-stone-900">${escapeHtml(String(it.qty))}ï¿½</span> ${escapeHtml(it.name)}</span>
                 <span class="text-stone-500 text-xs">${formatCurrency(it.price * it.qty, order.currency)}</span>
               </li>`).join('')}
           </ul>
@@ -771,8 +776,8 @@ async function loadSummary() {
               const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
               return `<div class="py-3 flex items-center justify-between gap-3">
                 <div>
-                  <p class="font-semibold text-stone-900 text-sm">#${o.id}${o.table_label ? ` · <span class="text-stone-500 font-normal">${escapeHtml(o.table_label)}</span>` : ''}</p>
-                  <p class="text-xs text-stone-400">${items.length} item${items.length !== 1 ? 's' : ''} · ${formatTime(o.created_at)}</p>
+                  <p class="font-semibold text-stone-900 text-sm">#${o.id}${o.table_label ? ` ï¿½ <span class="text-stone-500 font-normal">${escapeHtml(o.table_label)}</span>` : ''}</p>
+                  <p class="text-xs text-stone-400">${items.length} item${items.length !== 1 ? 's' : ''} ï¿½ ${formatTime(o.created_at)}</p>
                 </div>
                 <span class="font-bold text-stone-900">${formatCurrency(o.total, o.currency)}</span>
               </div>`;

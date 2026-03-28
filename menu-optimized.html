@@ -90,6 +90,8 @@ body {
 
 <!-- Fonts loaded with display=swap for better performance -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
+<script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
 <!-- Service Worker for caching -->
@@ -288,9 +290,9 @@ window.addEventListener('load', () => {
     const nav = performance.getEntriesByType('navigation')[0];
     if (nav) {
       console.log(`?? Performance Metrics:
-        • DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms
-        • Page Load Complete: ${nav.loadEventEnd.toFixed(2)}ms
-        • First Paint: ${nav.responseStart.toFixed(2)}ms
+        ï¿½ DOM Content Loaded: ${nav.domContentLoadedEventEnd.toFixed(2)}ms
+        ï¿½ Page Load Complete: ${nav.loadEventEnd.toFixed(2)}ms
+        ï¿½ First Paint: ${nav.responseStart.toFixed(2)}ms
       `);
     }
   }, 0);

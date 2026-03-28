@@ -4,8 +4,13 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Checkout – RestOrder</title>
+<title>Checkout ï¿½ RestOrder</title>
+<!-- Preconnect to Google Fonts for faster icon loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
+<script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -194,7 +199,7 @@
           <div id="gateway-container">
             <div class="flex items-center justify-center gap-3 py-6 text-stone-400 text-sm">
               <span class="material-symbols-outlined spin text-[20px]">progress_activity</span>
-              Loading payment options…
+              Loading payment optionsï¿½
             </div>
           </div>
 
@@ -227,7 +232,7 @@
         <!-- Plan loading -->
         <div id="plan-summary-loading" class="py-6 text-center text-stone-400 text-sm">
           <span class="material-symbols-outlined spin text-[20px] block mb-2">progress_activity</span>
-          Loading plan details…
+          Loading plan detailsï¿½
         </div>
 
         <!-- Plan details -->
@@ -277,7 +282,7 @@
 
 <footer class="border-t border-stone-200 bg-white mt-12 py-6">
   <div class="max-w-5xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-stone-400">
-    <span>© 2025 RestOrder. All rights reserved.</span>
+    <span>ï¿½ 2025 RestOrder. All rights reserved.</span>
     <div class="flex gap-4">
       <a href="/terms" class="hover:text-stone-600">Terms</a>
       <a href="/privacy" class="hover:text-stone-600">Privacy</a>
@@ -421,7 +426,7 @@ async function handleRegister(e) {
   const spinner  = document.getElementById('reg-spinner');
 
   errEl.classList.add('hidden');
-  btnText.textContent = 'Creating account…';
+  btnText.textContent = 'Creating accountï¿½';
   spinner.classList.remove('hidden');
   document.getElementById('reg-btn').disabled = true;
 
@@ -465,7 +470,7 @@ async function handleLogin(e) {
   const spinner  = document.getElementById('login-spinner');
 
   errEl.classList.add('hidden');
-  btnText.textContent = 'Signing in…';
+  btnText.textContent = 'Signing inï¿½';
   spinner.classList.remove('hidden');
   document.getElementById('login-btn').disabled = true;
 
@@ -605,7 +610,7 @@ async function renderGateways(gateways) {
           return d.order_id;
         },
         onApprove: async (data) => {
-          showMsg('Processing payment…');
+          showMsg('Processing paymentï¿½');
           const menuId = getTargetMenuId();
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
@@ -646,7 +651,7 @@ function doFlutterwave(publicKey) {
     customizations: { title: 'RestOrder', description: `${selectedPlan.display_name} Plan`, logo: '/icon-192.png' },
     callback: async (response) => {
       if (response.status === 'successful' || response.status === 'completed') {
-        showMsg('Verifying payment…');
+        showMsg('Verifying paymentï¿½');
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
@@ -689,7 +694,7 @@ function onPaymentSuccess() {
       <span class="material-symbols-outlined text-green-600 text-[48px] block mb-3">check_circle</span>
       <p class="font-bold text-green-800 text-lg">Payment Successful!</p>
       <p class="text-green-700 text-sm mt-1">Your ${escHtml(selectedPlan?.display_name || '')} subscription is now active.</p>
-      <p class="text-stone-500 text-xs mt-3">Redirecting to dashboard…</p>
+      <p class="text-stone-500 text-xs mt-3">Redirecting to dashboardï¿½</p>
     </div>`;
   setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
 }
@@ -787,7 +792,7 @@ async function init() {
     clearToken();
   }
 
-  // Not logged in — show auth section (step 1 in 2-step flow)
+  // Not logged in ï¿½ show auth section (step 1 in 2-step flow)
   setStep(1);
   document.getElementById('auth-section').classList.remove('hidden');
 }

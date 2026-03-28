@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet"/>
+<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
+<script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
@@ -176,7 +178,7 @@ html[data-theme="dark"] .icon-btn{background:rgba(26,25,23,.85);}
 }
 .hero-chip .material-symbols-outlined{font-size:14px;}
 /* -- Layout variants (applied via data-layout on #hero) -- */
-/* logo-left (default): logo left, text right — handled by base #hero-row */
+/* logo-left (default): logo left, text right ï¿½ handled by base #hero-row */
 /* logo-right: text left, logo right */
 #hero[data-layout="logo-right"] #hero-row{flex-direction:row-reverse;}
 /* stacked: logo top, text below, left-aligned */
@@ -1353,7 +1355,7 @@ function updateNavActive(tab){
     const on=b.dataset.nav===tab;
     b.classList.toggle('bnav-active',on);
     if(on){
-      // pop animation — re-trigger by removing + adding class
+      // pop animation ï¿½ re-trigger by removing + adding class
       b.classList.remove('bnav-pop');
       void b.offsetWidth; // reflow
       b.classList.add('bnav-pop');
