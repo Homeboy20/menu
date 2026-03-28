@@ -4,7 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Dashboard – RestOrder Admin</title>
+<title>Dashboard â€” RestOrder Admin</title>
+<!-- Preconnect to Google Fonts for faster icon loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -244,6 +247,61 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- System Tools -->
+  <div class="mt-6 bg-surface border border-slate-700 rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+          <span class="material-symbols-outlined text-amber-400 text-[22px]">build</span>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold">System Tools</h3>
+          <p class="text-slate-400 text-sm">Cache management and maintenance utilities</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Hard Refresh -->
+      <button onclick="hardRefreshPage()" class="p-4 bg-bg-dark rounded-xl border border-slate-700 hover:border-primary/50 transition group text-left">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="material-symbols-outlined text-primary text-[20px] group-hover:animate-spin">refresh</span>
+          <span class="font-semibold text-slate-200">Hard Refresh</span>
+        </div>
+        <p class="text-xs text-slate-400">Reload bypassing cache</p>
+      </button>
+      
+      <!-- Clear App Data -->
+      <button onclick="clearAppCache()" class="p-4 bg-bg-dark rounded-xl border border-slate-700 hover:border-amber-500/50 transition group text-left">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="material-symbols-outlined text-amber-400 text-[20px]">delete_sweep</span>
+          <span class="font-semibold text-slate-200">Clear App Data</span>
+        </div>
+        <p class="text-xs text-slate-400">Remove cached settings (keeps login)</p>
+      </button>
+      
+      <!-- Reset Service Worker -->
+      <button onclick="resetServiceWorker()" class="p-4 bg-bg-dark rounded-xl border border-slate-700 hover:border-orange-500/50 transition group text-left">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="material-symbols-outlined text-orange-400 text-[20px]">restart_alt</span>
+          <span class="font-semibold text-slate-200">Reset SW</span>
+        </div>
+        <p class="text-xs text-slate-400">Unregister service workers</p>
+      </button>
+      
+      <!-- Full Cache Clear -->
+      <button onclick="fullCacheClear()" class="p-4 bg-bg-dark rounded-xl border border-red-900/50 hover:border-red-500/50 transition group text-left">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="material-symbols-outlined text-red-400 text-[20px]">warning</span>
+          <span class="font-semibold text-slate-200">Full Clear</span>
+        </div>
+        <p class="text-xs text-slate-400">Clear all & logout</p>
+      </button>
+    </div>
+    
+    <p id="cache-status" class="hidden mt-4 text-sm text-primary text-center"></p>
   </div>
 
 </div><!-- /section-overview -->
@@ -864,7 +922,7 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '—';
+  if (!isoStr) return 'ï¿½';
   return new Date(isoStr).toLocaleDateString('en-US', { 
     year: 'numeric', month: 'short', day: 'numeric' 
   });
@@ -877,6 +935,79 @@ document.getElementById('login-email').addEventListener('keypress', (e) => {
 document.getElementById('login-password').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') document.getElementById('login-btn').click();
 });
+
+// -- Cache Management ---------------------------------------------------------
+function showCacheStatus(msg) {
+  const el = document.getElementById('cache-status');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+function hardRefreshPage() {
+  location.reload(true);
+}
+
+function clearAppCache() {
+  const keysToKeep = ['adminToken'];
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (!keysToKeep.includes(key)) {
+      localStorage.removeItem(key);
+    }
+  });
+  sessionStorage.clear();
+  showCacheStatus('âœ“ App data cleared successfully');
+}
+
+async function resetServiceWorker() {
+  try {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+    }
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+    showCacheStatus('âœ“ Service worker reset. Refresh the page.');
+  } catch (err) {
+    showCacheStatus('Error: ' + err.message);
+  }
+}
+
+async function fullCacheClear() {
+  if (!confirm('This will log you out and clear all cached data. Continue?')) return;
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+    }
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+    document.cookie.split(';').forEach(c => {
+      const eqPos = c.indexOf('=');
+      const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+      document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+    });
+    alert('All cache cleared. The page will now reload.');
+    location.href = '/admin-dashboard';
+  } catch (err) {
+    alert('Error clearing cache: ' + err.message);
+  }
+}
 
 // -- Section switching --------------------------------------------------------
 function showSection(name) {
@@ -955,7 +1086,7 @@ function renderPkgPlansTable(plans) {
             <td class="px-6 py-4 font-mono font-semibold text-primary">${escapeHtml(p.name)}</td>
             <td class="px-6 py-4 font-semibold">${escapeHtml(p.display_name)}</td>
             <td class="px-6 py-4 text-right font-bold">$${parseFloat(p.price).toFixed(2)}/mo</td>
-            <td class="px-6 py-4 text-right font-bold">${p.annual_price > 0 ? '$' + parseFloat(p.annual_price).toFixed(2) + '/yr' : '<span class="text-slate-500">—</span>'}</td>
+            <td class="px-6 py-4 text-right font-bold">${p.annual_price > 0 ? '$' + parseFloat(p.annual_price).toFixed(2) + '/yr' : '<span class="text-slate-500">ï¿½</span>'}</td>
             <td class="px-6 py-4 text-center">${p.menu_limit === 999 ? '<span class="text-primary font-bold">&infin;</span>' : p.menu_limit}</td>
             <td class="px-6 py-4 text-center">${p.location_limit === 999 ? '<span class="text-primary font-bold">&infin;</span>' : p.location_limit}</td>
             <td class="px-6 py-4 text-center">${p.is_active ? '<span class="badge badge-professional">Active</span>' : '<span class="badge badge-starter">Inactive</span>'}</td>
@@ -1392,7 +1523,7 @@ async function viewSubscription(id) {
         </div>
         <div>
           <p class="text-xs text-slate-400 uppercase font-semibold mb-1">Email</p>
-          <p class="text-slate-200">${escapeHtml(sub.email || '—')}</p>
+          <p class="text-slate-200">${escapeHtml(sub.email || 'ï¿½')}</p>
         </div>
         <div>
           <p class="text-xs text-slate-400 uppercase font-semibold mb-1">Menu ID</p>
