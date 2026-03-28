@@ -1,9 +1,9 @@
 // Service Worker for aggressive caching and offline functionality
-// Version: 1.3.0 - Increment when updating cache strategy
+// Version: 1.4.1 - Increment when updating cache strategy
 
-const CACHE_NAME = 'restorder-v1.4.0';
-const STATIC_CACHE = 'static-v1.4.0';
-const DYNAMIC_CACHE = 'dynamic-v1.4.0';
+const CACHE_NAME = 'restorder-v1.4.1';
+const STATIC_CACHE = 'static-v1.4.1';
+const DYNAMIC_CACHE = 'dynamic-v1.4.1';
 
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
@@ -11,15 +11,16 @@ const STATIC_ASSETS = [
   '/index.html',
   '/menu.html',
   '/admin.html',
+  '/js/icons.js',
+  '/icons/sprite.svg',
   '/api/menus/demo',
-  'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap'
+  'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap'
 ];
 
 // Cache strategies
 const CACHE_STRATEGIES = {
   // Static assets - cache first, network fallback
-  static: ['/index.html', '/menu.html', '/admin.html', '/sw.js'],
+  static: ['/index.html', '/menu.html', '/admin.html', '/sw.js', '/js/icons.js', '/icons/sprite.svg'],
   
   // API calls - network first, cache fallback for offline
   api: ['/api/'],

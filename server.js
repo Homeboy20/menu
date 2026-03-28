@@ -493,6 +493,27 @@ app.use('/__/auth', (req, res) => {
 });
 
 // Static file caching and optimization
+const PUBLIC_DIR = path.join(__dirname, 'public');
+
+app.use('/icons', express.static(path.join(PUBLIC_DIR, 'icons'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0',
+  etag: true,
+  lastModified: true,
+  immutable: true
+}));
+
+app.use('/js', express.static(path.join(PUBLIC_DIR, 'js'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0',
+  etag: true,
+  lastModified: true,
+  immutable: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+}));
+
 app.use(express.static('.', {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0', // 1 year cache in production
   etag: true,
@@ -1529,7 +1550,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.37'
+    version: '1.54.38'
   });
 });
 
@@ -2957,7 +2978,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.37' 
+      version: '1.54.38' 
     });
   } catch (err) {
     res.status(500).json({ 

@@ -7,11 +7,7 @@
 <title>Dashboard — RestOrder</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -48,7 +44,7 @@
 <aside class="w-64 bg-white border-r border-stone-200 p-6 flex flex-col shadow-sm">
   <div class="flex items-center gap-3 mb-10">
     <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-white">
-      <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+      <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
     </div>
     <div>
       <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
@@ -58,30 +54,30 @@
 
   <nav class="space-y-1 flex-1">
     <a href="#" onclick="showSection('dashboard'); return false;" data-section="dashboard" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl bg-orange-50 text-primary transition">
-      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
     <a href="/menu-editor" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
-      <span class="material-symbols-outlined text-[20px]">add_circle</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add_circle"/></svg>
       <span class="text-sm font-medium">Create Menu</span>
     </a>
     <a href="#" onclick="showSection('subscription'); return false;" data-section="subscription" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
-      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-credit_card"/></svg>
       <span class="text-sm font-medium">Subscription</span>
     </a>
     <a href="#" onclick="showSection('profile'); return false;" data-section="profile" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
-      <span class="material-symbols-outlined text-[20px]">person</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-person"/></svg>
       <span class="text-sm font-medium">Profile</span>
     </a>
     <a href="#" onclick="showSection('team'); return false;" data-section="team" class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-600 hover:bg-stone-100 transition">
-      <span class="material-symbols-outlined text-[20px]">group</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-group"/></svg>
       <span class="text-sm font-medium">Team</span>
     </a>
   </nav>
 
   <div class="pt-4 border-t border-stone-200">
     <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-stone-500 hover:bg-stone-100 w-full transition">
-      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-logout"/></svg>
       <span class="text-sm font-medium">Logout</span>
     </button>
   </div>
@@ -103,7 +99,7 @@
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <span class="text-stone-500 text-sm">Total Menus</span>
-          <span class="material-symbols-outlined text-primary text-[20px]">restaurant_menu</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
         </div>
         <p class="text-3xl font-bold text-stone-900" id="stat-menus">0</p>
         <p class="text-xs text-stone-400 mt-1">Active digital menus</p>
@@ -112,7 +108,7 @@
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <span class="text-stone-500 text-sm">Total Scans</span>
-          <span class="material-symbols-outlined text-amber-500 text-[20px]">qr_code_scanner</span>
+          <svg class="material-symbols-outlined text-amber-500 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg>
         </div>
         <p class="text-3xl font-bold text-amber-600" id="stat-scans">0</p>
         <p class="text-xs text-stone-400 mt-1">QR code scans</p>
@@ -121,7 +117,7 @@
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <span class="text-stone-500 text-sm">Current Plan</span>
-          <span class="material-symbols-outlined text-green-600 text-[20px]">workspace_premium</span>
+          <svg class="material-symbols-outlined text-green-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-workspace_premium"/></svg>
         </div>
         <p class="text-2xl font-bold text-green-600" id="stat-plan">Loading...</p>
         <p class="text-xs text-stone-400 mt-1">Subscription tier</p>
@@ -134,7 +130,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a href="/menu-editor" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-primary/50 hover:bg-orange-50 transition">
           <div class="size-10 rounded-lg bg-orange-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-primary text-[20px]">add</span>
+            <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add"/></svg>
           </div>
           <div>
             <p class="font-semibold text-sm text-stone-800">Create Menu</p>
@@ -144,7 +140,7 @@
         
         <a href="#" onclick="showSection('subscription'); return false;" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-amber-300 hover:bg-amber-50 transition">
           <div class="size-10 rounded-lg bg-amber-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-amber-600 text-[20px]">upgrade</span>
+            <svg class="material-symbols-outlined text-amber-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-upgrade"/></svg>
           </div>
           <div>
             <p class="font-semibold text-sm text-stone-800">Upgrade Plan</p>
@@ -154,7 +150,7 @@
         
         <a href="/#pricing" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition">
           <div class="size-10 rounded-lg bg-green-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-green-600 text-[20px]">info</span>
+            <svg class="material-symbols-outlined text-green-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-info"/></svg>
           </div>
           <div>
             <p class="font-semibold text-sm text-stone-800">View Pricing</p>
@@ -164,7 +160,7 @@
         
         <a href="mailto:support@restorder.online" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition">
           <div class="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
-            <span class="material-symbols-outlined text-blue-600 text-[20px]">support_agent</span>
+            <svg class="material-symbols-outlined text-blue-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
           </div>
           <div>
             <p class="font-semibold text-sm text-stone-800">Get Support</p>
@@ -185,7 +181,7 @@
       
       <div id="menus-container">
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">hourglass_empty</span>
+          <svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-hourglass_empty"/></svg>
           <p class="text-stone-400">Loading your menus...</p>
         </div>
       </div>
@@ -196,7 +192,7 @@
   <div id="subscription-section" class="hidden">
     <div class="mb-8">
       <button onclick="showSection('dashboard')" class="text-stone-500 hover:text-primary transition mb-4 flex items-center gap-2 text-sm">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_back"/></svg>
         Back to Dashboard
       </button>
       <h2 class="text-3xl font-bold mb-2 text-stone-900">Subscription</h2>
@@ -205,7 +201,7 @@
 
     <div id="subscription-content">
       <div class="p-12 text-center">
-        <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin">progress_activity</span>
+        <svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
         <p class="text-stone-400">Loading subscription details...</p>
       </div>
     </div>
@@ -215,7 +211,7 @@
   <div id="profile-section" class="hidden">
     <div class="mb-8">
       <button onclick="showSection('dashboard')" class="text-stone-500 hover:text-primary transition mb-4 flex items-center gap-2 text-sm">
-        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_back"/></svg>
         Back to Dashboard
       </button>
       <h2 class="text-3xl font-bold mb-2 text-stone-900">Profile Settings</h2>
@@ -239,7 +235,7 @@
       <!-- Business Information Card -->
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">business</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-business"/></svg>
           Business Information
         </h4>
         <form id="profile-form" class="space-y-5">
@@ -306,7 +302,7 @@
       <!-- Change Password Card -->
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">lock</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
           Change Password
         </h4>
         <form id="password-form" class="space-y-5">
@@ -338,13 +334,13 @@
       <!-- Account Security Card -->
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
         <h4 class="text-base font-semibold text-stone-900 mb-5 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">shield</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shield"/></svg>
           Account Security
         </h4>
         <div class="space-y-4">
           <div class="flex items-center justify-between py-3 border-b border-stone-100">
             <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-[20px] text-stone-400">mark_email_read</span>
+              <svg class="material-symbols-outlined text-[20px] text-stone-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-mark_email_read"/></svg>
               <div>
                 <p class="text-sm font-medium text-stone-800">Email Verified</p>
                 <p class="text-xs text-stone-400">Your email address confirmation status</p>
@@ -354,7 +350,7 @@
           </div>
           <div class="flex items-center justify-between py-3 border-b border-stone-100">
             <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-[20px] text-stone-400">login</span>
+              <svg class="material-symbols-outlined text-[20px] text-stone-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-login"/></svg>
               <div>
                 <p class="text-sm font-medium text-stone-800">Last Login</p>
                 <p class="text-xs text-stone-400">Most recent session start</p>
@@ -364,7 +360,7 @@
           </div>
           <div class="flex items-center justify-between py-3">
             <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-[20px] text-stone-400">calendar_today</span>
+              <svg class="material-symbols-outlined text-[20px] text-stone-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-calendar_today"/></svg>
               <div>
                 <p class="text-sm font-medium text-stone-800">Member Since</p>
                 <p class="text-xs text-stone-400">Account creation date</p>
@@ -378,7 +374,7 @@
       <!-- Danger Zone -->
       <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
         <h4 class="text-base font-semibold text-red-700 mb-2 flex items-center gap-2">
-          <span class="material-symbols-outlined text-[20px]">warning</span>
+          <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-warning"/></svg>
           Danger Zone
         </h4>
         <p class="text-sm text-red-600 mb-4">Permanently delete your account and all associated menus. This action cannot be undone.</p>
@@ -403,7 +399,7 @@
       </div>
       <div id="staff-list-container">
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">hourglass_empty</span>
+          <svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-hourglass_empty"/></svg>
           <p class="text-stone-400">Loading staff members...</p>
         </div>
       </div>
@@ -417,7 +413,7 @@
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 m-4">
     <div class="flex items-center justify-between">
       <h3 id="staff-modal-title" class="text-lg font-bold text-stone-900">Add Staff Member</h3>
-      <button onclick="closeStaffModal()" class="text-stone-400 hover:text-stone-700 transition"><span class="material-symbols-outlined">close</span></button>
+      <button onclick="closeStaffModal()" class="text-stone-400 hover:text-stone-700 transition"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg></button>
     </div>
     <input type="hidden" id="staff-modal-id"/>
     <div>
@@ -657,7 +653,7 @@ async function loadDashboard() {
     if (menus.length === 0) {
       container.innerHTML = `
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-stone-600 block mb-3">restaurant</span>
+          <svg class="material-symbols-outlined text-[64px] text-stone-600 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant"/></svg>
           <p class="text-stone-400 mb-4">No menus yet</p>
           <a href="/menu-editor" class="inline-block px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition">
             Create Your First Menu
@@ -676,9 +672,9 @@ async function loadDashboard() {
                     ${menu.plan_name ? `<span class="badge badge-${menu.plan_name.toLowerCase()}">${menu.plan_name}</span>` : ''}
                   </div>
                   <div class="flex items-center gap-4 text-sm text-stone-400">
-                    <span><span class="material-symbols-outlined text-[16px] align-middle">menu_book</span> ${menu.item_count} items</span>
-                    <span><span class="material-symbols-outlined text-[16px] align-middle">qr_code_scanner</span> ${menu.total_scans.toLocaleString()} scans</span>
-                    <span><span class="material-symbols-outlined text-[16px] align-middle">calendar_today</span> Created ${formatDate(menu.created_at)}</span>
+                    <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-menu_book"/></svg> ${menu.item_count} items</span>
+                    <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg> ${menu.total_scans.toLocaleString()} scans</span>
+                    <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-calendar_today"/></svg> Created ${formatDate(menu.created_at)}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -894,7 +890,7 @@ function showSection(section) {
 // Load subscription info
 async function loadSubscription() {
   const container = document.getElementById('subscription-content');
-  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin">progress_activity</span><p class="text-stone-400">Loading subscription details...</p></div>';
+  container.innerHTML = '<div class="p-12 text-center"><svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg><p class="text-stone-400">Loading subscription details...</p></div>';
 
   try {
     const [plansRes, subsRes, paymentsRes] = await Promise.all([
@@ -979,7 +975,7 @@ async function loadSubscription() {
           const daysLeft = Math.max(0, Math.ceil((trialEndDate - new Date()) / (1000 * 60 * 60 * 24)));
           const expired = trialEndDate < new Date();
           return `<div class="mt-5 p-4 ${expired ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'} border rounded-xl flex items-center gap-3">
-            <span class="material-symbols-outlined ${expired ? 'text-red-500' : 'text-amber-500'} text-[24px]">timer</span>
+            <svg class="material-symbols-outlined ${expired ? 'text-red-500' : 'text-amber-500'} text-[24px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-timer"/></svg>
             <div class="flex-1">
               <p class="font-semibold text-sm ${expired ? 'text-red-800' : 'text-amber-800'}">${expired ? 'Your trial has expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left in your free trial`}</p>
               <p class="text-xs ${expired ? 'text-red-600' : 'text-amber-600'} mt-0.5">${expired ? 'Upgrade now to keep your menu online.' : `Trial ends ${trialEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}</p>
@@ -1008,9 +1004,9 @@ async function loadSubscription() {
                 ${plan.price > 0 ? '<span class="text-stone-400 text-sm">/' + plan.interval + '</span>' : '<span class="text-stone-400 text-sm">/month</span>'}
               </div>
               <div class="space-y-1.5 mb-5 text-sm">
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span></div>
-                <div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span></div>
-                ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[16px]">check_circle</span><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
+                <div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span></div>
+                <div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span></div>
+                ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
               </div>
               ${!isCurrent ? `
                 <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}', '${escapeHtml(plan.name)}')"
@@ -1029,7 +1025,7 @@ async function loadSubscription() {
         </div>
         ${payments.length === 0 ? `
           <div class="p-10 text-center">
-            <span class="material-symbols-outlined text-[48px] text-stone-300 block mb-3">receipt_long</span>
+            <svg class="material-symbols-outlined text-[48px] text-stone-300 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
             <p class="text-stone-400 text-sm">No payment records yet.</p>
           </div>` : `
           <table class="w-full text-sm">
@@ -1060,7 +1056,7 @@ async function loadSubscription() {
 
       <!-- Need help box -->
       <div class="mt-6 p-5 bg-orange-50 border border-orange-200 rounded-2xl flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary text-[28px]">support_agent</span>
+        <svg class="material-symbols-outlined text-primary text-[28px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
         <div class="flex-1">
           <p class="font-semibold text-stone-900 text-sm">Questions about your subscription?</p>
           <p class="text-stone-500 text-xs mt-0.5">Our team responds within 24 hours.</p>
@@ -1074,7 +1070,7 @@ async function loadSubscription() {
   } catch (err) {
     container.innerHTML = `
       <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
-        <span class="material-symbols-outlined text-red-500 text-[48px] block mb-3">error</span>
+        <svg class="material-symbols-outlined text-red-500 text-[48px] block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
         <p class="text-red-600 mb-4">Failed to load subscription details</p>
         <button onclick="loadSubscription()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition">Try Again</button>
       </div>
@@ -1150,7 +1146,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
   // Paid plan � load available gateways
   confirmBtn.classList.add('hidden');
   document.getElementById('pcm-payment-section').innerHTML =
-    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><span class="material-symbols-outlined spin text-[20px]">progress_activity</span>Loading payment options�</div>';
+    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><svg class="material-symbols-outlined spin text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading payment options�</div>';
 
   try {
     await detectCountry();
@@ -1171,7 +1167,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
     }
 
     let html = '<p class="text-stone-500 text-xs mb-3">Choose a payment method:</p>';
-    if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mb-2 font-semibold text-sm transition" style="background:#f5a623;color:#fff;"><span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
+    if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mb-2 font-semibold text-sm transition" style="background:#f5a623;color:#fff;"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>Pay with Flutterwave</button>`;
     if (hasPP) html += `<div id="paypal-button-container" class="mt-2"></div>`;
     if (hasBT) {
       const bt = gateways.bank_transfer;
@@ -1183,9 +1179,9 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
       if (bt.routing_number) bankInfo += `<div><strong>Routing Number:</strong> ${bt.routing_number}</div>`;
       if (bt.instructions) bankInfo += `<div class="mt-2 italic">${bt.instructions}</div>`;
       html += `<div class="mt-3 p-4 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-600 leading-relaxed">${bankInfo}<p class="mt-2 text-stone-400">Transfer the exact amount. Your subscription will be activated once payment is confirmed (usually within 24 hours).</p></div>`;
-      html += `<button id="bt-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#10b981;color:#fff;"><span class="material-symbols-outlined text-[18px]">account_balance</span>I've Sent $${planPrice.toFixed(2)} via Bank Transfer</button>`;
+      html += `<button id="bt-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#10b981;color:#fff;"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-account_balance"/></svg>I've Sent $${planPrice.toFixed(2)} via Bank Transfer</button>`;
     }
-    if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#3b82f6;color:#fff;"><span class="material-symbols-outlined text-[18px]">payments</span>Pay $${planPrice.toFixed(2)} with ClickPesa</button>`;
+    if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#3b82f6;color:#fff;"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>Pay $${planPrice.toFixed(2)} with ClickPesa</button>`;
     section.innerHTML = html;
 
     if (hasFW) {
@@ -1246,7 +1242,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
           else if (d.reference) { showSubToast('Payment initiated (ref: ' + d.reference + '). Complete payment via ClickPesa.'); }
           else { showSubToast(d.error || 'Failed to initiate ClickPesa payment.', true); }
         } catch(e) { showSubToast('Failed to initiate payment.', true); }
-        finally { btn.disabled = false; btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">payments</span>Pay $${planPrice.toFixed(2)} with ClickPesa`; }
+        finally { btn.disabled = false; btn.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>Pay $${planPrice.toFixed(2)} with ClickPesa`; }
       };
     }
   } catch(err) {
@@ -1386,7 +1382,7 @@ let currentStaffEditId = null;
 
 async function loadTeam() {
   const container = document.getElementById('staff-list-container');
-  container.innerHTML = '<div class="p-12 text-center"><span class="material-symbols-outlined text-[48px] text-stone-300 block mb-3 spin">progress_activity</span><p class="text-stone-400">Loading...</p></div>';
+  container.innerHTML = '<div class="p-12 text-center"><svg class="material-symbols-outlined text-[48px] text-stone-300 block mb-3 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg><p class="text-stone-400">Loading...</p></div>';
   try {
     const res = await fetch('/api/staff', { headers: { 'x-customer-token': customerToken } });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to load staff');
@@ -1396,7 +1392,7 @@ async function loadTeam() {
     if (!staff.length) {
       container.innerHTML = `
         <div class="p-12 text-center">
-          <span class="material-symbols-outlined text-[64px] text-stone-300 block mb-3">group_add</span>
+          <svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-group_add"/></svg>
           <p class="text-stone-600 font-medium mb-1">No staff members yet</p>
           <p class="text-stone-400 text-sm mb-4">Add managers, waiters, or cashiers to your team.</p>
           <button onclick="openStaffModal()" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-orange-700 transition">+ Add First Staff Member</button>
@@ -1414,13 +1410,13 @@ async function loadTeam() {
         <span class="px-2 py-1 rounded-full text-xs font-semibold ${s.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${s.status}</span>
         <div class="flex items-center gap-1">
           <button onclick="editStaff(${s.id})" class="p-2 text-stone-400 hover:text-primary hover:bg-orange-50 rounded-lg transition" title="Edit">
-            <span class="material-symbols-outlined text-[18px]">edit</span>
+            <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
           </button>
           <button onclick="toggleStaffStatus(${s.id},'${s.status === 'active' ? 'disabled' : 'active'}')" class="p-2 text-stone-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition" title="${s.status === 'active' ? 'Disable' : 'Enable'}">
-            <span class="material-symbols-outlined text-[18px]">${s.status === 'active' ? 'block' : 'check_circle'}</span>
+            <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${s.status === 'active' ? 'block' : 'check_circle'}"/></svg>
           </button>
           <button onclick="deleteStaff(${s.id},'${escapeHtml(s.name)}')" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove">
-            <span class="material-symbols-outlined text-[18px]">delete</span>
+            <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-delete"/></svg>
           </button>
         </div>
       </div>`).join('')}</div>`;
@@ -1601,7 +1597,7 @@ async function showTrialExpiredOverlay(menuId) {
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePlanChangeModal()"></div>
   <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
     <button onclick="closePlanChangeModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition">
-      <span class="material-symbols-outlined">close</span>
+      <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
     </button>
     <h3 class="text-xl font-bold text-stone-900 mb-1">Upgrade Plan</h3>
     <p class="text-stone-500 text-sm mb-5">You are switching to:</p>
@@ -1626,7 +1622,7 @@ async function showTrialExpiredOverlay(menuId) {
 <div id="trial-expired-overlay" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
   <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
     <div class="size-20 mx-auto mb-5 rounded-full bg-red-100 flex items-center justify-center">
-      <span class="material-symbols-outlined text-red-500 text-[40px]">timer_off</span>
+      <svg class="material-symbols-outlined text-red-500 text-[40px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-timer_off"/></svg>
     </div>
     <h2 class="text-2xl font-bold text-stone-900 mb-2">Your Free Trial Has Ended</h2>
     <p class="text-stone-500 mb-6">Your 7-day trial has expired. Upgrade to a paid plan to keep your menu online and continue using all features.</p>
@@ -1640,7 +1636,7 @@ async function showTrialExpiredOverlay(menuId) {
     <input type="hidden" id="cancel-menu-id"/>
     <div class="flex items-center gap-3 mb-4">
       <div class="size-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-red-600 text-[24px]">cancel</span>
+        <svg class="material-symbols-outlined text-red-600 text-[24px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-cancel"/></svg>
       </div>
       <div>
         <h3 class="text-xl font-bold text-stone-900">Cancel Subscription</h3>
@@ -1656,6 +1652,7 @@ async function showTrialExpiredOverlay(menuId) {
   </div>
 </div>
 
+<script src="/js/icons.js"></script>
 </body>
 </html>
 

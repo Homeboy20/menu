@@ -12,9 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
@@ -780,10 +777,10 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     <div id="topbar-name">Menu</div>
     <div style="flex:1;display:flex;justify-content:flex-end;gap:8px">
       <button class="icon-btn" id="search-toggle-btn" onclick="toggleSearchBar()" aria-label="Search">
-        <span class="material-symbols-outlined">search</span>
+        <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
       </button>
       <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+        <svg class="material-symbols-outlined" id="theme-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dark_mode"/></svg>
       </button>
     </div>
   </header>
@@ -812,10 +809,10 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
 
   <!-- Table banner -->
   <div id="table-banner">
-    <span class="material-symbols-outlined" style="font-size:18px;flex-shrink:0">table_restaurant</span>
+    <svg class="material-symbols-outlined" style="font-size:18px;flex-shrink:0" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg>
     <span id="table-banner-label">Table &mdash;</span>
     <button id="call-waiter-btn" onclick="callWaiter()">
-      <span class="material-symbols-outlined" style="font-size:14px">notifications</span>
+      <svg class="material-symbols-outlined" style="font-size:14px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-notifications"/></svg>
       Call Waiter
     </button>
     <span id="waiter-sent-msg">&#10003; Notified!</span>
@@ -824,7 +821,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
   <!-- Search bar -->
   <div id="search-bar-wrap">
     <div id="search-bar">
-      <span class="material-symbols-outlined">search</span>
+      <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
       <input id="search-input" type="search" placeholder="Search items&hellip;"
              autocomplete="off" spellcheck="false" oninput="onSearchInput()"/>
       <button id="search-clear" onclick="clearSearch()" aria-label="Clear search">&#10005;</button>
@@ -843,10 +840,10 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     <span id="count-label"></span>
     <div class="view-toggle">
       <button class="view-btn active" data-view="list" onclick="setView('list')" aria-label="List view">
-        <span class="material-symbols-outlined" style="font-size:17px">view_agenda</span>
+        <svg class="material-symbols-outlined" style="font-size:17px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-view_agenda"/></svg>
       </button>
       <button class="view-btn" data-view="grid" onclick="setView('grid')" aria-label="Grid view">
-        <span class="material-symbols-outlined" style="font-size:17px">grid_view</span>
+        <svg class="material-symbols-outlined" style="font-size:17px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-grid_view"/></svg>
       </button>
     </div>
   </div>
@@ -857,7 +854,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
 
   <!-- Footer (desktop) -->
   <div id="footer">
-    <span class="material-symbols-outlined" style="font-size:14px">qr_code_2</span>
+    <svg class="material-symbols-outlined" style="font-size:14px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_2"/></svg>
     Powered by RestOrder
   </div>
 </div>
@@ -866,24 +863,24 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
 <nav id="bottom-nav">
   <div id="bnav-blob"></div>
   <button class="bnav-item bnav-active" data-nav="menu" onclick="navTo('menu')">
-    <span class="material-symbols-outlined">restaurant_menu</span>
+    <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
     <span class="bnav-label">Menu</span>
   </button>
   <button class="bnav-item" data-nav="categories" onclick="navTo('categories')">
-    <span class="material-symbols-outlined">category</span>
+    <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-category"/></svg>
     <span class="bnav-label">Browse</span>
   </button>
   <button class="bnav-item" data-nav="search" onclick="navTo('search')">
-    <span class="material-symbols-outlined">search</span>
+    <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
     <span class="bnav-label">Search</span>
   </button>
   <button class="bnav-item" data-nav="cart" onclick="navTo('cart')">
-    <span class="material-symbols-outlined">shopping_bag</span>
+    <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shopping_bag"/></svg>
     <span class="bnav-badge" id="bnav-cart-badge">0</span>
     <span class="bnav-label">Cart</span>
   </button>
   <button class="bnav-item" data-nav="theme" onclick="navTo('theme')">
-    <span class="material-symbols-outlined" id="bnav-theme-icon">dark_mode</span>
+    <svg class="material-symbols-outlined" id="bnav-theme-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dark_mode"/></svg>
     <span class="bnav-label">Theme</span>
   </button>
 </nav>
@@ -903,7 +900,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
 <!-- Error -->
 <div id="error-state">
   <div style="width:76px;height:76px;border-radius:50%;background:var(--surf2);display:flex;align-items:center;justify-content:center">
-    <span class="material-symbols-outlined" style="font-size:34px;color:var(--text);opacity:.4">error_outline</span>
+    <svg class="material-symbols-outlined" style="font-size:34px;color:var(--text);opacity:.4" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error_outline"/></svg>
   </div>
   <p style="font-size:20px;font-weight:900;color:var(--head);letter-spacing:-.4px">Menu Not Found</p>
   <p id="error-msg" style="font-size:13px;color:var(--text);line-height:1.7;max-width:280px"></p>
@@ -916,7 +913,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
   <div class="sheet-header">
     <span class="sheet-title">All Categories</span>
     <button class="icon-btn" style="background:var(--surf2);box-shadow:none" onclick="closeCatSheet();updateNavActive('menu')" aria-label="Close">
-      <span class="material-symbols-outlined">close</span>
+      <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
     </button>
   </div>
   <div id="cat-sheet-list"></div>
@@ -943,7 +940,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
         <button class="qty-btn" onclick="adjustQty(1)">+</button>
       </div>
       <button id="add-to-cart-btn" onclick="addToCart()">
-        <span class="material-symbols-outlined" style="font-size:20px">add_shopping_cart</span>
+        <svg class="material-symbols-outlined" style="font-size:20px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add_shopping_cart"/></svg>
         Add to Order
       </button>
     </div>
@@ -960,7 +957,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
   </div>
   <div id="cart-items-list"></div>
   <div id="cart-empty">
-    <span class="material-symbols-outlined" style="font-size:48px;color:var(--text);opacity:.2;display:block;margin-bottom:10px">shopping_bag</span>
+    <svg class="material-symbols-outlined" style="font-size:48px;color:var(--text);opacity:.2;display:block;margin-bottom:10px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shopping_bag"/></svg>
     <p style="font-size:14px;font-weight:600">Your order is empty</p>
     <p style="font-size:12px;margin-top:4px;opacity:.6">Add items from the menu to get started</p>
   </div>
@@ -978,7 +975,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
       <span id="cart-phone-error"></span>
     </div>
     <button id="checkout-order-btn" onclick="placeOrder()">
-      <span class="material-symbols-outlined" style="font-size:20px">receipt_long</span>
+      <svg class="material-symbols-outlined" style="font-size:20px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
       Place Order
     </button>
   </div>
@@ -1172,7 +1169,7 @@ function applyBranding(data){
   if(data.cuisine)cd.push({icon:'restaurant',label:data.cuisine});
   if(data.hours)cd.push({icon:'schedule',label:data.hours});
   if(data.location)cd.push({icon:'location_on',label:data.location});
-  chips.innerHTML=cd.map(c=>`<span class="hero-chip"><span class="material-symbols-outlined">${c.icon}</span>${esc(c.label)}</span>`).join('');
+  chips.innerHTML=cd.map(c=>`<span class="hero-chip"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${c.icon}"/></svg>${esc(c.label)}</span>`).join('');
   const hli=document.getElementById('hero-logo-img');
   const hli2=document.getElementById('hero-initials');
   if(showLogo){
@@ -1208,7 +1205,7 @@ function buildTabs(){
   if(!activeCategory||activeCategory==='All'||!cats.includes(activeCategory)){activeCategory=cats[0];activeSubcategory='All';}
   document.getElementById('cat-tabs').innerHTML=cats.map(c=>{
     const on=c===activeCategory;
-    return`<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}" class="tab-pill ${on?'tab-active':'tab-inactive'}"><span class="material-symbols-outlined tab-icon-sm">${getCatIcon(c)}</span>${esc(c)}</button>`;
+    return`<button onclick="setCategory('${esc(c)}')" data-cat="${esc(c)}" class="tab-pill ${on?'tab-active':'tab-inactive'}"><svg class="material-symbols-outlined tab-icon-sm" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${getCatIcon(c)}"/></svg>${esc(c)}</button>`;
   }).join('');
   buildSubcatPills();
 }
@@ -1248,7 +1245,7 @@ function renderItems(){
   const n=filtered.length;
   document.getElementById('count-label').textContent=n+(n===1?' item':' items');
   const container=document.getElementById('items-container');
-  if(!n){container.innerHTML=`<div class="empty-state"><div class="empty-icon"><span class="material-symbols-outlined">search_off</span></div><p class="empty-title">Nothing here</p><p class="empty-sub">Try a different keyword or browse another category.</p></div>`;return;}
+  if(!n){container.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search_off"/></svg></div><p class="empty-title">Nothing here</p><p class="empty-sub">Try a different keyword or browse another category.</p></div>`;return;}
   const sg={};for(const it of filtered){const s=it.subcategory||'';(sg[s]=sg[s]||[]).push(it);}
   if(viewMode==='grid')container.innerHTML=Object.entries(sg).map(([s,items],i)=>buildGridSection(s,items,i)).join('');
   else container.innerHTML=Object.entries(sg).map(([s,items],i)=>buildListSection(s,items,i)).join('');
@@ -1272,7 +1269,7 @@ function buildListCard(item){
   const cartItem=cart.find(c=>c._idx===idx);
   const qty=cartItem?cartItem.qty:0;
   let stars='';
-  if(rating>0){let s='';for(let i=1;i<=5;i++)s+=`<span class="material-symbols-outlined star-icon${i<=Math.round(rating)?' filled':''}">star</span>`;stars=`<div class="item-stars" style="margin-top:4px">${s}<span class="star-score">${rating.toFixed(1)}</span></div>`;}
+  if(rating>0){let s='';for(let i=1;i<=5;i++)s+=`<svg class="material-symbols-outlined star-icon${i<=Math.round(rating)?' filled':''}" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-star"/></svg>`;stars=`<div class="item-stars" style="margin-top:4px">${s}<span class="star-score">${rating.toFixed(1)}</span></div>`;}
   return`<div class="item-card" onclick="openItemDetail(${idx})" style="animation-delay:${(item._idx||0)%8*30}ms">
   ${img?`<div class="item-card-img-wrap"><img class="item-card-img" src="${esc(img)}" alt="${esc(item.name)}" loading="lazy"/></div>`:''}
   <div class="item-card-body" style="${img?'':'padding:16px 14px'}">
@@ -1379,7 +1376,7 @@ function openCatSheet(){
   document.getElementById('cat-sheet-list').innerHTML=cats.map(c=>{
     const cnt=allItems.filter(it=>(it.category||'Other')===c).length;
     const act=c===activeCategory;
-    return`<button class="cat-sheet-item${act?' cs-active':''}" onclick="selectSheetCat('${esc(c)}')"><div class="cs-icon-wrap"><span class="material-symbols-outlined">${getCatIcon(c)}</span></div><span class="cs-name">${esc(c)}</span><span class="cs-count">${cnt}</span></button>`;
+    return`<button class="cat-sheet-item${act?' cs-active':''}" onclick="selectSheetCat('${esc(c)}')"><div class="cs-icon-wrap"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${getCatIcon(c)}"/></svg></div><span class="cs-name">${esc(c)}</span><span class="cs-count">${cnt}</span></button>`;
   }).join('');
   document.getElementById('cat-sheet-overlay').classList.add('open');
   document.getElementById('cat-sheet').classList.add('open');
@@ -1397,7 +1394,7 @@ function openItemDetail(idx){
   const img=document.getElementById('item-modal-img');
   if(item.imageUrl){img.src=item.imageUrl;img.alt=item.name;img.classList.add('has-img');}else img.classList.remove('has-img');
   const cb=document.getElementById('item-modal-cat');
-  if(item.category){cb.innerHTML=`<span class="material-symbols-outlined" style="font-size:13px">${getCatIcon(item.category)}</span>${esc(item.category)}`;cb.style.display='inline-flex';}else cb.style.display='none';
+  if(item.category){cb.innerHTML=`<svg class="material-symbols-outlined" style="font-size:13px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${getCatIcon(item.category)}"/></svg>${esc(item.category)}`;cb.style.display='inline-flex';}else cb.style.display='none';
   document.getElementById('item-modal-name').textContent=item.name||'';
   document.getElementById('item-modal-desc').textContent=item.description||'';
   const px=parseFloat(item.price);
@@ -1550,5 +1547,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 </script>
+<script src="/js/icons.js"></script>
 </body>
 </html>

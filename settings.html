@@ -7,11 +7,7 @@
 <title>Settings — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -94,7 +90,7 @@
   <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <div class="flex items-center gap-3">
       <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
-        <span class="material-symbols-outlined text-[22px]">lock</span>
+        <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
       </div>
       <div>
         <h2 class="font-bold text-lg">Admin Access</h2>
@@ -118,7 +114,7 @@
 <aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
   <div class="flex items-center gap-3 mb-10">
     <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
-      <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+      <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-admin_panel_settings"/></svg>
     </div>
     <div>
       <h1 class="font-bold text-lg">RestOrder Admin</h1>
@@ -127,35 +123,35 @@
   </div>
   <nav class="space-y-2 flex-1">
     <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">dashboard</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
     <a href="/customers" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">groups</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-groups"/></svg>
       <span class="text-sm font-medium">Customers</span>
     </a>
     <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       <span class="text-sm font-medium">All Menus</span>
     </a>
     <a href="/subscriptions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">credit_card</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-credit_card"/></svg>
       <span class="text-sm font-medium">Subscriptions</span>
     </a>
     <a href="/payments" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">payments</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>
       <span class="text-sm font-medium">Payments</span>
     </a>
     <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">analytics</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-analytics"/></svg>
       <span class="text-sm font-medium">Analytics</span>
     </a>
     <a href="/settings" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
-      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-settings"/></svg>
       <span class="text-sm font-medium">Settings</span>
     </a>
     <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
-      <span class="material-symbols-outlined text-[20px]">shield_person</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shield_person"/></svg>
       <span class="text-sm font-medium">Admin Users</span>
     </a>
   </nav>
@@ -165,7 +161,7 @@
       <p class="text-xs text-slate-400 truncate" id="user-role"></p>
     </div>
     <button id="logout-btn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:bg-bg-dark w-full transition">
-      <span class="material-symbols-outlined text-[20px]">logout</span>
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-logout"/></svg>
       <span class="text-sm font-medium">Logout</span>
     </button>
   </div>
@@ -198,7 +194,7 @@
       <!-- Site Settings --------------------------------------------------- -->
       <div class="card space-y-4">
         <div class="section-header">
-          <span class="material-symbols-outlined text-primary">language</span>
+          <svg class="material-symbols-outlined text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-language"/></svg>
           <h3 class="text-lg font-bold">Site Settings</h3>
         </div>
         <div>
@@ -225,7 +221,7 @@
       <!-- Currency & Region ----------------------------------------------- -->
       <div class="card space-y-4">
         <div class="section-header">
-          <span class="material-symbols-outlined text-amber-400">monetization_on</span>
+          <svg class="material-symbols-outlined text-amber-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-monetization_on"/></svg>
           <h3 class="text-lg font-bold">Currency & Region</h3>
         </div>
         <div>
@@ -244,7 +240,7 @@
             <p class="text-xs text-slate-400 mb-2">Test geolocation for your current IP:</p>
             <div class="flex items-center gap-2">
               <button onclick="detectCurrency()" class="btn-secondary">
-                <span class="material-symbols-outlined text-[16px]">my_location</span>
+                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-my_location"/></svg>
                 Detect My Currency
               </button>
               <div id="geo-status" class="hidden text-sm font-medium px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20"></div>
@@ -259,7 +255,7 @@
       <!-- Brand Identity ---------------------------------------------------- -->
       <div class="card space-y-5 lg:col-span-2">
         <div class="section-header">
-          <span class="material-symbols-outlined text-primary">style</span>
+          <svg class="material-symbols-outlined text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-style"/></svg>
           <h3 class="text-lg font-bold">Brand Identity</h3>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -279,14 +275,14 @@
             <div class="flex gap-2">
               <input id="br-logo-url" type="url" class="input-field flex-1" placeholder="https://... or upload ?" oninput="updateBrandingPreview('logo')"/>
               <label class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl cursor-pointer text-sm flex items-center gap-1 transition whitespace-nowrap" title="Upload logo image">
-                <span class="material-symbols-outlined text-[16px]">upload</span> Upload
+                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-upload"/></svg> Upload
                 <input type="file" accept="image/*" class="hidden" onchange="uploadBrandingImage(this,'logo')"/>
               </label>
             </div>
             <div id="br-logo-preview" class="mt-2 hidden p-2 bg-slate-800 border border-slate-700 rounded-xl inline-flex items-center gap-2">
               <img id="br-logo-img" src="" alt="Logo preview" class="h-10 max-w-[160px] object-contain rounded"/>
               <button onclick="clearBrandingField('logo')" class="text-slate-400 hover:text-red-400 transition" title="Remove">
-                <span class="material-symbols-outlined text-[16px]">close</span>
+                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
               </button>
             </div>
             <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG, transparent background, max 3 MB</p>
@@ -297,14 +293,14 @@
             <div class="flex gap-2">
               <input id="br-favicon-url" type="url" class="input-field flex-1" placeholder="https://... or upload ?" oninput="updateBrandingPreview('favicon')"/>
               <label class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl cursor-pointer text-sm flex items-center gap-1 transition whitespace-nowrap" title="Upload favicon image">
-                <span class="material-symbols-outlined text-[16px]">upload</span> Upload
+                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-upload"/></svg> Upload
                 <input type="file" accept="image/*" class="hidden" onchange="uploadBrandingImage(this,'favicon')"/>
               </label>
             </div>
             <div id="br-favicon-preview" class="mt-2 hidden p-2 bg-slate-800 border border-slate-700 rounded-xl inline-flex items-center gap-2">
               <img id="br-favicon-img" src="" alt="Favicon preview" class="h-8 w-8 object-contain rounded"/>
               <button onclick="clearBrandingField('favicon')" class="text-slate-400 hover:text-red-400 transition" title="Remove">
-                <span class="material-symbols-outlined text-[16px]">close</span>
+                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
               </button>
             </div>
             <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 64�64px, max 3 MB</p>
@@ -325,7 +321,7 @@
 
     <!-- Super-admin lock notice -->
     <div id="integration-lock" class="hidden mb-6 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl p-4 flex items-center gap-3">
-      <span class="material-symbols-outlined">lock</span>
+      <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
       <p class="text-sm">Integration settings are restricted to <strong>Super Admin</strong> users. You can view but not edit.</p>
     </div>
 
@@ -347,7 +343,7 @@
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-4">
             <div class="provider-logo bg-orange-500/15 text-orange-400">
-              <span class="material-symbols-outlined text-[26px]">phone_android</span>
+              <svg class="material-symbols-outlined text-[26px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-phone_android"/></svg>
             </div>
             <div>
               <div class="flex items-center gap-2">
@@ -379,20 +375,20 @@
             <label class="card-label">API Secret</label>
             <div class="pw-wrap">
               <input id="cp-api-secret" type="password" class="input-field" placeholder="Your API Secret"/>
-              <button class="pw-eye" onclick="togglePw('cp-api-secret')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('cp-api-secret')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
           <div class="md:col-span-2">
             <label class="card-label">Callback URL <span class="text-slate-500 font-normal">(auto-generated � copy this into your ClickPesa dashboard)</span></label>
             <div class="flex gap-2">
               <input id="cp-callback-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
-              <button onclick="copyWebhookUrl('cp-callback-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span>Copy</button>
+              <button onclick="copyWebhookUrl('cp-callback-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_copy"/></svg>Copy</button>
             </div>
           </div>
         </div>
         <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-700">
           <button onclick="testProvider('clickpesa')" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">wifi_tethering</span>Test Connection
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-wifi_tethering"/></svg>Test Connection
           </button>
           <button id="save-cp-btn" onclick="saveProvider('clickpesa')" class="save-btn">Save ClickPesa</button>
         </div>
@@ -403,7 +399,7 @@
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-4">
             <div class="provider-logo bg-amber-500/15 text-amber-400">
-              <span class="material-symbols-outlined text-[26px]">bolt</span>
+              <svg class="material-symbols-outlined text-[26px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>
             </div>
             <div>
               <div class="flex items-center gap-2">
@@ -427,7 +423,7 @@
             <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated)</span></label>
             <div class="flex gap-2">
               <input id="fw-webhook-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
-              <button onclick="copyWebhookUrl('fw-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span>Copy</button>
+              <button onclick="copyWebhookUrl('fw-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_copy"/></svg>Copy</button>
             </div>
           </div>
           <div>
@@ -438,20 +434,20 @@
             <label class="card-label">Secret Key</label>
             <div class="pw-wrap">
               <input id="fw-sec-key" type="password" class="input-field" placeholder="FLWSECK_TEST-xxxxxxxx"/>
-              <button class="pw-eye" onclick="togglePw('fw-sec-key')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('fw-sec-key')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
           <div class="md:col-span-2">
             <label class="card-label">Encryption Key</label>
             <div class="pw-wrap">
               <input id="fw-enc-key" type="password" class="input-field" placeholder="Your 32-character encryption key"/>
-              <button class="pw-eye" onclick="togglePw('fw-enc-key')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('fw-enc-key')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
         </div>
         <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-700">
           <button onclick="testProvider('flutterwave')" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">wifi_tethering</span>Test Connection
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-wifi_tethering"/></svg>Test Connection
           </button>
           <button id="save-fw-btn" onclick="saveProvider('flutterwave')" class="save-btn">Save Flutterwave</button>
         </div>
@@ -462,7 +458,7 @@
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-4">
             <div class="provider-logo bg-blue-500/15 text-blue-400">
-              <span class="material-symbols-outlined text-[26px]">account_balance_wallet</span>
+              <svg class="material-symbols-outlined text-[26px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-account_balance_wallet"/></svg>
             </div>
             <div>
               <div class="flex items-center gap-2">
@@ -486,7 +482,7 @@
             <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated � register this in PayPal Developer)</span></label>
             <div class="flex gap-2">
               <input id="pp-webhook-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
-              <button onclick="copyWebhookUrl('pp-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span>Copy</button>
+              <button onclick="copyWebhookUrl('pp-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_copy"/></svg>Copy</button>
             </div>
           </div>
           <div>
@@ -501,13 +497,13 @@
             <label class="card-label">Client Secret</label>
             <div class="pw-wrap">
               <input id="pp-client-secret" type="password" class="input-field" placeholder="EKxxxxxxxxxxxxxxxxxxxxxx"/>
-              <button class="pw-eye" onclick="togglePw('pp-client-secret')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('pp-client-secret')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
         </div>
         <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-700">
           <button onclick="testProvider('paypal')" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">wifi_tethering</span>Test Connection
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-wifi_tethering"/></svg>Test Connection
           </button>
           <button id="save-pp-btn" onclick="saveProvider('paypal')" class="save-btn">Save PayPal</button>
         </div>
@@ -518,7 +514,7 @@
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-4">
             <div class="provider-logo bg-emerald-500/15 text-emerald-400">
-              <span class="material-symbols-outlined text-[26px]">account_balance</span>
+              <svg class="material-symbols-outlined text-[26px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-account_balance"/></svg>
             </div>
             <div>
               <div class="flex items-center gap-2">
@@ -569,7 +565,7 @@
     <div id="spanel-email" class="hidden">
       <div class="card space-y-5">
         <div class="section-header">
-          <span class="material-symbols-outlined text-sky-400">mail</span>
+          <svg class="material-symbols-outlined text-sky-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-mail"/></svg>
           <div>
             <h3 class="text-lg font-bold">Email / SMTP</h3>
             <p class="text-sm text-slate-400 mt-0.5">Used for password resets, trial notifications, and receipts</p>
@@ -605,7 +601,7 @@
             <label class="card-label">Password / Secret</label>
             <div class="pw-wrap">
               <input id="em-pass" type="password" class="input-field" placeholder="SMTP password or secret"/>
-              <button class="pw-eye" onclick="togglePw('em-pass')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('em-pass')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
           <div>
@@ -619,7 +615,7 @@
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-700">
           <button onclick="sendTestEmail()" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">send</span>Send Test Email
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-send"/></svg>Send Test Email
           </button>
           <button id="save-em-btn" onclick="saveEmailSettings()" class="save-btn">Save Email Settings</button>
         </div>
@@ -632,7 +628,7 @@
     <div id="spanel-webhooks" class="hidden">
       <div class="card space-y-5">
         <div class="section-header">
-          <span class="material-symbols-outlined text-violet-400">webhook</span>
+          <svg class="material-symbols-outlined text-violet-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-webhook"/></svg>
           <div>
             <h3 class="text-lg font-bold">Outbound Webhooks</h3>
             <p class="text-sm text-slate-400 mt-0.5">RestOrder will POST JSON events to these URLs for real-time notifications</p>
@@ -657,7 +653,7 @@
             <label class="card-label">Signing Secret <span class="text-slate-500 font-normal">(HMAC-SHA256 used to sign the X-RestOrder-Signature header)</span></label>
             <div class="pw-wrap">
               <input id="wh-secret" type="password" class="input-field" placeholder="Random secret string (min 24 chars)"/>
-              <button class="pw-eye" onclick="togglePw('wh-secret')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('wh-secret')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
         </div>
@@ -694,14 +690,14 @@
       <!-- Quick Paste Config -->
       <div class="card space-y-4 mb-6" id="fb-paste-card">
         <div class="section-header">
-          <span class="material-symbols-outlined text-sky-400">content_paste</span>
+          <svg class="material-symbols-outlined text-sky-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_paste"/></svg>
           <div>
             <h3 class="text-lg font-bold">Quick Setup � Paste Firebase Config</h3>
             <p class="text-sm text-slate-400 mt-0.5">Copy the config snippet from Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; SDK setup &rarr; Config, then paste it below</p>
           </div>
         </div>
         <div class="bg-sky-500/8 border border-sky-500/20 rounded-xl p-4 text-sm text-sky-300 flex gap-3">
-          <span class="material-symbols-outlined shrink-0 text-[18px] mt-0.5">info</span>
+          <svg class="material-symbols-outlined shrink-0 text-[18px] mt-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-info"/></svg>
           <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = { � }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
         </div>
         <div>
@@ -710,7 +706,7 @@
         </div>
         <div class="flex items-center gap-3">
           <button onclick="parseFbConfigScript()" class="save-btn">
-            <span class="material-symbols-outlined text-[16px]">auto_fix_high</span>Parse &amp; Fill Fields
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-auto_fix_high"/></svg>Parse &amp; Fill Fields
           </button>
           <span id="fb-parse-msg" class="text-sm hidden"></span>
         </div>
@@ -719,7 +715,7 @@
       <!-- Public SDK Config -->
       <div class="card space-y-5 mb-6">
         <div class="section-header">
-          <span class="material-symbols-outlined text-amber-400">public</span>
+          <svg class="material-symbols-outlined text-amber-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-public"/></svg>
           <div>
             <h3 class="text-lg font-bold">Public SDK Config</h3>
             <p class="text-sm text-slate-400 mt-0.5">Used by the browser. Safe to expose &mdash; these are your Firebase web app credentials</p>
@@ -734,7 +730,7 @@
             <label class="card-label">Web API Key</label>
             <div class="pw-wrap">
               <input id="fb-api-key" type="password" class="input-field" placeholder="AIzaSy�"/>
-              <button class="pw-eye" onclick="togglePw('fb-api-key')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" onclick="togglePw('fb-api-key')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
           <div class="md:col-span-2">
@@ -763,14 +759,14 @@
       <!-- Admin / Server SDK Config -->
       <div class="card space-y-5">
         <div class="section-header">
-          <span class="material-symbols-outlined text-red-400">admin_panel_settings</span>
+          <svg class="material-symbols-outlined text-red-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-admin_panel_settings"/></svg>
           <div>
             <h3 class="text-lg font-bold">Server-Side Admin SDK</h3>
             <p class="text-sm text-slate-400 mt-0.5">Used by the server to verify Firebase ID tokens. Download from Firebase Console ? Project Settings ? Service Accounts</p>
           </div>
         </div>
         <div class="bg-amber-500/8 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300 flex gap-3">
-          <span class="material-symbols-outlined shrink-0 text-[18px] mt-0.5">restart_alt</span>
+          <svg class="material-symbols-outlined shrink-0 text-[18px] mt-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restart_alt"/></svg>
           <span>Changes to Admin SDK credentials require a server restart to take effect. Public SDK config updates are instant.</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -784,14 +780,14 @@
               <textarea id="fb-private-key" rows="4" class="input-field font-mono text-xs" placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIB�&#10;-----END PRIVATE KEY-----
 "
                 style="padding-right:42px;resize:vertical"></textarea>
-              <button class="pw-eye" style="top:10px" onclick="toggleFbKey()" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+              <button class="pw-eye" style="top:10px" onclick="toggleFbKey()" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
         </div>
         <div id="fb-status-row" class="hidden p-3 rounded-xl text-sm flex items-center gap-2"></div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-700">
           <button onclick="testFirebaseConfig()" class="btn-secondary">
-            <span class="material-symbols-outlined text-[16px]">bolt</span>Test Connection
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>Test Connection
           </button>
           <button id="save-fb-btn" onclick="saveFirebaseSettings()" class="save-btn">Save Firebase Settings</button>
         </div>
@@ -1135,7 +1131,7 @@ function populateForms(s) {
   if (fb.private_key === '��������' || (fb.private_key && fb.private_key.length > 10)) {
     const row = document.getElementById('fb-status-row');
     row.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-    row.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Admin SDK private key is stored. Leave the field blank to keep the current key.';
+    row.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Admin SDK private key is stored. Leave the field blank to keep the current key.';
     row.classList.remove('hidden');
   }
 }
@@ -1575,7 +1571,7 @@ async function saveFirebaseSettings() {
     serverSettings.integration_firebase = config;
     const row = document.getElementById('fb-status-row');
     row.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-    row.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Settings saved. Restart the server for Admin SDK changes to take effect.';
+    row.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Settings saved. Restart the server for Admin SDK changes to take effect.';
     row.classList.remove('hidden');
     showToast('Firebase settings saved.');
   } catch(e) { showToast(e.message, 'error'); }
@@ -1584,26 +1580,27 @@ async function saveFirebaseSettings() {
 async function testFirebaseConfig() {
   const statusRow = document.getElementById('fb-status-row');
   statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300';
-  statusRow.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Testing Firebase connection�';
+  statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px] animate-spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Testing Firebase connection�';
   statusRow.classList.remove('hidden');
   try {
     const res = await fetch('/api/firebase-config');
     const data = await res.json();
     if (data.enabled && data.projectId) {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-      statusRow.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Public SDK active � Project: <strong>${data.projectId}</strong>`;
+      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Public SDK active � Project: <strong>${data.projectId}</strong>`;
     } else {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400';
-      statusRow.innerHTML = '<span class="material-symbols-outlined text-[18px]">warning</span> Firebase not enabled or not configured yet.';
+      statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-warning"/></svg> Firebase not enabled or not configured yet.';
     }
   } catch(e) {
     statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
-    statusRow.innerHTML = `<span class="material-symbols-outlined text-[18px]">error</span> Test failed: ${e.message}`;
+    statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg> Test failed: ${e.message}`;
   }
 }
 
 // -- Init ----------------------------------------------------------------------
 checkAuth();
 </script>
+<script src="/js/icons.js"></script>
 </body>
 </html>

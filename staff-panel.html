@@ -8,9 +8,6 @@
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -155,7 +152,7 @@
     <!-- Logo + title -->
     <div class="flex items-center gap-3">
       <a href="/" class="size-9 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0">
-        <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+        <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       </a>
       <div class="hidden sm:block">
         <p class="font-bold text-sm text-stone-900 leading-tight">Staff Panel</p>
@@ -181,12 +178,12 @@
       <button id="theme-toggle"
         class="p-2 rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition"
         title="Toggle light/dark theme">
-        <span class="material-symbols-outlined text-[22px]" id="theme-icon">light_mode</span>
+        <svg class="material-symbols-outlined text-[22px]" id="theme-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-light_mode"/></svg>
       </button>
       <button id="logout-btn"
         class="p-2 rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 transition"
         title="Sign out">
-        <span class="material-symbols-outlined text-[22px]">logout</span>
+        <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-logout"/></svg>
       </button>
     </div>
   </div>
@@ -194,7 +191,7 @@
 
 <!-- -- Role info bar ---------------------------------------------------------- -->
 <div id="role-bar" class="bg-gradient-to-r from-primary to-primary-light text-white px-4 py-2.5 text-center text-sm font-medium hidden">
-  <span class="material-symbols-outlined text-[16px] align-middle mr-1">badge</span>
+  <svg class="material-symbols-outlined text-[16px] align-middle mr-1" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-badge"/></svg>
   <span id="role-bar-text"></span>
 </div>
 
@@ -224,13 +221,13 @@
           <option value="_all">All Active</option>
         </select>
         <button onclick="loadOrders()" class="p-2 rounded-xl border border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-primary transition" title="Refresh">
-          <span class="material-symbols-outlined text-[20px]">refresh</span>
+          <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-refresh"/></svg>
         </button>
       </div>
     </div>
     <div id="orders-container">
       <div class="p-12 text-center text-stone-400">
-        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">receipt_long</span>
+        <svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
         Select a menu to view orders
       </div>
     </div>
@@ -244,12 +241,12 @@
         <span id="alerts-badge" class="hidden bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full"></span>
       </div>
       <button onclick="loadAlerts()" class="p-2 rounded-xl border border-stone-300 text-stone-500 hover:bg-stone-50 hover:text-primary transition" title="Refresh">
-        <span class="material-symbols-outlined text-[20px]">refresh</span>
+        <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-refresh"/></svg>
       </button>
     </div>
     <div id="alerts-container">
       <div class="p-12 text-center text-stone-400">
-        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">notifications</span>
+        <svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-notifications"/></svg>
         Select a menu to view alerts
       </div>
     </div>
@@ -260,7 +257,7 @@
     <h2 class="text-lg font-bold text-stone-900 mb-4">Today's Summary</h2>
     <div id="summary-container">
       <div class="p-12 text-center text-stone-400">
-        <span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">bar_chart</span>
+        <svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bar_chart"/></svg>
         Select a menu to view summary
       </div>
     </div>
@@ -426,7 +423,7 @@ async function init() {
   nav.innerHTML = cfg.tabs.map(t => `
     <button id="tab-btn-${t.id}" onclick="showTab('${t.id}')"
       class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-stone-900 hover:bg-stone-50 transition-all">
-      <span class="material-symbols-outlined text-[18px]">${t.icon}</span>
+      <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${t.icon}"/></svg>
       ${t.label}
       ${t.id === 'alerts' ? '<span id="tab-alert-badge" class="hidden bg-red-600 text-white text-xs font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">0</span>' : ''}
     </button>
@@ -504,11 +501,11 @@ async function loadMenus() {
 async function loadOrders() {
   const container = document.getElementById('orders-container');
   if (!selectedMenuId) {
-    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">receipt_long</span>Select a menu to view orders</div>';
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>Select a menu to view orders</div>';
     return;
   }
 
-  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+  container.innerHTML = '<div class="p-8 text-center"><svg class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg></div>';
 
   try {
     const filterVal = document.getElementById('order-status-filter').value;
@@ -535,7 +532,7 @@ async function loadOrders() {
     if (!rows.length) {
       container.innerHTML = `
         <div class="p-12 text-center text-stone-400">
-          <span class="material-symbols-outlined text-[64px] block mb-2 text-stone-300">receipt_long</span>
+          <svg class="material-symbols-outlined text-[64px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
           <p class="font-medium text-stone-500">No ${filterVal === '_all' ? 'active' : filterVal} orders</p>
         </div>`;
       return;
@@ -552,7 +549,7 @@ async function loadOrders() {
               : nextStatus === 'ready'
               ? 'border-teal-300 bg-teal-50 text-teal-700 hover:bg-teal-100'
               : 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'}">
-          <span class="material-symbols-outlined text-[15px] align-middle mr-0.5">${STATUS_ICON[nextStatus]}</span>
+          <svg class="material-symbols-outlined text-[15px] align-middle mr-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${STATUS_ICON[nextStatus]}"/></svg>
           Mark ${STATUS_LABELS[nextStatus]}
         </button>`).join('');
 
@@ -562,16 +559,16 @@ async function loadOrders() {
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold text-stone-900 text-base">#${order.id}</span>
-                ${order.table_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-[13px] align-middle">table_restaurant</span> ${escapeHtml(order.table_label)}</span>` : ''}
+                ${order.table_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full"><svg class="material-symbols-outlined text-[13px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg> ${escapeHtml(order.table_label)}</span>` : ''}
                 ${order.customer_name ? `<span class="text-xs text-stone-500">${escapeHtml(order.customer_name)}</span>` : ''}
               </div>
               <p class="text-xs text-stone-400 mt-1">
-                <span class="material-symbols-outlined text-[13px] align-middle">schedule</span>
+                <svg class="material-symbols-outlined text-[13px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-schedule"/></svg>
                 ${formatTime(order.created_at)}
               </p>
             </div>
             <span class="chip-${order.status} px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
-              <span class="material-symbols-outlined text-[14px] align-middle mr-0.5">${STATUS_ICON[order.status]}</span>
+              <svg class="material-symbols-outlined text-[14px] align-middle mr-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${STATUS_ICON[order.status]}"/></svg>
               ${STATUS_LABELS[order.status]}
             </span>
           </div>
@@ -589,7 +586,7 @@ async function loadOrders() {
         </div>`;
     }).join('')}</div>`;
   } catch (err) {
-    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><svg class="material-symbols-outlined text-[36px] block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -611,11 +608,11 @@ async function updateOrderStatus(orderId, newStatus) {
 async function loadAlerts() {
   const container = document.getElementById('alerts-container');
   if (!selectedMenuId) {
-    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">notifications</span>Select a menu to view alerts</div>';
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-notifications"/></svg>Select a menu to view alerts</div>';
     return;
   }
 
-  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+  container.innerHTML = '<div class="p-8 text-center"><svg class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg></div>';
 
   try {
     const res = await fetch(`/api/menus/${selectedMenuId}/alerts`, {
@@ -639,7 +636,7 @@ async function loadAlerts() {
     if (!alerts.length) {
       container.innerHTML = `
         <div class="p-12 text-center text-stone-400">
-          <span class="material-symbols-outlined text-[64px] block mb-2 text-stone-300">notifications_off</span>
+          <svg class="material-symbols-outlined text-[64px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-notifications_off"/></svg>
           <p class="font-medium text-stone-500">No alerts for this menu</p>
         </div>`;
       return;
@@ -651,18 +648,16 @@ async function loadAlerts() {
           <div class="flex items-start gap-3">
             <div class="size-9 rounded-xl flex-shrink-0 flex items-center justify-center
               ${alert.status === 'pending' ? 'bg-orange-100' : 'bg-stone-100'}">
-              <span class="material-symbols-outlined text-[20px] ${alert.status === 'pending' ? 'text-orange-600' : 'text-stone-400'}">
-                ${alert.status === 'pending' ? 'campaign' : 'check_circle'}
-              </span>
+              <svg class="material-symbols-outlined text-[20px] ${alert.status === 'pending' ? 'text-orange-600' : 'text-stone-400'}" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${alert.status === 'pending' ? 'campaign' : 'check_circle'}"/></svg>
             </div>
             <div>
               <p class="font-semibold text-stone-900">
-                <span class="material-symbols-outlined text-[15px] align-middle text-stone-500 mr-0.5">table_restaurant</span>
+                <svg class="material-symbols-outlined text-[15px] align-middle text-stone-500 mr-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg>
                 ${escapeHtml(alert.table_label)}
               </p>
               <p class="text-sm text-stone-600 mt-0.5">${escapeHtml(alert.message)}</p>
               <p class="text-xs text-stone-400 mt-1">
-                <span class="material-symbols-outlined text-[13px] align-middle">schedule</span>
+                <svg class="material-symbols-outlined text-[13px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-schedule"/></svg>
                 ${formatTime(alert.created_at)}
               </p>
             </div>
@@ -670,13 +665,13 @@ async function loadAlerts() {
           ${alert.status === 'pending' ? `
             <button onclick="dismissAlert(${alert.id})"
               class="flex-shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl bg-green-50 text-green-700 border border-green-300 hover:bg-green-100 transition">
-              <span class="material-symbols-outlined text-[15px] align-middle">done</span>
+              <svg class="material-symbols-outlined text-[15px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-done"/></svg>
               Done
             </button>` : '<span class="text-xs text-stone-400 font-medium">Dismissed</span>'}
         </div>
       </div>`).join('')}</div>`;
   } catch (err) {
-    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><svg class="material-symbols-outlined text-[36px] block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -698,11 +693,11 @@ async function dismissAlert(alertId) {
 async function loadSummary() {
   const container = document.getElementById('summary-container');
   if (!selectedMenuId) {
-    container.innerHTML = '<div class="p-12 text-center text-stone-400"><span class="material-symbols-outlined text-[48px] block mb-2 text-stone-300">bar_chart</span>Select a menu to view summary</div>';
+    container.innerHTML = '<div class="p-12 text-center text-stone-400"><svg class="material-symbols-outlined text-[48px] block mb-2 text-stone-300" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bar_chart"/></svg>Select a menu to view summary</div>';
     return;
   }
 
-  container.innerHTML = '<div class="p-8 text-center"><span class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2">progress_activity</span></div>';
+  container.innerHTML = '<div class="p-8 text-center"><svg class="material-symbols-outlined text-[40px] text-stone-300 spin block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg></div>';
 
   try {
     // Fetch all statuses for summary
@@ -785,7 +780,7 @@ async function loadSummary() {
           </div>`}
       </div>`;
   } catch (err) {
-    container.innerHTML = `<div class="p-8 text-center text-red-400"><span class="material-symbols-outlined text-[36px] block mb-2">error</span>${escapeHtml(err.message)}</div>`;
+    container.innerHTML = `<div class="p-8 text-center text-red-400"><svg class="material-symbols-outlined text-[36px] block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -816,5 +811,6 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // -- Start ---------------------------------------------------------------------
 init();
 </script>
+<script src="/js/icons.js"></script>
 </body>
 </html>

@@ -7,11 +7,7 @@
 <title>Checkout � RestOrder</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -57,7 +53,7 @@
   <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
     <a href="/" class="flex items-center gap-3 no-underline">
       <div class="size-10 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white">
-        <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+        <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       </div>
       <div>
         <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
@@ -65,7 +61,7 @@
       </div>
     </a>
     <div class="flex items-center gap-2 text-xs text-stone-500">
-      <span class="material-symbols-outlined text-green-600 text-[16px]">lock</span>
+      <svg class="material-symbols-outlined text-green-600 text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
       <span>SSL Secured</span>
     </div>
   </div>
@@ -77,7 +73,7 @@
   <div id="plan-preselected-banner" class="hidden mb-6">
     <div class="bg-gradient-to-r from-primary/5 to-primary-light/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-4">
       <div class="size-12 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white flex-shrink-0">
-        <span class="material-symbols-outlined text-[24px]">workspace_premium</span>
+        <svg class="material-symbols-outlined text-[24px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-workspace_premium"/></svg>
       </div>
       <div class="flex-1 min-w-0">
         <p class="text-xs text-primary font-semibold uppercase tracking-wide">Your Selected Plan</p>
@@ -152,7 +148,7 @@
             <button type="submit" id="reg-btn"
               class="w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
               <span id="reg-btn-text">Create Account & Continue</span>
-              <span id="reg-spinner" class="hidden material-symbols-outlined spin text-[18px]">progress_activity</span>
+              <svg id="reg-spinner" class="hidden material-symbols-outlined spin text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
             </button>
             <p class="text-xs text-stone-400 text-center">By registering you agree to our <a href="/terms" class="underline">Terms</a> and <a href="/privacy" class="underline">Privacy Policy</a></p>
           </form>
@@ -175,7 +171,7 @@
             <button type="submit" id="login-btn"
               class="w-full py-3 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
               <span id="login-btn-text">Sign In & Continue</span>
-              <span id="login-spinner" class="hidden material-symbols-outlined spin text-[18px]">progress_activity</span>
+              <svg id="login-spinner" class="hidden material-symbols-outlined spin text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
             </button>
           </form>
         </div>
@@ -198,7 +194,7 @@
           <!-- Gateway buttons -->
           <div id="gateway-container">
             <div class="flex items-center justify-center gap-3 py-6 text-stone-400 text-sm">
-              <span class="material-symbols-outlined spin text-[20px]">progress_activity</span>
+              <svg class="material-symbols-outlined spin text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
               Loading payment options�
             </div>
           </div>
@@ -210,7 +206,7 @@
       <!-- Already logged in notice -->
       <div id="logged-in-notice" class="hidden">
         <div class="bg-green-50 border border-green-200 rounded-2xl p-5 flex items-center gap-4">
-          <span class="material-symbols-outlined text-green-600 text-[28px]">person</span>
+          <svg class="material-symbols-outlined text-green-600 text-[28px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-person"/></svg>
           <div class="flex-1">
             <p class="font-semibold text-stone-900 text-sm" id="logged-in-name">You're signed in</p>
             <p class="text-xs text-stone-500" id="logged-in-email"></p>
@@ -225,13 +221,13 @@
     <div class="lg:col-span-2">
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm sticky top-24">
         <div class="flex items-center gap-2 mb-4">
-          <span class="material-symbols-outlined text-primary text-[20px]">shopping_cart</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shopping_cart"/></svg>
           <h3 class="font-bold text-stone-900">Order Summary</h3>
         </div>
 
         <!-- Plan loading -->
         <div id="plan-summary-loading" class="py-6 text-center text-stone-400 text-sm">
-          <span class="material-symbols-outlined spin text-[20px] block mb-2">progress_activity</span>
+          <svg class="material-symbols-outlined spin text-[20px] block mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
           Loading plan details�
         </div>
 
@@ -354,7 +350,7 @@ function setStep(n) {
       if (i < n) {
         dot.className = 'step-dot done';
         lbl.className = 'text-sm font-semibold text-stone-700';
-        dot.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+        dot.innerHTML = '<svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check"/></svg>';
       } else if (i === n) {
         dot.className = 'step-dot active';
         lbl.className = 'text-sm font-semibold text-stone-700';
@@ -370,7 +366,7 @@ function setStep(n) {
     for (let i = 1; i <= 3; i++) {
       const dot = document.getElementById(`step-dot-${i}`);
       const lbl = document.getElementById(`step-label-${i}`);
-      if (i < n)  { dot.className = 'step-dot done'; lbl.className = 'text-sm font-semibold text-stone-700'; dot.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>'; }
+      if (i < n)  { dot.className = 'step-dot done'; lbl.className = 'text-sm font-semibold text-stone-700'; dot.innerHTML = '<svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check"/></svg>'; }
       else if (i === n) { dot.className = 'step-dot active'; lbl.className = 'text-sm font-semibold text-stone-700'; dot.textContent = i; }
       else        { dot.className = 'step-dot inactive'; lbl.className = 'text-sm text-stone-400'; dot.textContent = i; }
     }
@@ -574,7 +570,7 @@ async function renderGateways(gateways) {
 
   let html = '<div class="space-y-3">';
   if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#f5a623;color:#fff;">
-    <span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
+    <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>Pay with Flutterwave</button>`;
   if (hasPP) html += `<div id="paypal-btn-wrap" class="mt-2"></div>`;
   html += '</div>';
   container.innerHTML = html;
@@ -691,7 +687,7 @@ async function doManualUpgrade() {
 function onPaymentSuccess() {
   document.getElementById('gateway-container').innerHTML = `
     <div class="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
-      <span class="material-symbols-outlined text-green-600 text-[48px] block mb-3">check_circle</span>
+      <svg class="material-symbols-outlined text-green-600 text-[48px] block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>
       <p class="font-bold text-green-800 text-lg">Payment Successful!</p>
       <p class="text-green-700 text-sm mt-1">Your ${escHtml(selectedPlan?.display_name || '')} subscription is now active.</p>
       <p class="text-stone-500 text-xs mt-3">Redirecting to dashboard�</p>
@@ -759,7 +755,7 @@ async function init() {
 
     const feats = Array.isArray(selectedPlan.features) ? selectedPlan.features : [];
     document.getElementById('ps-features').innerHTML = feats.map(f =>
-      `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[15px]">check_circle</span><span class="text-stone-600">${escHtml(f)}</span></li>`
+      `<li class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[15px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">${escHtml(f)}</span></li>`
     ).join('');
   } catch (_) {
     document.getElementById('plan-summary-loading').innerHTML = '<p class="text-red-500 text-sm text-center">Failed to load plan.</p>';
@@ -799,5 +795,6 @@ async function init() {
 
 init();
 </script>
+<script src="/js/icons.js"></script>
 </body>
 </html>

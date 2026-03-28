@@ -8,11 +8,7 @@
 <meta name="description" content="Choose your plan and launch your digital restaurant menu in minutes. Free forever or upgrade for advanced features."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
-<style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/><style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
 /* Phone input with country code */
@@ -223,7 +219,7 @@ input::placeholder{color:#c4bfbc;}
 <header>
 <div class="container"><nav class="nav">
 <a href="/" class="logo">
-<div class="logo-icon"><span class="material-symbols-outlined">restaurant_menu</span></div>
+<div class="logo-icon"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg></div>
 <div class="logo-text"><strong>RestOrder</strong><span>Digital Menu Platform</span></div>
 </a>
 <div class="nav-right">
@@ -250,16 +246,16 @@ input::placeholder{color:#c4bfbc;}
 </div>
 <div id="plans-grid" class="plans-grid">
 <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light)">
-<span class="material-symbols-outlined spin" style="font-size:32px;display:block;margin-bottom:10px;">progress_activity</span>
+<svg class="material-symbols-outlined spin" style="font-size:32px;display:block;margin-bottom:10px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
 Loading plans&hellip;
 </div>
 </div>
 <div class="step1-cta">
 <button class="btn-continue" id="btn-step1-continue" disabled onclick="goToStep(2)">
-Continue <span class="material-symbols-outlined" style="font-size:22px">arrow_forward</span>
+Continue <svg class="material-symbols-outlined" style="font-size:22px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
 </button>
 <div class="trust-strip">
-<span class="material-symbols-outlined">lock</span>
+<svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
 Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel anytime
 </div>
 </div>
@@ -280,7 +276,7 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
   </svg>
   <span class="btn-text" id="reg-google-text">Continue with Google</span>
-  <span class="material-symbols-outlined spinner">progress_activity</span>
+  <svg class="material-symbols-outlined spinner" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
 </button>
 <div id="reg-google-err" class="google-error"></div>
 <div class="google-divider" id="reg-google-divider">or continue with email</div>
@@ -288,26 +284,26 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 
 <div class="form-row">
 <div class="form-group">
-<label><span class="material-symbols-outlined">store</span>Business Name *</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-store"/></svg>Business Name *</label>
 <input type="text" id="business-name" required placeholder="Joe's Pizza"/>
 </div>
 <div class="form-group">
-<label><span class="material-symbols-outlined">person</span>Your Name</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-person"/></svg>Your Name</label>
 <input type="text" id="contact-name" placeholder="John Smith"/>
 </div>
 </div>
 <div class="form-row">
 <div class="form-group">
-<label><span class="material-symbols-outlined">email</span>Email Address *</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-email"/></svg>Email Address *</label>
 <input type="email" id="reg-email" required placeholder="you@restaurant.com"/>
 </div>
 <div class="form-group">
-<label><span class="material-symbols-outlined">phone</span>Phone Number</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-phone"/></svg>Phone Number</label>
 <div class="phone-input-wrap">
   <button type="button" class="phone-country-btn" id="phone-country-btn" onclick="togglePhoneDropdown()">
     <span class="flag" id="phone-flag">🇺🇸</span>
     <span class="code" id="phone-code">+1</span>
-    <span class="material-symbols-outlined">expand_more</span>
+    <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-expand_more"/></svg>
   </button>
   <div class="phone-dropdown" id="phone-dropdown">
     <div class="phone-dropdown-search">
@@ -322,13 +318,13 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 <div class="form-row">
 <div class="form-group">
-<label><span class="material-symbols-outlined">public</span>Country *</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-public"/></svg>Country *</label>
 <select id="reg-country" required class="form-select">
 <option value="">Select your country</option>
 </select>
 </div>
 <div class="form-group">
-<label><span class="material-symbols-outlined">location_city</span>City</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-location_city"/></svg>City</label>
 <select id="reg-city" class="form-select">
 <option value="">Select city</option>
 </select>
@@ -337,7 +333,7 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 <div class="form-row">
 <div class="form-group">
-<label><span class="material-symbols-outlined">signpost</span>Street / Area</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-signpost"/></svg>Street / Area</label>
 <select id="reg-street" class="form-select">
 <option value="">Select street / area</option>
 </select>
@@ -346,16 +342,16 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 <div class="form-row">
 <div class="form-group">
-<label><span class="material-symbols-outlined">lock</span>Password *</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>Password *</label>
 <input type="password" id="reg-password" required placeholder="Min 8 chars + 1 number"/>
 </div>
 <div class="form-group">
-<label><span class="material-symbols-outlined">lock</span>Confirm Password *</label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>Confirm Password *</label>
 <input type="password" id="reg-confirm" required placeholder="Re-enter password"/>
 </div>
 </div>
 <div class="form-group">
-<label><span class="material-symbols-outlined">confirmation_number</span>Promo Code <span style="font-weight:400;color:var(--text-light)">(optional)</span></label>
+<label><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-confirmation_number"/></svg>Promo Code <span style="font-weight:400;color:var(--text-light)">(optional)</span></label>
 <div class="promo-row">
 <input type="text" id="promo-code" placeholder="Enter promo code" maxlength="50" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/>
 <button type="button" class="btn-apply" onclick="applyPromo()">Apply</button>
@@ -367,21 +363,21 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 <label for="reg-terms">I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></label>
 </div>
 <div class="alert-error" id="step2-err">
-<span class="material-symbols-outlined">error</span>
+<svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
 <span id="step2-err-text"></span>
 </div>
 <div class="form-actions">
 <button type="button" class="btn-back" onclick="goToStep(1)">
-<span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> Back
+<svg class="material-symbols-outlined" style="font-size:18px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_back"/></svg> Back
 </button>
 <button type="button" class="btn-next" id="btn-step2-next" onclick="proceedFromStep2()">
 <span id="step2-btn-text">Continue to Payment</span>
-<span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+<svg class="material-symbols-outlined" style="font-size:18px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
 </button>
 </div>
 </div>
 <div class="summary-card">
-<div class="summary-title"><span class="material-symbols-outlined">receipt_long</span>Order Summary</div>
+<div class="summary-title"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>Order Summary</div>
 <div id="summary-2"></div>
 </div>
 </div>
@@ -393,36 +389,36 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 <p style="font-size:14px;color:var(--text-light);margin-bottom:28px">Secure &amp; encrypted &mdash; your data is safe</p>
 <div id="free-plan-section" style="display:none">
 <div class="free-card">
-<span class="material-symbols-outlined">check_circle</span>
+<svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>
 <h3 id="free-section-title">No Payment Required</h3>
 <p id="free-section-desc">Your selected plan is free &mdash; no credit card needed.</p>
 <button class="btn-free-create" id="btn-free-create" onclick="createAccount('free',{})">
 <span id="free-btn-txt">Create My Account</span>
-<span id="free-spinner" style="display:none" class="material-symbols-outlined spin">progress_activity</span>
+<svg id="free-spinner" style="display:none" class="material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
 </button>
 </div>
 </div>
 <div id="paid-plan-section" style="display:none" class="payment-section">
 <div class="gw-card" id="flw-card" style="display:none">
 <div class="gw-header">
-<div class="gw-icon flw"><span class="material-symbols-outlined">credit_card</span></div>
+<div class="gw-icon flw"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-credit_card"/></svg></div>
 <div><div class="gw-name">Card / Mobile Money</div><div class="gw-desc">Visa, Mastercard, Verve, USSD, Mobile Money</div></div>
 </div>
 <button class="btn-gw-pay flw" id="flw-pay-btn" onclick="payWithFlutterwave()">
-<span class="material-symbols-outlined" style="font-size:20px">credit_card</span>
+<svg class="material-symbols-outlined" style="font-size:20px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-credit_card"/></svg>
 <span id="flw-pay-txt">Pay with Flutterwave</span>
 </button>
 </div>
 <div class="gw-card" id="pp-card" style="display:none">
 <div class="gw-header">
-<div class="gw-icon pp"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+<div class="gw-icon pp"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-account_balance_wallet"/></svg></div>
 <div><div class="gw-name">PayPal</div><div class="gw-desc">Pay with PayPal balance or linked card</div></div>
 </div>
-<div id="paypal-btn-container"><div style="text-align:center;padding:14px;color:var(--text-light);font-size:13px"><span class="material-symbols-outlined spin" style="display:block;margin-bottom:6px">progress_activity</span>Loading PayPal&hellip;</div></div>
+<div id="paypal-btn-container"><div style="text-align:center;padding:14px;color:var(--text-light);font-size:13px"><svg class="material-symbols-outlined spin" style="display:block;margin-bottom:6px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading PayPal&hellip;</div></div>
 </div>
 <div class="gw-card" id="bt-card" style="display:none">
 <div class="gw-header">
-<div class="gw-icon" style="background:rgba(16,185,129,0.12);color:#10b981"><span class="material-symbols-outlined">account_balance</span></div>
+<div class="gw-icon" style="background:rgba(16,185,129,0.12);color:#10b981"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-account_balance"/></svg></div>
 <div><div class="gw-name">Bank Transfer</div><div class="gw-desc">Pay via direct bank transfer</div></div>
 </div>
 <div id="bt-details" style="padding:12px 16px;font-size:13px;color:var(--text-light);line-height:1.7">
@@ -430,32 +426,32 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 <p style="margin:0;font-size:12px;color:var(--text-muted)">Transfer the exact amount shown in your order summary. Your account will be activated once payment is confirmed (usually within 24 hours).</p>
 </div>
 <button class="btn-gw-pay" id="bt-pay-btn" onclick="payWithBankTransfer()" style="background:#10b981;color:#fff">
-<span class="material-symbols-outlined" style="font-size:20px">check_circle</span>
+<svg class="material-symbols-outlined" style="font-size:20px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>
 <span id="bt-pay-txt">I've Completed the Transfer</span>
 </button>
 </div>
 <div class="gw-card" id="cp-card" style="display:none">
 <div class="gw-header">
-<div class="gw-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6"><span class="material-symbols-outlined">payments</span></div>
+<div class="gw-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg></div>
 <div><div class="gw-name">ClickPesa</div><div class="gw-desc">Pay via mobile money, bank, or card (East Africa)</div></div>
 </div>
 <button class="btn-gw-pay" id="cp-pay-btn" onclick="payWithClickPesa()" style="background:#3b82f6;color:#fff">
-<span class="material-symbols-outlined" style="font-size:20px">payments</span>
+<svg class="material-symbols-outlined" style="font-size:20px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>
 <span id="cp-pay-txt">Pay with ClickPesa</span>
 </button>
 </div>
 <div class="no-gw-msg" id="no-gw-msg">No payment gateways configured. Please contact support.</div>
 </div>
 <div class="alert-error" id="step3-err" style="margin-top:16px">
-<span class="material-symbols-outlined">error</span>
+<svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
 <span id="step3-err-text"></span>
 </div>
 <button class="step3-back" onclick="goToStep(2)">
-<span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> Back to details
+<svg class="material-symbols-outlined" style="font-size:18px" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_back"/></svg> Back to details
 </button>
 </div>
 <div class="summary-card">
-<div class="summary-title"><span class="material-symbols-outlined">receipt_long</span>Order Summary</div>
+<div class="summary-title"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>Order Summary</div>
 <div id="summary-3"></div>
 <div class="guarantee">
 <strong>30-Day Money-Back Guarantee</strong><br/>If you're not 100% satisfied, we'll refund every penny.
@@ -465,10 +461,10 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 <div class="step-panel" id="step-success">
 <div class="success-wrap">
-<div class="success-circle"><span class="material-symbols-outlined">check_circle</span></div>
+<div class="success-circle"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg></div>
 <h2>You're all set!</h2>
 <p>Your account and digital menu have been created successfully.</p>
-<div class="redirect-notice"><span class="material-symbols-outlined spin">progress_activity</span> Taking you to your dashboard&hellip;</div>
+<div class="redirect-notice"><svg class="material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Taking you to your dashboard&hellip;</div>
 </div>
 </div>
 </div>
@@ -709,7 +705,7 @@ function renderPlans(){
     else if(isPopular)tag='<div class="plan-tag">SAVE $720/year</div>';
     else if(p.name==="enterprise")tag='<div class="plan-tag">SAVE $1,800/year</div>';
     var featItems=feats.slice(0,5).map(function(f){
-      return '<li><span class="material-symbols-outlined feat-icon">check_circle</span>'+eh(f)+'</li>';
+      return '<li><svg class="material-symbols-outlined feat-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>'+eh(f)+'</li>';
     }).join("");
     html+='<div class="plan-card'+(isPopular?" popular-card":"")+'" id="pcard-'+p.id+'" onclick="selectPlan('+p.id+')">';
     html+=badge;
@@ -759,7 +755,7 @@ window.applyPromo=async function(){
 function showPromoMsg(ok,msg){
   var d=el("promo-msg");d.style.display="flex";
   d.className="promo-msg "+(ok?"ok":"err");
-  d.innerHTML='<span class="material-symbols-outlined">'+( ok?"check_circle":"cancel")+'</span> '+eh(msg);
+  d.innerHTML='<svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-'+( ok?"check_circle":"cancel")+'"/></svg> '+eh(msg);
 }
 function computeEffectivePrice(){
   if(!selectedPlan){effectivePrice=0;return;}
@@ -782,14 +778,14 @@ function renderSummary(targetId){
   h+='<hr class="summary-divider"/>';
   h+='<div class="summary-total-row"><span class="summary-total-label">Due Today</span><span class="summary-total-amount">$'+effectivePrice.toFixed(2)+'</span></div>';
   if(effectivePrice===0)h+='<div class="summary-free-badge">? Free ô no payment needed</div>';
-  h+='<div class="summary-features">'+feats.slice(0,4).map(function(f){return '<div class="summary-feat"><span class="material-symbols-outlined">check_circle</span>'+eh(f)+'</div>';}).join("")+'</div>';
+  h+='<div class="summary-features">'+feats.slice(0,4).map(function(f){return '<div class="summary-feat"><svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>'+eh(f)+'</div>';}).join("")+'</div>';
   el(targetId).innerHTML=h;
 }
 window.goToStep=function(step){
   [1,2,3].forEach(function(s){
     el("step-"+s).classList.remove("visible");
     var dot=el("dot-"+s);var lbl=el("lbl-"+s);
-    if(s<step){dot.className="step-dot done";dot.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:\"FILL\" 1">check</span>';}
+    if(s<step){dot.className="step-dot done";dot.innerHTML='<svg class="material-symbols-outlined" style="font-size:18px;font-variation-settings:\"FILL\" 1" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check"/></svg>';}
     else if(s===step){dot.className="step-dot active";dot.textContent=s;if(lbl)lbl.className="step-label active-label";}
     else{dot.className="step-dot pending";dot.textContent=s;if(lbl)lbl.className="step-label";}
   });
@@ -1054,5 +1050,6 @@ async function registerWithGoogle() {
   }
 }
 </script>
+<script src="/js/icons.js"></script>
 </body>
 </html>

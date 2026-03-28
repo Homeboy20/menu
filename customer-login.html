@@ -7,11 +7,7 @@
 <title>Sign In — RestOrder</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -55,7 +51,7 @@
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
     <a href="/" class="flex items-center gap-3 text-decoration-none">
       <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
-        <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+        <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       </div>
       <div>
         <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
@@ -77,7 +73,7 @@
     <!-- Logo & Title -->
     <div class="text-center mb-8">
       <div class="size-16 rounded-2xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
-        <span class="material-symbols-outlined text-[32px]">restaurant_menu</span>
+        <svg class="material-symbols-outlined text-[32px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       </div>
       <h2 class="text-3xl font-bold mb-2 text-stone-900">Welcome Back</h2>
       <p class="text-stone-600">Sign in to your RestOrder account</p>
@@ -88,7 +84,7 @@
       <form id="login-form" class="space-y-6">
         <div>
           <label class="block text-sm font-medium text-stone-700 mb-2">
-            <span class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary">email</span>
+            <svg class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-email"/></svg>
             Email Address
           </label>
           <input id="email" type="email" required placeholder="you@restaurant.com" autocomplete="email"
@@ -97,7 +93,7 @@
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="block text-sm font-medium text-stone-700">
-              <span class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary">lock</span>
+              <svg class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
               Password
             </label>
             <a href="#" class="text-xs text-primary hover:underline">Forgot password?</a>
@@ -112,19 +108,19 @@
         </div>
         <div id="error-message" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl">
           <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined text-red-600 text-[20px]">error</span>
+            <svg class="material-symbols-outlined text-red-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
             <p class="text-sm text-red-700" id="error-text"></p>
           </div>
         </div>
         <!-- Role detected badge � shown after successful lookup -->
         <div id="role-badge" class="hidden p-3 bg-stone-50 border border-stone-200 rounded-xl flex items-center gap-3">
-          <span class="material-symbols-outlined text-primary text-[20px]" id="role-icon">person</span>
+          <svg class="material-symbols-outlined text-primary text-[20px]" id="role-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-person"/></svg>
           <p class="text-sm font-medium text-stone-700" id="role-text"></p>
         </div>
         <button type="submit" id="submit-btn"
           class="w-full px-6 py-3.5 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
           <span id="submit-text">Sign In</span>
-          <span id="submit-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+          <svg id="submit-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
         </button>
       </form>
 
@@ -142,14 +138,14 @@
         style="display:none">
         <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         <span id="google-btn-text">Sign in with Google</span>
-        <span id="google-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+        <svg id="google-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
       </button>
 
       <!-- Phone OTP Sign-In -->
       <button id="phone-btn" onclick="showPhoneSignIn()"
         class="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition"
         style="display:none">
-        <span class="material-symbols-outlined text-[18px] text-primary">phone</span>
+        <svg class="material-symbols-outlined text-[18px] text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-phone"/></svg>
         <span>Sign in with Phone</span>
       </button>
 
@@ -161,7 +157,7 @@
           <button onclick="sendPhoneOTP()" id="send-otp-btn"
             class="px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition flex items-center gap-1">
             <span id="send-otp-text">Send OTP</span>
-            <span id="otp-spinner" class="hidden material-symbols-outlined spin text-[16px]">progress_activity</span>
+            <svg id="otp-spinner" class="hidden material-symbols-outlined spin text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
           </button>
         </div>
         <div id="otp-section" class="hidden space-y-3">
@@ -170,7 +166,7 @@
           <button onclick="verifyPhoneOTP()" id="verify-otp-btn"
             class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition flex items-center justify-center gap-2">
             <span id="verify-otp-text">Verify &amp; Sign In</span>
-            <span id="verify-spinner" class="hidden material-symbols-outlined spin">progress_activity</span>
+            <svg id="verify-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
           </button>
         </div>
         <div id="recaptcha-container"></div>
@@ -416,5 +412,6 @@ async function handleFirebaseToken(idToken) {
 }
 </script>
 
+<script src="/js/icons.js"></script>
 </body>
 </html>

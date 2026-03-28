@@ -9,9 +9,6 @@
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
-<script>(function(){var h=document.documentElement;function s(){h.classList.add('fonts-loaded')}if(!document.fonts){setTimeout(s,3000);return}function t(){document.fonts.load('24px "Material Symbols Outlined"').then(function(f){f.length?s():setTimeout(t,100)}).catch(function(){setTimeout(t,100)})}t();setTimeout(s,5000)})();</script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
   tailwind.config = {
@@ -43,13 +40,13 @@
 <div class="relative flex min-h-screen w-full flex-col group/design-root">
 <div class="flex items-center p-4 pb-2 justify-between sticky top-0 z-10 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-b border-primary/10">
 <div class="flex size-12 shrink-0 items-center justify-center text-slate-700 dark:text-slate-300">
-<span class="material-symbols-outlined text-2xl">menu</span>
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-menu"/></svg>
 </div>
 <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Dashboard</h2>
 <div class="flex size-12 shrink-0 items-center justify-center text-slate-700 dark:text-slate-300">
-<span class="material-symbols-outlined text-2xl relative">
-        notifications
-        <span class="absolute top-0 right-0 size-2.5 bg-primary rounded-full border border-background-light dark:border-background-dark"></span>
+<span class="relative inline-flex items-center justify-center">
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-notifications"/></svg>
+<span class="absolute top-0 right-0 size-2.5 bg-primary rounded-full border border-background-light dark:border-background-dark"></span>
 </span>
 </div>
 </div>
@@ -62,21 +59,21 @@
 <div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
 <div class="flex items-center justify-between">
 <p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Total Items</p>
-<span class="material-symbols-outlined text-primary/80 text-lg">restaurant_menu</span>
+<svg class="material-symbols-outlined text-primary/80 text-lg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
 </div>
 <p class="tracking-tight text-3xl font-bold leading-tight mt-1">142</p>
 </div>
 <div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
 <div class="flex items-center justify-between">
 <p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Categories</p>
-<span class="material-symbols-outlined text-primary/80 text-lg">category</span>
+<svg class="material-symbols-outlined text-primary/80 text-lg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-category"/></svg>
 </div>
 <p class="tracking-tight text-3xl font-bold leading-tight mt-1">12</p>
 </div>
 <div class="flex min-w-[140px] flex-col gap-2 rounded-xl p-5 bg-white dark:bg-primary/5 border border-primary/10 shadow-sm snap-start shrink-0">
 <div class="flex items-center justify-between">
 <p class="text-sm font-medium leading-normal text-slate-600 dark:text-slate-400">Recent</p>
-<span class="material-symbols-outlined text-primary/80 text-lg">update</span>
+<svg class="material-symbols-outlined text-primary/80 text-lg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-update"/></svg>
 </div>
 <p class="tracking-tight text-3xl font-bold leading-tight mt-1">5</p>
 </div>
@@ -86,17 +83,17 @@
 </div>
 <div class="px-4 py-2">
 <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-12 px-4 bg-primary text-background-dark text-base font-semibold leading-normal tracking-wide shadow-md shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all">
-<span class="material-symbols-outlined text-[20px]">file_upload</span>
+<svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-file_upload"/></svg>
 <span>Import Menu</span>
 </button>
 </div>
 <div class="flex gap-3 px-4 py-2">
 <button class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl h-11 px-3 bg-white dark:bg-primary/10 border border-primary/20 text-slate-800 dark:text-primary text-sm font-semibold leading-normal hover:bg-primary/5 active:scale-[0.98] transition-all">
-<span class="material-symbols-outlined text-[18px]">add</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add"/></svg>
 <span>Add Item</span>
 </button>
 <button class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl h-11 px-3 bg-white dark:bg-primary/10 border border-primary/20 text-slate-800 dark:text-primary text-sm font-semibold leading-normal hover:bg-primary/5 active:scale-[0.98] transition-all">
-<span class="material-symbols-outlined text-[18px]">folder_managed</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-folder_managed"/></svg>
 <span>Categories</span>
 </button>
 </div>
@@ -113,10 +110,10 @@
 </div>
 <div class="flex gap-1 shrink-0">
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">edit</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
 </button>
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">delete</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-delete"/></svg>
 </button>
 </div>
 </div>
@@ -128,10 +125,10 @@
 </div>
 <div class="flex gap-1 shrink-0">
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">edit</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
 </button>
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">delete</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-delete"/></svg>
 </button>
 </div>
 </div>
@@ -143,10 +140,10 @@
 </div>
 <div class="flex gap-1 shrink-0">
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-primary hover:bg-primary/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">edit</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
 </button>
 <button class="size-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors">
-<span class="material-symbols-outlined text-[18px]">delete</span>
+<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-delete"/></svg>
 </button>
 </div>
 </div>
@@ -155,19 +152,19 @@
 <div class="fixed bottom-0 left-0 w-full bg-background-light dark:bg-background-dark border-t border-primary/10 pb-safe">
 <div class="flex justify-around items-center h-16 px-2">
 <button class="flex flex-col items-center justify-center w-16 h-full text-primary">
-<span class="material-symbols-outlined text-2xl">dashboard</span>
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>
 <span class="text-[10px] font-medium mt-1">Home</span>
 </button>
 <button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">restaurant_menu</span>
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
 <span class="text-[10px] font-medium mt-1">Menu</span>
 </button>
 <button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">receipt_long</span>
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
 <span class="text-[10px] font-medium mt-1">Orders</span>
 </button>
 <button class="flex flex-col items-center justify-center w-16 h-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
-<span class="material-symbols-outlined text-2xl">settings</span>
+<svg class="material-symbols-outlined text-2xl" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-settings"/></svg>
 <span class="text-[10px] font-medium mt-1">Settings</span>
 </button>
 </div>
@@ -189,4 +186,5 @@
     }
   }
 </style>
+<script src="/js/icons.js"></script>
 </body></html>
