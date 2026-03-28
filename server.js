@@ -13,6 +13,7 @@ const helmet       = require('helmet');
 const rateLimit    = require('express-rate-limit');
 const bcrypt       = require('bcrypt');
 const sharp        = require('sharp');
+const https        = require('https');
 const cookieParser = require('cookie-parser');
 const { doubleCsrf } = require('csrf-csrf');
 const validator    = require('validator');
@@ -457,6 +458,38 @@ app.get('/menu', async (req, res, next) => {
   }
   
   res.sendFile(path.join(__dirname, 'menu.html'));
+});
+
+// ── Firebase Auth Handler Proxy ──────────────────────────────────────────────
+// When authDomain is set to the custom domain (restorder.online), Firebase SDK
+// opens /__/auth/handler on this origin. Proxy those requests to Firebase Hosting.
+app.all('/__/auth/*', (req, res) => {
+  const firebaseProject = process.env.FIREBASE_PROJECT_ID || 'restorder-d70f5';
+  const target = `${firebaseProject}.firebaseapp.com`;
+  const proxyPath = req.originalUrl;
+  const options = {
+    hostname: target,
+    port: 443,
+    path: proxyPath,
+    method: req.method,
+    headers: {
+      ...req.headers,
+      host: target,
+    },
+  };
+  const proxyReq = https.request(options, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res, { end: true });
+  });
+  proxyReq.on('error', (err) => {
+    console.error('Firebase auth proxy error:', err.message);
+    res.status(502).send('Firebase auth proxy error');
+  });
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    req.pipe(proxyReq, { end: true });
+  } else {
+    proxyReq.end();
+  }
 });
 
 // Static file caching and optimization
@@ -1496,7 +1529,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.26'
+    version: '1.54.27'
   });
 });
 
@@ -2924,7 +2957,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.26' 
+      version: '1.54.27' 
     });
   } catch (err) {
     res.status(500).json({ 
