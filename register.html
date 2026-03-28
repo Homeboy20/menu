@@ -13,6 +13,43 @@
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
+/* Phone input with country code */
+.phone-input-wrap{display:flex;gap:0;position:relative;}
+.phone-country-btn{display:flex;align-items:center;gap:6px;padding:12px 12px;background:#fff;border:2px solid var(--border);border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);cursor:pointer;font-size:14px;min-width:90px;transition:all 0.2s;}
+.phone-country-btn:hover{background:#f5f5f4;}
+.phone-country-btn:focus{outline:none;border-color:var(--primary);z-index:2;}
+.phone-country-btn .flag{font-size:20px;line-height:1;}
+.phone-country-btn .code{font-weight:600;color:var(--text);}
+.phone-country-btn .material-symbols-outlined{font-size:16px;color:var(--text-light);margin-left:auto;}
+.phone-input-wrap input[type="tel"]{flex:1;border-radius:0 var(--radius-sm) var(--radius-sm) 0;border-left:1px solid var(--border);}
+.phone-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);max-height:280px;overflow-y:auto;z-index:100;display:none;margin-top:4px;}
+.phone-dropdown.open{display:block;}
+.phone-dropdown-search{padding:10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;}
+.phone-dropdown-search input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);font-size:13px;}
+.phone-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.15s;}
+.phone-dropdown-item:hover{background:#f5f5f4;}
+.phone-dropdown-item.selected{background:#fff8f5;}
+.phone-dropdown-item .flag{font-size:18px;}
+.phone-dropdown-item .name{flex:1;font-size:13px;color:var(--text);}
+.phone-dropdown-item .dial{font-size:13px;font-weight:600;color:var(--text-light);}
+
+/* Google sign-up button - redesigned */
+.google-signup-section{margin-bottom:24px;}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px 24px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);font-size:15px;font-weight:700;color:var(--text);cursor:pointer;transition:all 0.25s;font-family:inherit;position:relative;overflow:hidden;}
+.google-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(66,133,244,0.04),rgba(52,168,83,0.04),rgba(251,188,5,0.04),rgba(234,67,53,0.04));opacity:0;transition:opacity 0.3s;}
+.google-btn:hover{border-color:#d1d5db;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+.google-btn:hover::before{opacity:1;}
+.google-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+.google-btn .btn-text{transition:opacity 0.2s;}
+.google-btn .spinner{display:none;animation:spin 1s linear infinite;}
+.google-btn.loading .btn-text{opacity:0;}
+.google-btn.loading .spinner{display:inline-block;position:absolute;}
+.google-divider{display:flex;align-items:center;gap:16px;margin:20px 0;color:var(--text-light);font-size:13px;}
+.google-divider::before,.google-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.google-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-xs);padding:12px 14px;margin-top:12px;font-size:13px;color:#dc2626;}
+.google-error.show{display:block;}
+
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --primary:#c2410c;--primary-dark:#9a3412;--primary-light:#ea580c;
@@ -231,18 +268,20 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 <h2 class="form-title">Your Details</h2>
 <p class="form-subtitle">Tell us about your restaurant to get started</p>
 
-<!-- Google quick-start -->
-<button id="reg-google-btn" onclick="registerWithGoogle()" style="display:none"
-  class="w-full flex items-center justify-center gap-3 px-5 py-3 border border-stone-300 rounded-2xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition mb-2">
-  <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-  <span id="reg-google-text">Sign up with Google</span>
-  <span id="reg-google-spinner" class="material-symbols-outlined hidden" style="animation:spin 1s linear infinite;font-size:16px">progress_activity</span>
+<!-- Google quick-start - redesigned -->
+<div class="google-signup-section" id="google-signup-section" style="display:none">
+<button type="button" id="reg-google-btn" onclick="registerWithGoogle()" class="google-btn">
+  <svg width="20" height="20" viewBox="0 0 48 48">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+  </svg>
+  <span class="btn-text" id="reg-google-text">Continue with Google</span>
+  <span class="material-symbols-outlined spinner">progress_activity</span>
 </button>
-<div id="reg-google-err" class="hidden mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
-<div id="reg-google-divider" style="display:none" class="relative flex items-center gap-3 my-4">
-  <div class="flex-1 border-t border-stone-200"></div>
-  <span class="text-xs text-stone-400 shrink-0">or fill the form</span>
-  <div class="flex-1 border-t border-stone-200"></div>
+<div id="reg-google-err" class="google-error"></div>
+<div class="google-divider" id="reg-google-divider">or continue with email</div>
 </div>
 
 <div class="form-row">
@@ -262,7 +301,21 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 </div>
 <div class="form-group">
 <label><span class="material-symbols-outlined">phone</span>Phone Number</label>
-<input type="tel" id="reg-phone" placeholder="+1 (555) 123-4567"/>
+<div class="phone-input-wrap">
+  <button type="button" class="phone-country-btn" id="phone-country-btn" onclick="togglePhoneDropdown()">
+    <span class="flag" id="phone-flag">🇺🇸</span>
+    <span class="code" id="phone-code">+1</span>
+    <span class="material-symbols-outlined">expand_more</span>
+  </button>
+  <div class="phone-dropdown" id="phone-dropdown">
+    <div class="phone-dropdown-search">
+      <input type="text" id="phone-search" placeholder="Search country..." oninput="filterPhoneCountries(this.value)"/>
+    </div>
+    <div id="phone-dropdown-list"></div>
+  </div>
+  <input type="tel" id="reg-phone" placeholder="555 123 4567"/>
+</div>
+<input type="hidden" id="reg-phone-full"/>
 </div>
 </div>
 <div class="form-row">
@@ -423,21 +476,128 @@ Secure checkout &nbsp;&middot;&nbsp; No setup fees &nbsp;&middot;&nbsp; Cancel a
 (function(){
 "use strict";
 var plans=[],selectedPlan=null,promoData=null,effectivePrice=0,urlPromoParam="";
-var flwPublicKey="",paypalClientId="",bankTransferData=null,clickpesaData=null,ppRendered=false,csrfToken="",detectedCountry="";
+var flwPublicKey="",paypalClientId="",bankTransferData=null,clickpesaData=null,ppRendered=false,csrfToken="",detectedCountry="",selectedPhoneCountry="US";
 var COUNTRIES=[
 ["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AO","Angola"],["AR","Argentina"],["AU","Australia"],["AT","Austria"],["BH","Bahrain"],["BD","Bangladesh"],["BE","Belgium"],["BJ","Benin"],["BW","Botswana"],["BR","Brazil"],["BF","Burkina Faso"],["BI","Burundi"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CO","Colombia"],["KM","Comoros"],["CG","Congo"],["CD","Congo (DRC)"],["CR","Costa Rica"],["CI","Côte d'Ivoire"],["HR","Croatia"],["CZ","Czech Republic"],["DK","Denmark"],["DJ","Djibouti"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["ET","Ethiopia"],["FI","Finland"],["FR","France"],["GA","Gabon"],["GM","Gambia"],["DE","Germany"],["GH","Ghana"],["GR","Greece"],["GT","Guatemala"],["GN","Guinea"],["HK","Hong Kong"],["HU","Hungary"],["IN","India"],["ID","Indonesia"],["IQ","Iraq"],["IE","Ireland"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JO","Jordan"],["KE","Kenya"],["KW","Kuwait"],["LB","Lebanon"],["LR","Liberia"],["LY","Libya"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["ML","Mali"],["MR","Mauritania"],["MU","Mauritius"],["MX","Mexico"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NP","Nepal"],["NL","Netherlands"],["NZ","New Zealand"],["NE","Niger"],["NG","Nigeria"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PL","Poland"],["PT","Portugal"],["QA","Qatar"],["RO","Romania"],["RW","Rwanda"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SL","Sierra Leone"],["SG","Singapore"],["SK","Slovakia"],["SI","Slovenia"],["SO","Somalia"],["ZA","South Africa"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SE","Sweden"],["CH","Switzerland"],["TW","Taiwan"],["TZ","Tanzania"],["TH","Thailand"],["TG","Togo"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TR","Turkey"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UY","Uruguay"],["VN","Vietnam"],["ZM","Zambia"],["ZW","Zimbabwe"]
 ];
+// Phone country codes with flags (ISO code -> [dial code, flag emoji, country name])
+var PHONE_CODES={
+AF:["+93","🇦🇫","Afghanistan"],AL:["+355","🇦🇱","Albania"],DZ:["+213","🇩🇿","Algeria"],AO:["+244","🇦🇴","Angola"],
+AR:["+54","🇦🇷","Argentina"],AU:["+61","🇦🇺","Australia"],AT:["+43","🇦🇹","Austria"],BH:["+973","🇧🇭","Bahrain"],
+BD:["+880","🇧🇩","Bangladesh"],BE:["+32","🇧🇪","Belgium"],BJ:["+229","🇧🇯","Benin"],BW:["+267","🇧🇼","Botswana"],
+BR:["+55","🇧🇷","Brazil"],BF:["+226","🇧🇫","Burkina Faso"],BI:["+257","🇧🇮","Burundi"],KH:["+855","🇰🇭","Cambodia"],
+CM:["+237","🇨🇲","Cameroon"],CA:["+1","🇨🇦","Canada"],CF:["+236","🇨🇫","Central African Republic"],TD:["+235","🇹🇩","Chad"],
+CL:["+56","🇨🇱","Chile"],CN:["+86","🇨🇳","China"],CO:["+57","🇨🇴","Colombia"],KM:["+269","🇰🇲","Comoros"],
+CG:["+242","🇨🇬","Congo"],CD:["+243","🇨🇩","Congo (DRC)"],CR:["+506","🇨🇷","Costa Rica"],CI:["+225","🇨🇮","Côte d'Ivoire"],
+HR:["+385","🇭🇷","Croatia"],CZ:["+420","🇨🇿","Czech Republic"],DK:["+45","🇩🇰","Denmark"],DJ:["+253","🇩🇯","Djibouti"],
+DO:["+1","🇩🇴","Dominican Republic"],EC:["+593","🇪🇨","Ecuador"],EG:["+20","🇪🇬","Egypt"],SV:["+503","🇸🇻","El Salvador"],
+GQ:["+240","🇬🇶","Equatorial Guinea"],ER:["+291","🇪🇷","Eritrea"],ET:["+251","🇪🇹","Ethiopia"],FI:["+358","🇫🇮","Finland"],
+FR:["+33","🇫🇷","France"],GA:["+241","🇬🇦","Gabon"],GM:["+220","🇬🇲","Gambia"],DE:["+49","🇩🇪","Germany"],
+GH:["+233","🇬🇭","Ghana"],GR:["+30","🇬🇷","Greece"],GT:["+502","🇬🇹","Guatemala"],GN:["+224","🇬🇳","Guinea"],
+HK:["+852","🇭🇰","Hong Kong"],HU:["+36","🇭🇺","Hungary"],IN:["+91","🇮🇳","India"],ID:["+62","🇮🇩","Indonesia"],
+IQ:["+964","🇮🇶","Iraq"],IE:["+353","🇮🇪","Ireland"],IL:["+972","🇮🇱","Israel"],IT:["+39","🇮🇹","Italy"],
+JM:["+1","🇯🇲","Jamaica"],JP:["+81","🇯🇵","Japan"],JO:["+962","🇯🇴","Jordan"],KE:["+254","🇰🇪","Kenya"],
+KW:["+965","🇰🇼","Kuwait"],LB:["+961","🇱🇧","Lebanon"],LR:["+231","🇱🇷","Liberia"],LY:["+218","🇱🇾","Libya"],
+MG:["+261","🇲🇬","Madagascar"],MW:["+265","🇲🇼","Malawi"],MY:["+60","🇲🇾","Malaysia"],ML:["+223","🇲🇱","Mali"],
+MR:["+222","🇲🇷","Mauritania"],MU:["+230","🇲🇺","Mauritius"],MX:["+52","🇲🇽","Mexico"],MA:["+212","🇲🇦","Morocco"],
+MZ:["+258","🇲🇿","Mozambique"],MM:["+95","🇲🇲","Myanmar"],NA:["+264","🇳🇦","Namibia"],NP:["+977","🇳🇵","Nepal"],
+NL:["+31","🇳🇱","Netherlands"],NZ:["+64","🇳🇿","New Zealand"],NE:["+227","🇳🇪","Niger"],NG:["+234","🇳🇬","Nigeria"],
+NO:["+47","🇳🇴","Norway"],OM:["+968","🇴🇲","Oman"],PK:["+92","🇵🇰","Pakistan"],PA:["+507","🇵🇦","Panama"],
+PG:["+675","🇵🇬","Papua New Guinea"],PY:["+595","🇵🇾","Paraguay"],PE:["+51","🇵🇪","Peru"],PH:["+63","🇵🇭","Philippines"],
+PL:["+48","🇵🇱","Poland"],PT:["+351","🇵🇹","Portugal"],QA:["+974","🇶🇦","Qatar"],RO:["+40","🇷🇴","Romania"],
+RW:["+250","🇷🇼","Rwanda"],SA:["+966","🇸🇦","Saudi Arabia"],SN:["+221","🇸🇳","Senegal"],RS:["+381","🇷🇸","Serbia"],
+SL:["+232","🇸🇱","Sierra Leone"],SG:["+65","🇸🇬","Singapore"],SK:["+421","🇸🇰","Slovakia"],SI:["+386","🇸🇮","Slovenia"],
+SO:["+252","🇸🇴","Somalia"],ZA:["+27","🇿🇦","South Africa"],SS:["+211","🇸🇸","South Sudan"],ES:["+34","🇪🇸","Spain"],
+LK:["+94","🇱🇰","Sri Lanka"],SD:["+249","🇸🇩","Sudan"],SE:["+46","🇸🇪","Sweden"],CH:["+41","🇨🇭","Switzerland"],
+TW:["+886","🇹🇼","Taiwan"],TZ:["+255","🇹🇿","Tanzania"],TH:["+66","🇹🇭","Thailand"],TG:["+228","🇹🇬","Togo"],
+TT:["+1","🇹🇹","Trinidad and Tobago"],TN:["+216","🇹🇳","Tunisia"],TR:["+90","🇹🇷","Turkey"],UG:["+256","🇺🇬","Uganda"],
+UA:["+380","🇺🇦","Ukraine"],AE:["+971","🇦🇪","United Arab Emirates"],GB:["+44","🇬🇧","United Kingdom"],US:["+1","🇺🇸","United States"],
+UY:["+598","🇺🇾","Uruguay"],VN:["+84","🇻🇳","Vietnam"],ZM:["+260","🇿🇲","Zambia"],ZW:["+263","🇿🇼","Zimbabwe"]
+};
+// Initialize phone dropdown list
+function initPhoneDropdown(){
+  var list=el("phone-dropdown-list");if(!list)return;
+  var html="";
+  Object.keys(PHONE_CODES).sort(function(a,b){return PHONE_CODES[a][2].localeCompare(PHONE_CODES[b][2]);})
+    .forEach(function(code){
+      var p=PHONE_CODES[code];
+      html+='<div class="phone-dropdown-item" data-code="'+code+'" onclick="selectPhoneCountry(\''+code+'\')">'+
+        '<span class="flag">'+p[1]+'</span>'+
+        '<span class="name">'+p[2]+'</span>'+
+        '<span class="dial">'+p[0]+'</span></div>';
+    });
+  list.innerHTML=html;
+}
+window.togglePhoneDropdown=function(){
+  var dd=el("phone-dropdown");
+  dd.classList.toggle("open");
+  if(dd.classList.contains("open")){
+    el("phone-search").value="";filterPhoneCountries("");el("phone-search").focus();
+    setTimeout(function(){document.addEventListener("click",closePhoneDropdownOutside);},10);
+  }
+};
+function closePhoneDropdownOutside(e){
+  var dd=el("phone-dropdown");var btn=el("phone-country-btn");
+  if(!dd.contains(e.target)&&!btn.contains(e.target)){
+    dd.classList.remove("open");document.removeEventListener("click",closePhoneDropdownOutside);
+  }
+}
+window.filterPhoneCountries=function(q){
+  q=q.toLowerCase();
+  var items=el("phone-dropdown-list").querySelectorAll(".phone-dropdown-item");
+  items.forEach(function(item){
+    var name=item.querySelector(".name").textContent.toLowerCase();
+    var dial=item.querySelector(".dial").textContent;
+    item.style.display=(name.indexOf(q)>-1||dial.indexOf(q)>-1)?"":"none";
+  });
+};
+window.selectPhoneCountry=function(code){
+  selectedPhoneCountry=code;
+  var p=PHONE_CODES[code];if(!p)return;
+  el("phone-flag").textContent=p[1];
+  el("phone-code").textContent=p[0];
+  el("phone-dropdown").classList.remove("open");
+  document.removeEventListener("click",closePhoneDropdownOutside);
+  updateFullPhone();
+  // Mark as selected
+  var items=el("phone-dropdown-list").querySelectorAll(".phone-dropdown-item");
+  items.forEach(function(item){item.classList.toggle("selected",item.dataset.code===code);});
+};
+function updateFullPhone(){
+  var phoneInput=el("reg-phone");var fullInput=el("reg-phone-full");
+  var p=PHONE_CODES[selectedPhoneCountry];
+  if(p&&phoneInput&&fullInput){
+    var num=phoneInput.value.replace(/\D/g,"");
+    fullInput.value=num?p[0]+num:"";
+  }
+}
+function setPhoneCountryFromDetected(){
+  if(detectedCountry&&PHONE_CODES[detectedCountry]){
+    selectPhoneCountry(detectedCountry);
+  }
+}
 var COUNTRY_CITIES={AF:["Kabul","Kandahar","Herat","Mazar-i-Sharif","Jalalabad"],AL:["Tirana","Durres","Vlore","Elbasan","Shkoder"],DZ:["Algiers","Oran","Constantine","Annaba","Blida"],AO:["Luanda","Huambo","Lobito","Benguela","Lubango"],AR:["Buenos Aires","Cordoba","Rosario","Mendoza","La Plata","Tucuman","Mar del Plata"],AU:["Sydney","Melbourne","Brisbane","Perth","Adelaide","Gold Coast","Canberra","Hobart","Darwin"],AT:["Vienna","Graz","Linz","Salzburg","Innsbruck"],BH:["Manama","Riffa","Muharraq","Hamad Town"],BD:["Dhaka","Chittagong","Khulna","Rajshahi","Sylhet","Rangpur"],BE:["Brussels","Antwerp","Ghent","Charleroi","Liege"],BJ:["Cotonou","Porto-Novo","Parakou","Djougou"],BW:["Gaborone","Francistown","Molepolole","Maun","Serowe"],BR:["Sao Paulo","Rio de Janeiro","Brasilia","Salvador","Fortaleza","Belo Horizonte","Manaus","Curitiba","Recife"],BF:["Ouagadougou","Bobo-Dioulasso","Koudougou","Banfora"],BI:["Bujumbura","Gitega","Muyinga","Ngozi","Rumonge"],KH:["Phnom Penh","Siem Reap","Battambang","Sihanoukville"],CM:["Douala","Yaounde","Bamenda","Bafoussam","Garoua","Maroua"],CA:["Toronto","Montreal","Vancouver","Calgary","Edmonton","Ottawa","Winnipeg","Quebec City","Hamilton","Halifax"],CF:["Bangui","Bimbo","Berberati","Carnot"],TD:["NDjamena","Moundou","Abeche","Sarh"],CL:["Santiago","Valparaiso","Concepcion","Antofagasta","Temuco"],CN:["Shanghai","Beijing","Guangzhou","Shenzhen","Chengdu","Hangzhou","Wuhan","Xian","Nanjing","Chongqing"],CO:["Bogota","Medellin","Cali","Barranquilla","Cartagena","Bucaramanga"],KM:["Moroni","Mutsamudu","Fomboni"],CG:["Brazzaville","Pointe-Noire","Dolisie","Nkayi"],CD:["Kinshasa","Lubumbashi","Mbuji-Mayi","Kisangani","Kananga","Bukavu","Goma"],CR:["San Jose","Alajuela","Cartago","Heredia"],CI:["Abidjan","Bouake","Daloa","Yamoussoukro","Korhogo"],HR:["Zagreb","Split","Rijeka","Osijek","Zadar"],CZ:["Prague","Brno","Ostrava","Plzen"],DK:["Copenhagen","Aarhus","Odense","Aalborg"],DJ:["Djibouti City","Ali Sabieh","Tadjoura","Obock","Dikhil"],DO:["Santo Domingo","Santiago","San Pedro de Macoris","La Romana"],EC:["Quito","Guayaquil","Cuenca","Machala","Ambato"],EG:["Cairo","Alexandria","Giza","Port Said","Suez","Luxor","Aswan","Mansoura"],SV:["San Salvador","Santa Ana","San Miguel","Mejicanos"],GQ:["Malabo","Bata","Ebebiyin"],ER:["Asmara","Keren","Massawa","Assab","Mendefera"],ET:["Addis Ababa","Dire Dawa","Mekelle","Gondar","Adama","Hawassa","Bahir Dar","Jimma","Dessie","Harar"],FI:["Helsinki","Espoo","Tampere","Vantaa","Oulu","Turku"],FR:["Paris","Marseille","Lyon","Toulouse","Nice","Nantes","Strasbourg","Bordeaux","Lille"],GA:["Libreville","Port-Gentil","Franceville","Oyem"],GM:["Banjul","Serekunda","Brikama","Bakau"],DE:["Berlin","Hamburg","Munich","Cologne","Frankfurt","Stuttgart","Dusseldorf","Leipzig","Dortmund"],GH:["Accra","Kumasi","Tamale","Takoradi","Cape Coast","Tema","Sunyani","Obuasi","Koforidua"],GR:["Athens","Thessaloniki","Patras","Heraklion","Larissa"],GT:["Guatemala City","Mixco","Villa Nueva","Quetzaltenango"],GN:["Conakry","Nzerekore","Kankan","Kindia"],HK:["Central","Tsim Sha Tsui","Wan Chai","Mong Kok","Causeway Bay","Kowloon"],HU:["Budapest","Debrecen","Szeged","Miskolc","Pecs"],IN:["Mumbai","Delhi","Bangalore","Hyderabad","Ahmedabad","Chennai","Kolkata","Pune","Jaipur","Lucknow","Surat","Kochi"],ID:["Jakarta","Surabaya","Bandung","Medan","Semarang","Makassar","Denpasar","Yogyakarta"],IQ:["Baghdad","Basra","Erbil","Mosul","Sulaymaniyah","Najaf"],IE:["Dublin","Cork","Limerick","Galway","Waterford"],IL:["Tel Aviv","Jerusalem","Haifa","Rishon LeZion","Beersheba"],IT:["Rome","Milan","Naples","Turin","Palermo","Genoa","Bologna","Florence","Venice"],JM:["Kingston","Montego Bay","Spanish Town","Portmore"],JP:["Tokyo","Osaka","Yokohama","Nagoya","Sapporo","Fukuoka","Kobe","Kyoto","Sendai"],JO:["Amman","Zarqa","Irbid","Aqaba","Madaba"],KE:["Nairobi","Mombasa","Kisumu","Nakuru","Eldoret","Thika","Malindi","Kitale","Garissa","Nyeri","Machakos","Meru","Lamu","Nanyuki","Naivasha"],KW:["Kuwait City","Hawalli","Salmiya","Farwaniya"],LB:["Beirut","Tripoli","Sidon","Tyre","Jounieh"],LR:["Monrovia","Gbarnga","Kakata","Buchanan"],LY:["Tripoli","Benghazi","Misrata","Sabha"],MG:["Antananarivo","Toamasina","Antsirabe","Fianarantsoa","Mahajanga"],MW:["Lilongwe","Blantyre","Mzuzu","Zomba","Mangochi","Karonga"],MY:["Kuala Lumpur","George Town","Johor Bahru","Ipoh","Shah Alam","Kota Kinabalu","Kuching"],ML:["Bamako","Sikasso","Mopti","Koutiala","Segou"],MR:["Nouakchott","Nouadhibou","Kaedi","Rosso"],MU:["Port Louis","Beau Bassin-Rose Hill","Vacoas-Phoenix","Curepipe"],MX:["Mexico City","Guadalajara","Monterrey","Puebla","Tijuana","Cancun","Merida","Leon","Queretaro"],MA:["Casablanca","Rabat","Marrakech","Fez","Tangier","Agadir","Meknes"],MZ:["Maputo","Matola","Beira","Nampula","Chimoio"],MM:["Yangon","Mandalay","Naypyidaw","Mawlamyine"],NA:["Windhoek","Walvis Bay","Swakopmund","Oshakati","Rundu"],NP:["Kathmandu","Pokhara","Lalitpur","Bharatpur","Biratnagar"],NL:["Amsterdam","Rotterdam","The Hague","Utrecht","Eindhoven","Groningen"],NZ:["Auckland","Wellington","Christchurch","Hamilton","Tauranga","Dunedin","Queenstown"],NE:["Niamey","Zinder","Maradi","Tahoua"],NG:["Lagos","Abuja","Kano","Ibadan","Port Harcourt","Benin City","Kaduna","Enugu","Calabar","Warri","Owerri","Jos","Ilorin","Uyo"],NO:["Oslo","Bergen","Trondheim","Stavanger","Tromso"],OM:["Muscat","Salalah","Sohar","Nizwa"],PK:["Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Peshawar","Multan","Quetta"],PA:["Panama City","Colon","David","Santiago"],PG:["Port Moresby","Lae","Mount Hagen","Madang"],PY:["Asuncion","Ciudad del Este","San Lorenzo","Luque"],PE:["Lima","Arequipa","Trujillo","Chiclayo","Cusco","Piura","Iquitos"],PH:["Manila","Quezon City","Davao","Cebu City","Makati","Taguig","Cagayan de Oro","Zamboanga"],PL:["Warsaw","Krakow","Lodz","Wroclaw","Poznan","Gdansk"],PT:["Lisbon","Porto","Braga","Coimbra","Funchal"],QA:["Doha","Al Wakrah","Al Khor","Umm Salal","Al Rayyan"],RO:["Bucharest","Cluj-Napoca","Timisoara","Iasi","Constanta","Brasov"],RW:["Kigali","Butare","Gitarama","Musanze","Rubavu","Muhanga","Huye","Nyagatare"],SA:["Riyadh","Jeddah","Mecca","Medina","Dammam","Khobar","Tabuk"],SN:["Dakar","Touba","Thies","Saint-Louis","Kaolack"],RS:["Belgrade","Novi Sad","Nis","Kragujevac"],SL:["Freetown","Bo","Kenema","Makeni"],SG:["Singapore","Jurong East","Tampines","Woodlands"],SK:["Bratislava","Kosice","Presov","Zilina"],SI:["Ljubljana","Maribor","Celje","Kranj"],SO:["Mogadishu","Hargeisa","Kismayo","Marka","Berbera","Baidoa","Garowe"],ZA:["Johannesburg","Cape Town","Durban","Pretoria","Port Elizabeth","Bloemfontein","East London","Polokwane"],SS:["Juba","Malakal","Wau","Bor","Yambio","Rumbek"],ES:["Madrid","Barcelona","Valencia","Seville","Zaragoza","Malaga","Bilbao"],LK:["Colombo","Kandy","Galle","Jaffna","Negombo"],SD:["Khartoum","Omdurman","Port Sudan","Kassala","El Obeid","Nyala"],SE:["Stockholm","Gothenburg","Malmo","Uppsala","Linkoping"],CH:["Zurich","Geneva","Basel","Bern","Lausanne","Lucerne"],TW:["Taipei","Kaohsiung","Taichung","Tainan","Hsinchu"],TZ:["Dar es Salaam","Dodoma","Mwanza","Arusha","Zanzibar City","Mbeya","Morogoro","Tanga","Iringa","Kigoma","Tabora","Moshi","Songea","Bukoba","Musoma"],TH:["Bangkok","Chiang Mai","Pattaya","Nonthaburi","Hat Yai","Phuket","Udon Thani"],TG:["Lome","Sokode","Kara","Kpalime"],TT:["Port of Spain","Chaguanas","San Fernando","Arima"],TN:["Tunis","Sfax","Sousse","Kairouan","Bizerte"],TR:["Istanbul","Ankara","Izmir","Bursa","Antalya","Adana","Konya","Gaziantep"],UG:["Kampala","Gulu","Lira","Mbarara","Jinja","Mbale","Mukono","Masaka","Entebbe","Fort Portal","Kabale","Soroti","Arua","Hoima"],UA:["Kyiv","Kharkiv","Odesa","Dnipro","Lviv"],AE:["Dubai","Abu Dhabi","Sharjah","Ajman","Al Ain","Ras Al Khaimah","Fujairah"],GB:["London","Birmingham","Manchester","Leeds","Glasgow","Liverpool","Edinburgh","Bristol","Cardiff","Belfast"],US:["New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Francisco","Austin","Seattle","Denver","Miami","Atlanta"],UY:["Montevideo","Salto","Paysandu","Las Piedras"],VN:["Ho Chi Minh City","Hanoi","Da Nang","Hai Phong","Can Tho","Nha Trang","Hue"],ZM:["Lusaka","Kitwe","Ndola","Kabwe","Livingstone","Chipata","Kasama","Solwezi"],ZW:["Harare","Bulawayo","Chitungwiza","Mutare","Gweru","Masvingo","Kwekwe"]};
 function populateCountrySelect(){
   var sel=el("reg-country");
   if(!sel)return;
   COUNTRIES.forEach(function(c){var o=document.createElement("option");o.value=c[0];o.textContent=c[1];sel.appendChild(o);});
-  sel.addEventListener("change",function(){populateCitySelect("reg-city","reg-city-other",sel.value);});
-  if(detectedCountry){sel.value=detectedCountry;populateCitySelect("reg-city","reg-city-other",detectedCountry);}
+  sel.addEventListener("change",function(){
+    populateCitySelect("reg-city","reg-city-other",sel.value);
+    // Sync phone country when main country changes
+    if(PHONE_CODES[sel.value])selectPhoneCountry(sel.value);
+  });
+  // Initialize phone dropdown list
+  initPhoneDropdown();
+  // Add listener to phone input to update hidden full number
+  var phoneInput=el("reg-phone");if(phoneInput)phoneInput.addEventListener("input",updateFullPhone);
+  if(detectedCountry){
+    sel.value=detectedCountry;populateCitySelect("reg-city","reg-city-other",detectedCountry);
+    setPhoneCountryFromDetected();
+  }
   else{
     fetch("https://ipapi.co/json/",{signal:AbortSignal.timeout(4000)}).then(function(r){return r.json();}).then(function(d){
       detectedCountry=(d.country_code||"").toUpperCase();
-      if(detectedCountry){sel.value=detectedCountry;populateCitySelect("reg-city","reg-city-other",detectedCountry);}
+      if(detectedCountry){sel.value=detectedCountry;populateCitySelect("reg-city","reg-city-other",detectedCountry);setPhoneCountryFromDetected();}
     }).catch(function(){});
   }
 }
@@ -682,7 +842,7 @@ window.payWithFlutterwave=function(){
   if(!flwPublicKey){showAlert("step3-err","Flutterwave is not configured. Please contact support.");return;}
   var email=el("reg-email").value.trim();
   var name=el("contact-name").value.trim()||el("business-name").value.trim();
-  var phone=el("reg-phone").value.trim();
+  var phone=el("reg-phone-full").value||el("reg-phone").value.trim();
   FlutterwaveCheckout({
     public_key:flwPublicKey,
     tx_ref:"ROREG-"+Date.now(),
@@ -745,7 +905,7 @@ window.createAccount=async function(method,paymentData){
     password:el("reg-password").value,
     businessName:el("business-name").value.trim(),
     contactName:el("contact-name").value.trim(),
-    phone:el("reg-phone").value.trim(),
+    phone:el("reg-phone-full").value||el("reg-phone").value.trim(),
     country:el("reg-country").value,
     city:getCityValue("reg-city","reg-city-other"),
     address:getStreetValue("reg-street","reg-street-other"),
@@ -816,8 +976,8 @@ async function initRegisterFirebase() {
       = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
     const app = getApps().length ? getApps()[0] : initializeApp(cfg);
     _regFirebaseAuth = { auth: getAuth(app), GoogleAuthProvider, signInWithPopup };
-    document.getElementById('reg-google-btn').style.display    = '';
-    document.getElementById('reg-google-divider').style.display = '';
+    // Show the Google sign-up section container
+    document.getElementById('google-signup-section').style.display = '';
   } catch (_) {}
 }
 
@@ -825,9 +985,8 @@ async function registerWithGoogle() {
   if (!_regFirebaseAuth) return;
   const btn = document.getElementById('reg-google-btn');
   const errEl = document.getElementById('reg-google-err');
-  errEl.classList.add('hidden');
-  document.getElementById('reg-google-text').textContent = 'Signing inô';
-  document.getElementById('reg-google-spinner').classList.remove('hidden');
+  errEl.style.display = 'none';
+  btn.classList.add('loading');
   btn.disabled = true;
   try {
     const provider = new _regFirebaseAuth.GoogleAuthProvider();
@@ -885,11 +1044,10 @@ async function registerWithGoogle() {
   } catch (err) {
     if (err.code !== 'auth/popup-closed-by-user') {
       errEl.textContent = err.message || 'Google sign-up failed.';
-      errEl.classList.remove('hidden');
+      errEl.style.display = 'block';
     }
   } finally {
-    document.getElementById('reg-google-text').textContent = 'Sign up with Google';
-    document.getElementById('reg-google-spinner').classList.add('hidden');
+    btn.classList.remove('loading');
     btn.disabled = false;
   }
 }
