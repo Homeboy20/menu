@@ -4,7 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Settings – RestOrder Admin</title>
+<title>Settings â€” RestOrder Admin</title>
+<!-- Preconnect to Google Fonts for faster icon loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -302,7 +305,7 @@
                 <span class="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 64×64px, max 3 MB</p>
+            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 64ï¿½64px, max 3 MB</p>
           </div>
         </div>
         <div class="flex justify-end pt-2">
@@ -349,7 +352,7 @@
                 <h4 class="font-bold text-lg">ClickPesa</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-medium">Tanzania</span>
               </div>
-              <p class="text-sm text-slate-400">M-Pesa · Tigo Pesa · Airtel Money · Halotel</p>
+              <p class="text-sm text-slate-400">M-Pesa ï¿½ Tigo Pesa ï¿½ Airtel Money ï¿½ Halotel</p>
             </div>
           </div>
           <button id="cp-toggle-btn" onclick="toggleProvider('clickpesa')" class="toggle-off">Disabled</button>
@@ -378,7 +381,7 @@
             </div>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Callback URL <span class="text-slate-500 font-normal">(auto-generated — copy this into your ClickPesa dashboard)</span></label>
+            <label class="card-label">Callback URL <span class="text-slate-500 font-normal">(auto-generated ï¿½ copy this into your ClickPesa dashboard)</span></label>
             <div class="flex gap-2">
               <input id="cp-callback-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
               <button onclick="copyWebhookUrl('cp-callback-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span>Copy</button>
@@ -405,7 +408,7 @@
                 <h4 class="font-bold text-lg">Flutterwave</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-medium">Pan-Africa</span>
               </div>
-              <p class="text-sm text-slate-400">NG · GH · KE · ZA · TZ · UG · RW · EG & 30+ countries</p>
+              <p class="text-sm text-slate-400">NG ï¿½ GH ï¿½ KE ï¿½ ZA ï¿½ TZ ï¿½ UG ï¿½ RW ï¿½ EG & 30+ countries</p>
             </div>
           </div>
           <button id="fw-toggle-btn" onclick="toggleProvider('flutterwave')" class="toggle-off">Disabled</button>
@@ -464,7 +467,7 @@
                 <h4 class="font-bold text-lg">PayPal</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-medium">Global</span>
               </div>
-              <p class="text-sm text-slate-400">Credit cards · Debit cards · PayPal balance · 200+ countries</p>
+              <p class="text-sm text-slate-400">Credit cards ï¿½ Debit cards ï¿½ PayPal balance ï¿½ 200+ countries</p>
             </div>
           </div>
           <button id="pp-toggle-btn" onclick="toggleProvider('paypal')" class="toggle-off">Disabled</button>
@@ -478,7 +481,7 @@
             </select>
           </div>
           <div>
-            <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated — register this in PayPal Developer)</span></label>
+            <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated ï¿½ register this in PayPal Developer)</span></label>
             <div class="flex gap-2">
               <input id="pp-webhook-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
               <button onclick="copyWebhookUrl('pp-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span>Copy</button>
@@ -520,7 +523,7 @@
                 <h4 class="font-bold text-lg">Bank Transfer</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">Global</span>
               </div>
-              <p class="text-sm text-slate-400">Direct bank transfer · Manual confirmation required</p>
+              <p class="text-sm text-slate-400">Direct bank transfer ï¿½ Manual confirmation required</p>
             </div>
           </div>
           <button id="bt-toggle-btn" onclick="toggleProvider('bank_transfer')" class="toggle-off">Disabled</button>
@@ -634,7 +637,7 @@
           </div>
         </div>
         <div class="bg-bg-dark border border-slate-700 rounded-xl p-4 text-sm text-slate-400 space-y-1">
-          <p><span class="text-primary font-semibold">PayPal / Flutterwave / ClickPesa</span> — use their own callback URLs set in the Payment tab above.</p>
+          <p><span class="text-primary font-semibold">PayPal / Flutterwave / ClickPesa</span> ï¿½ use their own callback URLs set in the Payment tab above.</p>
           <p>The URLs below are for your own internal systems (accounting, CRM, etc.).</p>
         </div>
         <div class="space-y-4">
@@ -691,13 +694,13 @@
         <div class="section-header">
           <span class="material-symbols-outlined text-sky-400">content_paste</span>
           <div>
-            <h3 class="text-lg font-bold">Quick Setup — Paste Firebase Config</h3>
+            <h3 class="text-lg font-bold">Quick Setup ï¿½ Paste Firebase Config</h3>
             <p class="text-sm text-slate-400 mt-0.5">Copy the config snippet from Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; SDK setup &rarr; Config, then paste it below</p>
           </div>
         </div>
         <div class="bg-sky-500/8 border border-sky-500/20 rounded-xl p-4 text-sm text-sky-300 flex gap-3">
           <span class="material-symbols-outlined shrink-0 text-[18px] mt-0.5">info</span>
-          <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = { … }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
+          <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = { ï¿½ }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
         </div>
         <div>
           <label class="card-label">Firebase Config Script</label>
@@ -728,7 +731,7 @@
           <div>
             <label class="card-label">Web API Key</label>
             <div class="pw-wrap">
-              <input id="fb-api-key" type="password" class="input-field" placeholder="AIzaSy…"/>
+              <input id="fb-api-key" type="password" class="input-field" placeholder="AIzaSyï¿½"/>
               <button class="pw-eye" onclick="togglePw('fb-api-key')" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
             </div>
           </div>
@@ -741,15 +744,15 @@
             <input id="fb-app-id" type="text" class="input-field" placeholder="1:123456789:web:abcdef01234567890"/>
           </div>
           <div>
-            <label class="card-label">Storage Bucket <span class="text-slate-500 font-normal">(optional — for file storage)</span></label>
+            <label class="card-label">Storage Bucket <span class="text-slate-500 font-normal">(optional ï¿½ for file storage)</span></label>
             <input id="fb-storage-bucket" type="text" class="input-field" placeholder="my-project-12345.appspot.com"/>
           </div>
           <div>
-            <label class="card-label">Messaging Sender ID <span class="text-slate-500 font-normal">(optional — for push notifications)</span></label>
+            <label class="card-label">Messaging Sender ID <span class="text-slate-500 font-normal">(optional ï¿½ for push notifications)</span></label>
             <input id="fb-messaging-sender-id" type="text" class="input-field" placeholder="123456789012"/>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Measurement ID <span class="text-slate-500 font-normal">(optional — for Google Analytics)</span></label>
+            <label class="card-label">Measurement ID <span class="text-slate-500 font-normal">(optional ï¿½ for Google Analytics)</span></label>
             <input id="fb-measurement-id" type="text" class="input-field" placeholder="G-XXXXXXXXXX"/>
           </div>
         </div>
@@ -774,9 +777,9 @@
             <input id="fb-client-email" type="email" class="input-field" placeholder="firebase-adminsdk-xxxxx@my-project.iam.gserviceaccount.com"/>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Private Key <span class="text-slate-500 font-normal">(full PEM — paste from the JSON file)</span></label>
+            <label class="card-label">Private Key <span class="text-slate-500 font-normal">(full PEM ï¿½ paste from the JSON file)</span></label>
             <div class="pw-wrap">
-              <textarea id="fb-private-key" rows="4" class="input-field font-mono text-xs" placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIB…&#10;-----END PRIVATE KEY-----
+              <textarea id="fb-private-key" rows="4" class="input-field font-mono text-xs" placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIBï¿½&#10;-----END PRIVATE KEY-----
 "
                 style="padding-right:42px;resize:vertical"></textarea>
               <button class="pw-eye" style="top:10px" onclick="toggleFbKey()" type="button"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
@@ -802,13 +805,13 @@
 // -- Constants --------------------------------------------------------------
 const CURRENCIES = [
   { code:'USD', name:'US Dollar',              symbol:'$'    },
-  { code:'EUR', name:'Euro',                   symbol:'€'    },
-  { code:'GBP', name:'British Pound',          symbol:'£'    },
+  { code:'EUR', name:'Euro',                   symbol:'ï¿½'    },
+  { code:'GBP', name:'British Pound',          symbol:'ï¿½'    },
   { code:'CAD', name:'Canadian Dollar',        symbol:'C$'   },
   { code:'AUD', name:'Australian Dollar',      symbol:'A$'   },
   { code:'CHF', name:'Swiss Franc',            symbol:'CHF'  },
-  { code:'JPY', name:'Japanese Yen',           symbol:'¥'    },
-  { code:'CNY', name:'Chinese Yuan',           symbol:'¥'    },
+  { code:'JPY', name:'Japanese Yen',           symbol:'ï¿½'    },
+  { code:'CNY', name:'Chinese Yuan',           symbol:'ï¿½'    },
   { code:'INR', name:'Indian Rupee',           symbol:'?'    },
   { code:'SGD', name:'Singapore Dollar',       symbol:'S$'   },
   { code:'HKD', name:'Hong Kong Dollar',       symbol:'HK$'  },
@@ -829,7 +832,7 @@ const CURRENCIES = [
   { code:'ETB', name:'Ethiopian Birr',         symbol:'Br'   },
   { code:'XOF', name:'W. African CFA Franc',   symbol:'CFA'  },
   { code:'XAF', name:'C. African CFA Franc',   symbol:'CFA'  },
-  { code:'EGP', name:'Egyptian Pound',         symbol:'E£'   },
+  { code:'EGP', name:'Egyptian Pound',         symbol:'Eï¿½'   },
   { code:'MAD', name:'Moroccan Dirham',        symbol:'MAD'  },
   { code:'ZMW', name:'Zambian Kwacha',         symbol:'ZK'   },
   { code:'MZN', name:'Mozambican Metical',     symbol:'MT'   },
@@ -880,7 +883,7 @@ let geoDetectEnabled = false;
   CURRENCIES.forEach(c => {
     const o = document.createElement('option');
     o.value = c.code;
-    o.textContent = `${c.code} – ${c.name} (${c.symbol})`;
+    o.textContent = `${c.code} ï¿½ ${c.name} (${c.symbol})`;
     cSel.appendChild(o);
   });
   const tSel = document.getElementById('g-timezone');
@@ -1126,8 +1129,8 @@ function populateForms(s) {
   setVal('fb-messaging-sender-id',   fb.messaging_sender_id  || '');
   setVal('fb-measurement-id',        fb.measurement_id       || '');
   setVal('fb-client-email',          fb.client_email         || '');
-  document.getElementById('fb-private-key').value = (fb.private_key && fb.private_key !== '••••••••') ? fb.private_key : '';
-  if (fb.private_key === '••••••••' || (fb.private_key && fb.private_key.length > 10)) {
+  document.getElementById('fb-private-key').value = (fb.private_key && fb.private_key !== 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½') ? fb.private_key : '';
+  if (fb.private_key === 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' || (fb.private_key && fb.private_key.length > 10)) {
     const row = document.getElementById('fb-status-row');
     row.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
     row.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span> Admin SDK private key is stored. Leave the field blank to keep the current key.';
@@ -1147,7 +1150,7 @@ function setBool(id, val) {
 // -- Save General -------------------------------------------------------------
 async function saveGeneralSettings() {
   const btn = document.getElementById('save-general-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
   try {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT', headers: authHeaders(),
@@ -1170,7 +1173,7 @@ async function saveGeneralSettings() {
 // -- Save Branding -------------------------------------------------------------
 async function saveBrandingSettings() {
   const btn = document.getElementById('save-branding-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
   try {
     const siteName = document.getElementById('br-site-name').value.trim();
     const res = await fetch('/api/admin/settings', {
@@ -1197,7 +1200,7 @@ async function uploadBrandingImage(input, type) {
   const urlFieldId     = type === 'logo' ? 'br-logo-url'     : 'br-favicon-url';
   const btn            = document.getElementById('save-branding-btn');
   const originalText   = btn.textContent;
-  btn.textContent = 'Uploading…'; btn.disabled = true;
+  btn.textContent = 'Uploadingï¿½'; btn.disabled = true;
   try {
     const formData = new FormData();
     formData.append('image', input.files[0]);
@@ -1244,7 +1247,7 @@ function clearBrandingField(type) {
 // -- Save Currency ------------------------------------------------------------
 async function saveCurrencySettings() {
   const btn = document.getElementById('save-currency-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
   try {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT', headers: authHeaders(),
@@ -1271,10 +1274,10 @@ function updateGeoToggle() {
 }
 async function detectCurrency() {
   const statusEl = document.getElementById('geo-status');
-  statusEl.textContent = 'Detecting…';
+  statusEl.textContent = 'Detectingï¿½';
   statusEl.classList.remove('hidden');
   try {
-    // Client-side IP geolocation – no SSRF risk (browser makes the request)
+    // Client-side IP geolocation ï¿½ no SSRF risk (browser makes the request)
     const res = await fetch('https://ipapi.co/json/');
     if (!res.ok) throw new Error('Geo API unavailable');
     const data = await res.json();
@@ -1290,10 +1293,10 @@ async function detectCurrency() {
         showToast(`Default currency set to ${currency}. Click "Save Currency Settings" to persist.`);
       }
     } else {
-      statusEl.textContent = `${data.country_name} – no mapped currency`;
+      statusEl.textContent = `${data.country_name} ï¿½ no mapped currency`;
     }
   } catch(e) {
-    statusEl.textContent = 'Detection failed – geo service unavailable';
+    statusEl.textContent = 'Detection failed ï¿½ geo service unavailable';
     statusEl.className = 'text-sm font-medium px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20';
   }
 }
@@ -1320,7 +1323,7 @@ async function saveProvider(name) {
   const p = map[name];
   const saveId = `save-${p}-btn`;
   const btn = document.getElementById(saveId);
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
 
   let config = { enabled: providerEnabled[name] };
   if (name === 'clickpesa') {
@@ -1390,7 +1393,7 @@ function onEmailProviderChange() {
 async function saveEmailSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-em-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
   const existing = serverSettings.integration_email || {};
   const passRaw = document.getElementById('em-pass').value.trim();
   const config = {
@@ -1422,7 +1425,7 @@ function sendTestEmail() {
 async function saveWebhookSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-wh-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
   const existing = serverSettings.integration_webhooks || {};
   const secretRaw = document.getElementById('wh-secret').value.trim();
   const config = {
@@ -1455,7 +1458,7 @@ function parseFbConfigScript() {
     return;
   }
 
-  // Extract the object literal — handles both:
+  // Extract the object literal ï¿½ handles both:
   //   const firebaseConfig = { ... };
   //   initializeApp({ ... });
   //   or a bare { ... } paste
@@ -1493,7 +1496,7 @@ function parseFbConfigScript() {
     // Scroll to public SDK card
     document.getElementById('fb-paste-card').nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    msg.textContent = 'No recognizable fields found — check the pasted text.';
+    msg.textContent = 'No recognizable fields found ï¿½ check the pasted text.';
     msg.className = 'text-sm text-red-400';
   }
   msg.classList.remove('hidden');
@@ -1529,7 +1532,7 @@ function toggleFbKey() {
 async function saveFirebaseSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-fb-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  btn.textContent = 'Savingï¿½'; btn.disabled = true;
 
   const existing = serverSettings.integration_firebase || {};
   const privateKeyRaw        = document.getElementById('fb-private-key').value.trim();
@@ -1579,14 +1582,14 @@ async function saveFirebaseSettings() {
 async function testFirebaseConfig() {
   const statusRow = document.getElementById('fb-status-row');
   statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300';
-  statusRow.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Testing Firebase connection…';
+  statusRow.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Testing Firebase connectionï¿½';
   statusRow.classList.remove('hidden');
   try {
     const res = await fetch('/api/firebase-config');
     const data = await res.json();
     if (data.enabled && data.projectId) {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-      statusRow.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Public SDK active — Project: <strong>${data.projectId}</strong>`;
+      statusRow.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Public SDK active ï¿½ Project: <strong>${data.projectId}</strong>`;
     } else {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400';
       statusRow.innerHTML = '<span class="material-symbols-outlined text-[18px]">warning</span> Firebase not enabled or not configured yet.';

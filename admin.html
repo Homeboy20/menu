@@ -4,7 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>MenuAdmin � Upload &amp; Publish</title>
+<title>MenuAdmin — Upload &amp; Publish</title>
+<!-- Preconnect to Google Fonts for faster icon loading -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -1192,6 +1195,67 @@
                 class="w-full py-3 rounded-xl bg-primary text-bg-dark font-bold hover:brightness-110 transition-all">
           Update Password
         </button>
+      </div>
+
+      <!-- -- Cache Management ------------------------------------------ -->
+      <div class="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <span class="material-symbols-outlined text-[20px] text-primary">cached</span>
+          Cache Management
+        </h3>
+        <p class="text-xs text-stone-500">Clear cached data to fix loading issues or get the latest updates.</p>
+
+        <div class="space-y-3">
+          <!-- Clear Browser Cache -->
+          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <div>
+              <p class="text-sm font-medium text-stone-700">Hard Refresh Page</p>
+              <p class="text-xs text-stone-500 mt-0.5">Reload page and bypass browser cache (Ctrl+Shift+R)</p>
+            </div>
+            <button onclick="hardRefreshPage()"
+                    class="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
+            </button>
+          </div>
+
+          <!-- Clear Local Storage -->
+          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <div>
+              <p class="text-sm font-medium text-stone-700">Clear App Data</p>
+              <p class="text-xs text-stone-500 mt-0.5">Remove cached settings and preferences (keeps login)</p>
+            </div>
+            <button onclick="clearAppCache()"
+                    class="px-4 py-2 rounded-lg bg-amber-100 text-amber-700 text-sm font-medium hover:bg-amber-200 transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">delete_sweep</span> Clear
+            </button>
+          </div>
+
+          <!-- Clear Service Worker -->
+          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <div>
+              <p class="text-sm font-medium text-stone-700">Reset Service Worker</p>
+              <p class="text-xs text-stone-500 mt-0.5">Unregister service workers and clear all caches</p>
+            </div>
+            <button onclick="resetServiceWorker()"
+                    class="px-4 py-2 rounded-lg bg-red-100 text-red-600 text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">restart_alt</span> Reset
+            </button>
+          </div>
+
+          <!-- Full Cache Clear -->
+          <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-200">
+            <div>
+              <p class="text-sm font-medium text-red-700">Full Cache Clear</p>
+              <p class="text-xs text-red-500 mt-0.5">Clear everything and log out (nuclear option)</p>
+            </div>
+            <button onclick="fullCacheClear()"
+                    class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">warning</span> Clear All
+            </button>
+          </div>
+        </div>
+
+        <p id="cache-status" class="hidden text-sm text-green-600 text-center"></p>
       </div>
     </section>
 
@@ -2743,6 +2807,94 @@ async function changePassword() {
   } catch (err) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
+  }
+}
+
+// -- Cache Management -----------------------------------------------------------
+function showCacheStatus(msg) {
+  const el = document.getElementById('cache-status');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
+function hardRefreshPage() {
+  // Bypass cache and reload
+  location.reload(true);
+}
+
+function clearAppCache() {
+  // Clear non-auth localStorage items
+  const token = localStorage.getItem('adminToken');
+  const custToken = localStorage.getItem('customerToken');
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (key !== 'adminToken' && key !== 'customerToken') {
+      localStorage.removeItem(key);
+    }
+  });
+  // Clear sessionStorage except tokens
+  const sessKeys = Object.keys(sessionStorage);
+  sessKeys.forEach(key => {
+    if (key !== 'customerToken') {
+      sessionStorage.removeItem(key);
+    }
+  });
+  showCacheStatus('✓ App data cleared successfully');
+}
+
+async function resetServiceWorker() {
+  try {
+    // Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+    }
+    // Clear all caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+    showCacheStatus('✓ Service worker reset successfully. Refresh the page.');
+  } catch (err) {
+    showCacheStatus('Error: ' + err.message);
+  }
+}
+
+async function fullCacheClear() {
+  if (!confirm('This will log you out and clear all cached data. Continue?')) return;
+  try {
+    // Clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+    // Clear service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+      }
+    }
+    // Clear all caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      for (const name of cacheNames) {
+        await caches.delete(name);
+      }
+    }
+    // Clear cookies for this site
+    document.cookie.split(';').forEach(c => {
+      const eqPos = c.indexOf('=');
+      const name = eqPos > -1 ? c.substr(0, eqPos).trim() : c.trim();
+      document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+    });
+    alert('All cache cleared. The page will now reload.');
+    location.href = '/admin.html';
+  } catch (err) {
+    alert('Error clearing cache: ' + err.message);
   }
 }
 
