@@ -113,6 +113,10 @@
       <span class="material-symbols-outlined text-[20px]">settings</span>
       <span class="text-sm font-medium">Settings</span>
     </a>
+    <button id="nav-cache-tools" onclick="openCacheTools()" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition w-full text-left">
+      <span class="material-symbols-outlined text-[20px]">build</span>
+      <span class="text-sm font-medium">Cache Management</span>
+    </button>
     <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <span class="material-symbols-outlined text-[20px]">shield_person</span>
       <span class="text-sm font-medium">Admin Users</span>
@@ -252,7 +256,7 @@
   </div>
 
   <!-- System Tools -->
-  <div class="mt-6 bg-surface border border-slate-700 rounded-2xl p-6">
+  <div id="cache-tools-card" class="mt-6 bg-surface border border-slate-700 rounded-2xl p-6">
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
         <div class="size-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
@@ -1009,6 +1013,15 @@ async function fullCacheClear() {
   } catch (err) {
     alert('Error clearing cache: ' + err.message);
   }
+}
+
+function openCacheTools() {
+  showSection('overview');
+  const card = document.getElementById('cache-tools-card');
+  if (!card) return;
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  card.classList.add('ring-2', 'ring-amber-500/40');
+  setTimeout(() => card.classList.remove('ring-2', 'ring-amber-500/40'), 1400);
 }
 
 // -- Section switching --------------------------------------------------------
