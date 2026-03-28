@@ -222,7 +222,7 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
   cookieName: 'csrf-token',
   cookieOptions: {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',  // Allow cookies after OAuth redirects
     secure: process.env.NODE_ENV === 'production',
     path: '/'
   },
@@ -256,7 +256,7 @@ app.use(helmet({
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com'],
+      connectSrc:    ["'self'", 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://ipapi.co'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       formAction:    ["'self'"],   // Restrict form submissions to same origin
@@ -1529,7 +1529,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.30'
+    version: '1.54.31'
   });
 });
 
@@ -2957,7 +2957,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.30' 
+      version: '1.54.31' 
     });
   } catch (err) {
     res.status(500).json({ 
