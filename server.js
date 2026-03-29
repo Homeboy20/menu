@@ -2342,32 +2342,6 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
         return res.status(400).json({ error: 'Please enter a valid phone number.' });
       }
     }
-      return res.status(400).json({ error: 'Invalid email address.' });
-    }
-    
-    // Validate password strength
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
-    }
-    
-    // Additional password strength validation
-    if (!validator.isStrongPassword(password, { 
-      minLength: 8, 
-      minLowercase: 1, 
-      minUppercase: 0, 
-      minNumbers: 1, 
-      minSymbols: 0 
-    })) {
-      return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
-    }
-    
-    // Check if email already exists
-    const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: 'Email already registered.' });
-    }
-    
-    // [validation already done above in the new block — skip legacy duplicate checks]
 
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
