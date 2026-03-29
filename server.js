@@ -5406,10 +5406,21 @@ function buildEmailTransport(rawConfig) {
     throw new Error('Email credentials are required for the selected provider.');
   }
 
+  // Auto-correct: port 587 uses STARTTLS (secure must be false);
+  // port 465 uses direct TLS (secure must be true).
+  // If there's a mismatch from saved config, override to the correct port.
+  let resolvedPort = p.port;
+  let resolvedSecure = p.secure;
+  if (resolvedSecure && resolvedPort === 587) {
+    resolvedPort = 465; // swap to direct-TLS port
+  } else if (!resolvedSecure && resolvedPort === 465) {
+    resolvedPort = 587; // swap to STARTTLS port
+  }
+
   const transport = {
     host: p.host,
-    port: p.port,
-    secure: p.secure,
+    port: resolvedPort,
+    secure: resolvedSecure,
     connectionTimeout: 20000,
     greetingTimeout: 20000,
     socketTimeout: 30000,

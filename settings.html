@@ -605,8 +605,8 @@
             <input id="em-port" type="number" class="input-field" placeholder="587"/>
           </div>
           <div id="em-secure-row" class="flex items-center gap-3 self-end pb-2">
-            <input id="em-secure" type="checkbox" class="accent-primary size-4"/>
-            <label for="em-secure" class="text-sm text-slate-300">Use TLS/SSL</label>
+            <input id="em-secure" type="checkbox" class="accent-primary size-4" onchange="onEmailSecureChange()"/>
+            <label for="em-secure" class="text-sm text-slate-300">Use TLS/SSL (port 465) — uncheck for STARTTLS (port 587)</label>
           </div>
           <div>
             <label class="card-label">Username / API Key</label>
@@ -1423,6 +1423,14 @@ function onEmailProviderChange() {
     }
     secureEl.checked = preset.secure;
   }
+}
+function onEmailSecureChange() {
+  const secure = document.getElementById('em-secure').checked;
+  const portEl = document.getElementById('em-port');
+  const port = parseInt(portEl.value || '0', 10);
+  // 465 = direct TLS (SSL on), 587 = STARTTLS (SSL off)
+  if (secure && (port === 587 || port === 0)) portEl.value = '465';
+  if (!secure && port === 465) portEl.value = '587';
 }
 async function saveEmailSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
