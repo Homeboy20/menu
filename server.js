@@ -18,6 +18,7 @@ const cookieParser = require('cookie-parser');
 const { doubleCsrf } = require('csrf-csrf');
 const validator    = require('validator');
 const xss          = require('xss');
+const nodemailer   = require('nodemailer');
 
 // ── Firebase Admin SDK (optional – set FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY) ──
 let firebaseAdmin = null;
@@ -101,6 +102,7 @@ if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2') || ADMIN_SECRET_HA
   console.warn('     Then set ADMIN_SECRET_HASH=<hash> in .env\n');
 }
 const SESSION_TTL = parseInt(process.env.SESSION_TTL_MS || '28800000', 10); // 8 h
+const PASSWORD_RESET_TTL_MS = parseInt(process.env.PASSWORD_RESET_TTL_MS || '3600000', 10); // 1 h
 
 // In-memory session store: token → { createdAt, user }
 // Good enough for a single-process app; swap for Redis in multi-instance deploys.
@@ -880,6 +882,21 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_email ON customers (email)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_status ON customers (status)`);
 
+    // Password reset tokens for customer self-service reset flow
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS customer_password_resets (
+        id           SERIAL PRIMARY KEY,
+        customer_id  INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+        token_hash   TEXT NOT NULL UNIQUE,
+        expires_at   BIGINT NOT NULL,
+        used_at      TEXT,
+        request_ip   TEXT DEFAULT '',
+        created_at   TEXT NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_cpr_customer ON customer_password_resets (customer_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_cpr_expires ON customer_password_resets (expires_at)`);
+
     // Migrations: add promo/discount columns to existing customers tables
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS promo_code       TEXT    DEFAULT ''`);
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS discount_percent INTEGER DEFAULT 0`);
@@ -1571,7 +1588,7 @@ app.get('/health', (req, res) => {
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
-    version: '1.54.39'
+    version: '1.54.45'
   });
 });
 
@@ -2130,6 +2147,9 @@ app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection,
     if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 0, minNumbers: 1, minSymbols: 0 }))
       return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
 
+    const cleanBusinessName = sanitizeInput(businessName, 200);
+    const cleanContactName = sanitizeInput(contactName || '', 200);
+
     const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
     if (existing.rows.length > 0) return res.status(400).json({ error: 'Email already registered. Please sign in instead.' });
 
@@ -2210,7 +2230,7 @@ app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection,
     const { rows: newCust } = await pool.query(`
       INSERT INTO customers (email, password_hash, business_name, contact_name, phone, address, country, city, status, created_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9) RETURNING id, email, business_name
-    `, [cleanEmail, passwordHash, sanitizeInput(businessName, 200), encryptField(sanitizeInput(contactName || '', 200)), encryptField(sanitizeInput(phone || '', 50)), encryptField(sanitizeInput(address || '', 300)), encryptField(sanitizeInput(country || '', 100)), encryptField(sanitizeInput(city || '', 200)), now]);
+    `, [cleanEmail, passwordHash, cleanBusinessName, encryptField(cleanContactName), encryptField(sanitizeInput(phone || '', 50)), encryptField(sanitizeInput(address || '', 300)), encryptField(sanitizeInput(country || '', 100)), encryptField(sanitizeInput(city || '', 200)), now]);
     const customer = newCust[0];
 
     // Create default menu
@@ -2225,7 +2245,7 @@ app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection,
         tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
       VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
         '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
-    `, [menuId, sanitizeInput(businessName, 200), qrCode, now, customer.id]);
+    `, [menuId, cleanBusinessName, qrCode, now, customer.id]);
 
     // Create subscription
     if (effectivePrice > 0) {
@@ -2257,6 +2277,11 @@ app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection,
 
     // Create session
     const token = await createCustomerSession(customer.id, customer.email);
+    queueWelcomeEmail({
+      to: customer.email,
+      businessName: cleanBusinessName,
+      contactName: cleanContactName,
+    });
     res.cookie('customerToken', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: SESSION_TTL });
     res.json({ customer: { id: customer.id, email: customer.email, businessName: customer.business_name }, token, defaultMenuId: menuId });
   } catch (err) {
@@ -2308,7 +2333,8 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
     
     // Sanitize user inputs
     const cleanBusinessName = sanitizeInput(businessName, 200);
-    const cleanContactName = encryptField(sanitizeInput(contactName || '', 200));
+    const cleanContactNamePlain = sanitizeInput(contactName || '', 200);
+    const cleanContactName = encryptField(cleanContactNamePlain);
     const cleanPhone = encryptField(sanitizeInput(phone || '', 50));
     const cleanPromoCode = promoCode ? sanitizeInput(promoCode, 50).toUpperCase() : null;
     
@@ -2378,6 +2404,12 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
 
     // Create session token
     const token = await createCustomerSession(customer.id, customer.email);
+
+    queueWelcomeEmail({
+      to: customer.email,
+      businessName: cleanBusinessName,
+      contactName: cleanContactNamePlain,
+    });
     
     // Set secure httpOnly cookie
     res.cookie('customerToken', token, {
@@ -2600,6 +2632,7 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
     if (!uid) return res.status(401).json({ error: 'Invalid token payload.' });
 
     const now = new Date().toISOString();
+    let welcomeEmailContext = null;
 
     // Look up existing customer: firebase_uid → email → phone
     let customer = null;
@@ -2636,6 +2669,8 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
       if (!email && !phone) return res.status(400).json({ error: 'No email or phone number in Firebase token.' });
 
       const cleanEmail = email ? sanitizeEmail(email) : `phone.${uid}@restorder.local`;
+      const cleanBusinessName = sanitizeInput(String(businessName).trim(), 200);
+      const cleanDisplayName = displayName ? sanitizeInput(String(displayName), 200) : '';
       const randomPwd  = crypto.randomBytes(32).toString('hex');
       const passwordHash = await bcrypt.hash(randomPwd, 12);
 
@@ -2645,8 +2680,8 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$9) RETURNING *`,
         [
           cleanEmail, passwordHash,
-          sanitizeInput(String(businessName).trim(), 200),
-          displayName ? sanitizeInput(String(displayName), 200) : '',
+          cleanBusinessName,
+          cleanDisplayName,
           phone || '',
           email ? 1 : 0,
           phone ? 1 : 0,
@@ -2654,6 +2689,11 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
         ]
       );
       customer = ins.rows[0];
+      welcomeEmailContext = {
+        to: customer.email,
+        businessName: cleanBusinessName,
+        contactName: cleanDisplayName,
+      };
 
       // Create default menu + trial subscription
       try {
@@ -2668,7 +2708,7 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
             tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
           VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
             '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
-        `, [menuId, sanitizeInput(String(businessName).trim(), 200), qrCode, now, customer.id]);
+        `, [menuId, cleanBusinessName, qrCode, now, customer.id]);
 
         const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
         if (trialPlan.length) {
@@ -2686,6 +2726,10 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
 
     if (customer.status !== 'active') {
       return res.status(403).json({ error: 'Account is not active. Please contact support.' });
+    }
+
+    if (welcomeEmailContext) {
+      queueWelcomeEmail(welcomeEmailContext);
     }
 
     const token = await createCustomerSession(customer.id, customer.email);
@@ -2844,6 +2888,121 @@ app.post('/api/customers/change-password', requireCustomerAuth, async (req, res)
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/customers/password-reset/request
+// Always returns a generic success response to avoid account enumeration.
+app.post('/api/customers/password-reset/request', loginLimiter, doubleCsrfProtection, async (req, res) => {
+  try {
+    const cleanEmail = sanitizeEmail(req.body?.email || '');
+    const genericResponse = {
+      success: true,
+      message: 'If an account exists for that email, a reset link has been sent.'
+    };
+
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      return res.json(genericResponse);
+    }
+
+    const { rows } = await pool.query(
+      'SELECT id, email, business_name, contact_name, status FROM customers WHERE email = $1 LIMIT 1',
+      [cleanEmail]
+    );
+    if (!rows.length) return res.json(genericResponse);
+
+    const customer = rows[0];
+    if (customer.status !== 'active') return res.json(genericResponse);
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const nowMs = Date.now();
+    const nowISO = new Date(nowMs).toISOString();
+    const expiresAt = nowMs + PASSWORD_RESET_TTL_MS;
+    const requestIp = sanitizeStr(req.ip || req.connection?.remoteAddress || '', 120);
+
+    await pool.query('DELETE FROM customer_password_resets WHERE customer_id = $1 OR expires_at <= $2', [customer.id, nowMs]);
+    await pool.query(
+      `INSERT INTO customer_password_resets (customer_id, token_hash, expires_at, used_at, request_ip, created_at)
+       VALUES ($1, $2, $3, NULL, $4, $5)`,
+      [customer.id, tokenHash, expiresAt, requestIp, nowISO]
+    );
+
+    queuePasswordResetEmail({
+      to: customer.email,
+      token,
+      businessName: customer.business_name,
+      contactName: decryptField(customer.contact_name),
+    });
+
+    return res.json(genericResponse);
+  } catch (err) {
+    console.error('Password reset request error:', err);
+    res.status(500).json({ error: 'Failed to process password reset request.' });
+  }
+});
+
+// POST /api/customers/password-reset/confirm
+app.post('/api/customers/password-reset/confirm', loginLimiter, doubleCsrfProtection, async (req, res) => {
+  try {
+    const token = sanitizeStr(req.body?.token, 300);
+    const newPassword = String(req.body?.newPassword || '');
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: 'Token and new password are required.' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    }
+    if (!validator.isStrongPassword(newPassword, {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 0,
+      minNumbers: 1,
+      minSymbols: 0,
+    })) {
+      return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const nowMs = Date.now();
+    const nowISO = new Date(nowMs).toISOString();
+
+    const { rows } = await pool.query(
+      `SELECT pr.id AS reset_id, pr.customer_id
+       FROM customer_password_resets pr
+       WHERE pr.token_hash = $1
+         AND pr.used_at IS NULL
+         AND pr.expires_at > $2
+       LIMIT 1`,
+      [tokenHash, nowMs]
+    );
+    if (!rows.length) {
+      return res.status(400).json({ error: 'Invalid or expired reset token.' });
+    }
+
+    const resetRecord = rows[0];
+    const newHash = await bcrypt.hash(newPassword, 12);
+
+    await pool.query(
+      'UPDATE customers SET password_hash = $1, updated_at = $2, login_attempts = 0, lockout_until = NULL WHERE id = $3',
+      [newHash, nowISO, resetRecord.customer_id]
+    );
+    await pool.query('UPDATE customer_password_resets SET used_at = $1 WHERE id = $2', [nowISO, resetRecord.reset_id]);
+    await pool.query('DELETE FROM customer_password_resets WHERE customer_id = $1 AND id <> $2', [resetRecord.customer_id, resetRecord.reset_id]);
+
+    // Invalidate all sessions for this customer so old sessions cannot persist after reset.
+    for (const [sessionToken, session] of customerSessions.entries()) {
+      if (session && session.customerId === resetRecord.customer_id) {
+        customerSessions.delete(sessionToken);
+      }
+    }
+    await pool.query('DELETE FROM customer_sessions WHERE customer_id = $1', [resetRecord.customer_id]);
+
+    res.json({ success: true, message: 'Password reset successful. Please sign in with your new password.' });
+  } catch (err) {
+    console.error('Password reset confirm error:', err);
+    res.status(500).json({ error: 'Failed to reset password.' });
   }
 });
 
@@ -3021,7 +3180,7 @@ app.get('/api/health', async (_req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      version: '1.54.39' 
+      version: '1.54.45' 
     });
   } catch (err) {
     res.status(500).json({ 
@@ -4578,6 +4737,10 @@ app.get('/api/admin/payments', requireAuth, async (req, res) => {
 // PUT /api/admin/payments/:id - Admin: Update payment status
 app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
   try {
+    const { rows: existingPaymentRows } = await pool.query('SELECT status FROM payments WHERE id = $1 LIMIT 1', [req.params.id]);
+    if (!existingPaymentRows.length) return res.status(404).json({ error: 'Payment not found.' });
+
+    const previousStatus = sanitizeStr(existingPaymentRows[0].status, 20);
     const status = sanitizeStr(req.body.status, 20);
     const notes = sanitizeStr(req.body.notes, 500);
     const now = new Date().toISOString();
@@ -4591,7 +4754,7 @@ app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
     values.push(req.params.id);
     await pool.query(`UPDATE payments SET ${updates.join(', ')} WHERE id = $${p}`, values);
     // When completed: activate subscription and advance next_billing_date
-    if (status === 'completed') {
+    if (status === 'completed' && previousStatus !== 'completed') {
       const { rows: pmtRows } = await pool.query(
         `SELECT p.subscription_id, sp.interval
          FROM payments p
@@ -4610,6 +4773,7 @@ app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
           [nextBillingDate, now, subscription_id]
         );
       }
+      queuePaymentReceiptEmailForPayment(req.params.id);
     }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -4650,6 +4814,7 @@ app.post('/api/admin/payments', requireAuth, async (req, res) => {
         `UPDATE subscriptions SET status = 'active', end_date = $1, next_billing_date = $1, updated_at = $2 WHERE id = $3`,
         [nextBillingDate, now, subId]
       );
+      queuePaymentReceiptEmailForPayment(rows[0].id);
     }
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -4888,11 +5053,16 @@ app.post('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
     const status = sanitizeStr(req.body.status, 20) || 'completed';
     const notes = sanitizeStr(req.body.notes, 500) || '';
     const now = new Date().toISOString();
+    const paidAt = status === 'completed' ? now : null;
     
     const { rows } = await pool.query(`
       INSERT INTO payments (subscription_id, amount, currency, payment_method, status, paid_at, notes, created_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
-    `, [subId, amount, currency, paymentMethod, status, now, notes, now]);
+    `, [subId, amount, currency, paymentMethod, status, paidAt, notes, now]);
+
+    if (status === 'completed') {
+      queuePaymentReceiptEmailForPayment(rows[0].id);
+    }
     
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -5146,6 +5316,313 @@ async function getGatewayConfig(name) {
   try { return JSON.parse(rows[0].value); } catch { return null; }
 }
 
+// Helper: load email integration config from settings
+async function getEmailConfig() {
+  const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_email'");
+  if (!rows.length) return null;
+  try { return JSON.parse(rows[0].value); } catch { return null; }
+}
+
+function parsePort(value, fallback) {
+  const n = parseInt(String(value ?? ''), 10);
+  return Number.isInteger(n) && n > 0 && n <= 65535 ? n : fallback;
+}
+
+function formatFromAddress(name, email) {
+  const safeName = String(name || '').replace(/"/g, '').trim();
+  return safeName ? `${safeName} <${email}>` : email;
+}
+
+function buildEmailTransport(rawConfig) {
+  const cfg = rawConfig && typeof rawConfig === 'object' ? rawConfig : {};
+  const provider = String(cfg.provider || 'smtp').trim().toLowerCase();
+  const secure = cfg.secure === true || cfg.secure === 'true';
+
+  const fromName = String(cfg.from_name || 'RestOrder').trim() || 'RestOrder';
+  const fromEmail = sanitizeEmail(cfg.from_email || '');
+  if (!fromEmail || !isValidEmail(fromEmail)) {
+    throw new Error('A valid From Email is required in Email settings.');
+  }
+
+  const user = String(cfg.user || '').trim();
+  const pass = String(cfg.pass || '').trim();
+  if ((user && !pass) || (!user && pass)) {
+    throw new Error('Email username and password must both be provided.');
+  }
+
+  const providers = {
+    smtp: {
+      host: String(cfg.host || '').trim(),
+      port: parsePort(cfg.port, secure ? 465 : 587),
+      secure,
+      requireHost: true,
+      requireAuth: false,
+      defaultUser: '',
+    },
+    sendgrid: {
+      host: String(cfg.host || 'smtp.sendgrid.net').trim(),
+      port: parsePort(cfg.port, secure ? 465 : 587),
+      secure,
+      requireHost: true,
+      requireAuth: true,
+      defaultUser: 'apikey',
+    },
+    mailgun: {
+      host: String(cfg.host || 'smtp.mailgun.org').trim(),
+      port: parsePort(cfg.port, secure ? 465 : 587),
+      secure,
+      requireHost: true,
+      requireAuth: true,
+      defaultUser: '',
+    },
+    ses: {
+      host: String(cfg.host || process.env.AWS_SES_SMTP_HOST || 'email-smtp.us-east-1.amazonaws.com').trim(),
+      port: parsePort(cfg.port, secure ? 465 : 587),
+      secure,
+      requireHost: true,
+      requireAuth: true,
+      defaultUser: '',
+    },
+    brevo: {
+      host: String(cfg.host || 'smtp-relay.brevo.com').trim(),
+      port: parsePort(cfg.port, secure ? 465 : 587),
+      secure,
+      requireHost: true,
+      requireAuth: true,
+      defaultUser: '',
+    },
+  };
+
+  const p = providers[provider];
+  if (!p) {
+    throw new Error(`Unsupported email provider: ${provider}`);
+  }
+  if (p.requireHost && !p.host) {
+    throw new Error('Email host is required for the selected provider.');
+  }
+
+  const finalUser = user || p.defaultUser;
+  if (p.requireAuth && (!finalUser || !pass)) {
+    throw new Error('Email credentials are required for the selected provider.');
+  }
+
+  const transport = {
+    host: p.host,
+    port: p.port,
+    secure: p.secure,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
+  };
+
+  if (finalUser && pass) {
+    transport.auth = { user: finalUser, pass };
+  }
+
+  return {
+    provider,
+    fromName,
+    fromEmail,
+    transporter: nodemailer.createTransport(transport),
+  };
+}
+
+function getPublicBaseUrl() {
+  const base = (process.env.PUBLIC_APP_URL || HOST || '').trim();
+  return base.replace(/\/$/, '');
+}
+
+function formatCurrencyAmount(amount, currency = 'USD') {
+  const numeric = Number(amount || 0);
+  const safeCurrency = String(currency || 'USD').toUpperCase();
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: safeCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number.isFinite(numeric) ? numeric : 0);
+  } catch {
+    const fallback = Number.isFinite(numeric) ? numeric.toFixed(2) : '0.00';
+    return `${safeCurrency} ${fallback}`;
+  }
+}
+
+async function sendTransactionalEmail({ to, subject, text, html, replyTo }) {
+  try {
+    const recipient = sanitizeEmail(to || '');
+    if (!recipient || !isValidEmail(recipient)) {
+      return { sent: false, reason: 'invalid-recipient' };
+    }
+
+    const config = await getEmailConfig();
+    if (!config) {
+      return { sent: false, reason: 'missing-email-settings' };
+    }
+
+    const { fromName, fromEmail, transporter } = buildEmailTransport(config);
+    const info = await transporter.sendMail({
+      from: formatFromAddress(fromName, fromEmail),
+      to: recipient,
+      subject: String(subject || '').slice(0, 250),
+      text: String(text || ''),
+      html: String(html || ''),
+      replyTo: replyTo ? String(replyTo).slice(0, 250) : undefined,
+    });
+    return { sent: true, messageId: info?.messageId || null };
+  } catch (err) {
+    return { sent: false, reason: err.message || 'send-failed' };
+  }
+}
+
+function queueTransactionalEmail(payload, context = 'transactional') {
+  setImmediate(async () => {
+    const result = await sendTransactionalEmail(payload);
+    if (result.sent) {
+      console.log(`✓ ${context} email queued/sent:`, result.messageId || 'no-message-id');
+    } else {
+      console.warn(`⚠ ${context} email skipped/failed:`, result.reason || 'unknown');
+    }
+  });
+}
+
+function queueWelcomeEmail({ to, businessName, contactName }) {
+  if (!to) return;
+  const safeBusiness = sanitizeStr(businessName || 'your business', 120);
+  const safeContact = sanitizeStr(contactName || '', 120);
+  const greeting = safeContact ? `Hi ${safeContact},` : 'Hi there,';
+  const loginUrl = `${getPublicBaseUrl()}/login`;
+  const supportEmail = process.env.SUPPORT_EMAIL || 'support@restorder.online';
+
+  const subject = `Welcome to RestOrder, ${safeBusiness}`;
+  const text = [
+    `${greeting}`,
+    '',
+    `Welcome to RestOrder for ${safeBusiness}. Your account is ready.`,
+    `Sign in here: ${loginUrl}`,
+    '',
+    'If you need help, reply to this email or contact support:',
+    supportEmail,
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:640px;margin:0 auto;padding:20px;">
+      <h2 style="margin:0 0 12px 0;color:#0ea5e9;">Welcome to RestOrder</h2>
+      <p style="margin:0 0 10px 0;">${validator.escape(greeting)}</p>
+      <p style="margin:0 0 10px 0;">Your account for <strong>${validator.escape(safeBusiness)}</strong> is ready.</p>
+      <p style="margin:0 0 16px 0;">You can sign in any time at <a href="${loginUrl}">${loginUrl}</a>.</p>
+      <p style="margin:0;color:#475569;">Need help? Contact <a href="mailto:${supportEmail}">${supportEmail}</a>.</p>
+    </div>
+  `;
+
+  queueTransactionalEmail({ to, subject, text, html }, 'welcome');
+}
+
+function queuePasswordResetEmail({ to, token, businessName, contactName }) {
+  if (!to || !token) return;
+  const safeBusiness = sanitizeStr(businessName || 'your account', 120);
+  const safeContact = sanitizeStr(contactName || '', 120);
+  const greeting = safeContact ? `Hi ${safeContact},` : 'Hi there,';
+  const resetUrl = `${getPublicBaseUrl()}/login?reset=${encodeURIComponent(token)}`;
+  const ttlMinutes = Math.max(1, Math.round(PASSWORD_RESET_TTL_MS / 60000));
+
+  const subject = 'Reset your RestOrder password';
+  const text = [
+    `${greeting}`,
+    '',
+    `We received a password reset request for ${safeBusiness}.`,
+    `Reset link (valid for ${ttlMinutes} minutes): ${resetUrl}`,
+    '',
+    'If you did not request this, you can safely ignore this email.'
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:640px;margin:0 auto;padding:20px;">
+      <h2 style="margin:0 0 12px 0;color:#0ea5e9;">Password Reset Request</h2>
+      <p style="margin:0 0 10px 0;">${validator.escape(greeting)}</p>
+      <p style="margin:0 0 10px 0;">We received a password reset request for <strong>${validator.escape(safeBusiness)}</strong>.</p>
+      <p style="margin:0 0 10px 0;">This link is valid for ${ttlMinutes} minutes:</p>
+      <p style="margin:0 0 16px 0;"><a href="${resetUrl}">${resetUrl}</a></p>
+      <p style="margin:0;color:#475569;">If you did not request this reset, you can safely ignore this email.</p>
+    </div>
+  `;
+
+  queueTransactionalEmail({ to, subject, text, html }, 'password-reset');
+}
+
+function queuePaymentReceiptEmailForPayment(paymentId) {
+  const id = parseInt(paymentId, 10);
+  if (!id) return;
+
+  setImmediate(async () => {
+    try {
+      const { rows } = await pool.query(
+        `SELECT p.id, p.amount, p.currency, p.payment_method, p.payment_id, p.notes, p.paid_at, p.created_at,
+                s.next_billing_date,
+                sp.display_name AS plan_name,
+                m.restaurant_name,
+                c.email AS customer_email,
+                c.business_name
+         FROM payments p
+         JOIN subscriptions s ON p.subscription_id = s.id
+         LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+         JOIN menus m ON s.menu_id = m.id
+         JOIN customers c ON m.customer_id = c.id
+         WHERE p.id = $1
+         LIMIT 1`,
+        [id]
+      );
+
+      if (!rows.length) return;
+      const row = rows[0];
+      const to = sanitizeEmail(row.customer_email || '');
+      if (!to || !isValidEmail(to)) return;
+
+      const amountLabel = formatCurrencyAmount(row.amount, row.currency || 'USD');
+      const paidAt = row.paid_at || row.created_at || new Date().toISOString();
+      const planLabel = sanitizeStr(row.plan_name || 'Subscription', 120);
+      const restaurant = sanitizeStr(row.restaurant_name || row.business_name || 'Restaurant', 120);
+      const paymentRef = sanitizeStr(row.payment_id || `PAY-${row.id}`, 120);
+      const nextBilling = row.next_billing_date ? new Date(row.next_billing_date).toISOString() : '';
+
+      const subject = `Receipt: ${amountLabel} for ${planLabel}`;
+      const text = [
+        'Payment receipt from RestOrder',
+        '',
+        `Business: ${restaurant}`,
+        `Plan: ${planLabel}`,
+        `Amount: ${amountLabel}`,
+        `Method: ${row.payment_method || 'manual'}`,
+        `Reference: ${paymentRef}`,
+        `Paid at: ${paidAt}`,
+        nextBilling ? `Next billing: ${nextBilling}` : '',
+        row.notes ? `Notes: ${row.notes}` : '',
+      ].filter(Boolean).join('\n');
+
+      const html = `
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:680px;margin:0 auto;padding:20px;">
+          <h2 style="margin:0 0 12px 0;color:#0ea5e9;">Payment Receipt</h2>
+          <p style="margin:0 0 12px 0;">Thank you. We received your payment.</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Business</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(restaurant)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Plan</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(planLabel)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Amount</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(amountLabel)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Method</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(String(row.payment_method || 'manual'))}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Reference</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(paymentRef)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Paid at</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(String(paidAt))}</td></tr>
+            ${nextBilling ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Next billing</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(String(nextBilling))}</td></tr>` : ''}
+          </table>
+          ${row.notes ? `<p style="margin:12px 0 0 0;color:#475569;"><strong>Notes:</strong> ${validator.escape(String(row.notes))}</p>` : ''}
+        </div>
+      `;
+
+      queueTransactionalEmail({ to, subject, text, html }, 'receipt');
+    } catch (err) {
+      console.warn('⚠ receipt lookup/email failed:', err.message || err);
+    }
+  });
+}
+
 // Helper: activate subscription after a confirmed payment
 async function activateSubscriptionPayment(menuId, planId, amount, currency, method, paymentRef, notes) {
   const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
@@ -5179,11 +5656,16 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
     );
   }
 
-  await pool.query(
+  const { rows: paymentRows } = await pool.query(
     `INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, paid_at, notes, created_at)
-     VALUES ($1,$2,$3,$4,$5,'completed',$6,$7,$6)`,
+     VALUES ($1,$2,$3,$4,$5,'completed',$6,$7,$6)
+     RETURNING id`,
     [subId, amount, currency || 'USD', method, paymentRef, nowISO, notes || '']
   );
+
+  if (paymentRows.length) {
+    queuePaymentReceiptEmailForPayment(paymentRows[0].id);
+  }
   return subId;
 }
 
@@ -5769,6 +6251,64 @@ app.put('/api/admin/settings', requireRole('super_admin'), async (req, res) => {
     }
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/admin/settings/email/test – Send a test email using integration_email config
+app.post('/api/admin/settings/email/test', requireRole('super_admin'), async (req, res) => {
+  try {
+    const to = sanitizeEmail(req.body?.to || req.adminUser?.email || '');
+    if (!to || !isValidEmail(to)) {
+      return res.status(400).json({ error: 'A valid recipient email is required.' });
+    }
+
+    const config = await getEmailConfig();
+    if (!config) {
+      return res.status(400).json({ error: 'Email settings not found. Save Email settings first.' });
+    }
+
+    const { provider, fromName, fromEmail, transporter } = buildEmailTransport(config);
+    await transporter.verify();
+
+    const sentAt = new Date().toISOString();
+    const subject = 'RestOrder test email';
+    const text = [
+      'This is a test email from RestOrder.',
+      '',
+      `Provider: ${provider}`,
+      `Sent at: ${sentAt}`,
+      '',
+      'If you received this message, your email integration is working correctly.'
+    ].join('\n');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.5;color:#0f172a;max-width:620px;margin:0 auto;padding:20px;">
+        <h2 style="margin:0 0 12px 0;color:#0ea5e9;">RestOrder Test Email</h2>
+        <p style="margin:0 0 10px 0;">This is a test email from your RestOrder Email integration.</p>
+        <p style="margin:0 0 6px 0;"><strong>Provider:</strong> ${provider}</p>
+        <p style="margin:0 0 16px 0;"><strong>Sent at:</strong> ${sentAt}</p>
+        <p style="margin:0;">If you received this message, your email settings are working.</p>
+      </div>
+    `;
+
+    const info = await transporter.sendMail({
+      from: formatFromAddress(fromName, fromEmail),
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    res.json({
+      success: true,
+      provider,
+      to,
+      messageId: info?.messageId || null,
+      message: `Test email sent to ${to}.`,
+    });
+  } catch (err) {
+    console.error('Test email send failed:', err);
+    res.status(500).json({ error: err.message || 'Failed to send test email.' });
+  }
 });
 
 // GET /api/settings/currency – Public: currency config for customer-facing pages

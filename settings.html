@@ -7,7 +7,8 @@
 <title>Settings — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -576,6 +577,7 @@
             <label class="card-label">Provider</label>
             <select id="em-provider" class="input-field" onchange="onEmailProviderChange()">
               <option value="smtp">Custom SMTP</option>
+              <option value="brevo">Brevo (Sendinblue)</option>
               <option value="sendgrid">SendGrid</option>
               <option value="mailgun">Mailgun</option>
               <option value="ses">AWS SES</option>
@@ -614,7 +616,7 @@
           </div>
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-700">
-          <button onclick="sendTestEmail()" class="btn-secondary">
+          <button id="send-test-email-btn" onclick="sendTestEmail()" class="btn-secondary">
             <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-send"/></svg>Send Test Email
           </button>
           <button id="save-em-btn" onclick="saveEmailSettings()" class="save-btn">Save Email Settings</button>
@@ -911,7 +913,7 @@ function applyUserUI(user) {
     document.getElementById('integration-lock').classList.remove('hidden');
     document.getElementById('integration-lock').classList.add('flex');
     // Disable all save buttons in integrations
-    ['save-cp-btn','save-fw-btn','save-pp-btn','save-bt-btn','save-em-btn','save-wh-btn','save-fb-btn'].forEach(id => {
+    ['save-cp-btn','save-fw-btn','save-pp-btn','save-bt-btn','save-em-btn','save-wh-btn','save-fb-btn','send-test-email-btn'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.disabled = true;
     });
@@ -1385,8 +1387,29 @@ function testProvider(name) {
 function onEmailProviderChange() {
   const provider = document.getElementById('em-provider').value;
   const smtpOnly = ['em-host-row','em-port-row','em-secure-row'];
-  const isSmtp = provider === 'smtp';
-  smtpOnly.forEach(id => document.getElementById(id).style.display = isSmtp ? '' : 'none');
+  const showSmtpFields = provider === 'smtp' || provider === 'brevo' || provider === 'sendgrid' || provider === 'mailgun' || provider === 'ses';
+  smtpOnly.forEach(id => document.getElementById(id).style.display = showSmtpFields ? '' : 'none');
+
+  // Auto-fill host/port defaults for known providers
+  const defaults = {
+    brevo:     { host: 'smtp-relay.brevo.com',                  port: '587', secure: false },
+    sendgrid:  { host: 'smtp.sendgrid.net',                     port: '587', secure: false },
+    mailgun:   { host: 'smtp.mailgun.org',                      port: '587', secure: false },
+    ses:       { host: 'email-smtp.us-east-1.amazonaws.com',    port: '587', secure: false },
+  };
+  const preset = defaults[provider];
+  if (preset) {
+    const hostEl = document.getElementById('em-host');
+    const portEl = document.getElementById('em-port');
+    const secureEl = document.getElementById('em-secure');
+    if (!hostEl.value || Object.values(defaults).some(d => d.host === hostEl.value)) {
+      hostEl.value = preset.host;
+    }
+    if (!portEl.value || Object.values(defaults).some(d => d.port === portEl.value)) {
+      portEl.value = preset.port;
+    }
+    secureEl.checked = preset.secure;
+  }
 }
 async function saveEmailSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
@@ -1415,8 +1438,34 @@ async function saveEmailSettings() {
   } catch(e) { showToast(e.message, 'error'); }
   finally { btn.textContent = 'Save Email Settings'; btn.disabled = false; }
 }
-function sendTestEmail() {
-  showToast('Test email feature coming soon.', 'error');
+async function sendTestEmail() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
+
+  const fallbackTo = (currentUser && currentUser.email) ? currentUser.email : '';
+  const promptValue = window.prompt('Send test email to:', fallbackTo);
+  if (promptValue === null) return;
+
+  const to = promptValue.trim();
+  if (!to) { showToast('Recipient email is required.', 'error'); return; }
+
+  const btn = document.getElementById('send-test-email-btn');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+  try {
+    const res = await fetch('/api/admin/settings/email/test', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ to })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Failed to send test email.');
+    showToast(data.message || 'Test email sent.');
+  } catch(e) {
+    showToast(e.message || 'Failed to send test email.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = originalHtml || 'Send Test Email'; }
+  }
 }
 
 // -- Webhook Settings ----------------------------------------------------------
