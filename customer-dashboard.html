@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -7,7 +7,8 @@
 <title>Dashboard — RestOrder</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -1571,12 +1572,38 @@ async function showTrialExpiredOverlay(menuId) {
   document.getElementById('trial-expired-overlay').classList.remove('hidden');
 }
 
+async function showSubscribePrompt() {
+  try {
+    const plansRes = await fetch('/api/subscription-plans');
+    if (plansRes.ok) {
+      const plans = await plansRes.json();
+      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise');
+      const container = document.getElementById('subscribe-prompt-plans');
+      container.innerHTML = paidPlans.map(p => {
+        const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
+        return `
+          <div class="border border-stone-200 rounded-xl p-4 hover:border-primary/50 transition">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
+                <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
+              </div>
+              <a href="/checkout?plan=${encodeURIComponent(p.name)}" class="px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition">Choose</a>
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>\u2713 ' + escapeHtml(f) + '</span>').join('')}</div>
+          </div>`;
+      }).join('');
+    }
+  } catch(e) { console.error('Failed to load plans for subscribe prompt:', e); }
+  document.getElementById('subscribe-prompt-overlay').classList.remove('hidden');
+}
+
 // Init
 (async () => {
   const authed = await checkAuth();
   if (authed) {
     await loadDashboard();
-    // Check trial expiry � load subscription data and show overlay if expired
+    // Check trial expiry and subscription status
     try {
       const subsRes = await fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } });
       if (subsRes.ok) {
@@ -1585,6 +1612,14 @@ async function showTrialExpiredOverlay(menuId) {
         if (trialSub && new Date(trialSub.trial_end) < new Date()) {
           showSection('subscription');
           showTrialExpiredOverlay(trialSub.menu_id);
+        } else {
+          // Prompt subscription for phone-only registrations or explicit ?subscribe=1
+          const urlParams = new URLSearchParams(window.location.search);
+          const forceSubscribe = urlParams.get('subscribe') === '1';
+          const hasActive = Array.isArray(subs) && subs.some(s => ['active', 'trial'].includes(s.status));
+          if (forceSubscribe || !hasActive) {
+            await showSubscribePrompt();
+          }
         }
       }
     } catch(e) { /* subscription check failed, proceed normally */ }
@@ -1619,6 +1654,22 @@ async function showTrialExpiredOverlay(menuId) {
 <!-- Cancel Subscription Modal -->
 
 <!-- Trial Expired Overlay -->
+<!-- Subscribe Prompt Modal (phone-only registrations / no active subscription) -->
+<div id="subscribe-prompt-overlay" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);">
+  <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
+    <div class="size-20 mx-auto mb-5 rounded-full bg-orange-100 flex items-center justify-center">
+      <svg class="material-symbols-outlined text-orange-500 text-[40px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
+    </div>
+    <h2 class="text-2xl font-bold text-stone-900 mb-2">Choose a Plan to Get Started</h2>
+    <p class="text-stone-500 mb-6">You don't have an active subscription yet. Pick a plan to publish your menu and unlock all features.</p>
+    <div id="subscribe-prompt-plans" class="grid gap-3 mb-5 text-left"></div>
+    <button onclick="document.getElementById('subscribe-prompt-overlay').classList.add('hidden');showSection('subscription');" class="w-full py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-semibold text-sm transition">
+      View Plans &amp; Manage Subscription
+    </button>
+    <p class="text-xs text-stone-400 mt-4">Need help? <a href="mailto:support@restorder.online" class="text-primary hover:underline">Contact support</a></p>
+  </div>
+</div>
+
 <div id="trial-expired-overlay" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
   <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
     <div class="size-20 mx-auto mb-5 rounded-full bg-red-100 flex items-center justify-center">

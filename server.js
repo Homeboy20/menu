@@ -77,24 +77,10 @@ const HOST = (process.env.HOST || DEFAULT_HOST).replace(/\/$/, '');
 // ── Admin password (bcrypt hash) ──────────────────────────────────────────────
 let ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
 
-// Handle environment variable corruption in deployment platforms
+// Strip surrounding quotes that some deployment platforms inject around env values
 if (ADMIN_SECRET_HASH) {
-  // Remove quotes if they got added during environment variable processing
   ADMIN_SECRET_HASH = ADMIN_SECRET_HASH.replace(/^["']|["']$/g, '');
-  
-  // Fix common escaping issues where $ becomes / due to shell expansion
-  if (ADMIN_SECRET_HASH.includes('$2b$12/6') && ADMIN_SECRET_HASH.length < 60) {
-    console.log('🔧 Fixing corrupted environment variable...');
-    // Restore the known working hash
-    ADMIN_SECRET_HASH = '$2b$12$PFrqLgUEjxy4pCRI5UEl8Ogc3ZU/5fK0ASCR2ESiEODis0cwwogMW';
-  }
 }
-
-console.log('🔍 Environment Debug:');
-console.log('  NODE_ENV:', process.env.NODE_ENV);
-console.log('  ADMIN_SECRET_HASH length:', ADMIN_SECRET_HASH.length);
-console.log('  ADMIN_SECRET_HASH starts with $2:', ADMIN_SECRET_HASH.startsWith('$2'));
-console.log('  ADMIN_SECRET_HASH first 10 chars:', ADMIN_SECRET_HASH.substring(0, 10));
 
 if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2') || ADMIN_SECRET_HASH.length < 59) {
   console.warn('\n  ⚠  WARNING: ADMIN_SECRET_HASH is not set or is not a valid bcrypt hash.');
@@ -285,6 +271,15 @@ const loginLimiter = rateLimit({
   legacyHeaders:   false,
   message: { error: 'Too many login attempts. Please wait 15 minutes.' },
   skipSuccessfulRequests: true,
+});
+
+// Rate-limit for account registration (prevent enumeration / mass sign-ups)
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: parseInt(process.env.REGISTER_RATE_LIMIT || '5', 10),
+  standardHeaders: true,
+  legacyHeaders:   false,
+  message: { error: 'Too many registration attempts. Please try again later.' },
 });
 
 // ── Performance & Compression Middleware ──────────────────────────────────────
@@ -915,6 +910,10 @@ async function initDB() {
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS login_attempts INTEGER NOT NULL DEFAULT 0`).catch(() => {});
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS lockout_until  TEXT    DEFAULT NULL`).catch(() => {});
     await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_firebase_uid ON customers (firebase_uid) WHERE firebase_uid IS NOT NULL AND firebase_uid <> ''`).catch(() => {});
+
+    // Migration: support phone-only registration (email becomes optional)
+    await client.query(`ALTER TABLE customers ALTER COLUMN email DROP NOT NULL`).catch(() => {});
+    await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS registration_type TEXT NOT NULL DEFAULT 'email'`).catch(() => {});
 
     // ── Subscription Management Tables ──────────────────────────────────────────
     
@@ -2136,7 +2135,7 @@ app.post('/api/payments/paypal/create-order-public', async (req, res) => {
 });
 
 // POST /api/customers/checkout-register - Paywall-first: verify payment, then create account
-app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection, async (req, res) => {
+app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password, businessName, contactName, phone, country, city, address, plan_id, payment_method, transaction_id, paypal_order_id, promo_code } = req.body || {};
     if (!email || !password || !businessName || !plan_id) return res.status(400).json({ error: 'Email, password, business name, and plan are required.' });
@@ -2290,19 +2289,59 @@ app.post('/api/customers/checkout-register', loginLimiter, doubleCsrfProtection,
   }
 });
 
-// POST /api/customers/register - Create new customer account
-app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (req, res) => {
+// POST /api/customers/register - Create new customer account (email OR phone-only)
+app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async (req, res) => {
   try {
-    const { email, password, businessName, contactName, phone, promoCode } = req.body || {};
-    
-    // Validation
-    if (!email || !password || !businessName) {
-      return res.status(400).json({ error: 'Email, password, and business name are required.' });
+    const { email, password, businessName, contactName, phone, promoCode, registrationType } = req.body || {};
+    const isPhoneOnly = registrationType === 'phone' || (!email && phone);
+
+    // Validation — phone-only path requires phone + businessName + password
+    if (isPhoneOnly) {
+      if (!phone || !businessName || !password) {
+        return res.status(400).json({ error: 'Phone number, business name, and password are required.' });
+      }
+    } else {
+      // Standard email path
+      if (!email || !password || !businessName) {
+        return res.status(400).json({ error: 'Email, password, and business name are required.' });
+      }
     }
-    
-    // Sanitize and validate email
-    const cleanEmail = sanitizeEmail(email);
-    if (!isValidEmail(cleanEmail)) {
+
+    // Email validation (only if provided)
+    let cleanEmail = null;
+    if (email) {
+      cleanEmail = sanitizeEmail(email);
+      if (!isValidEmail(cleanEmail)) {
+        return res.status(400).json({ error: 'Invalid email address.' });
+      }
+      // Check if email already exists
+      const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
+      if (existing.rows.length > 0) {
+        return res.status(400).json({ error: 'Email already registered.' });
+      }
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    if (!isPhoneOnly && password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    }
+    if (!isPhoneOnly && !validator.isStrongPassword(password, {
+      minLength: 8, minLowercase: 1, minUppercase: 0, minNumbers: 1, minSymbols: 0
+    })) {
+      return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
+    }
+
+    // For phone-only: validate phone and check uniqueness
+    const cleanPhone = encryptField(sanitizeInput(phone || '', 50));
+    if (isPhoneOnly) {
+      const rawPhone = sanitizeInput(phone, 50);
+      if (!rawPhone || rawPhone.length < 7) {
+        return res.status(400).json({ error: 'Please enter a valid phone number.' });
+      }
+    }
       return res.status(400).json({ error: 'Invalid email address.' });
     }
     
@@ -2328,6 +2367,8 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
       return res.status(400).json({ error: 'Email already registered.' });
     }
     
+    // [validation already done above in the new block — skip legacy duplicate checks]
+
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
     
@@ -2335,7 +2376,8 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
     const cleanBusinessName = sanitizeInput(businessName, 200);
     const cleanContactNamePlain = sanitizeInput(contactName || '', 200);
     const cleanContactName = encryptField(cleanContactNamePlain);
-    const cleanPhone = encryptField(sanitizeInput(phone || '', 50));
+    // cleanPhone already set above when isPhoneOnly; recalculate for email path
+    const finalCleanPhone = cleanPhone || encryptField(sanitizeInput(phone || '', 50));
     const cleanPromoCode = promoCode ? sanitizeInput(promoCode, 50).toUpperCase() : null;
     
     // Validate and apply promo code
@@ -2345,37 +2387,33 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
     
     if (cleanPromoCode) {
       const validPromoCodes = {
-        'EXIT50':   { discount: 50, months: 3, description: '50% off for 3 months' },
-        'EXIT50': { discount: 50, months: 3, description: '50% off for 3 months (exit intent)' },
         'LAUNCH25': { discount: 25, months: 6, description: '25% off for 6 months' },
-        'ANNUAL20': { discount: 20, months: 12, description: '20% off annual plan' }
+        'ANNUAL20': { discount: 20, months: 12, description: '20% off annual plan' },
+        'EXIT50':   { discount: 50, months: 3, description: '50% off for 3 months' },
       };
       
       if (validPromoCodes[cleanPromoCode]) {
         promoDetails = validPromoCodes[cleanPromoCode];
         discountPercent = promoDetails.discount;
         discountMonths = promoDetails.months;
-        console.log(`✅ Promo code applied: ${cleanPromoCode} - ${promoDetails.description}`);
-      } else {
-        console.log(`⚠️ Invalid promo code attempted: ${cleanPromoCode}`);
       }
     }
     
-    // Create customer
+    // Create customer (email may be NULL for phone-only accounts)
     const now = new Date().toISOString();
     const { rows } = await pool.query(`
-      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months)
-      VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, $9)
-      RETURNING id, email, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months
-    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, cleanPhone, now, cleanPromoCode, discountPercent, discountMonths]);
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months, registration_type)
+      VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, $9, $10)
+      RETURNING id, email, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months, registration_type
+    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
     
     const customer = rows[0];
 
-    // Auto-create a default menu + trial subscription for new customers
+    // Auto-create a default menu for new customers
+    // Phone-only accounts get no trial subscription — they will subscribe later
     let defaultMenuId = null;
     try {
       const menuNow = new Date().toISOString();
-      const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       defaultMenuId = crypto.randomUUID();
       const defaultQr = await generateQRCode(defaultMenuId, 1).catch(() => '');
       await pool.query(`
@@ -2389,55 +2427,58 @@ app.post('/api/customers/register', loginLimiter, doubleCsrfProtection, async (r
           '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
       `, [defaultMenuId, cleanBusinessName, defaultQr, menuNow, customer.id]);
 
-      const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
-      if (trialPlan.length > 0) {
-        await pool.query(`
-          INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, created_at)
-          VALUES ($1, $2, 'trial', $3, $4, $3)
-          ON CONFLICT (menu_id) DO NOTHING
-        `, [defaultMenuId, trialPlan[0].id, menuNow, trialEnd]);
+      if (!isPhoneOnly) {
+        // Email-registered accounts get an auto 7-day trial subscription
+        const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
+        if (trialPlan.length > 0) {
+          await pool.query(`
+            INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, created_at)
+            VALUES ($1, $2, 'trial', $3, $4, $3)
+            ON CONFLICT (menu_id) DO NOTHING
+          `, [defaultMenuId, trialPlan[0].id, menuNow, trialEnd]);
+        }
       }
     } catch (setupErr) {
-      console.warn('Default menu/trial setup failed:', setupErr.message);
+      console.warn('Default menu setup failed:', setupErr.message);
       defaultMenuId = null;
     }
 
     // Create session token
-    const token = await createCustomerSession(customer.id, customer.email);
+    const token = await createCustomerSession(customer.id, customer.email || customer.id);
 
-    queueWelcomeEmail({
-      to: customer.email,
-      businessName: cleanBusinessName,
-      contactName: cleanContactNamePlain,
-    });
+    // Only queue welcome email for accounts with a valid email address
+    if (customer.email) {
+      queueWelcomeEmail({
+        to: customer.email,
+        businessName: cleanBusinessName,
+        contactName: cleanContactNamePlain,
+      });
+    }
     
     // Set secure httpOnly cookie
     res.cookie('customerToken', token, {
-      httpOnly: true,  // Prevent XSS attacks
-      secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
-      sameSite: 'strict',  // Prevent CSRF attacks
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: SESSION_TTL
     });
-    
-    console.log('✅ Customer registered:', customer.email);
     
     res.json({
       customer: {
         id: customer.id,
-        email: customer.email,
+        email: customer.email || null,
         businessName: customer.business_name,
-        contactName: customer.contact_name,
-        phone: customer.phone,
+        registrationType: customer.registration_type || 'email',
         status: customer.status,
         createdAt: customer.created_at,
-        promoCode: customer.promo_code,
-        discountPercent: customer.discount_percent,
-        discountMonths: customer.discount_months
+        hasSubscription: !isPhoneOnly,
       },
       promoApplied: promoDetails ? true : false,
-      promoDetails: promoDetails,
+      promoDetails,
       token,
       defaultMenuId,
+      requiresSubscription: isPhoneOnly,
       expiresIn: SESSION_TTL
     });
   } catch (err) {
@@ -2518,73 +2559,82 @@ app.post('/api/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   }
 });
 
-// POST /api/customers/login - Customer login
+// POST /api/customers/login - Customer login (email or phone)
 app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
-    const { email, password } = req.body || {};
+    const { email, phone, password } = req.body || {};
     
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
+    if ((!email && !phone) || !password) {
+      return res.status(400).json({ error: 'Email (or phone) and password are required.' });
+    }
+
+    let customer = null;
+
+    if (email) {
+      const cleanEmail = sanitizeEmail(email);
+      if (!isValidEmail(cleanEmail)) {
+        return res.status(401).json({ error: 'Invalid credentials.' });
+      }
+      const { rows } = await pool.query('SELECT * FROM customers WHERE email = $1', [cleanEmail]);
+      customer = rows[0] || null;
+    } else {
+      // Phone login — look up all active customers and compare decrypted phone
+      const cleanPhone = sanitizeInput(phone, 50);
+      const { rows } = await pool.query("SELECT * FROM customers WHERE status = 'active' AND registration_type = 'phone' LIMIT 200");
+      for (const row of rows) {
+        const decrypted = decryptField(row.phone);
+        if (decrypted && (decrypted === cleanPhone || decrypted.replace(/\D/g,'') === cleanPhone.replace(/\D/g,''))) {
+          customer = row;
+          break;
+        }
+      }
     }
     
-    // Sanitize email
-    const cleanEmail = sanitizeEmail(email);
-    if (!isValidEmail(cleanEmail)) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+    if (!customer) {
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
-    
-    // Get customer
-    const { rows } = await pool.query(
-      'SELECT * FROM customers WHERE email = $1',
-      [cleanEmail]
-    );
-    
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-    
-    const customer = rows[0];
     
     // Check password
     const match = await bcrypt.compare(password, customer.password_hash);
     if (!match) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid credentials.' });
     }
     
-    // Check if account is active
     if (customer.status !== 'active') {
       return res.status(403).json({ error: 'Account is not active. Please contact support.' });
     }
     
-    // Update last login
-    await pool.query(
-      'UPDATE customers SET last_login = $1 WHERE id = $2',
-      [new Date().toISOString(), customer.id]
-    );
+    await pool.query('UPDATE customers SET last_login = $1 WHERE id = $2', [new Date().toISOString(), customer.id]);
     
-    // Create session
-    const token = await createCustomerSession(customer.id, customer.email);
+    const token = await createCustomerSession(customer.id, customer.email || String(customer.id));
     
-    // Set secure httpOnly cookie
     res.cookie('customerToken', token, {
-      httpOnly: true,  // Prevent XSS attacks
-      secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
-      sameSite: 'strict',  // Prevent CSRF attacks
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: SESSION_TTL
     });
-    
-    console.log('✅ Customer logged in:', customer.email);
+
+    // Check if account has any active/trial subscription
+    const subCheck = await pool.query(
+      `SELECT s.status FROM subscriptions s
+         JOIN menus m ON m.id = s.menu_id
+       WHERE m.customer_id = $1 AND s.status IN ('active','trial') LIMIT 1`,
+      [customer.id]
+    );
+    const hasSubscription = subCheck.rows.length > 0;
     
     res.json({
       customer: {
         id: customer.id,
-        email: customer.email,
+        email: customer.email || null,
         businessName: customer.business_name,
-        contactName: customer.contact_name,
-        phone: customer.phone,
-        status: customer.status
+        registrationType: customer.registration_type || 'email',
+        status: customer.status,
+        hasSubscription,
       },
       token,
+      requiresSubscription: !hasSubscription,
       expiresIn: SESSION_TTL
     });
   } catch (err) {
