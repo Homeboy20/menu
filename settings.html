@@ -28,28 +28,28 @@
   .input-field {
     width: 100%;
     padding: 10px 16px;
-    background: #0d1b2a;
+    background: #ffffff;
     border: 1px solid #334155;
     border-radius: 12px;
-    color: #f1f5f9;
+    color: #1e293b;
     font-size: 14px;
     outline: none;
     transition: border-color 0.15s;
   }
-  .input-field::placeholder { color: #94a3b8; opacity: 1; }
+  .input-field::placeholder { color: #94a3b8; }
   .input-field:focus { border-color: #2dd4bf; box-shadow: 0 0 0 2px rgba(45,212,191,0.15); }
   .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
-  /* Fix browser autofill overriding background/text */
+  /* Autofill: keep white bg, charcoal text */
   .input-field:-webkit-autofill,
   .input-field:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px #0d1b2a inset !important;
-    -webkit-text-fill-color: #f1f5f9 !important;
-    caret-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #1e293b !important;
+    caret-color: #1e293b;
   }
-  /* Fix select option text in dropdown */
+  /* Select option text */
   .input-field option {
-    background: #132639;
-    color: #f1f5f9;
+    background: #ffffff;
+    color: #1e293b;
   }
   .save-btn {
     padding: 10px 24px;

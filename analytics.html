@@ -32,16 +32,16 @@
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Input text visibility on dark background ── */
+  /* ── Input fields: white bg, charcoal text ── */
   input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
-  select, textarea { color: #f1f5f9 !important; }
-  input::placeholder, textarea::placeholder { color: #94a3b8 !important; opacity: 1; }
+  select, textarea { background: #ffffff !important; color: #1e293b !important; }
+  input::placeholder, textarea::placeholder { color: #94a3b8 !important; }
   input:-webkit-autofill, input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px #0d1b2a inset !important;
-    -webkit-text-fill-color: #f1f5f9 !important;
-    caret-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #1e293b !important;
+    caret-color: #1e293b;
   }
-  select option { background: #132639; color: #f1f5f9; }
+  select option { background: #ffffff; color: #1e293b; }
 </style>
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
