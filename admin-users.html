@@ -38,6 +38,17 @@
   .badge-customer { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
   .badge-active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
   .badge-disabled { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+
+  /* ── Input text visibility on dark background ── */
+  input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
+  select, textarea { color: #f1f5f9 !important; }
+  input::placeholder, textarea::placeholder { color: #475569 !important; opacity: 1; }
+  input:-webkit-autofill, input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0d1b2a inset !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    caret-color: #f1f5f9;
+  }
+  select option { background: #132639; color: #f1f5f9; }
 </style>
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">

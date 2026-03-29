@@ -7,7 +7,8 @@
 <title>Dashboard — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
   tailwind.config = {
@@ -35,6 +36,17 @@
   .badge-starter { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
   .badge-professional { background: rgba(45, 212, 191, 0.15); color: #2dd4bf; }
   .badge-enterprise { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+
+  /* ── Input text visibility on dark background ── */
+  input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
+  select, textarea { color: #f1f5f9 !important; }
+  input::placeholder, textarea::placeholder { color: #475569 !important; opacity: 1; }
+  input:-webkit-autofill, input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0d1b2a inset !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    caret-color: #f1f5f9;
+  }
+  select option { background: #132639; color: #f1f5f9; }
 </style>
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">

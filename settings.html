@@ -31,13 +31,26 @@
     background: #0d1b2a;
     border: 1px solid #334155;
     border-radius: 12px;
-    color: #e2e8f0;
+    color: #f1f5f9;
     font-size: 14px;
     outline: none;
     transition: border-color 0.15s;
   }
+  .input-field::placeholder { color: #475569; opacity: 1; }
   .input-field:focus { border-color: #2dd4bf; box-shadow: 0 0 0 2px rgba(45,212,191,0.15); }
   .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* Fix browser autofill overriding background/text */
+  .input-field:-webkit-autofill,
+  .input-field:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #0d1b2a inset !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    caret-color: #f1f5f9;
+  }
+  /* Fix select option text in dropdown */
+  .input-field option {
+    background: #132639;
+    color: #f1f5f9;
+  }
   .save-btn {
     padding: 10px 24px;
     background: #2dd4bf;
