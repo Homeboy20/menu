@@ -1163,7 +1163,7 @@ function setBool(id, val) {
 // -- Save General -------------------------------------------------------------
 async function saveGeneralSettings() {
   const btn = document.getElementById('save-general-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
   try {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT', headers: authHeaders(),
@@ -1186,7 +1186,7 @@ async function saveGeneralSettings() {
 // -- Save Branding -------------------------------------------------------------
 async function saveBrandingSettings() {
   const btn = document.getElementById('save-branding-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
   try {
     const siteName = document.getElementById('br-site-name').value.trim();
     const res = await fetch('/api/admin/settings', {
@@ -1260,7 +1260,7 @@ function clearBrandingField(type) {
 // -- Save Currency ------------------------------------------------------------
 async function saveCurrencySettings() {
   const btn = document.getElementById('save-currency-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
   try {
     const res = await fetch('/api/admin/settings', {
       method: 'PUT', headers: authHeaders(),
@@ -1336,7 +1336,7 @@ async function saveProvider(name) {
   const p = map[name];
   const saveId = `save-${p}-btn`;
   const btn = document.getElementById(saveId);
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
 
   let config = { enabled: providerEnabled[name] };
   if (name === 'clickpesa') {
@@ -1427,7 +1427,7 @@ function onEmailProviderChange() {
 async function saveEmailSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-em-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
   const existing = serverSettings.integration_email || {};
   const passRaw = document.getElementById('em-pass').value.trim();
   const config = {
@@ -1485,7 +1485,7 @@ async function sendTestEmail() {
 async function saveWebhookSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-wh-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
   const existing = serverSettings.integration_webhooks || {};
   const secretRaw = document.getElementById('wh-secret').value.trim();
   const config = {
@@ -1592,7 +1592,7 @@ function toggleFbKey() {
 async function saveFirebaseSettings() {
   if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-fb-btn');
-  btn.textContent = 'Saving�'; btn.disabled = true;
+  btn.textContent = 'Saving...'; btn.disabled = true;
 
   const existing = serverSettings.integration_firebase || {};
   const privateKeyRaw        = document.getElementById('fb-private-key').value.trim();

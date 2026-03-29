@@ -5410,9 +5410,10 @@ function buildEmailTransport(rawConfig) {
     host: p.host,
     port: p.port,
     secure: p.secure,
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
     socketTimeout: 30000,
+    tls: { rejectUnauthorized: false },
   };
 
   if (finalUser && pass) {
@@ -6267,7 +6268,15 @@ app.post('/api/admin/settings/email/test', requireRole('super_admin'), async (re
     }
 
     const { provider, fromName, fromEmail, transporter } = buildEmailTransport(config);
-    await transporter.verify();
+
+    try {
+      await transporter.verify();
+    } catch (verifyErr) {
+      console.error('SMTP verify failed:', verifyErr.message);
+      return res.status(500).json({
+        error: `SMTP connection failed: ${verifyErr.message}. Check host, port, and credentials.`,
+      });
+    }
 
     const sentAt = new Date().toISOString();
     const subject = 'RestOrder test email';
