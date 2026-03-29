@@ -685,6 +685,11 @@ async function loadDashboard() {
                   <a href="/menu-editor?menu=${menu.id}" class="px-4 py-2 text-sm bg-orange-50 text-primary border border-orange-200 rounded-lg hover:bg-orange-100 transition">
                     Edit
                   </a>
+                  <button onclick="handleQRPrint('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')"
+                    class="px-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5">
+                    <svg class="material-symbols-outlined text-[15px]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg>
+                    Print QR
+                  </button>
                 </div>
               </div>
             </div>
@@ -1572,6 +1577,27 @@ async function showTrialExpiredOverlay(menuId) {
   document.getElementById('trial-expired-overlay').classList.remove('hidden');
 }
 
+function dismissOnboard() {
+  document.getElementById('onboard-modal').classList.add('hidden');
+  // Clear the param so it doesn't reshow on refresh
+  const url = new URL(window.location.href);
+  url.searchParams.delete('onboard');
+  window.history.replaceState({}, '', url.toString());
+}
+
+function handleQRPrint(menuId, planName) {
+  const plan = (planName || '').toLowerCase().trim();
+  const isPaid = plan && plan !== 'free' && plan !== 'starter' && plan !== 'trial' && plan !== '';
+  if (!isPaid) {
+    document.getElementById('fgate-title').textContent = 'Upgrade to Print QR Codes';
+    document.getElementById('fgate-desc').textContent = 'Print and download QR codes for your tables, takeaway bags, and more — available on any paid plan.';
+    document.getElementById('fgate-cta').href = '/pricing';
+    document.getElementById('feature-gate-modal').classList.remove('hidden');
+    return;
+  }
+  window.open('/menu?id=' + encodeURIComponent(menuId) + '&print_qr=1', '_blank');
+}
+
 async function showSubscribePrompt() {
   try {
     const plansRes = await fetch('/api/subscription-plans');
@@ -1603,6 +1629,11 @@ async function showSubscribePrompt() {
   const authed = await checkAuth();
   if (authed) {
     await loadDashboard();
+    // Show onboarding welcome for brand-new signups
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('onboard') === '1') {
+      document.getElementById('onboard-modal').classList.remove('hidden');
+    }
     // Check trial expiry and subscription status
     try {
       const subsRes = await fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } });
@@ -1614,10 +1645,11 @@ async function showSubscribePrompt() {
           showTrialExpiredOverlay(trialSub.menu_id);
         } else {
           // Prompt subscription for phone-only registrations or explicit ?subscribe=1
-          const urlParams = new URLSearchParams(window.location.search);
+          // Don't show on ?onboard=1 — let them explore first
           const forceSubscribe = urlParams.get('subscribe') === '1';
+          const isOnboarding = urlParams.get('onboard') === '1';
           const hasActive = Array.isArray(subs) && subs.some(s => ['active', 'trial'].includes(s.status));
-          if (forceSubscribe || !hasActive) {
+          if (!isOnboarding && (forceSubscribe || !hasActive)) {
             await showSubscribePrompt();
           }
         }
@@ -1653,7 +1685,71 @@ async function showSubscribePrompt() {
 
 <!-- Cancel Subscription Modal -->
 
+<!-- Feature Gate Modal (QR print / advanced features on free plans) -->
+<div id="feature-gate-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);">
+  <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
+    <button onclick="document.getElementById('feature-gate-modal').classList.add('hidden')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+      <svg class="material-symbols-outlined text-[22px]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
+    </button>
+    <div class="size-16 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-4 text-amber-500">
+      <svg class="material-symbols-outlined text-[30px]" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
+    </div>
+    <h2 class="text-xl font-bold text-stone-900 mb-2" id="fgate-title">Upgrade to Print QR Codes</h2>
+    <p class="text-stone-500 text-sm mb-6" id="fgate-desc">Print and download QR codes for your tables, flyers, and more with any paid plan.</p>
+    <a id="fgate-cta" href="/pricing" class="block w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm transition mb-3">
+      View Plans &amp; Upgrade
+    </a>
+    <button onclick="document.getElementById('feature-gate-modal').classList.add('hidden')" class="w-full py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-semibold text-sm transition">
+      Maybe Later
+    </button>
+  </div>
+</div>
+
 <!-- Trial Expired Overlay -->
+<!-- Onboarding Welcome Modal (shown on ?onboard=1 after new registration) -->
+<div id="onboard-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);">
+  <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full">
+    <div class="text-center mb-6">
+      <div class="size-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto mb-4 text-white">
+        <svg class="material-symbols-outlined text-[30px]" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-waving_hand"/></svg>
+      </div>
+      <h2 class="text-2xl font-bold text-stone-900 mb-1">Welcome to RestOrder!</h2>
+      <p class="text-stone-500 text-sm">Your menu is ready. Follow these 2 quick steps to make it shine.</p>
+    </div>
+
+    <div class="space-y-3 mb-6">
+      <!-- Step A: Upload logo -->
+      <div class="flex items-start gap-4 p-4 rounded-2xl border border-stone-200 hover:border-primary/40 transition cursor-pointer" onclick="dismissOnboard();showSection('settings');">
+        <div class="size-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0 text-primary">
+          <svg class="material-symbols-outlined text-[22px]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add_photo_alternate"/></svg>
+        </div>
+        <div>
+          <p class="font-semibold text-stone-900 text-sm">Upload your logo</p>
+          <p class="text-xs text-stone-500 mt-0.5">Make your menu look professional</p>
+        </div>
+        <svg class="material-symbols-outlined text-stone-400 text-[18px] ml-auto mt-1 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward_ios"/></svg>
+      </div>
+
+      <!-- Step B: Add first item -->
+      <div class="flex items-start gap-4 p-4 rounded-2xl border border-stone-200 hover:border-primary/40 transition cursor-pointer" onclick="dismissOnboard();showSection('menus');">
+        <div class="size-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0 text-primary">
+          <svg class="material-symbols-outlined text-[22px]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add_circle"/></svg>
+        </div>
+        <div>
+          <p class="font-semibold text-stone-900 text-sm">Add your first menu item</p>
+          <p class="text-xs text-stone-500 mt-0.5">Customers will see it instantly</p>
+        </div>
+        <svg class="material-symbols-outlined text-stone-400 text-[18px] ml-auto mt-1 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward_ios"/></svg>
+      </div>
+    </div>
+
+    <button onclick="dismissOnboard()" class="w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm transition">
+      Go to My Dashboard
+    </button>
+    <p class="text-center text-xs text-stone-400 mt-3">You can always find these in the left menu</p>
+  </div>
+</div>
+
 <!-- Subscribe Prompt Modal (phone-only registrations / no active subscription) -->
 <div id="subscribe-prompt-overlay" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);">
   <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">

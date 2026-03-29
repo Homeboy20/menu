@@ -375,6 +375,7 @@ app.use((req, res, next) => {
     '/menu': 'menu.html',
     '/admin': 'admin.html',
     '/register': 'register.html',
+    '/start': 'register-new.html',
     '/admin-dashboard': 'admin-dashboard.html',
     '/customers': 'customers.html',
     '/subscriptions': 'subscriptions.html',
