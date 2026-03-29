@@ -398,6 +398,7 @@ app.use((req, res, next) => {
   if (htmlFile) {
     const filePath = path.join(__dirname, htmlFile);
     if (fs.existsSync(filePath)) {
+      res.set('Cache-Control', 'no-cache, must-revalidate');
       return res.sendFile(filePath);
     }
   }
@@ -517,9 +518,9 @@ app.use(express.static('.', {
   lastModified: true,
   immutable: true,
   setHeaders: (res, path) => {
-    // Cache HTML files for shorter periods
+    // HTML files must never be cached — always revalidate so config/script order fixes take effect
     if (path.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
     // Cache CSS/JS for longer
     if (path.endsWith('.css') || path.endsWith('.js')) {
@@ -1678,17 +1679,21 @@ app.get('/favicon.ico', async (req, res) => {
 
 // GET /  – serve landing page
 app.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // GET /terms and /privacy – legal pages
 app.get('/terms', (req, res) => {
+  res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'terms.html'));
 });
 app.get('/privacy', (req, res) => {
+  res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'privacy.html'));
 });
 app.get('/refund', (req, res) => {
+  res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'refund.html'));
 });
 
