@@ -6408,6 +6408,10 @@ app.use((err, req, res, next) => {
 (async () => {
   await initDB();
   await loadCustomerSessionsFromDB();
+  // Load Firebase Admin SDK from DB settings if not already configured via .env
+  if (!firebaseAdmin) {
+    await reinitFirebaseAdmin().catch(e => console.warn('Firebase init from DB:', e.message));
+  }
   app.listen(PORT, () => {
     console.log(`\n  MenuAdmin MVP running at http://localhost:${PORT}`);
     console.log(`  Admin panel   : http://localhost:${PORT}/admin.html`);
