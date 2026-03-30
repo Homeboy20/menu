@@ -597,7 +597,137 @@ async function assertMenuOwnership(menuId, customerId, res) {
   return true;
 }
 
-// ── Subscription middleware (checks plan limits) ────────────────────────────────
+// ── Subscription access control ────────────────────────────────────────────────
+
+// Tier order used for comparison (lower index = lower tier)
+const PLAN_ORDER = ['trial', 'starter', 'professional', 'enterprise'];
+
+// requirePlan(minPlan) – middleware factory that enforces a minimum subscription tier.
+// When req.params.id (menu_id) is present, checks that specific menu's subscription.
+// When no menu_id is available (e.g. staff routes), checks the customer's best plan.
+// Admin users always bypass.
+function requirePlan(minPlan) {
+  return async (req, res, next) => {
+    try {
+      if (req.adminUser) return next();
+
+      const menuId = req.params.id || req.body?.menu_id;
+      const customerId = req.customer?.customerId || req.customer?.id;
+
+      let rows;
+
+      if (menuId) {
+        ({ rows } = await pool.query(`
+          SELECT s.status, s.trial_end, sp.name AS plan_name, sp.display_name
+          FROM subscriptions s
+          JOIN subscription_plans sp ON s.plan_id = sp.id
+          WHERE s.menu_id = $1
+        `, [menuId]));
+
+        if (!rows.length) {
+          return res.status(403).json({ error: 'No subscription found for this menu.', upgrade_required: true });
+        }
+
+        const sub = rows[0];
+        if (sub.status === 'trial' && sub.trial_end && new Date(sub.trial_end) < new Date()) {
+          return res.status(403).json({ error: 'Your free trial has expired. Please upgrade to continue.', trial_expired: true, upgrade_required: true });
+        }
+        if (sub.status !== 'active' && sub.status !== 'trial') {
+          return res.status(403).json({ error: 'Your subscription is not active. Please renew to continue.', subscription_status: sub.status, upgrade_required: true });
+        }
+
+        const currentIdx = PLAN_ORDER.indexOf(sub.plan_name);
+        const requiredIdx = PLAN_ORDER.indexOf(minPlan);
+        if (currentIdx < requiredIdx) {
+          return res.status(403).json({
+            error: `This feature requires the ${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)} plan or higher.`,
+            current_plan: sub.plan_name, required_plan: minPlan, upgrade_required: true
+          });
+        }
+        req.subscription = sub;
+
+      } else if (customerId) {
+        // No menu context – check the customer's best active plan
+        ({ rows } = await pool.query(`
+          SELECT sp.name AS plan_name
+          FROM subscriptions s
+          JOIN subscription_plans sp ON s.plan_id = sp.id
+          JOIN menus m ON m.id = s.menu_id
+          WHERE m.customer_id = $1
+            AND s.status IN ('active', 'trial')
+            AND (s.trial_end IS NULL OR s.trial_end > $2)
+          ORDER BY sp.menu_limit DESC
+          LIMIT 1
+        `, [customerId, new Date().toISOString()]));
+
+        if (!rows.length) {
+          return res.status(403).json({ error: 'No active subscription found.', upgrade_required: true });
+        }
+
+        const currentIdx = PLAN_ORDER.indexOf(rows[0].plan_name);
+        const requiredIdx = PLAN_ORDER.indexOf(minPlan);
+        if (currentIdx < requiredIdx) {
+          return res.status(403).json({
+            error: `This feature requires the ${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)} plan or higher.`,
+            current_plan: rows[0].plan_name, required_plan: minPlan, upgrade_required: true
+          });
+        }
+      }
+
+      next();
+    } catch (err) {
+      console.error('Plan check error:', err);
+      next(); // fail open – don't block on DB errors
+    }
+  };
+}
+
+// checkMenuLimit – blocks POST /api/menus if the customer has reached their plan's menu limit.
+async function checkMenuLimit(req, res, next) {
+  try {
+    if (req.adminUser) return next();
+    if (!req.customer) return next();
+
+    const customerId = req.customer.customerId || req.customer.id;
+
+    // Find the customer's best active plan
+    const { rows: planRows } = await pool.query(`
+      SELECT sp.menu_limit, sp.name AS plan_name, sp.display_name
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      JOIN menus m ON m.id = s.menu_id
+      WHERE m.customer_id = $1
+        AND s.status IN ('active', 'trial')
+        AND (s.trial_end IS NULL OR s.trial_end > $2)
+      ORDER BY sp.menu_limit DESC
+      LIMIT 1
+    `, [customerId, new Date().toISOString()]);
+
+    if (!planRows.length) return next();
+
+    const best = planRows[0];
+    if (best.menu_limit >= 999) return next(); // unlimited
+
+    const { rows: countRows } = await pool.query(
+      'SELECT COUNT(*) AS count FROM menus WHERE customer_id = $1', [customerId]
+    );
+    const currentCount = parseInt(countRows[0].count) || 0;
+
+    if (currentCount >= best.menu_limit) {
+      return res.status(403).json({
+        error: `Your ${best.display_name} plan allows up to ${best.menu_limit} menu(s). Please upgrade to create more.`,
+        current_plan: best.plan_name, limit: best.menu_limit, current_count: currentCount, upgrade_required: true
+      });
+    }
+
+    next();
+  } catch (err) {
+    console.error('Menu limit check error:', err);
+    next();
+  }
+}
+
+// ── Legacy subscription check (kept for reference, not applied) ───────────────
 async function checkSubscriptionLimit(req, res, next) {
   try {
     // Get menu ID from request (could be in params or body)
@@ -3898,7 +4028,7 @@ app.post('/api/upload', requireAnyAuth, upload.single('menuFile'), async (req, r
 });
 
 // POST /api/menus  – save a reviewed set of items and get back a QR code
-app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, async (req, res) => {
+app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, checkMenuLimit, async (req, res) => {
   try {
     const { restaurantName, items, currency } = req.body;
     if (!Array.isArray(items) || items.length === 0)
@@ -4140,7 +4270,7 @@ app.get('/api/menus/:id', async (req, res) => {
 });
 
 // GET /api/menus/:id/export-csv  – download menu items as CSV
-app.get('/api/menus/:id/export-csv', requireAnyAuth, async (req, res) => {
+app.get('/api/menus/:id/export-csv', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     const menu = await dbGetMenu(req.params.id);
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
@@ -4367,7 +4497,7 @@ app.delete('/api/qr-redirects/:id', requireAnyAuth, async (req, res) => {
 // ── Table Management ──────────────────────────────────────────────────────────
 
 // GET /api/menus/:id/tables - List tables for a menu
-app.get('/api/menus/:id/tables', requireAnyAuth, async (req, res) => {
+app.get('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
     const { rows } = await pool.query(
@@ -4379,7 +4509,7 @@ app.get('/api/menus/:id/tables', requireAnyAuth, async (req, res) => {
 });
 
 // POST /api/menus/:id/tables - Create a table + generate its QR
-app.post('/api/menus/:id/tables', requireAnyAuth, async (req, res) => {
+app.post('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     const menuId = req.params.id;
     const label = sanitizeStr(req.body.label, 100) || 'Table';
@@ -4405,7 +4535,7 @@ app.post('/api/menus/:id/tables', requireAnyAuth, async (req, res) => {
 });
 
 // DELETE /api/menus/:id/tables/:tableId - Delete a table
-app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, async (req, res) => {
+app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     await pool.query('DELETE FROM menu_tables WHERE id = $1 AND menu_id = $2',
       [req.params.tableId, req.params.id]);
@@ -4524,7 +4654,7 @@ app.post('/api/menus/:id/orders', async (req, res) => {
 });
 
 // GET /api/menus/:id/orders - Admin/customer views orders
-app.get('/api/menus/:id/orders', requireAnyAuth, async (req, res) => {
+app.get('/api/menus/:id/orders', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
     const status = req.query.status || 'pending';
@@ -6127,7 +6257,7 @@ app.post('/api/staff/login', loginLimiter, doubleCsrfProtection, async (req, res
 });
 
 // GET /api/staff – List staff for the authenticated business owner
-app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
   try {
     const { rows } = await pool.query(
       'SELECT id, name, email, role, status, created_at FROM staff_members WHERE customer_id = $1 ORDER BY created_at ASC',
@@ -6138,7 +6268,7 @@ app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, async (req, res
 });
 
 // POST /api/staff – Create a staff member (owner only)
-app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
 
@@ -6181,7 +6311,7 @@ app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, async (req, re
 });
 
 // PUT /api/staff/:id – Update a staff member (owner only)
-app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
     const { name, role, status, password } = req.body || {};
@@ -6230,7 +6360,7 @@ app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, async (req,
 });
 
 // DELETE /api/staff/:id – Remove a staff member (owner only)
-app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
 
