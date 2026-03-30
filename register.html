@@ -33,7 +33,10 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(194,65,12,.18);}
 @keyframes spin{to{transform:rotate(360deg);}}
 #progress-bar{transition:width .4s cubic-bezier(.4,0,.2,1);}
 .feat-chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;}
-.brand-panel{background:linear-gradient(150deg,#7c2d12 0%,#9a3412 25%,#c2410c 65%,#ea580c 100%);}
+.brand-panel{background:linear-gradient(150deg,#7c2d12 0%,#9a3412 25%,#c2410c 65%,#ea580c 100%);}  
+.tab-btn{transition:all .18s ease;border-radius:.625rem;}
+.tab-btn.active{background:#1c1917;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+#auth-otp{font-family:monospace;letter-spacing:.35em;}
 </style>
 </head>
 <body class="min-h-screen flex bg-stone-50">
@@ -126,57 +129,107 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(194,65,12,.18);}
             <p class="text-stone-500 text-sm">Your menu will be live in under 60 seconds.</p>
           </div>
 
+          <!-- Google sign-up -->
           <button id="btn-google" onclick="handleGoogle()" type="button"
-            class="w-full flex items-center justify-center gap-3 border border-stone-300 rounded-xl py-3 px-4 bg-white hover:bg-stone-50 transition text-sm font-semibold text-stone-700 mb-4">
+            class="w-full flex items-center justify-center gap-3 border border-stone-300 rounded-xl py-3 px-4 bg-white hover:bg-stone-50 transition text-sm font-semibold text-stone-700 mb-3">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
               <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
               <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
               <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
             </svg>
-            Continue with Google
+            <span id="google-reg-text">Continue with Google</span>
+            <svg id="google-reg-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
           </button>
+
+          <!-- Firebase error banner -->
+          <div id="firebase-reg-error" class="hidden bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-sm text-red-700 mb-3"></div>
 
           <div class="relative flex items-center gap-3 mb-4">
             <div class="flex-1 h-px bg-stone-200"></div>
-            <span class="text-xs text-stone-400 font-medium">or use email</span>
+            <span class="text-xs text-stone-400 font-medium">or sign up with</span>
             <div class="flex-1 h-px bg-stone-200"></div>
           </div>
 
-          <div class="mb-4">
-            <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-email">Email address</label>
-            <input id="s1-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
-              class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-              oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+          <!-- Tab switcher: Email | Phone -->
+          <div class="flex rounded-xl border border-stone-200 p-1 mb-5 bg-stone-50">
+            <button id="tab-email" onclick="switchTab('email')" type="button"
+              class="tab-btn active flex-1 py-2 text-sm font-semibold">Email</button>
+            <button id="tab-phone" onclick="switchTab('phone')" type="button"
+              class="tab-btn flex-1 py-2 text-sm font-semibold text-stone-500">Phone</button>
           </div>
 
-          <div class="mb-5">
-            <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-pw">Password</label>
-            <div class="relative">
-              <input id="s1-pw" type="password" autocomplete="new-password" placeholder="Min 8 characters + 1 number"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 pr-11 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-                oninput="updatePwStrength();clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
-              <button type="button" onclick="togglePw('s1-pw',this)" tabindex="-1"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
-                <svg class="material-symbols-outlined" style="font-size:20px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use id="s1-eye-icon" href="/icons/sprite.svg#icon-visibility"/></svg>
+          <!-- EMAIL TAB -->
+          <div id="tab-email-panel">
+            <div class="mb-4">
+              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-email">Email address</label>
+              <input id="s1-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
+                class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
+                oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+            </div>
+            <div class="mb-5">
+              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-pw">Password</label>
+              <div class="relative">
+                <input id="s1-pw" type="password" autocomplete="new-password" placeholder="Min 8 characters + 1 number"
+                  class="w-full rounded-xl border border-stone-300 px-4 py-3 pr-11 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
+                  oninput="updatePwStrength();clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+                <button type="button" onclick="togglePw('s1-pw',this)" tabindex="-1"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                  <svg class="material-symbols-outlined" style="font-size:20px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use id="s1-eye-icon" href="/icons/sprite.svg#icon-visibility"/></svg>
+                </button>
+              </div>
+              <div class="mt-2 flex gap-1.5">
+                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-1"></div>
+                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-2"></div>
+                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-3"></div>
+                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-4"></div>
+              </div>
+              <p id="pw-hint" class="text-xs text-stone-400 mt-1">Enter a password to check strength</p>
+            </div>
+            <p id="s1-error" class="hidden text-red-600 text-sm mb-3 font-medium"></p>
+            <button onclick="s1Next()" id="btn-s1"
+              class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
+              <span>Create Free Account</span>
+              <svg class="material-symbols-outlined" style="font-size:18px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
+            </button>
+          </div><!-- /tab-email-panel -->
+
+          <!-- PHONE TAB -->
+          <div id="tab-phone-panel" class="hidden">
+            <!-- Step A: enter phone number -->
+            <div id="phone-entry">
+              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="auth-phone">Phone number</label>
+              <div class="flex gap-2 mb-1">
+                <input id="auth-phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567"
+                  class="flex-1 rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
+                  oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')sendPhoneOTP()"/>
+                <button type="button" id="btn-send-otp" onclick="sendPhoneOTP()"
+                  class="px-4 py-3 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl text-sm transition shrink-0 flex items-center gap-1.5">
+                  <span id="otp-send-text">Send code</span>
+                  <svg id="otp-send-spin" class="spin hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
+                </button>
+              </div>
+              <p class="text-xs text-stone-400 mt-1 mb-0">Include country code &mdash; e.g. +44 7700 900123</p>
+            </div>
+            <!-- Step B: enter OTP code -->
+            <div id="otp-entry" class="hidden mt-1">
+              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="auth-otp">Verification code</label>
+              <input id="auth-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"
+                class="w-full text-center text-2xl rounded-xl border border-stone-300 px-4 py-3 text-stone-900 focus:border-primary transition"
+                oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')verifyPhoneOTP()"/>
+              <div class="flex justify-between mt-2 mb-3">
+                <button type="button" onclick="resetPhoneFlow()" class="text-xs text-stone-400 hover:text-stone-600 transition">&#8592; Change number</button>
+                <button type="button" onclick="sendPhoneOTP()" class="text-xs text-primary font-semibold hover:underline">Resend code</button>
+              </div>
+              <button type="button" onclick="verifyPhoneOTP()" id="btn-verify-otp"
+                class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
+                <span id="otp-verify-text">Verify &amp; Continue</span>
+                <svg id="otp-verify-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
               </button>
             </div>
-            <div class="mt-2 flex gap-1.5">
-              <div class="h-1 rounded flex-1 bg-stone-200" id="ps-1"></div>
-              <div class="h-1 rounded flex-1 bg-stone-200" id="ps-2"></div>
-              <div class="h-1 rounded flex-1 bg-stone-200" id="ps-3"></div>
-              <div class="h-1 rounded flex-1 bg-stone-200" id="ps-4"></div>
-            </div>
-            <p id="pw-hint" class="text-xs text-stone-400 mt-1">Enter a password to check strength</p>
-          </div>
-
-          <p id="s1-error" class="hidden text-red-600 text-sm mb-3 font-medium"></p>
-
-          <button onclick="s1Next()" id="btn-s1"
-            class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
-            <span>Create Free Account</span>
-            <svg class="material-symbols-outlined" style="font-size:18px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
-          </button>
+            <p id="phone-error" class="hidden text-red-600 text-sm mt-3 font-medium"></p>
+            <div id="recaptcha-container"></div>
+          </div><!-- /tab-phone-panel -->
 
           <p class="text-center text-xs text-stone-400 mt-4">
             By continuing you agree to our
@@ -312,7 +365,11 @@ function s2Next() {
   clearError('s2-error');
   if (!biz || biz.length < 2) { showError('s2-error', 'Please enter your business name.'); return; }
   goToStep(3);
-  doRegister();
+  if (window._pendingFirebaseIdToken) {
+    doFirebaseRegister(window._pendingFirebaseIdToken, biz);
+  } else {
+    doRegister();
+  }
 }
 
 function resetChecklist() {
@@ -387,9 +444,198 @@ function showRegError(msg) {
   el('s3-sub').textContent = 'Please check your details and try again.';
 }
 
-function handleGoogle() {
-  alert('Google sign-up coming soon! Use email for now.');
+// ── Tab switcher ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  const isEmail = tab === 'email';
+  el('tab-email').classList.toggle('active', isEmail);
+  el('tab-phone').classList.toggle('active', !isEmail);
+  el('tab-email').classList.toggle('text-stone-500', !isEmail);
+  el('tab-phone').classList.toggle('text-stone-500', isEmail);
+  el('tab-email-panel').classList.toggle('hidden', !isEmail);
+  el('tab-phone-panel').classList.toggle('hidden', isEmail);
+  clearError('s1-error');
+  clearError('phone-error');
+  if (!isEmail) setTimeout(() => { const p = el('auth-phone'); if (p && !el('otp-entry').classList.contains('hidden') === false) p.focus(); }, 40);
 }
+
+// ── Firebase helpers ───────────────────────────────────────────────────────────
+let _fbAuth = null, _fbPhoneConfirm = null;
+
+async function initFirebaseReg(cfg) {
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier }
+      = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+    _fbAuth = getAuth(app);
+    _fbAuth._gp = new GoogleAuthProvider();
+    _fbAuth._rv = RecaptchaVerifier;
+    _fbAuth._swp = signInWithPopup;
+    _fbAuth._swpn = signInWithPhoneNumber;
+    // Unlock Google button (it was always visible, but now it's functional)
+    el('btn-google').dataset.fbReady = '1';
+  } catch (e) { console.warn('Firebase load error:', e); }
+}
+
+function showFbError(msg) {
+  const d = el('firebase-reg-error');
+  d.textContent = msg;
+  d.classList.remove('hidden');
+  setTimeout(() => d.classList.add('hidden'), 7000);
+}
+
+async function handleFirebaseIdToken(idToken) {
+  // Called after Google or phone OTP — try to sign in or detect new account
+  const res = await fetch('/api/customers/firebase-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ idToken })
+  });
+  const data = await res.json();
+  if (res.ok && data.token) {
+    // Existing account — log in and redirect
+    localStorage.setItem('customerToken', data.token);
+    if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
+    if (data.customer?.businessName) localStorage.setItem('customerBusiness', data.customer.businessName);
+    window.location.href = data.redirectTo || '/dashboard';
+    return;
+  }
+  if (data.requiresRegistration) {
+    // New account — need business name; stash token and go to step 2
+    window._pendingFirebaseIdToken = idToken;
+    goToStep(2);
+    return;
+  }
+  showFbError(data.error || 'Sign-in failed. Please try again.');
+}
+
+async function doFirebaseRegister(idToken, businessName) {
+  // Step 3 animation — account actually created here
+  clearError('s3-error');
+  el('btn-retry').classList.add('hidden');
+  resetChecklist();
+  const spinner = el('s3-spinner');
+  el('s3-icon-ring').className = 'size-20 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-5';
+  spinner.className = 'spin material-symbols-outlined text-primary';
+  spinner.style.fontSize = '32px'; spinner.style.display = ''; spinner.style.color = '';
+  spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-sync');
+  el('s3-title').textContent = 'Setting up your menu\u2026';
+  el('s3-sub').textContent = 'This takes just a few seconds.';
+  await animateCheck('s3-c1', 600);
+  try {
+    const res = await fetch('/api/customers/firebase-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ idToken, businessName })
+    });
+    const data = await res.json();
+    if (!res.ok) { showRegError(data.error || 'Registration failed. Please try again.'); return; }
+    if (data.token) localStorage.setItem('customerToken', data.token);
+    if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
+    localStorage.setItem('customerBusiness', businessName);
+    window._pendingFirebaseIdToken = null;
+    await animateCheck('s3-c2', 500);
+    await animateCheck('s3-c3', 400);
+    el('s3-icon-ring').className = 'size-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-5';
+    spinner.style.fontSize = '40px'; spinner.style.color = '#16a34a';
+    spinner.className = 'material-symbols-outlined';
+    spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-check_circle');
+    el('s3-title').textContent = "You're all set!";
+    el('s3-sub').textContent = 'Redirecting to your dashboard\u2026';
+    setTimeout(() => window.location.href = '/dashboard?onboard=1', 800);
+  } catch (err) {
+    showRegError('Network error. Please check your connection and try again.');
+  }
+}
+
+// ── Google sign-up ─────────────────────────────────────────────────────────────
+async function handleGoogle() {
+  if (!_fbAuth) { showFbError('Google sign-up is loading. Please wait a moment and try again.'); return; }
+  const btn = el('btn-google');
+  el('google-reg-text').textContent = 'Signing in\u2026';
+  el('google-reg-spin').classList.remove('hidden');
+  btn.disabled = true;
+  try {
+    const result = await _fbAuth._swp(_fbAuth, _fbAuth._gp);
+    const idToken = await result.user.getIdToken();
+    await handleFirebaseIdToken(idToken);
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') showFbError(err.message || 'Google sign-in failed.');
+  } finally {
+    el('google-reg-text').textContent = 'Continue with Google';
+    el('google-reg-spin').classList.add('hidden');
+    btn.disabled = false;
+  }
+}
+
+// ── Phone OTP ──────────────────────────────────────────────────────────────────
+async function sendPhoneOTP() {
+  if (!_fbAuth) { showFbError('Firebase is not configured on this server.'); return; }
+  const phone = el('auth-phone').value.trim();
+  clearError('phone-error');
+  if (!phone) { showError('phone-error', 'Please enter your phone number with country code.'); return; }
+  el('otp-send-text').textContent = 'Sending\u2026';
+  el('otp-send-spin').classList.remove('hidden');
+  el('btn-send-otp').disabled = true;
+  try {
+    if (!window._rcVerifier) {
+      window._rcVerifier = new _fbAuth._rv(_fbAuth, 'recaptcha-container', { size: 'invisible' });
+    }
+    _fbPhoneConfirm = await _fbAuth._swpn(_fbAuth, phone, window._rcVerifier);
+    el('phone-entry').classList.add('hidden');
+    el('otp-entry').classList.remove('hidden');
+    setTimeout(() => el('auth-otp').focus(), 50);
+  } catch (err) {
+    showError('phone-error', err.message || 'Could not send code. Check the number and try again.');
+    el('otp-send-text').textContent = 'Send code';
+    el('otp-send-spin').classList.add('hidden');
+    el('btn-send-otp').disabled = false;
+  }
+}
+
+async function verifyPhoneOTP() {
+  if (!_fbPhoneConfirm) return;
+  const code = el('auth-otp').value.trim();
+  clearError('phone-error');
+  if (!/^\d{6}$/.test(code)) { showError('phone-error', 'Enter the 6-digit verification code.'); return; }
+  el('otp-verify-text').textContent = 'Verifying\u2026';
+  el('otp-verify-spin').classList.remove('hidden');
+  el('btn-verify-otp').disabled = true;
+  try {
+    const result = await _fbPhoneConfirm.confirm(code);
+    const idToken = await result.user.getIdToken();
+    await handleFirebaseIdToken(idToken);
+  } catch (err) {
+    showError('phone-error', err.message || 'Invalid code. Please try again.');
+    el('otp-verify-text').textContent = 'Verify & Continue';
+    el('otp-verify-spin').classList.add('hidden');
+    el('btn-verify-otp').disabled = false;
+  }
+}
+
+function resetPhoneFlow() {
+  _fbPhoneConfirm = null;
+  window._rcVerifier = null;
+  el('phone-entry').classList.remove('hidden');
+  el('otp-entry').classList.add('hidden');
+  el('auth-otp').value = '';
+  el('auth-phone').value = '';
+  el('otp-send-text').textContent = 'Send code';
+  el('otp-send-spin').classList.add('hidden');
+  el('btn-send-otp').disabled = false;
+  clearError('phone-error');
+  setTimeout(() => el('auth-phone').focus(), 40);
+}
+
+// ── Firebase init on load ──────────────────────────────────────────────────────
+(async () => {
+  try {
+    const cfg = await fetch('/api/firebase-config').then(r => r.json());
+    if (cfg && cfg.enabled) await initFirebaseReg(cfg);
+  } catch (e) { console.warn('Firebase config:', e); }
+})();
 </script>
 <script src="/js/icons.js"></script>
 </body>
