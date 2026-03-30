@@ -242,14 +242,15 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'blob:', 'https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
       scriptSrcAttr: ["'unsafe-inline'"],   // allow onclick/oninput/onchange handlers
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://ipapi.co'],
+      connectSrc:    ["'self'", 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://ipapi.co'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
+      workerSrc:     ["'self'", 'blob:'],
       formAction:    ["'self'"],   // Restrict form submissions to same origin
       baseUri:       ["'self'"],   // Prevent base tag attacks
     },
