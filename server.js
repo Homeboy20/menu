@@ -45,9 +45,12 @@ try {
 async function reinitFirebaseAdmin() {
   try {
     const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_firebase'");
-    if (!rows.length) return;
-    let cfg; try { cfg = JSON.parse(rows[0].value); } catch(e) { return; }
-    if (!cfg || !cfg.enabled || !cfg.project_id || !cfg.client_email || !cfg.private_key) return;
+    if (!rows.length) { console.warn('  ⚠  Firebase: no integration_firebase row in app_settings'); return; }
+    let cfg; try { cfg = JSON.parse(rows[0].value); } catch(e) { console.warn('  ⚠  Firebase: could not parse integration_firebase JSON'); return; }
+    if (!cfg || !cfg.enabled) { console.warn('  ⚠  Firebase: integration not enabled in settings'); return; }
+    if (!cfg.project_id)   { console.warn('  ⚠  Firebase Admin: missing project_id in settings'); return; }
+    if (!cfg.client_email)  { console.warn('  ⚠  Firebase Admin: missing client_email (Service Account Email) in settings'); return; }
+    if (!cfg.private_key)   { console.warn('  ⚠  Firebase Admin: missing private_key (Service Account Key) in settings'); return; }
     const fa = require('firebase-admin');
     // Delete existing default app if present
     try { await fa.app().delete(); } catch(e) { /* no existing app */ }
@@ -59,9 +62,9 @@ async function reinitFirebaseAdmin() {
       }),
     });
     firebaseAdmin = fa;
-    console.log('✓ Firebase Admin SDK re-initialized from DB settings');
+    console.log('✓ Firebase Admin SDK initialized from DB settings');
   } catch(e) {
-    console.warn('  ⚠  Firebase Admin re-init failed:', e.message);
+    console.warn('  ⚠  Firebase Admin init failed:', e.message);
   }
 }
 
@@ -6265,7 +6268,7 @@ app.get('/api/admin/settings', requireAuth, async (req, res) => {
     const { rows } = await pool.query('SELECT key, value FROM app_settings ORDER BY key');
     const out = {};
     const isSA = req.adminUser?.role === 'super_admin';
-    const SECRET_FIELDS = new Set(['api_secret','secret_key','encryption_key','client_secret','pass','secret']);
+    const SECRET_FIELDS = new Set(['api_secret','secret_key','encryption_key','client_secret','pass','secret','private_key']);
     for (const row of rows) {
       let val; try { val = JSON.parse(row.value); } catch(e) { val = row.value; }
       if (!isSA && val && typeof val === 'object') {

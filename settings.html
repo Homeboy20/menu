@@ -1142,8 +1142,8 @@ function populateForms(s) {
   setVal('fb-messaging-sender-id',   fb.messaging_sender_id  || '');
   setVal('fb-measurement-id',        fb.measurement_id       || '');
   setVal('fb-client-email',          fb.client_email         || '');
-  document.getElementById('fb-private-key').value = (fb.private_key && fb.private_key !== '��������') ? fb.private_key : '';
-  if (fb.private_key === '��������' || (fb.private_key && fb.private_key.length > 10)) {
+  document.getElementById('fb-private-key').value = (fb.private_key && fb.private_key !== '••••••••') ? fb.private_key : '';
+  if (fb.private_key === '••••••••' || (fb.private_key && fb.private_key.length > 10)) {
     const row = document.getElementById('fb-status-row');
     row.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
     row.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Admin SDK private key is stored. Leave the field blank to keep the current key.';
@@ -1628,6 +1628,11 @@ async function saveFirebaseSettings() {
 
   if (config.enabled && (!config.project_id || !config.api_key)) {
     showToast('Project ID and Web API Key are required to enable Firebase.', 'error');
+    btn.textContent = 'Save Firebase Settings'; btn.disabled = false;
+    return;
+  }
+  if (config.enabled && (!config.client_email || !config.private_key)) {
+    showToast('Service Account Email and Private Key are required for Google/Phone sign-in to work.', 'error');
     btn.textContent = 'Save Firebase Settings'; btn.disabled = false;
     return;
   }
