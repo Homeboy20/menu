@@ -4,520 +4,344 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Sign In — RestOrder</title>
-<!-- Preconnect to Google Fonts for faster icon loading -->
+<title>Sign In  RestOrder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.tailwindcss.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
-<script>
-  tailwind = { config: {
-    theme: {
-      extend: {
-        colors: {
-          "primary": "#c2410c",
-          "primary-light": "#ea580c",
-          "primary-dark": "#9a3412",
-          "bg": "#fafaf9",
-          "surface": "#ffffff",
-        },
-        fontFamily: { 
-          display: ["Plus Jakarta Sans", "sans-serif"],
-          body: ["DM Sans", "sans-serif"],
-        },
-      },
-    },
-  } };
-</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0c0c0f;--surface:#16161a;--surface-2:#1e1e24;--border:#2a2a32;
+  --text:#e8e6e3;--text-muted:#8a8a8e;--text-dim:#5c5c62;
+  --accent:#ea580c;--accent-dark:#c2410c;--accent-glow:rgba(234,88,12,.15);
+  --success:#22c55e;--error:#ef4444;
+}
+body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+h1,h2,h3{font-family:"DM Sans",sans-serif;font-weight:700;letter-spacing:-.025em;}
+.serif-accent{font-family:"Instrument Serif",Georgia,serif;font-style:italic;color:var(--accent);}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+.hidden{display:none!important;}
 
-  body { font-family: "DM Sans", sans-serif; font-size: 16px; line-height: 1.65; letter-spacing: -0.01em; }
-  h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; }
-  .spin { animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  
-  .gradient-text {
-    background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .brand-panel { background: linear-gradient(150deg, #7c2d12 0%, #9a3412 25%, #c2410c 65%, #ea580c 100%); }
+/* Login card */
+.login-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;}
+.logo-row{display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;}
+.logo-row .icon-box{width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
+.logo-row .icon-box svg{width:16px;height:16px;fill:white;}
+.logo-row span{font-weight:700;font-size:1rem;color:var(--text);}
+.login-title{font-size:1.5rem;font-weight:700;line-height:1.2;margin-bottom:.25rem;}
+.login-sub{color:var(--text-muted);font-size:.875rem;margin-bottom:1.75rem;}
+/* Inputs */
+.field-label{display:block;font-size:.8125rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;}
+.field-input{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s;}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.field-input::placeholder{color:var(--text-dim);}
+/* Buttons */
+.btn-primary{width:100%;padding:.85rem;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .2s,box-shadow .2s;font-family:inherit;}
+.btn-primary:hover{background:var(--accent-dark);box-shadow:0 4px 20px var(--accent-glow);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.btn-outline{width:100%;padding:.7rem;background:transparent;color:var(--text);font-weight:600;font-size:.875rem;border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:all .2s;font-family:inherit;}
+.btn-outline:hover{background:var(--surface-2);border-color:var(--text-dim);}
+.btn-outline:disabled{opacity:.6;cursor:not-allowed;}
+/* Divider */
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.25rem 0;}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border);}
+.divider span{font-size:.75rem;color:var(--text-dim);white-space:nowrap;}
+/* Error */
+.err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:.6rem .85rem;font-size:.8125rem;color:#fca5a5;margin-bottom:.75rem;}
+/* Checkbox */
+.check-row{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;}
+.check-row input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
+.check-row label{font-size:.8125rem;color:var(--text-muted);cursor:pointer;}
+/* Forgot */
+.forgot-link{font-size:.75rem;color:var(--accent);cursor:pointer;background:none;border:none;font-family:inherit;}
+.forgot-link:hover{text-decoration:underline;}
+/* Role badge */
+.role-badge{display:flex;align-items:center;gap:.6rem;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:.6rem .85rem;margin-bottom:.75rem;font-size:.8125rem;color:var(--text-muted);}
+/* Phone panel */
+.phone-panel{margin-top:.75rem;}
+.phone-row{display:flex;gap:.5rem;margin-bottom:.5rem;}
+.country-select-wrap{position:relative;flex-shrink:0;width:110px;}
+.country-select-wrap .field-input{padding-left:.75rem;padding-right:1.75rem;}
+select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a8e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.phone-num{flex:1;}
+/* OTP */
+.otp-input{text-align:center;font-family:monospace;font-size:1.25rem;letter-spacing:.3em;}
+/* Spin */
+.spin{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* Footer */
+.footer-row{display:flex;justify-content:center;gap:1rem;margin-top:1.25rem;font-size:.75rem;color:var(--text-dim);}
+.footer-row span{display:flex;align-items:center;gap:.3rem;}
+.footer-row svg{width:4px;height:4px;fill:var(--text-dim);}
+#recaptcha-container{position:fixed;bottom:0;left:0;z-index:-1;opacity:0;}
 </style>
 </head>
-<body class="bg-bg text-stone-900 min-h-screen flex">
+<body>
 
-<!-- LEFT BRAND PANEL -->
-<aside class="brand-panel hidden lg:flex lg:w-[44%] xl:w-[42%] flex-col justify-between p-12 relative overflow-hidden shrink-0">
-  <div class="absolute -top-20 -right-20 size-72 rounded-full pointer-events-none" style="background:rgba(255,255,255,.07)"></div>
-  <div class="absolute top-1/2 -right-32 size-80 rounded-full pointer-events-none" style="background:rgba(255,255,255,.05)"></div>
-  <div class="absolute -bottom-12 -left-16 size-64 rounded-full pointer-events-none" style="background:rgba(0,0,0,.1)"></div>
-
-  <div class="relative z-10">
-    <a href="/" class="inline-flex items-center gap-3 mb-14 no-underline">
-      <div class="size-12 rounded-2xl flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.18)">
-        <svg class="material-symbols-outlined text-white" style="font-size:24px" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
-      </div>
-      <div>
-        <p class="text-white font-bold text-xl leading-none" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</p>
-        <p style="color:rgba(255,220,200,.8);font-size:12px;margin-top:2px">Digital Menu Platform</p>
-      </div>
-    </a>
-    <h2 class="text-white font-bold mb-4 leading-tight" style="font-size:2rem;font-family:'Plus Jakarta Sans',sans-serif">
-      Your menu,<br>always in reach
-    </h2>
-    <p style="color:rgba(255,220,200,.9);font-size:15px;line-height:1.65;margin-bottom:2.5rem">
-      Manage items, track orders, and keep your menu fresh — all from one dashboard.
-    </p>
-    <ul class="space-y-3.5">
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Real-time menu updates</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Mobile-friendly ordering</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Analytics &amp; insights</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Secure &amp; always available</span></li>
-    </ul>
+<div class="login-card">
+  <div class="logo-row">
+    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+    <span>RestOrder</span>
   </div>
 
-  <div class="relative z-10 rounded-2xl p-5" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px)">
-    <div class="flex gap-1 mb-3" aria-label="5 stars">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-    </div>
-    <p style="color:rgba(255,255,255,.9);font-size:13px;font-style:italic;line-height:1.6;margin-bottom:12px">"Our menu has never been more up to date. I update prices from my phone in seconds — customers always see the right prices."</p>
-    <div class="flex items-center gap-3">
-      <div class="size-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style="background:rgba(255,255,255,.2)">JT</div>
-      <div>
-        <p style="color:#fff;font-size:13px;font-weight:700;line-height:1.3">James T.</p>
-        <p style="color:rgba(255,220,200,.75);font-size:12px">Manager, The Urban Kitchen</p>
-      </div>
-    </div>
-  </div>
-</aside>
+  <h2 class="login-title">Welcome <span class="serif-accent">back</span></h2>
+  <p class="login-sub">Sign in to your workspace to continue.</p>
 
-<!-- RIGHT FORM PANEL -->
-<div class="flex-1 flex flex-col min-h-screen">
-  <div class="flex items-center justify-between px-6 py-4 shrink-0">
-    <a href="/" class="lg:hidden flex items-center gap-2 no-underline">
-      <div class="size-8 rounded-lg flex items-center justify-center text-white" style="background:linear-gradient(135deg,#c2410c,#ea580c)">
-        <svg class="material-symbols-outlined" style="font-size:17px" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
-      </div>
-      <span class="font-bold text-stone-900 text-sm" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</span>
-    </a>
-    <div class="lg:hidden"></div>
-    <span class="text-sm text-stone-500">Don't have an account? <a href="/register" class="text-primary font-semibold hover:underline">Sign Up Free</a></span>
-  </div>
+  <!-- Google -->
+  <button id="google-btn" onclick="signInWithGoogle()" type="button" class="btn-outline" style="display:none;margin-bottom:.5rem">
+    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    <span id="google-btn-text">Google</span>
+    <svg id="google-spinner" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+  </button>
 
-<!-- Main Content -->
-  <main class="flex-1 flex items-center justify-center p-6">
-  <div class="w-full max-w-md">
-    <!-- Logo & Title -->
-    <div class="text-center mb-8">
-      <div class="size-16 rounded-2xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
-        <svg class="material-symbols-outlined text-[32px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
-      </div>
-      <h2 class="text-3xl font-bold mb-2 text-stone-900">Welcome Back</h2>
-      <p class="text-stone-600">Sign in to your RestOrder account</p>
+  <!-- Phone button -->
+  <button id="phone-btn" onclick="showPhoneSignIn()" type="button" class="btn-outline" style="display:none">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span>Phone</span>
+  </button>
+
+  <div class="divider"><span>or sign in with email</span></div>
+
+  <!-- Login form -->
+  <form id="login-form" autocomplete="on">
+    <div style="margin-bottom:1rem">
+      <label class="field-label" for="email">Email address</label>
+      <input id="email" type="email" required placeholder="you@company.com" autocomplete="email" class="field-input"/>
     </div>
-
-    <!-- Unified Login Form -->
-    <div class="bg-white border border-stone-200 rounded-2xl p-8 shadow-lg">
-      <form id="login-form" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-stone-700 mb-2">
-            <svg class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-email"/></svg>
-            Email Address
-          </label>
-          <input id="email" type="email" required placeholder="you@restaurant.com" autocomplete="email"
-            class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
-        </div>
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-sm font-medium text-stone-700">
-              <svg class="material-symbols-outlined text-[16px] align-middle mr-1 text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
-              Password
-            </label>
-            <a id="forgot-password-link" href="#" class="text-xs text-primary hover:underline">Forgot password?</a>
-          </div>
-          <input id="password" type="password" required placeholder="Enter your password" autocomplete="current-password"
-            class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition" />
-        </div>
-        <div class="flex items-center">
-          <input id="remember" type="checkbox"
-            class="rounded border-stone-300 bg-white text-primary focus:ring-2 focus:ring-primary focus:ring-offset-0" />
-          <label for="remember" class="ml-2 text-sm text-stone-600">Remember me for 30 days</label>
-        </div>
-        <div id="error-message" class="hidden p-4 bg-red-50 border border-red-200 rounded-xl">
-          <div class="flex items-start gap-3">
-            <svg class="material-symbols-outlined text-red-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
-            <p class="text-sm text-red-700" id="error-text"></p>
-          </div>
-        </div>
-        <!-- Role detected badge � shown after successful lookup -->
-        <div id="role-badge" class="hidden p-3 bg-stone-50 border border-stone-200 rounded-xl flex items-center gap-3">
-          <svg class="material-symbols-outlined text-primary text-[20px]" id="role-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-person"/></svg>
-          <p class="text-sm font-medium text-stone-700" id="role-text"></p>
-        </div>
-        <button type="submit" id="submit-btn"
-          class="w-full px-6 py-3.5 bg-gradient-to-r from-primary to-primary-light text-white font-bold rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
-          <span id="submit-text">Sign In</span>
-          <svg id="submit-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
+    <div style="margin-bottom:.25rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+        <label class="field-label" for="password" style="margin:0">Password</label>
+        <button type="button" id="forgot-password-link" class="forgot-link">Forgot password?</button>
+      </div>
+      <div style="position:relative">
+        <input id="password" type="password" required placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" autocomplete="current-password" class="field-input" style="padding-right:2.5rem"/>
+        <button type="button" onclick="togglePw()" tabindex="-1"
+          style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;">
+          <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
-      </form>
-
-      <!-- -- Social sign-in divider -- -->
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-stone-500">or continue with</span>
-        </div>
       </div>
-
-      <!-- Google Sign-In -->
-      <button id="google-btn" onclick="signInWithGoogle()"
-        class="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition mb-3"
-        style="display:none">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        <span id="google-btn-text">Sign in with Google</span>
-        <svg id="google-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
-      </button>
-
-      <!-- Phone OTP Sign-In -->
-      <button id="phone-btn" onclick="showPhoneSignIn()"
-        class="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-xl text-stone-700 font-semibold hover:bg-stone-50 hover:border-stone-400 transition"
-        style="display:none">
-        <svg class="material-symbols-outlined text-[18px] text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-phone"/></svg>
-        <span>Sign in with Phone</span>
-      </button>
-
-      <!-- Phone OTP Panel -->
-      <div id="phone-panel" class="hidden mt-4 space-y-3">
-        <div class="flex gap-2">
-          <input id="phone-input" type="tel" placeholder="+1 555 123 4567" autocomplete="tel"
-            class="flex-1 px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition"/>
-          <button onclick="sendPhoneOTP()" id="send-otp-btn"
-            class="px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition flex items-center gap-1">
-            <span id="send-otp-text">Send OTP</span>
-            <svg id="otp-spinner" class="hidden material-symbols-outlined spin text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
-          </button>
-        </div>
-        <div id="otp-section" class="hidden space-y-3">
-          <input id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code"
-            class="w-full px-4 py-3 bg-white border border-stone-300 rounded-xl text-stone-900 focus:ring-2 focus:ring-primary focus:border-transparent transition text-center text-lg font-mono tracking-widest"/>
-          <button onclick="verifyPhoneOTP()" id="verify-otp-btn"
-            class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition flex items-center justify-center gap-2">
-            <span id="verify-otp-text">Verify &amp; Sign In</span>
-            <svg id="verify-spinner" class="hidden material-symbols-outlined spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
-          </button>
-        </div>
-        <div id="recaptcha-container"></div>
-      </div>
-
-      <div id="firebase-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700"></div>
-
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200"></div></div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-stone-500">Don't have an account?</span>
-        </div>
-      </div>
-      <a href="/register"
-        class="block w-full px-6 py-3.5 bg-white text-primary font-semibold rounded-xl border border-primary/30 hover:bg-primary/5 transition text-center">
-        Create Free Account
-      </a>
     </div>
-
-    <!-- Admin Link -->
-    <div class="mt-6 text-center">
-      <a href="/admin" class="text-sm text-stone-500 hover:text-primary transition">
-        Admin Panel ?
-      </a>
+    <div class="check-row">
+      <input id="remember" type="checkbox"/>
+      <label for="remember">Keep me signed in for 30 days</label>
     </div>
+    <div id="error-message" class="err-msg hidden"></div>
+    <div id="role-badge" class="role-badge hidden">
+      <span id="role-text"></span>
+    </div>
+    <button type="submit" id="submit-btn" class="btn-primary">
+      <span id="submit-text">Sign in to RestOrder</span>
+      <svg id="submit-spinner" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+    </button>
+  </form>
+
+  <!-- Phone OTP Panel -->
+  <div id="phone-panel" class="phone-panel hidden">
+    <div class="divider"><span>enter your phone number</span></div>
+    <div class="phone-row">
+      <div class="country-select-wrap">
+        <select id="country-select" class="field-input" onchange="onCountryChange()"></select>
+      </div>
+      <input id="phone-input" type="tel" placeholder="555 123 4567" autocomplete="tel" class="field-input phone-num"/>
+    </div>
+    <button onclick="sendPhoneOTP()" id="send-otp-btn" class="btn-primary" style="margin-top:.5rem">
+      <span id="send-otp-text">Send OTP</span>
+      <svg id="otp-spinner" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+    </button>
+    <div id="otp-section" class="hidden" style="margin-top:.75rem">
+      <label class="field-label" for="otp-input">Verification code</label>
+      <input id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="000000" class="field-input otp-input"/>
+      <button onclick="verifyPhoneOTP()" id="verify-otp-btn" class="btn-primary" style="margin-top:.5rem">
+        <span id="verify-otp-text">Verify &amp; Sign In</span>
+        <svg id="verify-spinner" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+      </button>
+    </div>
+    <div id="recaptcha-container"></div>
   </div>
-  </main>
-</div><!-- /right panel -->
+
+  <div id="firebase-error" class="err-msg hidden" style="margin-top:.75rem"></div>
+
+  <div style="text-align:center;margin-top:1.5rem;font-size:.8125rem;color:var(--text-dim)">
+    Don't have an account? <a href="/register" style="font-weight:600">Start for free &rarr;</a>
+  </div>
+
+  <div class="footer-row">
+    <span><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#22c55e"/></svg> SOC 2 Type II</span>
+    <span><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#22c55e"/></svg> 256-bit encryption</span>
+    <span><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="#22c55e"/></svg> 99.9% uptime SLA</span>
+  </div>
+</div>
 
 <script>
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+"use strict";
+// Country data
+const COUNTRIES=[
+  {c:"AF",f:"\ud83c\udde6\ud83c\uddeb",d:"+93",n:"Afghanistan"},{c:"AL",f:"\ud83c\udde6\ud83c\uddf1",d:"+355",n:"Albania"},{c:"DZ",f:"\ud83c\udde9\ud83c\uddff",d:"+213",n:"Algeria"},
+  {c:"AR",f:"\ud83c\udde6\ud83c\uddf7",d:"+54",n:"Argentina"},{c:"AU",f:"\ud83c\udde6\ud83c\uddfa",d:"+61",n:"Australia"},{c:"AT",f:"\ud83c\udde6\ud83c\uddf9",d:"+43",n:"Austria"},
+  {c:"BH",f:"\ud83c\udde7\ud83c\udded",d:"+973",n:"Bahrain"},{c:"BD",f:"\ud83c\udde7\ud83c\udde9",d:"+880",n:"Bangladesh"},{c:"BE",f:"\ud83c\udde7\ud83c\uddea",d:"+32",n:"Belgium"},
+  {c:"BR",f:"\ud83c\udde7\ud83c\uddf7",d:"+55",n:"Brazil"},{c:"CA",f:"\ud83c\udde8\ud83c\udde6",d:"+1",n:"Canada"},{c:"CL",f:"\ud83c\udde8\ud83c\uddf1",d:"+56",n:"Chile"},
+  {c:"CN",f:"\ud83c\udde8\ud83c\uddf3",d:"+86",n:"China"},{c:"CO",f:"\ud83c\udde8\ud83c\uddf4",d:"+57",n:"Colombia"},{c:"HR",f:"\ud83c\udded\ud83c\uddf7",d:"+385",n:"Croatia"},
+  {c:"CZ",f:"\ud83c\udde8\ud83c\uddff",d:"+420",n:"Czech Republic"},{c:"DK",f:"\ud83c\udde9\ud83c\uddf0",d:"+45",n:"Denmark"},{c:"EG",f:"\ud83c\uddea\ud83c\uddec",d:"+20",n:"Egypt"},
+  {c:"ET",f:"\ud83c\uddea\ud83c\uddf9",d:"+251",n:"Ethiopia"},{c:"FI",f:"\ud83c\uddeb\ud83c\uddee",d:"+358",n:"Finland"},{c:"FR",f:"\ud83c\uddeb\ud83c\uddf7",d:"+33",n:"France"},
+  {c:"DE",f:"\ud83c\udde9\ud83c\uddea",d:"+49",n:"Germany"},{c:"GH",f:"\ud83c\uddec\ud83c\udded",d:"+233",n:"Ghana"},{c:"GR",f:"\ud83c\uddec\ud83c\uddf7",d:"+30",n:"Greece"},
+  {c:"HK",f:"\ud83c\udded\ud83c\uddf0",d:"+852",n:"Hong Kong"},{c:"HU",f:"\ud83c\udded\ud83c\uddfa",d:"+36",n:"Hungary"},{c:"IN",f:"\ud83c\uddee\ud83c\uddf3",d:"+91",n:"India"},
+  {c:"ID",f:"\ud83c\uddee\ud83c\udde9",d:"+62",n:"Indonesia"},{c:"IR",f:"\ud83c\uddee\ud83c\uddf7",d:"+98",n:"Iran"},{c:"IQ",f:"\ud83c\uddee\ud83c\uddf6",d:"+964",n:"Iraq"},
+  {c:"IE",f:"\ud83c\uddee\ud83c\uddea",d:"+353",n:"Ireland"},{c:"IL",f:"\ud83c\uddee\ud83c\uddf1",d:"+972",n:"Israel"},{c:"IT",f:"\ud83c\uddee\ud83c\uddf9",d:"+39",n:"Italy"},
+  {c:"JP",f:"\ud83c\uddef\ud83c\uddf5",d:"+81",n:"Japan"},{c:"JO",f:"\ud83c\uddef\ud83c\uddf4",d:"+962",n:"Jordan"},{c:"KE",f:"\ud83c\uddf0\ud83c\uddea",d:"+254",n:"Kenya"},
+  {c:"KR",f:"\ud83c\uddf0\ud83c\uddf7",d:"+82",n:"South Korea"},{c:"KW",f:"\ud83c\uddf0\ud83c\uddfc",d:"+965",n:"Kuwait"},{c:"LB",f:"\ud83c\uddf1\ud83c\udde7",d:"+961",n:"Lebanon"},
+  {c:"MY",f:"\ud83c\uddf2\ud83c\uddfe",d:"+60",n:"Malaysia"},{c:"MX",f:"\ud83c\uddf2\ud83c\uddfd",d:"+52",n:"Mexico"},{c:"MA",f:"\ud83c\uddf2\ud83c\udde6",d:"+212",n:"Morocco"},
+  {c:"NL",f:"\ud83c\uddf3\ud83c\uddf1",d:"+31",n:"Netherlands"},{c:"NZ",f:"\ud83c\uddf3\ud83c\uddff",d:"+64",n:"New Zealand"},{c:"NG",f:"\ud83c\uddf3\ud83c\uddec",d:"+234",n:"Nigeria"},
+  {c:"NO",f:"\ud83c\uddf3\ud83c\uddf4",d:"+47",n:"Norway"},{c:"OM",f:"\ud83c\uddf4\ud83c\uddf2",d:"+968",n:"Oman"},{c:"PK",f:"\ud83c\uddf5\ud83c\uddf0",d:"+92",n:"Pakistan"},
+  {c:"PE",f:"\ud83c\uddf5\ud83c\uddea",d:"+51",n:"Peru"},{c:"PH",f:"\ud83c\uddf5\ud83c\udded",d:"+63",n:"Philippines"},{c:"PL",f:"\ud83c\uddf5\ud83c\uddf1",d:"+48",n:"Poland"},
+  {c:"PT",f:"\ud83c\uddf5\ud83c\uddf9",d:"+351",n:"Portugal"},{c:"QA",f:"\ud83c\uddf6\ud83c\udde6",d:"+974",n:"Qatar"},{c:"RO",f:"\ud83c\uddf7\ud83c\uddf4",d:"+40",n:"Romania"},
+  {c:"RU",f:"\ud83c\uddf7\ud83c\uddfa",d:"+7",n:"Russia"},{c:"SA",f:"\ud83c\uddf8\ud83c\udde6",d:"+966",n:"Saudi Arabia"},{c:"SG",f:"\ud83c\uddf8\ud83c\uddec",d:"+65",n:"Singapore"},
+  {c:"ZA",f:"\ud83c\uddff\ud83c\udde6",d:"+27",n:"South Africa"},{c:"ES",f:"\ud83c\uddea\ud83c\uddf8",d:"+34",n:"Spain"},{c:"SE",f:"\ud83c\uddf8\ud83c\uddea",d:"+46",n:"Sweden"},
+  {c:"CH",f:"\ud83c\udde8\ud83c\udded",d:"+41",n:"Switzerland"},{c:"TW",f:"\ud83c\uddf9\ud83c\uddfc",d:"+886",n:"Taiwan"},{c:"TH",f:"\ud83c\uddf9\ud83c\udded",d:"+66",n:"Thailand"},
+  {c:"TR",f:"\ud83c\uddf9\ud83c\uddf7",d:"+90",n:"Turkey"},{c:"UA",f:"\ud83c\uddfa\ud83c\udde6",d:"+380",n:"Ukraine"},{c:"AE",f:"\ud83c\udde6\ud83c\uddea",d:"+971",n:"UAE"},
+  {c:"GB",f:"\ud83c\uddec\ud83c\udde7",d:"+44",n:"United Kingdom"},{c:"US",f:"\ud83c\uddfa\ud83c\uddf8",d:"+1",n:"United States"},{c:"VN",f:"\ud83c\uddfb\ud83c\uddf3",d:"+84",n:"Vietnam"},
+  {c:"TZ",f:"\ud83c\uddf9\ud83c\uddff",d:"+255",n:"Tanzania"},{c:"UG",f:"\ud83c\uddfa\ud83c\uddec",d:"+256",n:"Uganda"},{c:"LK",f:"\ud83c\uddf1\ud83c\uddf0",d:"+94",n:"Sri Lanka"},
+  {c:"NP",f:"\ud83c\uddf3\ud83c\uddf5",d:"+977",n:"Nepal"},{c:"MM",f:"\ud83c\uddf2\ud83c\uddf2",d:"+95",n:"Myanmar"},{c:"KH",f:"\ud83c\uddf0\ud83c\udded",d:"+855",n:"Cambodia"},
+  {c:"SN",f:"\ud83c\uddf8\ud83c\uddf3",d:"+221",n:"Senegal"},{c:"CI",f:"\ud83c\udde8\ud83c\uddee",d:"+225",n:"Ivory Coast"},{c:"CM",f:"\ud83c\udde8\ud83c\uddf2",d:"+237",n:"Cameroon"},
+];
 
-  const submitBtn     = document.getElementById('submit-btn');
-  const submitText    = document.getElementById('submit-text');
-  const submitSpinner = document.getElementById('submit-spinner');
-  const errorMessage  = document.getElementById('error-message');
-  const errorText     = document.getElementById('error-text');
-  const roleBadge     = document.getElementById('role-badge');
-
-  const email    = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const remember = document.getElementById('remember').checked;
-
-  errorMessage.classList.add('hidden');
-  roleBadge.classList.add('hidden');
-  submitBtn.disabled = true;
-  submitText.textContent = 'Signing In...';
-  submitSpinner.classList.remove('hidden');
-
-  try {
-    const { csrfToken } = await fetch('/api/csrf-token').then(r => r.json());
-
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, csrfToken })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Invalid email or password.');
-
-    const storage = remember ? localStorage : sessionStorage;
-    storage.setItem('customerToken', data.token);
-
-    if (data.userType === 'owner') {
-      storage.setItem('customerEmail', data.customer.email);
-      storage.setItem('customerBusiness', data.customer.businessName);
-      localStorage.removeItem('staffName');
-      localStorage.removeItem('staffRole');
-      document.getElementById('role-icon').textContent = 'store';
-      document.getElementById('role-text').textContent = 'Account Owner � redirecting�';
-    } else {
-      localStorage.setItem('staffName', data.staff.name);
-      localStorage.setItem('staffRole', data.staff.role);
-      localStorage.removeItem('customerEmail');
-      localStorage.removeItem('customerBusiness');
-      const roleLabel = data.staff.role === 'manager' ? 'Manager' : 'Staff Member';
-      document.getElementById('role-icon').textContent = 'badge';
-      document.getElementById('role-text').textContent = `${roleLabel} � redirecting�`;
-    }
-
-    roleBadge.classList.remove('hidden');
-    window.location.href = data.redirectTo;
-
-  } catch (err) {
-    errorText.textContent = err.message;
-    errorMessage.classList.remove('hidden');
-    submitBtn.disabled = false;
-    submitText.textContent = 'Sign In';
-    submitSpinner.classList.add('hidden');
-  }
-});
-
-document.getElementById('forgot-password-link').addEventListener('click', async (e) => {
-  e.preventDefault();
-  const defaultEmail = document.getElementById('email').value.trim();
-  const email = window.prompt('Enter your account email to receive a reset link:', defaultEmail);
-  if (email === null) return;
-
-  const cleanEmail = email.trim();
-  if (!cleanEmail) {
-    alert('Please enter your email address.');
-    return;
-  }
-
-  try {
-    const { csrfToken } = await fetch('/api/csrf-token').then(r => r.json());
-    const res = await fetch('/api/customers/password-reset/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, csrfToken })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Could not send reset email.');
-    alert(data.message || 'If an account exists, a reset link has been sent.');
-  } catch (err) {
-    alert(err.message || 'Could not send reset email. Please try again.');
-  }
-});
-
-async function handleResetTokenFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const token = (params.get('reset') || '').trim();
-  if (!token) return;
-
-  const newPassword = window.prompt('Enter your new password (minimum 8 characters, include a number):');
-  if (newPassword === null) return;
-  const confirmPassword = window.prompt('Confirm your new password:');
-  if (confirmPassword === null) return;
-
-  if (newPassword !== confirmPassword) {
-    alert('Passwords do not match.');
-    return;
-  }
-
-  try {
-    const { csrfToken } = await fetch('/api/csrf-token').then(r => r.json());
-    const res = await fetch('/api/customers/password-reset/confirm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, newPassword, csrfToken })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to reset password.');
-
-    alert(data.message || 'Password reset successful. Please sign in.');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  } catch (err) {
-    alert(err.message || 'Failed to reset password.');
-  }
+function buildCountrySelect(detectedCode){
+  const sel=document.getElementById('country-select');sel.innerHTML='';
+  [...COUNTRIES].sort((a,b)=>a.n.localeCompare(b.n)).forEach(c=>{
+    const opt=document.createElement('option');opt.value=c.c;opt.textContent=c.f+' '+c.d;opt.title=c.n;sel.appendChild(opt);
+  });
+  const match=detectedCode&&COUNTRIES.find(c=>c.c===detectedCode.toUpperCase());
+  sel.value=match?match.c:'US';
+}
+function onCountryChange(){
+  const c=COUNTRIES.find(x=>x.c===document.getElementById('country-select').value);
+  if(c)document.getElementById('phone-input').placeholder=c.d+' ...';
+}
+function getFullPhone(){
+  const c=COUNTRIES.find(x=>x.c===document.getElementById('country-select').value);
+  const num=document.getElementById('phone-input').value.trim().replace(/^0+/,'');
+  if(c&&num&&!num.startsWith('+'))return c.d+num;return num;
 }
 
-// Redirect if already authenticated
-window.addEventListener('load', async () => {
-  const token = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
-  if (token) {
-    try {
-      const res = await fetch('/api/customers/check', { headers: { 'x-customer-token': token } });
-      const data = await res.json();
-      if (data.authenticated) {
-        if (data.customer?.isStaff) {
-          window.location.href = data.customer?.staffRole === 'manager' ? '/menu-editor' : '/staff-panel';
-        } else {
-          window.location.href = '/dashboard';
-        }
-      }
-    } catch (_) { /* stay on login */ }
-  }
+function togglePw(){const p=document.getElementById('password');p.type=p.type==='password'?'text':'password';}
 
+// Login form
+document.getElementById('login-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('submit-btn'),txt=document.getElementById('submit-text'),spin=document.getElementById('submit-spinner');
+  const errBox=document.getElementById('error-message'),roleBadge=document.getElementById('role-badge');
+  const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value,remember=document.getElementById('remember').checked;
+  errBox.classList.add('hidden');roleBadge.classList.add('hidden');
+  btn.disabled=true;txt.textContent='Signing In...';spin.classList.remove('hidden');
+  try{
+    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
+    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,csrfToken})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Invalid email or password.');
+    const storage=remember?localStorage:sessionStorage;
+    storage.setItem('customerToken',data.token);
+    if(data.userType==='owner'){storage.setItem('customerEmail',data.customer.email);storage.setItem('customerBusiness',data.customer.businessName);localStorage.removeItem('staffName');localStorage.removeItem('staffRole');document.getElementById('role-text').textContent='Account Owner \u2014 redirecting\u2026';}
+    else{localStorage.setItem('staffName',data.staff.name);localStorage.setItem('staffRole',data.staff.role);localStorage.removeItem('customerEmail');localStorage.removeItem('customerBusiness');const rl=data.staff.role==='manager'?'Manager':'Staff Member';document.getElementById('role-text').textContent=rl+' \u2014 redirecting\u2026';}
+    roleBadge.classList.remove('hidden');window.location.href=data.redirectTo;
+  }catch(err){
+    errBox.textContent=err.message;errBox.classList.remove('hidden');
+    btn.disabled=false;txt.textContent='Sign in to RestOrder';spin.classList.add('hidden');
+  }
+});
+
+// Forgot password
+document.getElementById('forgot-password-link').addEventListener('click',async(e)=>{
+  e.preventDefault();
+  const def=document.getElementById('email').value.trim();const email=window.prompt('Enter your email to receive a reset link:',def);
+  if(email===null)return;const clean=email.trim();if(!clean){alert('Please enter your email.');return;}
+  try{
+    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
+    const res=await fetch('/api/customers/password-reset/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:clean,csrfToken})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not send reset email.');
+    alert(data.message||'If an account exists, a reset link has been sent.');
+  }catch(err){alert(err.message||'Could not send reset email.');}
+});
+
+// Reset token from URL
+async function handleResetTokenFromUrl(){
+  const token=(new URLSearchParams(window.location.search).get('reset')||'').trim();if(!token)return;
+  const np=window.prompt('Enter your new password (min 8 chars, include a number):');if(np===null)return;
+  const cp=window.prompt('Confirm new password:');if(cp===null)return;
+  if(np!==cp){alert('Passwords do not match.');return;}
+  try{
+    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
+    const res=await fetch('/api/customers/password-reset/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,newPassword:np,csrfToken})});
+    const data=await res.json();if(!res.ok)throw new Error(data.error||'Failed to reset password.');
+    alert(data.message||'Password reset successful. Please sign in.');window.history.replaceState({},document.title,window.location.pathname);
+  }catch(err){alert(err.message||'Failed to reset password.');}
+}
+
+// Auth check + init
+window.addEventListener('load',async()=>{
+  const token=localStorage.getItem('customerToken')||sessionStorage.getItem('customerToken');
+  if(token){try{const res=await fetch('/api/customers/check',{headers:{'x-customer-token':token}});const data=await res.json();
+    if(data.authenticated){if(data.customer?.isStaff){window.location.href=data.customer?.staffRole==='manager'?'/menu-editor':'/staff-panel';}else{window.location.href='/dashboard';}}}catch(_){}}
   await handleResetTokenFromUrl();
 
-  // Initialise Firebase if configured (always, so Google/Phone buttons appear)
-  try {
-    const cfg = await fetch('/api/firebase-config').then(r => r.json());
-    if (cfg.enabled) {
-      await initFirebase(cfg);
-    }
-  } catch (_) {}
+  // Country detect
+  let code='';try{const r=await fetch('/api/geo');const d=await r.json();code=d.country||'';}catch(e){}
+  buildCountrySelect(code);onCountryChange();
+
+  // Firebase init
+  try{const cfg=await fetch('/api/firebase-config').then(r=>r.json());if(cfg.enabled)await initFirebase(cfg);}catch(_){}
 });
 
-// -- Firebase ------------------------------------------------------------------
-let firebaseApp = null, firebaseAuth = null, phoneConfirmation = null;
+// Firebase
+let firebaseApp=null,firebaseAuth=null,phoneConfirmation=null;
+async function initFirebase(cfg){
+  const{initializeApp}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+  const{getAuth,GoogleAuthProvider,signInWithPopup,signInWithPhoneNumber,RecaptchaVerifier}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+  firebaseApp=initializeApp(cfg);firebaseAuth=getAuth(firebaseApp);
+  firebaseAuth._googleProvider=new GoogleAuthProvider();firebaseAuth._RecaptchaVerifier=RecaptchaVerifier;
+  firebaseAuth._signInWithPopup=signInWithPopup;firebaseAuth._signInWithPhoneNumber=signInWithPhoneNumber;
+  document.getElementById('google-btn').style.display='';document.getElementById('phone-btn').style.display='';
+}
+function firebaseErr(msg){const e=document.getElementById('firebase-error');e.textContent=msg;e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),6000);}
 
-async function initFirebase(cfg) {
-  // Load Firebase modular SDK from CDN
-  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-  const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier }
-    = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-
-  firebaseApp  = initializeApp(cfg);
-  firebaseAuth = getAuth(firebaseApp);
-  firebaseAuth._googleProvider = new GoogleAuthProvider();
-  firebaseAuth._RecaptchaVerifier = RecaptchaVerifier;
-  firebaseAuth._signInWithPopup = signInWithPopup;
-  firebaseAuth._signInWithPhoneNumber = signInWithPhoneNumber;
-
-  // Show social buttons only after Firebase is ready
-  document.getElementById('google-btn').style.display = '';
-  document.getElementById('phone-btn').style.display  = '';
+async function signInWithGoogle(){
+  if(!firebaseAuth)return;const btn=document.getElementById('google-btn');
+  document.getElementById('google-btn-text').textContent='Signing in\u2026';document.getElementById('google-spinner').classList.remove('hidden');btn.disabled=true;
+  try{const result=await firebaseAuth._signInWithPopup(firebaseAuth,firebaseAuth._googleProvider);const idToken=await result.user.getIdToken();await handleFirebaseToken(idToken);}
+  catch(err){if(err.code!=='auth/popup-closed-by-user')firebaseErr(err.message||'Google sign-in failed.');
+    document.getElementById('google-btn-text').textContent='Google';document.getElementById('google-spinner').classList.add('hidden');btn.disabled=false;}
 }
 
-function firebaseErr(msg) {
-  const el = document.getElementById('firebase-error');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 6000);
+function showPhoneSignIn(){document.getElementById('phone-panel').classList.remove('hidden');document.getElementById('phone-btn').style.display='none';document.getElementById('phone-input').focus();}
+
+async function sendPhoneOTP(){
+  if(!firebaseAuth)return;const phone=getFullPhone();if(!phone){firebaseErr('Enter a phone number with country code.');return;}
+  document.getElementById('send-otp-text').textContent='Sending\u2026';document.getElementById('otp-spinner').classList.remove('hidden');document.getElementById('send-otp-btn').disabled=true;
+  try{
+    if(!window.recaptchaVerifier){window.recaptchaVerifier=new firebaseAuth._RecaptchaVerifier(firebaseAuth,'recaptcha-container',{size:'invisible'});}
+    phoneConfirmation=await firebaseAuth._signInWithPhoneNumber(firebaseAuth,phone,window.recaptchaVerifier);
+    document.getElementById('otp-section').classList.remove('hidden');document.getElementById('send-otp-text').textContent='Resend';document.getElementById('otp-spinner').classList.add('hidden');document.getElementById('send-otp-btn').disabled=false;
+  }catch(err){firebaseErr(err.message||'Could not send OTP.');document.getElementById('send-otp-text').textContent='Send OTP';document.getElementById('otp-spinner').classList.add('hidden');document.getElementById('send-otp-btn').disabled=false;}
 }
 
-async function signInWithGoogle() {
-  if (!firebaseAuth) return;
-  const btn = document.getElementById('google-btn');
-  document.getElementById('google-btn-text').textContent = 'Signing in�';
-  document.getElementById('google-spinner').classList.remove('hidden');
-  btn.disabled = true;
-  try {
-    const result = await firebaseAuth._signInWithPopup(firebaseAuth, firebaseAuth._googleProvider);
-    const idToken = await result.user.getIdToken();
-    await handleFirebaseToken(idToken);
-  } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') firebaseErr(err.message || 'Google sign-in failed.');
-    document.getElementById('google-btn-text').textContent = 'Sign in with Google';
-    document.getElementById('google-spinner').classList.add('hidden');
-    btn.disabled = false;
+async function verifyPhoneOTP(){
+  if(!phoneConfirmation)return;const code=document.getElementById('otp-input').value.trim();
+  if(!/^\d{6}$/.test(code)){firebaseErr('Enter the 6-digit code.');return;}
+  document.getElementById('verify-otp-text').textContent='Verifying\u2026';document.getElementById('verify-spinner').classList.remove('hidden');document.getElementById('verify-otp-btn').disabled=true;
+  try{const result=await phoneConfirmation.confirm(code);const idToken=await result.user.getIdToken();await handleFirebaseToken(idToken);}
+  catch(err){firebaseErr(err.message||'Invalid code.');document.getElementById('verify-otp-text').textContent='Verify & Sign In';document.getElementById('verify-spinner').classList.add('hidden');document.getElementById('verify-otp-btn').disabled=false;}
+}
+
+async function handleFirebaseToken(idToken){
+  const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+  const data=await res.json();
+  if(res.status===422&&data.requiresRegistration){
+    const biz=prompt('Welcome! What is your restaurant / business name?');if(!biz)return;
+    const res2=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,businessName:biz.trim()})});
+    const data2=await res2.json();if(!res2.ok){firebaseErr(data2.error||'Registration failed.');return;}
+    localStorage.setItem('customerToken',data2.token);window.location.href=data2.redirectTo||'/dashboard';return;
   }
-}
-
-function showPhoneSignIn() {
-  document.getElementById('phone-panel').classList.remove('hidden');
-  document.getElementById('phone-btn').style.display = 'none';
-  document.getElementById('phone-input').focus();
-}
-
-async function sendPhoneOTP() {
-  if (!firebaseAuth) return;
-  const phone = document.getElementById('phone-input').value.trim();
-  if (!phone) { firebaseErr('Please enter a phone number with country code.'); return; }
-
-  document.getElementById('send-otp-text').textContent = 'Sending�';
-  document.getElementById('otp-spinner').classList.remove('hidden');
-  document.getElementById('send-otp-btn').disabled = true;
-  try {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new firebaseAuth._RecaptchaVerifier(firebaseAuth, 'recaptcha-container', { size: 'invisible' });
-    }
-    phoneConfirmation = await firebaseAuth._signInWithPhoneNumber(firebaseAuth, phone, window.recaptchaVerifier);
-    document.getElementById('otp-section').classList.remove('hidden');
-    document.getElementById('send-otp-text').textContent = 'Resend';
-    document.getElementById('otp-spinner').classList.add('hidden');
-    document.getElementById('send-otp-btn').disabled = false;
-  } catch (err) {
-    firebaseErr(err.message || 'Could not send OTP. Check the phone number.');
-    document.getElementById('send-otp-text').textContent = 'Send OTP';
-    document.getElementById('otp-spinner').classList.add('hidden');
-    document.getElementById('send-otp-btn').disabled = false;
-  }
-}
-
-async function verifyPhoneOTP() {
-  if (!phoneConfirmation) return;
-  const code = document.getElementById('otp-input').value.trim();
-  if (!/^\d{6}$/.test(code)) { firebaseErr('Enter the 6-digit code.'); return; }
-
-  document.getElementById('verify-otp-text').textContent = 'Verifying�';
-  document.getElementById('verify-spinner').classList.remove('hidden');
-  document.getElementById('verify-otp-btn').disabled = true;
-  try {
-    const result = await phoneConfirmation.confirm(code);
-    const idToken = await result.user.getIdToken();
-    await handleFirebaseToken(idToken);
-  } catch (err) {
-    firebaseErr(err.message || 'Invalid code. Please try again.');
-    document.getElementById('verify-otp-text').textContent = 'Verify & Sign In';
-    document.getElementById('verify-spinner').classList.add('hidden');
-    document.getElementById('verify-otp-btn').disabled = false;
-  }
-}
-
-async function handleFirebaseToken(idToken) {
-  const res = await fetch('/api/customers/firebase-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken })
-  });
-  const data = await res.json();
-
-  if (res.status === 422 && data.requiresRegistration) {
-    // New user � need business name
-    const biz = prompt('Welcome! What is your restaurant / business name?');
-    if (!biz) return;
-    const res2 = await fetch('/api/customers/firebase-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken, businessName: biz.trim() })
-    });
-    const data2 = await res2.json();
-    if (!res2.ok) { firebaseErr(data2.error || 'Registration failed.'); return; }
-    localStorage.setItem('customerToken', data2.token);
-    window.location.href = data2.redirectTo || '/dashboard';
-    return;
-  }
-  if (!res.ok) { firebaseErr(data.error || 'Sign-in failed.'); return; }
-  localStorage.setItem('customerToken', data.token);
-  window.location.href = data.redirectTo || '/dashboard';
+  if(!res.ok){firebaseErr(data.error||'Sign-in failed.');return;}
+  localStorage.setItem('customerToken',data.token);window.location.href=data.redirectTo||'/dashboard';
 }
 </script>
-
-<script src="/js/icons.js"></script>
 </body>
 </html>

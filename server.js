@@ -1602,6 +1602,12 @@ app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken });
 });
 
+// GET /api/geo – return visitor country code from Cloudflare CF-IPCountry header
+app.get('/api/geo', (req, res) => {
+  const country = (req.headers['cf-ipcountry'] || '').toUpperCase();
+  res.json({ country: country && country !== 'XX' && country !== 'T1' ? country : '' });
+});
+
 // GET /api/firebase-config – return public Firebase config for frontend SDK
 app.get('/api/firebase-config', async (req, res) => {
   // Check DB-stored settings first (admin UI overrides env vars)

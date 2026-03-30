@@ -8,635 +8,608 @@
 <meta name="description" content="Launch your digital restaurant menu in under 60 seconds. No credit card needed."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.tailwindcss.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<script>
-tailwind = { config: {
-  theme: {
-    extend: {
-      colors: { primary:"#c2410c","primary-light":"#ea580c","primary-dark":"#9a3412" },
-      fontFamily: { display:["Plus Jakarta Sans","sans-serif"], body:["DM Sans","sans-serif"] }
-    }
-  }
-} };
-</script>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-body{font-family:"DM Sans",sans-serif;}
-h1,h2,h3,h4{font-family:"Plus Jakarta Sans",sans-serif;}
-.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}
-.hidden{display:none!important}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0c0c0f;--surface:#16161a;--surface-2:#1e1e24;--border:#2a2a32;
+  --text:#e8e6e3;--text-muted:#8a8a8e;--text-dim:#5c5c62;
+  --accent:#ea580c;--accent-dark:#c2410c;--accent-glow:rgba(234,88,12,.15);
+  --success:#22c55e;--error:#ef4444;
+}
+body{font-family:"DM Sans",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
+h1,h2,h3{font-family:"DM Sans",sans-serif;font-weight:700;letter-spacing:-.025em;}
+.serif-accent{font-family:"Instrument Serif",Georgia,serif;font-style:italic;color:var(--accent);}
+a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
+.hidden{display:none!important;}
+/* Brand sidebar */
+.brand-sidebar{width:280px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem 2rem;position:fixed;left:0;top:0;bottom:0;z-index:10;}
+.brand-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:3rem;}
+.brand-logo .icon-box{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
+.brand-logo .icon-box svg{width:18px;height:18px;fill:white;}
+.brand-logo span{font-weight:700;font-size:1.1rem;color:var(--text);}
+.brand-tagline{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:1rem;color:var(--text);}
+.brand-desc{color:var(--text-muted);font-size:.875rem;line-height:1.65;margin-bottom:2rem;}
+.brand-checks{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;}
+.brand-checks li{display:flex;align-items:center;gap:.6rem;font-size:.8125rem;color:var(--text-muted);}
+.brand-checks li .ck{width:20px;height:20px;border-radius:50%;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-checks li .ck svg{width:11px;height:11px;}
+.testimonial-box{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:1.25rem;}
+.testimonial-box .stars{display:flex;gap:2px;margin-bottom:.6rem;}
+.testimonial-box .stars svg{width:13px;height:13px;fill:#fbbf24;}
+.testimonial-box .quote{font-size:.8125rem;color:var(--text-muted);font-style:italic;line-height:1.6;margin-bottom:.75rem;}
+.testimonial-box .author{display:flex;align-items:center;gap:.6rem;}
+.testimonial-box .avatar{width:32px;height:32px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--text-muted);}
+.testimonial-box .aname{font-size:.8125rem;font-weight:600;color:var(--text);}
+.testimonial-box .arole{font-size:.75rem;color:var(--text-dim);}
+/* Main area */
+.main-area{flex:1;margin-left:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+/* Step dots */
+.step-dots{display:flex;align-items:center;gap:0;margin-bottom:.5rem;justify-content:center;}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;border:2px solid var(--border);color:var(--text-dim);position:relative;transition:all .3s;}
+.step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-dot.done{background:transparent;border-color:var(--success);color:var(--success);}
+.step-dot.done svg{width:14px;height:14px;}
+.step-line{width:60px;height:2px;background:var(--border);transition:background .3s;}
+.step-line.done{background:var(--success);}
+.step-caption{text-align:center;font-size:.8125rem;color:var(--text-muted);margin-bottom:2rem;font-family:monospace;letter-spacing:.03em;}
+/* Form card */
+.form-card{width:100%;max-width:480px;}
+.section-label{display:flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
+.section-label::before{content:"";width:16px;height:2px;background:var(--accent);}
+.form-title{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;}
+.form-subtitle{color:var(--text-muted);font-size:.9rem;margin-bottom:2rem;line-height:1.5;}
+/* Inputs */
+.field-label{display:block;font-size:.8125rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;}
+.field-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s;}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.field-input::placeholder{color:var(--text-dim);}
+select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a8e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+/* Phone wrapper */
+.phone-row{display:flex;gap:.5rem;}
+.country-select-wrap{position:relative;flex-shrink:0;width:110px;}
+.country-select-wrap .field-input{padding-left:.75rem;padding-right:1.75rem;}
+.phone-row .field-input.phone-num{flex:1;}
+/* Buttons */
+.btn-primary{width:100%;padding:.85rem;background:var(--accent);color:#fff;font-weight:700;font-size:.9rem;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .2s,box-shadow .2s;font-family:inherit;}
+.btn-primary:hover{background:var(--accent-dark);box-shadow:0 4px 20px var(--accent-glow);}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.btn-primary svg{width:16px;height:16px;}
+.btn-outline{width:100%;padding:.75rem;background:transparent;color:var(--text);font-weight:600;font-size:.9rem;border:1px solid var(--border);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:all .2s;font-family:inherit;}
+.btn-outline:hover{background:var(--surface);border-color:var(--text-dim);}
+.btn-outline:disabled{opacity:.6;cursor:not-allowed;}
+.btn-back{background:none;border:none;color:var(--text-muted);font-size:.875rem;cursor:pointer;padding:.5rem 0;font-family:inherit;transition:color .2s;}
+.btn-back:hover{color:var(--text);}
+/* Tabs */
+.tab-bar{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:1.5rem;}
+.tab-btn{flex:1;padding:.55rem;border:none;background:transparent;color:var(--text-dim);font-size:.8125rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;font-family:inherit;}
+.tab-btn.active{background:var(--surface-2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+/* Divider */
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.25rem 0;}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border);}
+.divider span{font-size:.75rem;color:var(--text-dim);white-space:nowrap;}
+/* Password strength */
+.pw-bars{display:flex;gap:4px;margin-top:.5rem;}
+.pw-bars .bar{flex:1;height:3px;border-radius:2px;background:var(--border);transition:background .2s;}
+.pw-hint{font-size:.75rem;color:var(--text-dim);margin-top:.25rem;}
+/* Error */
+.err-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:.6rem .85rem;font-size:.8125rem;color:#fca5a5;margin-bottom:.75rem;}
+/* OTP */
+.otp-input{text-align:center;font-family:monospace;font-size:1.5rem;letter-spacing:.3em;}
+/* Step transitions */
 .step-panel{transition:opacity .22s ease,transform .22s ease;}
 .step-panel.entering{opacity:0;transform:translateX(14px);}
-input:focus{outline:none;box-shadow:0 0 0 3px rgba(194,65,12,.18);}
+/* Spin */
 .spin{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-#progress-bar{transition:width .4s cubic-bezier(.4,0,.2,1);}
-.feat-chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;}
-.brand-panel{background:linear-gradient(150deg,#7c2d12 0%,#9a3412 25%,#c2410c 65%,#ea580c 100%);}  
-.tab-btn{transition:all .18s ease;border-radius:.625rem;}
-.tab-btn.active{background:#1c1917;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);}
-#auth-otp{font-family:monospace;letter-spacing:.35em;}
+/* Checklist in step 3 */
+.s3-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;}
+.s3-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;}
+.s3-dot.done{background:var(--success);border-color:var(--success);}
+.s3-text{font-size:.875rem;color:var(--text-muted);}
+/* Footer link */
+.footer-link{text-align:center;font-size:.8125rem;color:var(--text-dim);margin-top:1.5rem;}
+.footer-link a{color:var(--accent);font-weight:600;}
+/* Terms */
+.terms{text-align:center;font-size:.75rem;color:var(--text-dim);margin-top:1.25rem;line-height:1.5;}
+.terms a{color:var(--text-muted);}
+/* Trust chips */
+.trust-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:1.25rem;}
+.trust-chip{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--text-dim);}
+.trust-chip svg{width:13px;height:13px;}
+/* Responsive */
+@media(max-width:900px){
+  .brand-sidebar{display:none;}
+  .main-area{margin-left:0;padding:1.5rem 1rem;}
+}
+/* Mobile header */
+.mobile-header{display:none;align-items:center;justify-content:space-between;padding:1rem;width:100%;max-width:480px;}
+@media(max-width:900px){.mobile-header{display:flex;}}
+.mobile-logo{display:flex;align-items:center;gap:.5rem;}
+.mobile-logo .icon-box{width:28px;height:28px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
+.mobile-logo .icon-box svg{width:14px;height:14px;fill:white;}
+.mobile-logo span{font-weight:700;font-size:.9rem;color:var(--text);}
+#recaptcha-container{position:fixed;bottom:0;left:0;z-index:-1;opacity:0;}
 </style>
 </head>
-<body class="min-h-screen flex bg-stone-50">
+<body>
 
-<!-- LEFT BRAND PANEL -->
-<aside class="brand-panel hidden lg:flex lg:w-[44%] xl:w-[42%] flex-col justify-between p-12 relative overflow-hidden shrink-0">
-  <div class="absolute -top-20 -right-20 size-72 rounded-full pointer-events-none" style="background:rgba(255,255,255,.07)"></div>
-  <div class="absolute top-1/2 -right-32 size-80 rounded-full pointer-events-none" style="background:rgba(255,255,255,.05)"></div>
-  <div class="absolute -bottom-12 -left-16 size-64 rounded-full pointer-events-none" style="background:rgba(0,0,0,.1)"></div>
-
-  <div class="relative z-10">
-    <a href="/" class="inline-flex items-center gap-3 mb-14 no-underline">
-      <div class="size-12 rounded-2xl flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.18)">
-        <svg class="material-symbols-outlined text-white" style="font-size:24px" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
-      </div>
-      <div>
-        <p class="text-white font-bold text-xl leading-none" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</p>
-        <p style="color:rgba(255,220,200,.8);font-size:12px;margin-top:2px">Digital Menu Platform</p>
-      </div>
-    </a>
-    <h2 class="text-white font-bold mb-4 leading-tight" style="font-size:2rem;font-family:'Plus Jakarta Sans',sans-serif">
-      Your restaurant,<br>live in 60 seconds
-    </h2>
-    <p style="color:rgba(255,220,200,.9);font-size:15px;line-height:1.65;margin-bottom:2.5rem">
-      Create your menu, generate a QR code, and let customers order  no technical skills required.
-    </p>
-    <ul class="space-y-3.5">
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">No credit card required</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Free forever plan  no expiry</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">QR code for every table</span></li>
-      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Instant menu updates, live</span></li>
+<!-- LEFT BRAND SIDEBAR -->
+<aside class="brand-sidebar">
+  <div>
+    <div class="brand-logo">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+      <span>RestOrder</span>
+    </div>
+    <h2 class="brand-tagline">Ship faster,<br><span class="serif-accent">stress less.</span></h2>
+    <p class="brand-desc">The only platform your restaurant needs to go from idea to production  without the chaos.</p>
+    <ul class="brand-checks">
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Free forever plan available</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Live menu in under 60 seconds</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No credit card required</li>
     </ul>
   </div>
-
-  <div class="relative z-10 rounded-2xl p-5" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px)">
-    <div class="flex gap-1 mb-3" aria-label="5 stars">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+  <div class="testimonial-box">
+    <div class="stars">
+      <svg viewBox="0 0 14 14"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg viewBox="0 0 14 14"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg viewBox="0 0 14 14"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg viewBox="0 0 14 14"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg viewBox="0 0 14 14"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
     </div>
-    <p style="color:rgba(255,255,255,.9);font-size:13px;font-style:italic;line-height:1.6;margin-bottom:12px">"We went from paper menus to digital in one afternoon. Our customers love scanning the QR code at each table."</p>
-    <div class="flex items-center gap-3">
-      <div class="size-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style="background:rgba(255,255,255,.2)">MK</div>
-      <div>
-        <p style="color:#fff;font-size:13px;font-weight:700;line-height:1.3">Maria K.</p>
-        <p style="color:rgba(255,220,200,.75);font-size:12px">Owner, Bella Trattoria</p>
-      </div>
+    <p class="quote">"We went from paper menus to digital in one afternoon. Customers love scanning the QR code at each table."</p>
+    <div class="author">
+      <div class="avatar">MK</div>
+      <div><div class="aname">Maria K.</div><div class="arole">Owner, Bella Trattoria</div></div>
     </div>
   </div>
 </aside>
 
-<!-- RIGHT FORM PANEL -->
-<div class="flex-1 flex flex-col min-h-screen">
-  <div class="flex items-center justify-between px-6 py-4 shrink-0">
-    <a href="/" class="lg:hidden flex items-center gap-2 no-underline">
-      <div class="size-8 rounded-lg flex items-center justify-center text-white" style="background:linear-gradient(135deg,#c2410c,#ea580c)">
-        <svg class="material-symbols-outlined" style="font-size:17px" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
-      </div>
-      <span class="font-bold text-stone-900 text-sm" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</span>
+<!-- MAIN AREA -->
+<div class="main-area">
+  <div class="mobile-header">
+    <a href="/" class="mobile-logo">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+      <span>RestOrder</span>
     </a>
-    <div class="lg:hidden"></div>
-    <span class="text-sm text-stone-500">Already have an account? <a href="/login" class="text-primary font-semibold hover:underline">Sign in</a></span>
+    <span style="font-size:.8125rem;color:var(--text-dim)">Already have an account? <a href="/login">Sign in</a></span>
   </div>
 
-  <div class="flex-1 flex items-start justify-center px-4 py-4 sm:py-8 overflow-y-auto">
-    <div class="w-full max-w-md">
+  <!-- Step dots -->
+  <div class="step-dots" id="step-dots">
+    <div class="step-dot active" id="dot-1">1</div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-dot" id="dot-2">2</div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-dot" id="dot-3">3</div>
+  </div>
+  <div class="step-caption" id="step-caption">Step 1 of 3  Let's get you in</div>
 
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-2">
-          <span id="step-label" class="text-sm font-semibold text-stone-600">Step 1 of 3</span>
-          <span id="step-pct" class="text-sm font-medium text-primary">33%</span>
-        </div>
-        <div class="h-1.5 bg-stone-200 rounded-full overflow-hidden">
-          <div id="progress-bar" class="h-full bg-primary rounded-full" style="width:33%"></div>
-        </div>
+  <!-- FORM CARD -->
+  <div class="form-card">
+
+    <!--  STEP 1  -->
+    <div id="step-1" class="step-panel">
+      <div class="section-label">Get Started</div>
+      <h2 class="form-title">Start your <span class="serif-accent">free trial</span></h2>
+      <p class="form-subtitle">14 days free. No credit card. No surprises.</p>
+
+      <!-- Google -->
+      <button id="btn-google" onclick="handleGoogle()" type="button" class="btn-outline" style="margin-bottom:.75rem">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        <span id="google-reg-text">Continue with Google</span>
+        <svg id="google-reg-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+      </button>
+
+      <!-- Firebase error banner -->
+      <div id="firebase-reg-error" class="err-msg hidden"></div>
+
+      <div class="divider"><span>or sign up with</span></div>
+
+      <!-- Tab switcher -->
+      <div class="tab-bar">
+        <button id="tab-email" onclick="switchTab('email')" type="button" class="tab-btn active">Email</button>
+        <button id="tab-phone" onclick="switchTab('phone')" type="button" class="tab-btn">Phone</button>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-
-        <!-- STEP 1 -->
-        <div id="step-1" class="step-panel p-7">
-          <div class="mb-6">
-            <div class="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-full px-3 py-1 mb-4">
-              <svg class="material-symbols-outlined text-primary" style="font-size:15px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
-              <span class="text-xs font-semibold text-primary">Free  no credit card needed</span>
-            </div>
-            <h2 class="text-2xl font-bold text-stone-900 mb-1">Create your free account</h2>
-            <p class="text-stone-500 text-sm">Your menu will be live in under 60 seconds.</p>
-          </div>
-
-          <!-- Google sign-up -->
-          <button id="btn-google" onclick="handleGoogle()" type="button"
-            class="w-full flex items-center justify-center gap-3 border border-stone-300 rounded-xl py-3 px-4 bg-white hover:bg-stone-50 transition text-sm font-semibold text-stone-700 mb-3">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-              <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-              <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
-            </svg>
-            <span id="google-reg-text">Continue with Google</span>
-            <svg id="google-reg-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
-          </button>
-
-          <!-- Firebase error banner -->
-          <div id="firebase-reg-error" class="hidden bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-sm text-red-700 mb-3"></div>
-
-          <div class="relative flex items-center gap-3 mb-4">
-            <div class="flex-1 h-px bg-stone-200"></div>
-            <span class="text-xs text-stone-400 font-medium">or sign up with</span>
-            <div class="flex-1 h-px bg-stone-200"></div>
-          </div>
-
-          <!-- Tab switcher: Email | Phone -->
-          <div class="flex rounded-xl border border-stone-200 p-1 mb-5 bg-stone-50">
-            <button id="tab-email" onclick="switchTab('email')" type="button"
-              class="tab-btn active flex-1 py-2 text-sm font-semibold">Email</button>
-            <button id="tab-phone" onclick="switchTab('phone')" type="button"
-              class="tab-btn flex-1 py-2 text-sm font-semibold text-stone-500">Phone</button>
-          </div>
-
-          <!-- EMAIL TAB -->
-          <div id="tab-email-panel">
-            <div class="mb-4">
-              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-email">Email address</label>
-              <input id="s1-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
-                class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-                oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
-            </div>
-            <div class="mb-5">
-              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s1-pw">Password</label>
-              <div class="relative">
-                <input id="s1-pw" type="password" autocomplete="new-password" placeholder="Min 8 characters + 1 number"
-                  class="w-full rounded-xl border border-stone-300 px-4 py-3 pr-11 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-                  oninput="updatePwStrength();clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
-                <button type="button" onclick="togglePw('s1-pw',this)" tabindex="-1"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
-                  <svg class="material-symbols-outlined" style="font-size:20px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use id="s1-eye-icon" href="/icons/sprite.svg#icon-visibility"/></svg>
-                </button>
-              </div>
-              <div class="mt-2 flex gap-1.5">
-                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-1"></div>
-                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-2"></div>
-                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-3"></div>
-                <div class="h-1 rounded flex-1 bg-stone-200" id="ps-4"></div>
-              </div>
-              <p id="pw-hint" class="text-xs text-stone-400 mt-1">Enter a password to check strength</p>
-            </div>
-            <p id="s1-error" class="hidden text-red-600 text-sm mb-3 font-medium"></p>
-            <button onclick="s1Next()" id="btn-s1"
-              class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
-              <span>Create Free Account</span>
-              <svg class="material-symbols-outlined" style="font-size:18px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
+      <!-- EMAIL TAB -->
+      <div id="tab-email-panel">
+        <div style="margin-bottom:1rem">
+          <label class="field-label" for="s1-email">Work email</label>
+          <input id="s1-email" type="email" autocomplete="email" placeholder="you@restaurant.com" class="field-input"
+            oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+        </div>
+        <div style="margin-bottom:.25rem">
+          <label class="field-label" for="s1-pw">Password</label>
+          <div style="position:relative">
+            <input id="s1-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" class="field-input"
+              style="padding-right:2.5rem" oninput="updatePwStrength();clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+            <button type="button" onclick="togglePw()" tabindex="-1"
+              style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0;">
+              <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-          </div><!-- /tab-email-panel -->
-
-          <!-- PHONE TAB -->
-          <div id="tab-phone-panel" class="hidden">
-            <!-- Step A: enter phone number -->
-            <div id="phone-entry">
-              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="auth-phone">Phone number</label>
-              <div class="flex gap-2 mb-1">
-                <input id="auth-phone" type="tel" autocomplete="tel" placeholder="+1 555 123 4567"
-                  class="flex-1 rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-                  oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')sendPhoneOTP()"/>
-                <button type="button" id="btn-send-otp" onclick="sendPhoneOTP()"
-                  class="px-4 py-3 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl text-sm transition shrink-0 flex items-center gap-1.5">
-                  <span id="otp-send-text">Send code</span>
-                  <svg id="otp-send-spin" class="spin hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
-                </button>
-              </div>
-              <p class="text-xs text-stone-400 mt-1 mb-0">Include country code &mdash; e.g. +44 7700 900123</p>
-            </div>
-            <!-- Step B: enter OTP code -->
-            <div id="otp-entry" class="hidden mt-1">
-              <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="auth-otp">Verification code</label>
-              <input id="auth-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"
-                class="w-full text-center text-2xl rounded-xl border border-stone-300 px-4 py-3 text-stone-900 focus:border-primary transition"
-                oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')verifyPhoneOTP()"/>
-              <div class="flex justify-between mt-2 mb-3">
-                <button type="button" onclick="resetPhoneFlow()" class="text-xs text-stone-400 hover:text-stone-600 transition">&#8592; Change number</button>
-                <button type="button" onclick="sendPhoneOTP()" class="text-xs text-primary font-semibold hover:underline">Resend code</button>
-              </div>
-              <button type="button" onclick="verifyPhoneOTP()" id="btn-verify-otp"
-                class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
-                <span id="otp-verify-text">Verify &amp; Continue</span>
-                <svg id="otp-verify-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
-              </button>
-            </div>
-            <p id="phone-error" class="hidden text-red-600 text-sm mt-3 font-medium"></p>
-            <div id="recaptcha-container"></div>
-          </div><!-- /tab-phone-panel -->
-
-          <p class="text-center text-xs text-stone-400 mt-4">
-            By continuing you agree to our
-            <a href="/terms" class="underline hover:text-stone-600">Terms</a> &amp;
-            <a href="/privacy" class="underline hover:text-stone-600">Privacy Policy</a>.
-          </p>
-        </div><!-- /step-1 -->
-
-        <!-- STEP 2 -->
-        <div id="step-2" class="step-panel p-7 hidden">
-          <div class="mb-6">
-            <div class="size-12 rounded-2xl bg-orange-50 flex items-center justify-center mb-4">
-              <svg class="material-symbols-outlined text-primary" style="font-size:26px" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-storefront"/></svg>
-            </div>
-            <h2 class="text-2xl font-bold text-stone-900 mb-1">What's your business called?</h2>
-            <p class="text-stone-500 text-sm">Appears on your digital menu. You can change it anytime.</p>
           </div>
-          <div class="mb-5">
-            <label class="block text-sm font-semibold text-stone-700 mb-1.5" for="s2-biz">Business / Restaurant name</label>
-            <input id="s2-biz" type="text" autocomplete="organization" placeholder="e.g. The Golden Fork"
-              class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-primary transition"
-              oninput="clearError('s2-error')" onkeydown="if(event.key==='Enter')s2Next()"/>
-          </div>
-          <p id="s2-error" class="hidden text-red-600 text-sm mb-3 font-medium"></p>
-          <button onclick="s2Next()" id="btn-s2"
-            class="w-full bg-primary hover:bg-primary-dark text-white font-bold rounded-xl py-3.5 text-sm transition flex items-center justify-center gap-2">
-            <span>Continue</span>
-            <svg class="material-symbols-outlined" style="font-size:18px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-arrow_forward"/></svg>
-          </button>
-          <button onclick="goBack(1)" type="button" class="w-full mt-3 text-sm text-stone-500 hover:text-stone-700 py-2 transition">&#8592; Back</button>
-        </div><!-- /step-2 -->
-
-        <!-- STEP 3 -->
-        <div id="step-3" class="step-panel p-7 hidden">
-          <div class="text-center">
-            <div class="size-20 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-5" id="s3-icon-ring">
-              <svg id="s3-spinner" class="spin material-symbols-outlined text-primary" style="font-size:32px" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-sync"/></svg>
-            </div>
-            <h2 id="s3-title" class="text-xl font-bold text-stone-900 mb-2">Setting up your menu&#x2026;</h2>
-            <p id="s3-sub" class="text-stone-500 text-sm mb-6">This takes just a few seconds.</p>
-            <div class="text-left space-y-3 mb-6">
-              <div class="flex items-center gap-3" id="s3-c1"><div class="size-6 rounded-full border-2 border-stone-300 flex items-center justify-center shrink-0 s3-dot"></div><span class="text-sm text-stone-600">Creating your account</span></div>
-              <div class="flex items-center gap-3" id="s3-c2"><div class="size-6 rounded-full border-2 border-stone-300 flex items-center justify-center shrink-0 s3-dot"></div><span class="text-sm text-stone-600">Building your menu</span></div>
-              <div class="flex items-center gap-3" id="s3-c3"><div class="size-6 rounded-full border-2 border-stone-300 flex items-center justify-center shrink-0 s3-dot"></div><span class="text-sm text-stone-600">Generating your QR code</span></div>
-            </div>
-            <p id="s3-error" class="hidden text-red-600 text-sm mb-4 font-medium bg-red-50 rounded-xl p-3"></p>
-            <button id="btn-retry" onclick="doRegister()" class="hidden w-full bg-primary text-white font-bold rounded-xl py-3 text-sm">Try Again</button>
-          </div>
-        </div><!-- /step-3 -->
-
-      </div><!-- /card -->
-
-      <div class="mt-5 flex flex-wrap justify-center gap-4">
-        <span class="feat-chip text-stone-500"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>No credit card</span>
-        <span class="feat-chip text-stone-500"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Free forever plan</span>
-        <span class="feat-chip text-stone-500"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Live in &lt;60 sec</span>
+          <div class="pw-bars"><div class="bar" id="ps-1"></div><div class="bar" id="ps-2"></div><div class="bar" id="ps-3"></div><div class="bar" id="ps-4"></div></div>
+          <p id="pw-hint" class="pw-hint">Enter a password to check strength</p>
+        </div>
+        <p id="s1-error" class="err-msg hidden"></p>
+        <button onclick="s1Next()" id="btn-s1" class="btn-primary" style="margin-top:1rem">
+          <span>Continue</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
 
-    </div>
+      <!-- PHONE TAB -->
+      <div id="tab-phone-panel" class="hidden">
+        <div id="phone-entry">
+          <label class="field-label" for="auth-phone">Phone number</label>
+          <div class="phone-row" style="margin-bottom:.5rem">
+            <div class="country-select-wrap">
+              <select id="country-select" class="field-input" onchange="onCountryChange()"></select>
+            </div>
+            <input id="auth-phone" type="tel" autocomplete="tel" placeholder="555 123 4567" class="field-input phone-num"
+              oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')sendPhoneOTP()"/>
+          </div>
+          <button type="button" id="btn-send-otp" onclick="sendPhoneOTP()" class="btn-primary" style="margin-top:.75rem">
+            <span id="otp-send-text">Send code</span>
+            <svg id="otp-send-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+          </button>
+        </div>
+        <div id="otp-entry" class="hidden" style="margin-top:.5rem">
+          <label class="field-label" for="auth-otp">Verification code</label>
+          <input id="auth-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"
+            class="field-input otp-input" oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')verifyPhoneOTP()"/>
+          <div style="display:flex;justify-content:space-between;margin-top:.5rem;margin-bottom:.75rem">
+            <button type="button" onclick="resetPhoneFlow()" class="btn-back" style="font-size:.8rem">&#8592; Change number</button>
+            <button type="button" onclick="sendPhoneOTP()" style="background:none;border:none;color:var(--accent);font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;">Resend code</button>
+          </div>
+          <button type="button" onclick="verifyPhoneOTP()" id="btn-verify-otp" class="btn-primary">
+            <span id="otp-verify-text">Verify &amp; Continue</span>
+            <svg id="otp-verify-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+          </button>
+        </div>
+        <p id="phone-error" class="err-msg hidden" style="margin-top:.75rem"></p>
+        <div id="recaptcha-container"></div>
+      </div>
+
+      <p class="terms">By continuing you agree to our <a href="/terms">Terms</a> &amp; <a href="/privacy">Privacy Policy</a>.</p>
+      <p class="footer-link" style="display:none" id="desktop-signin">Already have an account? <a href="/login">Sign in</a></p>
+    </div><!-- /step-1 -->
+
+    <!--  STEP 2  -->
+    <div id="step-2" class="step-panel hidden">
+      <div class="section-label">Your Restaurant</div>
+      <h2 class="form-title">Set up your <span class="serif-accent">workspace</span></h2>
+      <p class="form-subtitle">We'll tailor RestOrder to match how you actually work.</p>
+      <div style="margin-bottom:1.25rem">
+        <label class="field-label" for="s2-biz">Restaurant or business name</label>
+        <input id="s2-biz" type="text" autocomplete="organization" placeholder="e.g. The Golden Fork" class="field-input"
+          oninput="clearError('s2-error')" onkeydown="if(event.key==='Enter')s2Next()"/>
+      </div>
+      <p id="s2-error" class="err-msg hidden"></p>
+      <button onclick="s2Next()" id="btn-s2" class="btn-primary">
+        <span>Continue</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button onclick="goBack(1)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">&#8592; Back</button>
+    </div><!-- /step-2 -->
+
+    <!--  STEP 3  -->
+    <div id="step-3" class="step-panel hidden">
+      <div style="text-align:center">
+        <div id="s3-icon-ring" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+          <svg id="s3-spinner" class="spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+        </div>
+        <div class="section-label" id="s3-label" style="justify-content:center">Setting Up</div>
+        <h2 class="form-title" id="s3-title" style="text-align:center">Welcome to <span class="serif-accent">RestOrder</span></h2>
+        <p class="form-subtitle" id="s3-sub" style="text-align:center">Your workspace is being prepared</p>
+      </div>
+      <div style="margin:1rem 0 1.25rem">
+        <div class="s3-row" id="s3-c1"><div class="s3-dot"></div><span class="s3-text">Account created &amp; verified</span></div>
+        <div class="s3-row" id="s3-c2"><div class="s3-dot"></div><span class="s3-text">Menu configured with your preferences</span></div>
+        <div class="s3-row" id="s3-c3"><div class="s3-dot"></div><span class="s3-text">QR code generated  ready to print</span></div>
+      </div>
+      <p id="s3-error" class="err-msg hidden"></p>
+      <button id="btn-retry" onclick="doRegister()" class="btn-primary hidden">Try Again</button>
+      <button id="btn-dashboard" onclick="window.location.href='/dashboard?onboard=1'" class="btn-primary hidden">
+        <span>Open your dashboard</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div><!-- /step-3 -->
+  </div><!-- /form-card -->
+
+  <div class="trust-chips">
+    <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>No credit card</span>
+    <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Free forever plan</span>
+    <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Live in &lt;60 sec</span>
   </div>
-</div><!-- /right panel -->
+  <p class="footer-link" id="mobile-signin" style="display:none">Already have an account? <a href="/login">Sign in</a></p>
+</div>
 
 <script>
 "use strict";
+//  Country data: ISO  { flag, dial, name } 
+const COUNTRIES = [
+  {c:"AF",f:"\ud83c\udde6\ud83c\uddeb",d:"+93",n:"Afghanistan"},{c:"AL",f:"\ud83c\udde6\ud83c\uddf1",d:"+355",n:"Albania"},{c:"DZ",f:"\ud83c\udde9\ud83c\uddff",d:"+213",n:"Algeria"},
+  {c:"AR",f:"\ud83c\udde6\ud83c\uddf7",d:"+54",n:"Argentina"},{c:"AU",f:"\ud83c\udde6\ud83c\uddfa",d:"+61",n:"Australia"},{c:"AT",f:"\ud83c\udde6\ud83c\uddf9",d:"+43",n:"Austria"},
+  {c:"BH",f:"\ud83c\udde7\ud83c\udded",d:"+973",n:"Bahrain"},{c:"BD",f:"\ud83c\udde7\ud83c\udde9",d:"+880",n:"Bangladesh"},{c:"BE",f:"\ud83c\udde7\ud83c\uddea",d:"+32",n:"Belgium"},
+  {c:"BR",f:"\ud83c\udde7\ud83c\uddf7",d:"+55",n:"Brazil"},{c:"CA",f:"\ud83c\udde8\ud83c\udde6",d:"+1",n:"Canada"},{c:"CL",f:"\ud83c\udde8\ud83c\uddf1",d:"+56",n:"Chile"},
+  {c:"CN",f:"\ud83c\udde8\ud83c\uddf3",d:"+86",n:"China"},{c:"CO",f:"\ud83c\udde8\ud83c\uddf4",d:"+57",n:"Colombia"},{c:"HR",f:"\ud83c\udded\ud83c\uddf7",d:"+385",n:"Croatia"},
+  {c:"CZ",f:"\ud83c\udde8\ud83c\uddff",d:"+420",n:"Czech Republic"},{c:"DK",f:"\ud83c\udde9\ud83c\uddf0",d:"+45",n:"Denmark"},{c:"EG",f:"\ud83c\uddea\ud83c\uddec",d:"+20",n:"Egypt"},
+  {c:"ET",f:"\ud83c\uddea\ud83c\uddf9",d:"+251",n:"Ethiopia"},{c:"FI",f:"\ud83c\uddeb\ud83c\uddee",d:"+358",n:"Finland"},{c:"FR",f:"\ud83c\uddeb\ud83c\uddf7",d:"+33",n:"France"},
+  {c:"DE",f:"\ud83c\udde9\ud83c\uddea",d:"+49",n:"Germany"},{c:"GH",f:"\ud83c\uddec\ud83c\udded",d:"+233",n:"Ghana"},{c:"GR",f:"\ud83c\uddec\ud83c\uddf7",d:"+30",n:"Greece"},
+  {c:"HK",f:"\ud83c\udded\ud83c\uddf0",d:"+852",n:"Hong Kong"},{c:"HU",f:"\ud83c\udded\ud83c\uddfa",d:"+36",n:"Hungary"},{c:"IN",f:"\ud83c\uddee\ud83c\uddf3",d:"+91",n:"India"},
+  {c:"ID",f:"\ud83c\uddee\ud83c\udde9",d:"+62",n:"Indonesia"},{c:"IR",f:"\ud83c\uddee\ud83c\uddf7",d:"+98",n:"Iran"},{c:"IQ",f:"\ud83c\uddee\ud83c\uddf6",d:"+964",n:"Iraq"},
+  {c:"IE",f:"\ud83c\uddee\ud83c\uddea",d:"+353",n:"Ireland"},{c:"IL",f:"\ud83c\uddee\ud83c\uddf1",d:"+972",n:"Israel"},{c:"IT",f:"\ud83c\uddee\ud83c\uddf9",d:"+39",n:"Italy"},
+  {c:"JP",f:"\ud83c\uddef\ud83c\uddf5",d:"+81",n:"Japan"},{c:"JO",f:"\ud83c\uddef\ud83c\uddf4",d:"+962",n:"Jordan"},{c:"KE",f:"\ud83c\uddf0\ud83c\uddea",d:"+254",n:"Kenya"},
+  {c:"KR",f:"\ud83c\uddf0\ud83c\uddf7",d:"+82",n:"South Korea"},{c:"KW",f:"\ud83c\uddf0\ud83c\uddfc",d:"+965",n:"Kuwait"},{c:"LB",f:"\ud83c\uddf1\ud83c\udde7",d:"+961",n:"Lebanon"},
+  {c:"MY",f:"\ud83c\uddf2\ud83c\uddfe",d:"+60",n:"Malaysia"},{c:"MX",f:"\ud83c\uddf2\ud83c\uddfd",d:"+52",n:"Mexico"},{c:"MA",f:"\ud83c\uddf2\ud83c\udde6",d:"+212",n:"Morocco"},
+  {c:"NL",f:"\ud83c\uddf3\ud83c\uddf1",d:"+31",n:"Netherlands"},{c:"NZ",f:"\ud83c\uddf3\ud83c\uddff",d:"+64",n:"New Zealand"},{c:"NG",f:"\ud83c\uddf3\ud83c\uddec",d:"+234",n:"Nigeria"},
+  {c:"NO",f:"\ud83c\uddf3\ud83c\uddf4",d:"+47",n:"Norway"},{c:"OM",f:"\ud83c\uddf4\ud83c\uddf2",d:"+968",n:"Oman"},{c:"PK",f:"\ud83c\uddf5\ud83c\uddf0",d:"+92",n:"Pakistan"},
+  {c:"PE",f:"\ud83c\uddf5\ud83c\uddea",d:"+51",n:"Peru"},{c:"PH",f:"\ud83c\uddf5\ud83c\udded",d:"+63",n:"Philippines"},{c:"PL",f:"\ud83c\uddf5\ud83c\uddf1",d:"+48",n:"Poland"},
+  {c:"PT",f:"\ud83c\uddf5\ud83c\uddf9",d:"+351",n:"Portugal"},{c:"QA",f:"\ud83c\uddf6\ud83c\udde6",d:"+974",n:"Qatar"},{c:"RO",f:"\ud83c\uddf7\ud83c\uddf4",d:"+40",n:"Romania"},
+  {c:"RU",f:"\ud83c\uddf7\ud83c\uddfa",d:"+7",n:"Russia"},{c:"SA",f:"\ud83c\uddf8\ud83c\udde6",d:"+966",n:"Saudi Arabia"},{c:"SG",f:"\ud83c\uddf8\ud83c\uddec",d:"+65",n:"Singapore"},
+  {c:"ZA",f:"\ud83c\uddff\ud83c\udde6",d:"+27",n:"South Africa"},{c:"ES",f:"\ud83c\uddea\ud83c\uddf8",d:"+34",n:"Spain"},{c:"SE",f:"\ud83c\uddf8\ud83c\uddea",d:"+46",n:"Sweden"},
+  {c:"CH",f:"\ud83c\udde8\ud83c\udded",d:"+41",n:"Switzerland"},{c:"TW",f:"\ud83c\uddf9\ud83c\uddfc",d:"+886",n:"Taiwan"},{c:"TH",f:"\ud83c\uddf9\ud83c\udded",d:"+66",n:"Thailand"},
+  {c:"TR",f:"\ud83c\uddf9\ud83c\uddf7",d:"+90",n:"Turkey"},{c:"UA",f:"\ud83c\uddfa\ud83c\udde6",d:"+380",n:"Ukraine"},{c:"AE",f:"\ud83c\udde6\ud83c\uddea",d:"+971",n:"UAE"},
+  {c:"GB",f:"\ud83c\uddec\ud83c\udde7",d:"+44",n:"United Kingdom"},{c:"US",f:"\ud83c\uddfa\ud83c\uddf8",d:"+1",n:"United States"},{c:"VN",f:"\ud83c\uddfb\ud83c\uddf3",d:"+84",n:"Vietnam"},
+  {c:"TZ",f:"\ud83c\uddf9\ud83c\uddff",d:"+255",n:"Tanzania"},{c:"UG",f:"\ud83c\uddfa\ud83c\uddec",d:"+256",n:"Uganda"},{c:"LK",f:"\ud83c\uddf1\ud83c\uddf0",d:"+94",n:"Sri Lanka"},
+  {c:"NP",f:"\ud83c\uddf3\ud83c\uddf5",d:"+977",n:"Nepal"},{c:"MM",f:"\ud83c\uddf2\ud83c\uddf2",d:"+95",n:"Myanmar"},{c:"KH",f:"\ud83c\uddf0\ud83c\udded",d:"+855",n:"Cambodia"},
+  {c:"SN",f:"\ud83c\uddf8\ud83c\uddf3",d:"+221",n:"Senegal"},{c:"CI",f:"\ud83c\udde8\ud83c\uddee",d:"+225",n:"Ivory Coast"},{c:"CM",f:"\ud83c\udde8\ud83c\uddf2",d:"+237",n:"Cameroon"},
+];
+
 var currentStep = 1, csrfToken = '';
+function el(id) { return document.getElementById(id); }
+
+//  CSRF fetch 
+(async () => { try { const r = await fetch('/api/csrf-token',{credentials:'include'}); const d = await r.json(); csrfToken = d.csrfToken||d.token||''; } catch(e){} })();
+
+//  Country selector setup 
+function buildCountrySelect(detectedCode) {
+  const sel = el('country-select');
+  sel.innerHTML = '';
+  const sorted = [...COUNTRIES].sort((a,b) => a.n.localeCompare(b.n));
+  sorted.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.c;
+    opt.textContent = c.f + ' ' + c.d;
+    opt.title = c.n;
+    sel.appendChild(opt);
+  });
+  const match = detectedCode && COUNTRIES.find(c => c.c === detectedCode.toUpperCase());
+  sel.value = match ? match.c : 'US';
+}
+
+function onCountryChange() {
+  // just update placeholder hint
+  const c = COUNTRIES.find(x => x.c === el('country-select').value);
+  if (c) el('auth-phone').placeholder = c.d + ' ...';
+}
+
+function getFullPhone() {
+  const c = COUNTRIES.find(x => x.c === el('country-select').value);
+  const num = el('auth-phone').value.trim().replace(/^0+/,'');
+  if (c && num && !num.startsWith('+')) return c.d + num;
+  return num;
+}
+
+// Detect country on load
 (async () => {
-  try {
-    const r = await fetch('/api/csrf-token', { credentials: 'include' });
-    const d = await r.json();
-    csrfToken = d.csrfToken || d.token || '';
-  } catch (e) { console.warn('CSRF', e); }
+  let code = '';
+  try { const r = await fetch('/api/geo'); const d = await r.json(); code = d.country || ''; } catch(e) {}
+  buildCountrySelect(code);
+  onCountryChange();
 })();
 
-function el(id) { return document.getElementById(id); }
-function showError(id, msg) { const e = el(id); if (e) { e.textContent = msg; e.classList.remove('hidden'); } }
-function clearError(id) { const e = el(id); if (e) { e.textContent = ''; e.classList.add('hidden'); } }
+// Desktop sign-in link
+if (window.innerWidth >= 900) { const d = el('desktop-signin'); if(d) d.style.display=''; }
+else { const m = el('mobile-signin'); if(m) m.style.display=''; }
 
-function setProgress(step) {
-  const pct = step === 1 ? 33 : step === 2 ? 66 : 100;
-  el('progress-bar').style.width = pct + '%';
-  el('step-label').textContent = 'Step ' + step + ' of 3';
-  el('step-pct').textContent = pct + '%';
+//  Error helpers 
+function showError(id,msg){const e=el(id);if(e){e.textContent=msg;e.classList.remove('hidden');}}
+function clearError(id){const e=el(id);if(e){e.textContent='';e.classList.add('hidden');}}
+
+//  Step navigation 
+const stepCaptions = ['Step 1 of 3 \u2014 Let\u2019s get you in','Step 2 of 3 \u2014 Set up your workspace','Step 3 of 3 \u2014 Almost there'];
+function updateDots(n) {
+  for(let i=1;i<=3;i++){
+    const dot=el('dot-'+i), line=el('line-'+(i-1));
+    dot.className='step-dot';
+    if(i<n){dot.classList.add('done');dot.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';}
+    else if(i===n){dot.classList.add('active');dot.textContent=i;}
+    else{dot.textContent=i;}
+    if(line){line.className='step-line';if(i<n)line.classList.add('done');}
+  }
+  el('step-caption').textContent=stepCaptions[n-1]||'';
+}
+function goToStep(n){
+  el('step-'+currentStep).classList.add('hidden');
+  const to=el('step-'+n);to.classList.remove('hidden');to.classList.add('entering');
+  requestAnimationFrame(()=>to.classList.remove('entering'));
+  currentStep=n;updateDots(n);
+  const first=to.querySelector('input');if(first)setTimeout(()=>first.focus(),50);
+}
+function goBack(n){goToStep(n);}
+
+//  Password toggle & strength 
+function togglePw(){
+  const inp=el('s1-pw');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function updatePwStrength(){
+  const pw=el('s1-pw').value,bars=[el('ps-1'),el('ps-2'),el('ps-3'),el('ps-4')],hint=el('pw-hint');
+  bars.forEach(b=>b.style.background='var(--border)');
+  if(!pw){hint.textContent='Enter a password to check strength';hint.style.color='var(--text-dim)';return;}
+  let s=0;if(pw.length>=8)s++;if(/[0-9]/.test(pw))s++;if(/[A-Z]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+  const colors=['#ef4444','#f97316','#eab308','#22c55e'],labels=['Too weak','Fair','Good','Strong'];
+  for(let i=0;i<s;i++)bars[i].style.background=colors[s-1];
+  hint.textContent=labels[s-1]||'';hint.style.color=colors[s-1]||'var(--text-dim)';
 }
 
-function goToStep(n) {
-  el('step-' + currentStep).classList.add('hidden');
-  const to = el('step-' + n);
-  to.classList.remove('hidden');
-  to.classList.add('entering');
-  requestAnimationFrame(() => to.classList.remove('entering'));
-  currentStep = n;
-  setProgress(n);
-  const first = to.querySelector('input');
-  if (first) setTimeout(() => first.focus(), 50);
-}
-function goBack(n) { goToStep(n); }
-
-function togglePw(inputId, btn) {
-  const inp = el(inputId), use = btn.querySelector('use');
-  if (inp.type === 'password') { inp.type = 'text'; use.setAttribute('href', '/icons/sprite.svg#icon-visibility_off'); }
-  else { inp.type = 'password'; use.setAttribute('href', '/icons/sprite.svg#icon-visibility'); }
-}
-
-function updatePwStrength() {
-  const pw = el('s1-pw').value;
-  const bars = [el('ps-1'), el('ps-2'), el('ps-3'), el('ps-4')];
-  const hint = el('pw-hint');
-  bars.forEach(b => b.style.background = '#e7e5e4');
-  if (!pw) { hint.textContent = 'Enter a password to check strength'; return; }
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
-  const labels = ['Too weak', 'Fair', 'Good', 'Strong'];
-  for (let i = 0; i < score; i++) bars[i].style.background = colors[score - 1];
-  hint.textContent = labels[score - 1] || '';
-  hint.style.color = colors[score - 1] || '#a8a29e';
-}
-
-function s1Next() {
-  const email = el('s1-email').value.trim(), pw = el('s1-pw').value;
-  clearError('s1-error');
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('s1-error', 'Please enter a valid email address.'); return; }
-  if (pw.length < 8) { showError('s1-error', 'Password must be at least 8 characters.'); return; }
-  if (!/[0-9]/.test(pw)) { showError('s1-error', 'Password must contain at least 1 number.'); return; }
+//  Step 1 next (email path) 
+function s1Next(){
+  const email=el('s1-email').value.trim(),pw=el('s1-pw').value;clearError('s1-error');
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('s1-error','Please enter a valid email address.');return;}
+  if(pw.length<8){showError('s1-error','Password must be at least 8 characters.');return;}
+  if(!/[0-9]/.test(pw)){showError('s1-error','Password must contain at least 1 number.');return;}
   goToStep(2);
 }
 
-function s2Next() {
-  const biz = el('s2-biz').value.trim();
-  clearError('s2-error');
-  if (!biz || biz.length < 2) { showError('s2-error', 'Please enter your business name.'); return; }
+//  Step 2 next 
+function s2Next(){
+  const biz=el('s2-biz').value.trim();clearError('s2-error');
+  if(!biz||biz.length<2){showError('s2-error','Please enter your business name.');return;}
   goToStep(3);
-  if (window._pendingFirebaseIdToken) {
-    doFirebaseRegister(window._pendingFirebaseIdToken, biz);
-  } else {
-    doRegister();
+  if(window._pendingFirebaseIdToken){doFirebaseRegister(window._pendingFirebaseIdToken,biz);}
+  else{doRegister();}
+}
+
+//  Step 3: checklist animation 
+function resetChecklist(){['s3-c1','s3-c2','s3-c3'].forEach(id=>{const d=el(id).querySelector('.s3-dot');d.className='s3-dot';d.innerHTML='';});}
+function animateCheck(rowId,delay){
+  return new Promise(resolve=>{setTimeout(()=>{
+    const d=el(rowId).querySelector('.s3-dot');d.classList.add('done');
+    d.innerHTML='<svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    resolve();
+  },delay);});
+}
+
+//  Registration (email path) 
+async function doRegister(){
+  clearError('s3-error');el('btn-retry').classList.add('hidden');el('btn-dashboard').classList.add('hidden');resetChecklist();
+  el('s3-spinner').style.display='';el('s3-spinner').classList.add('spin');
+  el('s3-icon-ring').style.borderColor='var(--accent)';
+  el('s3-label').textContent='Setting Up';el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span>';
+  el('s3-sub').textContent='Your workspace is being prepared\u2026';
+  const email=el('s1-email').value.trim(),pw=el('s1-pw').value,biz=el('s2-biz').value.trim();
+  await animateCheck('s3-c1',600);
+  try{
+    const res=await fetch('/api/customers/register',{method:'POST',headers:{'Content-Type':'application/json','CSRF-Token':csrfToken},credentials:'include',body:JSON.stringify({email,password:pw,businessName:biz,registrationType:'email'})});
+    const data=await res.json();
+    if(!res.ok){showRegError(data.error||'Registration failed.');return;}
+    if(data.token)localStorage.setItem('customerToken',data.token);
+    if(data.customer&&data.customer.email)localStorage.setItem('customerEmail',data.customer.email);
+    if(data.customer&&data.customer.businessName)localStorage.setItem('customerBusiness',data.customer.businessName);
+    await animateCheck('s3-c2',500);await animateCheck('s3-c3',400);
+    showSuccess();
+  }catch(err){showRegError('Network error. Please check your connection and try again.');}
+}
+
+function showSuccess(){
+  el('s3-spinner').classList.remove('spin');el('s3-spinner').style.display='none';
+  el('s3-icon-ring').style.borderColor='var(--success)';
+  el('s3-icon-ring').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  el('s3-label').textContent="You're In!";el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span> \ud83d\ude80';
+  el('s3-sub').textContent="Your workspace is ready. Here's what we've set up for you.";
+  el('btn-dashboard').classList.remove('hidden');
+  setTimeout(()=>window.location.href='/dashboard?onboard=1',1500);
+}
+
+function showRegError(msg){
+  el('s3-error').textContent=msg;el('s3-error').classList.remove('hidden');
+  el('btn-retry').classList.remove('hidden');el('s3-spinner').style.display='none';
+  el('s3-label').textContent='Error';el('s3-title').textContent='Something went wrong';
+  el('s3-sub').textContent='Please check your details and try again.';
+}
+
+//  Tab switcher 
+function switchTab(tab){
+  const isEmail=tab==='email';
+  el('tab-email').classList.toggle('active',isEmail);el('tab-phone').classList.toggle('active',!isEmail);
+  el('tab-email-panel').classList.toggle('hidden',!isEmail);el('tab-phone-panel').classList.toggle('hidden',isEmail);
+  clearError('s1-error');clearError('phone-error');
+  if(!isEmail)setTimeout(()=>{const p=el('auth-phone');if(p)p.focus();},40);
+}
+
+//  Firebase helpers 
+let _fbAuth=null,_fbPhoneConfirm=null;
+
+async function initFirebaseReg(cfg){
+  try{
+    const{initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const{getAuth,GoogleAuthProvider,signInWithPopup,signInWithPhoneNumber,RecaptchaVerifier}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    const app=getApps().length?getApps()[0]:initializeApp(cfg);
+    _fbAuth=getAuth(app);_fbAuth._gp=new GoogleAuthProvider();_fbAuth._rv=RecaptchaVerifier;_fbAuth._swp=signInWithPopup;_fbAuth._swpn=signInWithPhoneNumber;
+  }catch(e){console.warn('Firebase load error:',e);}
+}
+
+function showFbError(msg){const d=el('firebase-reg-error');d.textContent=msg;d.classList.remove('hidden');setTimeout(()=>d.classList.add('hidden'),7000);}
+
+async function handleFirebaseIdToken(idToken){
+  const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken})});
+  const data=await res.json();
+  if(res.ok&&data.token){localStorage.setItem('customerToken',data.token);if(data.customer?.email)localStorage.setItem('customerEmail',data.customer.email);if(data.customer?.businessName)localStorage.setItem('customerBusiness',data.customer.businessName);window.location.href=data.redirectTo||'/dashboard';return;}
+  if(data.requiresRegistration){window._pendingFirebaseIdToken=idToken;goToStep(2);return;}
+  showFbError(data.error||'Sign-in failed. Please try again.');
+}
+
+async function doFirebaseRegister(idToken,businessName){
+  clearError('s3-error');el('btn-retry').classList.add('hidden');el('btn-dashboard').classList.add('hidden');resetChecklist();
+  el('s3-spinner').style.display='';el('s3-spinner').classList.add('spin');
+  el('s3-icon-ring').style.borderColor='var(--accent)';
+  el('s3-label').textContent='Setting Up';el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span>';
+  el('s3-sub').textContent='Your workspace is being prepared\u2026';
+  await animateCheck('s3-c1',600);
+  try{
+    const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken,businessName})});
+    const data=await res.json();
+    if(!res.ok){showRegError(data.error||'Registration failed.');return;}
+    if(data.token)localStorage.setItem('customerToken',data.token);if(data.customer?.email)localStorage.setItem('customerEmail',data.customer.email);
+    localStorage.setItem('customerBusiness',businessName);window._pendingFirebaseIdToken=null;
+    await animateCheck('s3-c2',500);await animateCheck('s3-c3',400);
+    showSuccess();
+  }catch(err){showRegError('Network error. Please check your connection and try again.');}
+}
+
+//  Google sign-up 
+async function handleGoogle(){
+  if(!_fbAuth){showFbError('Google sign-up is loading. Please wait a moment.');return;}
+  el('google-reg-text').textContent='Signing in\u2026';el('google-reg-spin').classList.remove('hidden');el('btn-google').disabled=true;
+  try{
+    const result=await _fbAuth._swp(_fbAuth,_fbAuth._gp);const idToken=await result.user.getIdToken();await handleFirebaseIdToken(idToken);
+  }catch(err){if(err.code!=='auth/popup-closed-by-user')showFbError(err.message||'Google sign-in failed.');}
+  finally{el('google-reg-text').textContent='Continue with Google';el('google-reg-spin').classList.add('hidden');el('btn-google').disabled=false;}
+}
+
+//  Phone OTP 
+async function sendPhoneOTP(){
+  if(!_fbAuth){showFbError('Firebase is not configured on this server.');return;}
+  const phone=getFullPhone();clearError('phone-error');
+  if(!phone){showError('phone-error','Please enter your phone number.');return;}
+  el('otp-send-text').textContent='Sending\u2026';el('otp-send-spin').classList.remove('hidden');el('btn-send-otp').disabled=true;
+  try{
+    if(!window._rcVerifier){window._rcVerifier=new _fbAuth._rv(_fbAuth,'recaptcha-container',{size:'invisible'});}
+    _fbPhoneConfirm=await _fbAuth._swpn(_fbAuth,phone,window._rcVerifier);
+    el('phone-entry').classList.add('hidden');el('otp-entry').classList.remove('hidden');setTimeout(()=>el('auth-otp').focus(),50);
+  }catch(err){
+    showError('phone-error',err.message||'Could not send code. Check the number and try again.');
+    el('otp-send-text').textContent='Send code';el('otp-send-spin').classList.add('hidden');el('btn-send-otp').disabled=false;
   }
 }
 
-function resetChecklist() {
-  ['s3-c1', 's3-c2', 's3-c3'].forEach(id => {
-    const dot = el(id).querySelector('.s3-dot');
-    dot.style.background = '';
-    dot.style.borderColor = '#d1d5db';
-    dot.innerHTML = '';
-  });
+async function verifyPhoneOTP(){
+  if(!_fbPhoneConfirm)return;const code=el('auth-otp').value.trim();clearError('phone-error');
+  if(!/^\d{6}$/.test(code)){showError('phone-error','Enter the 6-digit verification code.');return;}
+  el('otp-verify-text').textContent='Verifying\u2026';el('otp-verify-spin').classList.remove('hidden');el('btn-verify-otp').disabled=true;
+  try{const result=await _fbPhoneConfirm.confirm(code);const idToken=await result.user.getIdToken();await handleFirebaseIdToken(idToken);}
+  catch(err){showError('phone-error',err.message||'Invalid code. Please try again.');el('otp-verify-text').textContent='Verify & Continue';el('otp-verify-spin').classList.add('hidden');el('btn-verify-otp').disabled=false;}
 }
 
-function animateCheck(rowId, delay) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const dot = el(rowId).querySelector('.s3-dot');
-      dot.style.background = '#16a34a';
-      dot.style.borderColor = '#16a34a';
-      dot.innerHTML = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      resolve();
-    }, delay);
-  });
+function resetPhoneFlow(){
+  _fbPhoneConfirm=null;window._rcVerifier=null;
+  el('phone-entry').classList.remove('hidden');el('otp-entry').classList.add('hidden');
+  el('auth-otp').value='';el('auth-phone').value='';
+  el('otp-send-text').textContent='Send code';el('otp-send-spin').classList.add('hidden');el('btn-send-otp').disabled=false;
+  clearError('phone-error');setTimeout(()=>el('auth-phone').focus(),40);
 }
 
-async function doRegister() {
-  clearError('s3-error');
-  el('btn-retry').classList.add('hidden');
-  resetChecklist();
-  el('s3-icon-ring').className = 'size-20 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-5';
-  const spinner = el('s3-spinner');
-  spinner.className = 'spin material-symbols-outlined text-primary';
-  spinner.style.fontSize = '32px';
-  spinner.style.display = '';
-  spinner.style.color = '';
-  spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-sync');
-  el('s3-title').textContent = 'Setting up your menu\u2026';
-  el('s3-sub').textContent = 'This takes just a few seconds.';
-  const email = el('s1-email').value.trim(), pw = el('s1-pw').value, biz = el('s2-biz').value.trim();
-  await animateCheck('s3-c1', 600);
-  try {
-    const res = await fetch('/api/customers/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-      credentials: 'include',
-      body: JSON.stringify({ email, password: pw, businessName: biz, registrationType: 'email' })
-    });
-    const data = await res.json();
-    if (!res.ok) { showRegError(data.error || 'Registration failed. Please try again.'); return; }
-    if (data.token) localStorage.setItem('customerToken', data.token);
-    if (data.customer && data.customer.email) localStorage.setItem('customerEmail', data.customer.email);
-    if (data.customer && data.customer.businessName) localStorage.setItem('customerBusiness', data.customer.businessName);
-    await animateCheck('s3-c2', 500);
-    await animateCheck('s3-c3', 400);
-    el('s3-icon-ring').className = 'size-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-5';
-    spinner.style.fontSize = '40px';
-    spinner.style.color = '#16a34a';
-    spinner.className = 'material-symbols-outlined';
-    spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-check_circle');
-    el('s3-title').textContent = "You're all set!";
-    el('s3-sub').textContent = 'Redirecting to your dashboard\u2026';
-    setTimeout(() => window.location.href = '/dashboard?onboard=1', 800);
-  } catch (err) {
-    showRegError('Network error. Please check your connection and try again.');
-  }
-}
-
-function showRegError(msg) {
-  el('s3-error').textContent = msg;
-  el('s3-error').classList.remove('hidden');
-  el('btn-retry').classList.remove('hidden');
-  el('s3-spinner').style.display = 'none';
-  el('s3-title').textContent = 'Something went wrong';
-  el('s3-sub').textContent = 'Please check your details and try again.';
-}
-
-// ── Tab switcher ──────────────────────────────────────────────────────────────
-function switchTab(tab) {
-  const isEmail = tab === 'email';
-  el('tab-email').classList.toggle('active', isEmail);
-  el('tab-phone').classList.toggle('active', !isEmail);
-  el('tab-email').classList.toggle('text-stone-500', !isEmail);
-  el('tab-phone').classList.toggle('text-stone-500', isEmail);
-  el('tab-email-panel').classList.toggle('hidden', !isEmail);
-  el('tab-phone-panel').classList.toggle('hidden', isEmail);
-  clearError('s1-error');
-  clearError('phone-error');
-  if (!isEmail) setTimeout(() => { const p = el('auth-phone'); if (p && !el('otp-entry').classList.contains('hidden') === false) p.focus(); }, 40);
-}
-
-// ── Firebase helpers ───────────────────────────────────────────────────────────
-let _fbAuth = null, _fbPhoneConfirm = null;
-
-async function initFirebaseReg(cfg) {
-  try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getAuth, GoogleAuthProvider, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier }
-      = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-    const app = getApps().length ? getApps()[0] : initializeApp(cfg);
-    _fbAuth = getAuth(app);
-    _fbAuth._gp = new GoogleAuthProvider();
-    _fbAuth._rv = RecaptchaVerifier;
-    _fbAuth._swp = signInWithPopup;
-    _fbAuth._swpn = signInWithPhoneNumber;
-    // Unlock Google button (it was always visible, but now it's functional)
-    el('btn-google').dataset.fbReady = '1';
-  } catch (e) { console.warn('Firebase load error:', e); }
-}
-
-function showFbError(msg) {
-  const d = el('firebase-reg-error');
-  d.textContent = msg;
-  d.classList.remove('hidden');
-  setTimeout(() => d.classList.add('hidden'), 7000);
-}
-
-async function handleFirebaseIdToken(idToken) {
-  // Called after Google or phone OTP — try to sign in or detect new account
-  const res = await fetch('/api/customers/firebase-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ idToken })
-  });
-  const data = await res.json();
-  if (res.ok && data.token) {
-    // Existing account — log in and redirect
-    localStorage.setItem('customerToken', data.token);
-    if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
-    if (data.customer?.businessName) localStorage.setItem('customerBusiness', data.customer.businessName);
-    window.location.href = data.redirectTo || '/dashboard';
-    return;
-  }
-  if (data.requiresRegistration) {
-    // New account — need business name; stash token and go to step 2
-    window._pendingFirebaseIdToken = idToken;
-    goToStep(2);
-    return;
-  }
-  showFbError(data.error || 'Sign-in failed. Please try again.');
-}
-
-async function doFirebaseRegister(idToken, businessName) {
-  // Step 3 animation — account actually created here
-  clearError('s3-error');
-  el('btn-retry').classList.add('hidden');
-  resetChecklist();
-  const spinner = el('s3-spinner');
-  el('s3-icon-ring').className = 'size-20 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-5';
-  spinner.className = 'spin material-symbols-outlined text-primary';
-  spinner.style.fontSize = '32px'; spinner.style.display = ''; spinner.style.color = '';
-  spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-sync');
-  el('s3-title').textContent = 'Setting up your menu\u2026';
-  el('s3-sub').textContent = 'This takes just a few seconds.';
-  await animateCheck('s3-c1', 600);
-  try {
-    const res = await fetch('/api/customers/firebase-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ idToken, businessName })
-    });
-    const data = await res.json();
-    if (!res.ok) { showRegError(data.error || 'Registration failed. Please try again.'); return; }
-    if (data.token) localStorage.setItem('customerToken', data.token);
-    if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
-    localStorage.setItem('customerBusiness', businessName);
-    window._pendingFirebaseIdToken = null;
-    await animateCheck('s3-c2', 500);
-    await animateCheck('s3-c3', 400);
-    el('s3-icon-ring').className = 'size-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-5';
-    spinner.style.fontSize = '40px'; spinner.style.color = '#16a34a';
-    spinner.className = 'material-symbols-outlined';
-    spinner.querySelector('use').setAttribute('href', '/icons/sprite.svg#icon-check_circle');
-    el('s3-title').textContent = "You're all set!";
-    el('s3-sub').textContent = 'Redirecting to your dashboard\u2026';
-    setTimeout(() => window.location.href = '/dashboard?onboard=1', 800);
-  } catch (err) {
-    showRegError('Network error. Please check your connection and try again.');
-  }
-}
-
-// ── Google sign-up ─────────────────────────────────────────────────────────────
-async function handleGoogle() {
-  if (!_fbAuth) { showFbError('Google sign-up is loading. Please wait a moment and try again.'); return; }
-  const btn = el('btn-google');
-  el('google-reg-text').textContent = 'Signing in\u2026';
-  el('google-reg-spin').classList.remove('hidden');
-  btn.disabled = true;
-  try {
-    const result = await _fbAuth._swp(_fbAuth, _fbAuth._gp);
-    const idToken = await result.user.getIdToken();
-    await handleFirebaseIdToken(idToken);
-  } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user') showFbError(err.message || 'Google sign-in failed.');
-  } finally {
-    el('google-reg-text').textContent = 'Continue with Google';
-    el('google-reg-spin').classList.add('hidden');
-    btn.disabled = false;
-  }
-}
-
-// ── Phone OTP ──────────────────────────────────────────────────────────────────
-async function sendPhoneOTP() {
-  if (!_fbAuth) { showFbError('Firebase is not configured on this server.'); return; }
-  const phone = el('auth-phone').value.trim();
-  clearError('phone-error');
-  if (!phone) { showError('phone-error', 'Please enter your phone number with country code.'); return; }
-  el('otp-send-text').textContent = 'Sending\u2026';
-  el('otp-send-spin').classList.remove('hidden');
-  el('btn-send-otp').disabled = true;
-  try {
-    if (!window._rcVerifier) {
-      window._rcVerifier = new _fbAuth._rv(_fbAuth, 'recaptcha-container', { size: 'invisible' });
-    }
-    _fbPhoneConfirm = await _fbAuth._swpn(_fbAuth, phone, window._rcVerifier);
-    el('phone-entry').classList.add('hidden');
-    el('otp-entry').classList.remove('hidden');
-    setTimeout(() => el('auth-otp').focus(), 50);
-  } catch (err) {
-    showError('phone-error', err.message || 'Could not send code. Check the number and try again.');
-    el('otp-send-text').textContent = 'Send code';
-    el('otp-send-spin').classList.add('hidden');
-    el('btn-send-otp').disabled = false;
-  }
-}
-
-async function verifyPhoneOTP() {
-  if (!_fbPhoneConfirm) return;
-  const code = el('auth-otp').value.trim();
-  clearError('phone-error');
-  if (!/^\d{6}$/.test(code)) { showError('phone-error', 'Enter the 6-digit verification code.'); return; }
-  el('otp-verify-text').textContent = 'Verifying\u2026';
-  el('otp-verify-spin').classList.remove('hidden');
-  el('btn-verify-otp').disabled = true;
-  try {
-    const result = await _fbPhoneConfirm.confirm(code);
-    const idToken = await result.user.getIdToken();
-    await handleFirebaseIdToken(idToken);
-  } catch (err) {
-    showError('phone-error', err.message || 'Invalid code. Please try again.');
-    el('otp-verify-text').textContent = 'Verify & Continue';
-    el('otp-verify-spin').classList.add('hidden');
-    el('btn-verify-otp').disabled = false;
-  }
-}
-
-function resetPhoneFlow() {
-  _fbPhoneConfirm = null;
-  window._rcVerifier = null;
-  el('phone-entry').classList.remove('hidden');
-  el('otp-entry').classList.add('hidden');
-  el('auth-otp').value = '';
-  el('auth-phone').value = '';
-  el('otp-send-text').textContent = 'Send code';
-  el('otp-send-spin').classList.add('hidden');
-  el('btn-send-otp').disabled = false;
-  clearError('phone-error');
-  setTimeout(() => el('auth-phone').focus(), 40);
-}
-
-// ── Firebase init on load ──────────────────────────────────────────────────────
-(async () => {
-  try {
-    const cfg = await fetch('/api/firebase-config').then(r => r.json());
-    if (cfg && cfg.enabled) await initFirebaseReg(cfg);
-  } catch (e) { console.warn('Firebase config:', e); }
-})();
+//  Firebase init on load 
+(async()=>{try{const cfg=await fetch('/api/firebase-config').then(r=>r.json());if(cfg&&cfg.enabled)await initFirebaseReg(cfg);}catch(e){console.warn('Firebase config:',e);}})();
 </script>
-<script src="/js/icons.js"></script>
 </body>
 </html>
