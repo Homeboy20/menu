@@ -245,8 +245,8 @@ document.getElementById('login-form').addEventListener('submit',async(e)=>{
   errBox.classList.add('hidden');roleBadge.classList.add('hidden');
   btn.disabled=true;txt.textContent='Signing In...';spin.classList.remove('hidden');
   try{
-    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
-    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,csrfToken})});
+    const{csrfToken}=await fetch('/api/csrf-token',{credentials:'include'}).then(r=>r.json());
+    const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email,password,csrfToken})});
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Invalid email or password.');
     const storage=remember?localStorage:sessionStorage;
@@ -266,8 +266,8 @@ document.getElementById('forgot-password-link').addEventListener('click',async(e
   const def=document.getElementById('email').value.trim();const email=window.prompt('Enter your email to receive a reset link:',def);
   if(email===null)return;const clean=email.trim();if(!clean){alert('Please enter your email.');return;}
   try{
-    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
-    const res=await fetch('/api/customers/password-reset/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:clean,csrfToken})});
+    const{csrfToken}=await fetch('/api/csrf-token',{credentials:'include'}).then(r=>r.json());
+    const res=await fetch('/api/customers/password-reset/request',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({email:clean,csrfToken})});
     const data=await res.json();if(!res.ok)throw new Error(data.error||'Could not send reset email.');
     alert(data.message||'If an account exists, a reset link has been sent.');
   }catch(err){alert(err.message||'Could not send reset email.');}
@@ -280,8 +280,8 @@ async function handleResetTokenFromUrl(){
   const cp=window.prompt('Confirm new password:');if(cp===null)return;
   if(np!==cp){alert('Passwords do not match.');return;}
   try{
-    const{csrfToken}=await fetch('/api/csrf-token').then(r=>r.json());
-    const res=await fetch('/api/customers/password-reset/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,newPassword:np,csrfToken})});
+    const{csrfToken}=await fetch('/api/csrf-token',{credentials:'include'}).then(r=>r.json());
+    const res=await fetch('/api/customers/password-reset/confirm',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({token,newPassword:np,csrfToken})});
     const data=await res.json();if(!res.ok)throw new Error(data.error||'Failed to reset password.');
     alert(data.message||'Password reset successful. Please sign in.');window.history.replaceState({},document.title,window.location.pathname);
   }catch(err){alert(err.message||'Failed to reset password.');}
@@ -343,11 +343,11 @@ async function verifyPhoneOTP(){
 }
 
 async function handleFirebaseToken(idToken){
-  const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+  const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken})});
   const data=await res.json();
   if(res.status===422&&data.requiresRegistration){
     const biz=prompt('Welcome! What is your restaurant / business name?');if(!biz)return;
-    const res2=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,businessName:biz.trim()})});
+    const res2=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken,businessName:biz.trim()})});
     const data2=await res2.json();if(!res2.ok){firebaseErr(data2.error||'Registration failed.');return;}
     localStorage.setItem('customerToken',data2.token);window.location.href=data2.redirectTo||'/dashboard';return;
   }
