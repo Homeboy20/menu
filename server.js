@@ -247,7 +247,7 @@ app.use(helmet({
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://ipapi.co'],
+      connectSrc:    ["'self'", 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       workerSrc:     ["'self'", 'blob:'],
