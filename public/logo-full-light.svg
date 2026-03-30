@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="180" height="40" viewBox="0 0 180 40" fill="none">
-  <rect width="40" height="40" rx="10" fill="#ea580c"/>
-  <path d="M18.33 15h-1.67v-5.83h-1.66V15h-1.67V9.17H11.67V15c0 1.77 1.38 3.2 3.12 3.31V27.5h2.09V18.31C18.62 18.2 20 16.77 20 15V9.17h-1.67V15zM22.5 12.5v6.67h2.08v6.66H26.67V9.17c-2.3 0-4.17 1.86-4.17 3.33z" fill="white"/>
-  <text x="50" y="27" font-family="DM Sans, system-ui, sans-serif" font-weight="700" font-size="18" fill="#1c1917" letter-spacing="-0.025em">RestOrder</text>
-</svg>

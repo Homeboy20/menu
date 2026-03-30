@@ -1,0 +1,1 @@
+Get-ChildItem *.html | Where-Object { Select-String -Path $_.FullName -Pattern 'Material\+Symbols\+Outlined|icon\?family=Material\+Icons' -Quiet } | Sort-Object Name | Select-Object -ExpandProperty Name

@@ -1,0 +1,627 @@
+const fs = require('fs');
+
+const htmlFiles = fs.readdirSync('.').filter((f) => f.endsWith('.html'));
+const iconNames = new Set([
+  // Dynamic/runtime icon names that may not be directly captured as plain span text.
+  'campaign', 'phone_iphone', 'computer', 'local_fire_department', 'done_all',
+  'lunch_dining', 'local_bar', 'cake', 'tapas', 'fastfood', 'local_pizza',
+  'bakery_dining', 'set_meal', 'eco', 'soup_kitchen', 'egg_alt', 'coffee',
+  'nightlife', 'wine_bar', 'sports_bar', 'rice_bowl', 'dinner_dining', 'outdoor_grill'
+]);
+
+function stripMaterialIconCdn(content) {
+  let out = content;
+  out = out.replace(
+    /^\s*<link[^>]*fonts\.googleapis\.com[^>]*(Material\+Symbols\+Outlined|icon\?family=Material\+Icons)[^>]*>\s*\r?\n?/gim,
+    ''
+  );
+
+  // Remove icon-font-specific FOIT workaround blocks introduced earlier.
+  out = out.replace(
+    /^\s*<style>\.material-symbols-outlined\{visibility:hidden\}\.fonts-loaded \.material-symbols-outlined\{visibility:visible\}<\/style>\s*\r?\n?/gim,
+    ''
+  );
+  out = out.replace(
+    /^\s*<script>\(function\(\)\{[^<]*fonts-loaded[^<]*Material Symbols Outlined[^<]*<\/script>\s*\r?\n?/gim,
+    ''
+  );
+
+  return out;
+}
+
+function replaceMaterialSpans(content) {
+  const spanRegex = /<span\b([^>]*)>([\s\S]*?)<\/span>/gi;
+
+  return content.replace(spanRegex, (full, attrs, inner) => {
+    if (!/\bmaterial-symbols-outlined\b|\bmaterial-icons\b/i.test(attrs)) {
+      return full;
+    }
+
+    const iconRaw = inner.trim();
+
+    // Skip complex nested span content; keep these rare cases unchanged.
+    if (!iconRaw || /</.test(iconRaw)) {
+      return full;
+    }
+
+    if (/^[a-z0-9_]+$/i.test(iconRaw)) {
+      iconNames.add(iconRaw.toLowerCase());
+    }
+
+    const cleanedAttrs = attrs
+      .replace(/\s(?:width|height|viewBox|fill|stroke|stroke-width|aria-hidden)\s*=\s*("[^"]*"|'[^']*')/gi, '')
+      .trim();
+
+    const attrChunk = cleanedAttrs ? ` ${cleanedAttrs}` : '';
+
+    return `<svg${attrChunk} width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${iconRaw}"/></svg>`;
+  });
+}
+
+for (const file of htmlFiles) {
+  let content = fs.readFileSync(file, 'utf8');
+  content = stripMaterialIconCdn(content);
+  content = replaceMaterialSpans(content);
+
+  if (!/src=["']\/js\/icons\.js["']/i.test(content) && /<\/body>/i.test(content)) {
+    content = content.replace(/<\/body>/i, '<script src="/js/icons.js"></script>\n</body>');
+  }
+
+  fs.writeFileSync(file, content, 'utf8');
+}
+
+const defs = {
+  generic: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M8 12h8"/>'
+  ],
+  check: [
+    '<path d="m20 6-11 11-5-5"/>'
+  ],
+  checkCircle: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="m9 12 2 2 4-4"/>'
+  ],
+  x: [
+    '<path d="M18 6 6 18"/>',
+    '<path d="m6 6 12 12"/>'
+  ],
+  xCircle: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M15 9 9 15"/>',
+    '<path d="m9 9 6 6"/>'
+  ],
+  plus: [
+    '<path d="M12 5v14"/>',
+    '<path d="M5 12h14"/>'
+  ],
+  plusCircle: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M12 8v8"/>',
+    '<path d="M8 12h8"/>'
+  ],
+  arrowLeft: [
+    '<path d="m15 18-6-6 6-6"/>'
+  ],
+  arrowRight: [
+    '<path d="m9 18 6-6-6-6"/>'
+  ],
+  chevronDown: [
+    '<path d="m6 9 6 6 6-6"/>'
+  ],
+  eye: [
+    '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>',
+    '<circle cx="12" cy="12" r="3"/>'
+  ],
+  eyeOff: [
+    '<path d="M2 2l20 20"/>',
+    '<path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>',
+    '<path d="M6.2 6.2A14.8 14.8 0 0 0 2 12s3.5 6 10 6a10.7 10.7 0 0 0 5.8-1.6"/>',
+    '<path d="M14.6 5.1A10.8 10.8 0 0 0 12 6c-1.2 0-2.4.2-3.4.6"/>'
+  ],
+  search: [
+    '<circle cx="11" cy="11" r="7"/>',
+    '<path d="m21 21-4.3-4.3"/>'
+  ],
+  menu: [
+    '<path d="M4 6h16"/>',
+    '<path d="M4 12h16"/>',
+    '<path d="M4 18h16"/>'
+  ],
+  settings: [
+    '<circle cx="12" cy="12" r="3"/>',
+    '<path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.5 1Z"/>'
+  ],
+  lock: [
+    '<rect x="5" y="11" width="14" height="10" rx="2"/>',
+    '<path d="M8 11V8a4 4 0 1 1 8 0v3"/>'
+  ],
+  shield: [
+    '<path d="M12 3l7 3v6c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V6l7-3Z"/>'
+  ],
+  user: [
+    '<circle cx="12" cy="7" r="4"/>',
+    '<path d="M4 21a8 8 0 0 1 16 0"/>'
+  ],
+  users: [
+    '<circle cx="9" cy="8" r="3"/>',
+    '<circle cx="17" cy="9" r="2.5"/>',
+    '<path d="M3 21a6 6 0 0 1 12 0"/>',
+    '<path d="M14 21a5 5 0 0 1 7 0"/>'
+  ],
+  mail: [
+    '<rect x="3" y="5" width="18" height="14" rx="2"/>',
+    '<path d="m3 7 9 6 9-6"/>'
+  ],
+  phone: [
+    '<path d="M22 16.9v3a2 2 0 0 1-2.2 2A19 19 0 0 1 3.1 5.2 2 2 0 0 1 5.1 3h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.4 2.1L9.1 10.6a16 16 0 0 0 4.3 4.3l1.2-1.2a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9Z"/>'
+  ],
+  calendar: [
+    '<rect x="3" y="5" width="18" height="16" rx="2"/>',
+    '<path d="M16 3v4M8 3v4M3 10h18"/>'
+  ],
+  clock: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M12 7v6l4 2"/>'
+  ],
+  hourglass: [
+    '<path d="M6 3h12"/>',
+    '<path d="M6 21h12"/>',
+    '<path d="M8 3c0 4 4 5 4 9s-4 5-4 9"/>',
+    '<path d="M16 3c0 4-4 5-4 9s4 5 4 9"/>'
+  ],
+  globe: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M3 12h18"/>',
+    '<path d="M12 3a15 15 0 0 1 0 18"/>',
+    '<path d="M12 3a15 15 0 0 0 0 18"/>'
+  ],
+  mapPin: [
+    '<path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/>',
+    '<circle cx="12" cy="10" r="2.5"/>'
+  ],
+  rocket: [
+    '<path d="M5 19c1.5-1.5 4.5-1.5 6 0"/>',
+    '<path d="M13 11l4-4a6 6 0 0 0 2-4 6 6 0 0 0-4 2l-4 4"/>',
+    '<path d="M7 13l4-4"/>',
+    '<path d="M5 19v-4l4-4"/>'
+  ],
+  upload: [
+    '<path d="M12 16V5"/>',
+    '<path d="m7 10 5-5 5 5"/>',
+    '<path d="M4 19h16"/>'
+  ],
+  download: [
+    '<path d="M12 5v11"/>',
+    '<path d="m7 11 5 5 5-5"/>',
+    '<path d="M4 19h16"/>'
+  ],
+  cloudUpload: [
+    '<path d="M20 17.5a4.5 4.5 0 0 0-.8-8.9A6.5 6.5 0 1 0 5.5 17.5H20Z"/>',
+    '<path d="M12 17V9"/>',
+    '<path d="m9 12 3-3 3 3"/>'
+  ],
+  refresh: [
+    '<path d="M21 12a9 9 0 1 1-3.3-6.9"/>',
+    '<path d="M21 3v6h-6"/>'
+  ],
+  trash: [
+    '<path d="M3 6h18"/>',
+    '<path d="M8 6V4h8v2"/>',
+    '<rect x="6" y="6" width="12" height="14" rx="2"/>',
+    '<path d="M10 11v6M14 11v6"/>'
+  ],
+  pencil: [
+    '<path d="M12 20h9"/>',
+    '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5Z"/>'
+  ],
+  file: [
+    '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/>',
+    '<path d="M14 3v5h5"/>'
+  ],
+  receipt: [
+    '<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"/>',
+    '<path d="M9 8h6M9 12h6M9 16h4"/>'
+  ],
+  table: [
+    '<rect x="3" y="4" width="18" height="16" rx="2"/>',
+    '<path d="M3 10h18M9 4v16M15 4v16"/>'
+  ],
+  grid: [
+    '<rect x="3" y="3" width="8" height="8" rx="1"/>',
+    '<rect x="13" y="3" width="8" height="8" rx="1"/>',
+    '<rect x="3" y="13" width="8" height="8" rx="1"/>',
+    '<rect x="13" y="13" width="8" height="8" rx="1"/>'
+  ],
+  dashboard: [
+    '<path d="M3 13a9 9 0 1 1 18 0"/>',
+    '<path d="M12 13 16 9"/>',
+    '<circle cx="12" cy="13" r="1"/>'
+  ],
+  chart: [
+    '<path d="M4 19h16"/>',
+    '<path d="M7 16v-6"/>',
+    '<path d="M12 16V8"/>',
+    '<path d="M17 16v-3"/>'
+  ],
+  qr: [
+    '<rect x="3" y="3" width="7" height="7" rx="1"/>',
+    '<rect x="14" y="3" width="7" height="7" rx="1"/>',
+    '<rect x="3" y="14" width="7" height="7" rx="1"/>',
+    '<path d="M15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/>'
+  ],
+  link: [
+    '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1.5 1.5"/>',
+    '<path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7L13.5 19"/>'
+  ],
+  star: [
+    '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'
+  ],
+  bell: [
+    '<path d="M15 17H9a4 4 0 0 1-4-4v-2a7 7 0 1 1 14 0v2a4 4 0 0 1-4 4Z"/>',
+    '<path d="M10 21h4"/>'
+  ],
+  info: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M12 10v6"/>',
+    '<path d="M12 7h.01"/>'
+  ],
+  warning: [
+    '<path d="M12 3 2 21h20L12 3Z"/>',
+    '<path d="M12 9v5"/>',
+    '<path d="M12 17h.01"/>'
+  ],
+  help: [
+    '<circle cx="12" cy="12" r="9"/>',
+    '<path d="M9.1 9a3 3 0 1 1 4.8 2.4c-.8.6-1.4 1.1-1.4 2.1"/>',
+    '<path d="M12 17h.01"/>'
+  ],
+  image: [
+    '<rect x="3" y="5" width="18" height="14" rx="2"/>',
+    '<circle cx="8.5" cy="10" r="1.5"/>',
+    '<path d="m21 15-5-5-7 7"/>'
+  ],
+  copy: [
+    '<rect x="9" y="9" width="11" height="11" rx="2"/>',
+    '<rect x="4" y="4" width="11" height="11" rx="2"/>'
+  ],
+  clipboard: [
+    '<rect x="6" y="4" width="12" height="16" rx="2"/>',
+    '<path d="M9 4h6v3H9z"/>'
+  ],
+  wallet: [
+    '<rect x="3" y="6" width="18" height="12" rx="2"/>',
+    '<path d="M15 12h6"/>',
+    '<circle cx="15" cy="12" r="1"/>'
+  ],
+  creditCard: [
+    '<rect x="3" y="5" width="18" height="14" rx="2"/>',
+    '<path d="M3 10h18"/>'
+  ],
+  bank: [
+    '<path d="m3 10 9-6 9 6"/>',
+    '<path d="M5 10v8M9 10v8M15 10v8M19 10v8"/>',
+    '<path d="M3 18h18"/>'
+  ],
+  tag: [
+    '<path d="M20 12 12 20 4 12V4h8l8 8Z"/>',
+    '<circle cx="9" cy="9" r="1"/>'
+  ],
+  badge: [
+    '<path d="M12 3 9.5 8 4 9l4 4-1 6 5-2.5L17 19l-1-6 4-4-5.5-1L12 3Z"/>'
+  ],
+  bag: [
+    '<path d="M6 8h12l-1 12H7L6 8Z"/>',
+    '<path d="M9 8V6a3 3 0 1 1 6 0v2"/>'
+  ],
+  cart: [
+    '<path d="M3 4h2l2.5 11h10.5l2-8H7"/>',
+    '<circle cx="10" cy="19" r="1"/>',
+    '<circle cx="17" cy="19" r="1"/>'
+  ],
+  send: [
+    '<path d="m22 2-7 20-4-9-9-4 20-7Z"/>'
+  ],
+  wifi: [
+    '<path d="M2 8a15 15 0 0 1 20 0"/>',
+    '<path d="M5 12a10 10 0 0 1 14 0"/>',
+    '<path d="M8.5 15.5a5 5 0 0 1 7 0"/>',
+    '<circle cx="12" cy="19" r="1"/>'
+  ],
+  gavel: [
+    '<path d="M14 4 20 10"/>',
+    '<path d="m13 5-8 8"/>',
+    '<rect x="3" y="12" width="6" height="4" rx="1"/>',
+    '<rect x="15" y="4" width="6" height="4" rx="1"/>',
+    '<path d="M11 21h10"/>'
+  ],
+  brain: [
+    '<path d="M8 8a3 3 0 0 1 6 0v8a3 3 0 0 1-6 0"/>',
+    '<path d="M10 6a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3"/>',
+    '<path d="M14 6a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3"/>'
+  ],
+  chat: [
+    '<path d="M4 5h16v10H8l-4 4V5Z"/>'
+  ],
+  sun: [
+    '<circle cx="12" cy="12" r="4"/>',
+    '<path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
+  ],
+  moon: [
+    '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/>'
+  ],
+  monitor: [
+    '<rect x="3" y="4" width="18" height="12" rx="2"/>',
+    '<path d="M8 20h8M12 16v4"/>'
+  ],
+  smartphone: [
+    '<rect x="7" y="2" width="10" height="20" rx="2"/>',
+    '<path d="M11 18h2"/>'
+  ],
+  folder: [
+    '<path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/>'
+  ],
+  fire: [
+    '<path d="M12 3s4 3 4 7a4 4 0 1 1-8 0c0-2 1-3 2-4 .5 1.5 2 2 2 2Z"/>'
+  ],
+  utensils: [
+    '<path d="M4 3v8M7 3v8M4 7h3M6 11v10"/>',
+    '<path d="M14 3v18M20 3v7c0 2-2 3-3 3h-1"/>'
+  ],
+  pizza: [
+    '<path d="M4 4c5-2 11-2 16 0L12 21 4 4Z"/>',
+    '<circle cx="10" cy="10" r="1"/>',
+    '<circle cx="14" cy="11" r="1"/>',
+    '<circle cx="12" cy="15" r="1"/>'
+  ],
+  cup: [
+    '<path d="M5 8h11v7a5 5 0 0 1-10 0V8Z"/>',
+    '<path d="M16 9h2a2 2 0 0 1 0 4h-2"/>',
+    '<path d="M7 3h7"/>'
+  ],
+  leaf: [
+    '<path d="M5 13c0-6 5-9 14-10 0 9-3 14-10 14-2.5 0-4-1.5-4-4Z"/>',
+    '<path d="M8 16c2-2 5-5 9-7"/>'
+  ],
+  grill: [
+    '<path d="M4 8h16"/>',
+    '<path d="M6 8v6a6 6 0 0 0 12 0V8"/>',
+    '<path d="M8 21h8"/>'
+  ],
+  logout: [
+    '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>',
+    '<path d="M16 17l5-5-5-5"/>',
+    '<path d="M21 12H9"/>'
+  ],
+  login: [
+    '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>',
+    '<path d="M8 17l-5-5 5-5"/>',
+    '<path d="M3 12h12"/>'
+  ]
+};
+
+function pickBase(name) {
+  const n = String(name || '').toLowerCase();
+
+  if (n === 'close') return 'x';
+  if (n === 'cancel' || n === 'error' || n === 'gpp_bad' || n === 'search_off' || n === 'timer_off') return 'xCircle';
+  if (n === 'check' || n === 'done' || n === 'done_all' || n === 'verified') return 'check';
+  if (n === 'check_circle' || n === 'workspace_premium') return 'checkCircle';
+  if (n === 'add_circle' || n === 'person_add' || n === 'group_add') return 'plusCircle';
+  if (n === 'add') return 'plus';
+
+  if (n.includes('arrow_back')) return 'arrowLeft';
+  if (n.includes('arrow_forward')) return 'arrowRight';
+  if (n.includes('expand_more')) return 'chevronDown';
+
+  if (n.includes('visibility_off')) return 'eyeOff';
+  if (n.includes('visibility')) return 'eye';
+  if (n.includes('search')) return 'search';
+  if (n.includes('menu')) return 'menu';
+  if (n.includes('settings') || n === 'build' || n === 'cached' || n === 'restart_alt') return 'settings';
+
+  if (n.includes('lock') || n.includes('shield') || n.includes('security') || n.includes('admin_panel')) return 'lock';
+  if (n.includes('group') || n === 'groups') return 'users';
+  if (n === 'person' || n === 'store' || n === 'business' || n === 'support_agent') return 'user';
+
+  if (n === 'email' || n === 'mail' || n === 'mark_email_read') return 'mail';
+  if (n.includes('phone') || n === 'contact_phone') return 'phone';
+  if (n.includes('calendar')) return 'calendar';
+  if (n === 'schedule' || n === 'timer') return 'clock';
+  if (n === 'hourglass_empty') return 'hourglass';
+
+  if (n === 'public' || n === 'language') return 'globe';
+  if (n === 'location_on' || n === 'my_location') return 'mapPin';
+  if (n === 'location_city') return 'building';
+
+  if (n === 'rocket_launch') return 'rocket';
+  if (n === 'upload' || n === 'file_upload' || n === 'upload_file') return 'upload';
+  if (n === 'download') return 'download';
+  if (n === 'cloud_upload') return 'cloudUpload';
+  if (n === 'refresh' || n === 'sync' || n === 'update') return 'refresh';
+  if (n === 'delete' || n === 'delete_sweep' || n === 'block') return 'trash';
+  if (n === 'edit' || n === 'auto_fix_high') return 'pencil';
+
+  if (n === 'description' || n === 'picture_as_pdf') return 'file';
+  if (n === 'receipt_long') return 'receipt';
+  if (n === 'table' || n === 'table_chart' || n === 'table_restaurant' || n === 'table_view') return 'table';
+  if (n === 'grid_view' || n === 'grid_on' || n === 'view_agenda' || n === 'category') return 'grid';
+  if (n === 'dashboard') return 'dashboard';
+  if (n === 'analytics' || n === 'bar_chart' || n === 'trending_up' || n === 'speed' || n === 'currency_exchange') return 'chart';
+
+  if (n === 'qr_code' || n === 'qr_code_2' || n === 'qr_code_scanner') return 'qr';
+  if (n === 'link' || n === 'link_off' || n === 'webhook') return 'link';
+  if (n === 'star') return 'star';
+  if (n === 'notifications' || n === 'notifications_active' || n === 'notifications_off' || n === 'campaign') return 'bell';
+  if (n === 'info') return 'info';
+  if (n === 'warning') return 'warning';
+  if (n === 'help') return 'help';
+  if (n === 'image' || n === 'panorama') return 'image';
+
+  if (n === 'content_copy') return 'copy';
+  if (n === 'content_paste') return 'clipboard';
+
+  if (n === 'credit_card') return 'creditCard';
+  if (n === 'payments' || n === 'attach_money' || n === 'monetization_on' || n === 'account_balance_wallet') return 'wallet';
+  if (n === 'account_balance') return 'bank';
+  if (n === 'confirmation_number' || n === 'badge') return 'tag';
+
+  if (n === 'shopping_bag') return 'bag';
+  if (n === 'shopping_cart' || n === 'add_shopping_cart') return 'cart';
+
+  if (n === 'send') return 'send';
+  if (n === 'wifi_tethering') return 'wifi';
+  if (n === 'gavel') return 'gavel';
+  if (n === 'psychology') return 'brain';
+  if (n === 'chat' || n === 'support') return 'chat';
+
+  if (n === 'dark_mode') return 'moon';
+  if (n === 'light_mode') return 'sun';
+  if (n === 'devices' || n === 'computer') return 'monitor';
+  if (n === 'phone_android' || n === 'phone_iphone') return 'smartphone';
+  if (n === 'inventory_2') return 'folder';
+  if (n === 'local_fire_department') return 'fire';
+
+  if (n === 'restaurant' || n === 'restaurant_menu' || n === 'menu_book') return 'utensils';
+  if (n === 'local_pizza') return 'pizza';
+  if (n === 'coffee' || n === 'local_bar' || n === 'wine_bar' || n === 'sports_bar' || n === 'nightlife') return 'cup';
+  if (n === 'eco') return 'leaf';
+  if (n === 'outdoor_grill') return 'grill';
+
+  if (n === 'login') return 'login';
+  if (n === 'logout') return 'logout';
+
+  return 'generic';
+}
+
+// Add all static names discovered in HTML.
+for (const name of Array.from(iconNames)) {
+  iconNames.add(name);
+}
+
+const sortedNames = Array.from(iconNames).sort();
+
+function symbolFor(name) {
+  const base = pickBase(name);
+  const paths = defs[base] || defs.generic;
+  return [
+    `  <symbol id="icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">`,
+    ...paths.map((p) => `    ${p}`),
+    '  </symbol>'
+  ].join('\n');
+}
+
+const sprite = [
+  '<svg xmlns="http://www.w3.org/2000/svg" style="display:none">',
+  ...sortedNames.map(symbolFor),
+  '</svg>',
+  ''
+].join('\n');
+
+fs.mkdirSync('public/icons', { recursive: true });
+fs.writeFileSync('public/icons/sprite.svg', sprite, 'utf8');
+
+const iconsJs = `/* Self-hosted SVG icon helper */
+(function (global) {
+  function icon(name, size = 20) {
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-' + name + '"/></svg>';
+  }
+
+  function normalizeSvg(svgEl, iconName) {
+    if (!svgEl) return;
+    if (!svgEl.getAttribute('viewBox')) svgEl.setAttribute('viewBox', '0 0 24 24');
+    if (!svgEl.getAttribute('fill')) svgEl.setAttribute('fill', 'none');
+    if (!svgEl.getAttribute('stroke')) svgEl.setAttribute('stroke', 'currentColor');
+    if (!svgEl.getAttribute('stroke-width')) svgEl.setAttribute('stroke-width', '2');
+    if (!svgEl.getAttribute('width')) svgEl.setAttribute('width', '1em');
+    if (!svgEl.getAttribute('height')) svgEl.setAttribute('height', '1em');
+    svgEl.setAttribute('aria-hidden', 'true');
+
+    var name = iconName || svgEl.getAttribute('data-icon') || '';
+    if (!name) {
+      var txt = (svgEl.textContent || '').trim();
+      if (/^[a-zA-Z0-9_]+$/.test(txt)) name = txt;
+    }
+    if (!name) return;
+
+    svgEl.setAttribute('data-icon', name);
+    svgEl.innerHTML = '<use href="/icons/sprite.svg#icon-' + name + '"/>';
+  }
+
+  function spanToSvg(span) {
+    if (!span) return;
+    var name = (span.getAttribute('data-icon') || span.textContent || '').trim();
+    if (!name || /</.test(name)) return;
+
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+    // Copy attributes to preserve sizing classes and hooks.
+    for (var i = 0; i < span.attributes.length; i += 1) {
+      var a = span.attributes[i];
+      svg.setAttribute(a.name, a.value);
+    }
+
+    normalizeSvg(svg, name);
+    span.replaceWith(svg);
+  }
+
+  function hydrate(root) {
+    var scope = root || document;
+
+    var spans = scope.querySelectorAll('span.material-symbols-outlined, span.material-icons');
+    spans.forEach(spanToSvg);
+
+    var svgs = scope.querySelectorAll('svg.material-symbols-outlined, svg.material-icons');
+    svgs.forEach(function (el) { normalizeSvg(el); });
+  }
+
+  // Export helper API.
+  global.icon = icon;
+  global.hydrateIcons = hydrate;
+  global.setIcon = function (el, name) { normalizeSvg(el, name); };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { hydrate(document); });
+  } else {
+    hydrate(document);
+  }
+
+  // Keep dynamic UI icon swaps working when code sets textContent/innerHTML later.
+  var observer = new MutationObserver(function (records) {
+    records.forEach(function (record) {
+      if (record.type === 'childList') {
+        record.addedNodes.forEach(function (node) {
+          if (!node || node.nodeType !== 1) return;
+          if (node.matches && (node.matches('span.material-symbols-outlined') || node.matches('span.material-icons'))) {
+            spanToSvg(node);
+            return;
+          }
+          if (node.querySelectorAll) {
+            node.querySelectorAll('span.material-symbols-outlined, span.material-icons').forEach(spanToSvg);
+            node.querySelectorAll('svg.material-symbols-outlined, svg.material-icons').forEach(function (el) { normalizeSvg(el); });
+          }
+        });
+      }
+
+      if (record.type === 'characterData') {
+        var parent = record.target && record.target.parentElement;
+        if (parent && parent.matches && (parent.matches('svg.material-symbols-outlined') || parent.matches('svg.material-icons'))) {
+          normalizeSvg(parent);
+        }
+      }
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+})(window);
+`;
+
+fs.mkdirSync('public/js', { recursive: true });
+fs.writeFileSync('public/js/icons.js', iconsJs, 'utf8');
+
+console.log(`Migrated ${htmlFiles.length} HTML files.`);
+console.log(`Generated sprite with ${sortedNames.length} icon symbols.`);
