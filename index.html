@@ -175,15 +175,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
       filter: drop-shadow(0 4px 12px rgba(194,65,12,0.35));
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+      transition: all 0.3s ease;
     }
     
     header.scrolled .logo-icon {
       width: 36px;
       height: 36px;
-      font-size: 18px;
+    }
+    
+    header.scrolled .logo-icon svg {
+      width: 18px;
+      height: 18px;
     }
     
     .logo:hover .logo-icon {
@@ -1965,7 +1975,8 @@
   <header id="header" class="with-urgency">
     <nav class="container">
       <a href="/" class="logo">
-        <img src="/logo-full-light.svg" alt="RestOrder" height="36" data-brand-logo>
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+        <span>RestOrder</span>
       </a>
       
       <ul class="nav-center">
@@ -1999,7 +2010,8 @@
     <div class="mobile-menu-content">
       <div class="mobile-menu-header">
         <a href="/" class="logo">
-          <img src="/logo-full-dark.svg" alt="RestOrder" height="32" data-brand-logo-dark>
+          <div class="logo-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+          <span>RestOrder</span>
         </a>
         <button class="mobile-menu-close" id="mobile-menu-close">×</button>
       </div>
@@ -2619,7 +2631,8 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <img src="/logo-full-dark.svg" alt="RestOrder" height="36" data-brand-logo-dark>
+            <span style="font-size: 32px;">🍽️</span>
+            <span>RestOrder</span>
           </div>
           <p class="footer-description">
             The complete digital menu platform for modern restaurants. Boost sales, reduce costs, and delight customers with professional digital menus.
@@ -3311,6 +3324,5 @@
   <script src="/js/chat-triggers.js"></script>
 
 <script src="/js/icons.js"></script>
-<script src="/js/branding-loader.js"></script>
 </body>
 </html>

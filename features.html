@@ -109,15 +109,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
       filter: drop-shadow(0 3px 10px rgba(194,65,12,0.3));
       transition: all 0.3s ease;
+    }
+    
+    .logo-icon svg {
+      width: 26px;
+      height: 26px;
+      fill: white;
     }
     
     header.scrolled .logo-icon {
       width: 40px;
       height: 40px;
-      font-size: 22px;
+    }
+    
+    header.scrolled .logo-icon svg {
+      width: 22px;
+      height: 22px;
     }
     
     .logo:hover .logo-icon {
@@ -594,7 +603,8 @@
   <header id="header">
     <nav class="container">
       <a href="/" class="logo">
-        <img src="/logo-full-light.svg" alt="RestOrder" height="36" data-brand-logo>
+        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+        <span>RestOrder</span>
       </a>
       
       <ul class="nav-center">
@@ -621,7 +631,8 @@
     <div class="mobile-menu-content">
       <div class="mobile-menu-header">
         <a href="/" class="logo">
-          <img src="/logo-full-dark.svg" alt="RestOrder" height="32" data-brand-logo-dark>
+          <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+          <span>RestOrder</span>
         </a>
         <button class="mobile-menu-close" id="mobile-menu-close">�</button>
       </div>
@@ -801,7 +812,8 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <img src="/logo-full-dark.svg" alt="RestOrder" height="36" data-brand-logo-dark>
+            <span style="font-size: 32px;">???</span>
+            <span>RestOrder</span>
           </div>
           <p class="footer-description">
             The complete digital menu platform for modern restaurants, cafes, bars & eateries.
@@ -882,6 +894,5 @@
     });
   </script>
 <script src="/js/icons.js"></script>
-<script src="/js/branding-loader.js"></script>
 </body>
 </html>
