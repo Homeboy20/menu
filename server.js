@@ -3095,7 +3095,16 @@ app.get('/api/admin/customers', requireAuth, async (req, res) => {
     }
     query += ' GROUP BY c.id ORDER BY c.created_at DESC';
     const { rows } = await pool.query(query, params);
-    res.json(rows);
+    // Decrypt encrypted fields for display
+    const customers = rows.map(c => ({
+      ...c,
+      contact_name: decryptField(c.contact_name),
+      phone: decryptField(c.phone),
+      address: decryptField(c.address),
+      city: decryptField(c.city),
+      country: decryptField(c.country),
+    }));
+    res.json(customers);
   } catch (err) {
     console.error('Get customers error:', err);
     res.status(500).json({ error: err.message });
@@ -3119,7 +3128,15 @@ app.get('/api/admin/customers/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Customer not found.' });
     }
     
-    res.json(rows[0]);
+    const c = rows[0];
+    res.json({
+      ...c,
+      contact_name: decryptField(c.contact_name),
+      phone: decryptField(c.phone),
+      address: decryptField(c.address),
+      city: decryptField(c.city),
+      country: decryptField(c.country),
+    });
   } catch (err) {
     console.error('Get customer details error:', err);
     res.status(500).json({ error: err.message });
