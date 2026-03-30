@@ -43,6 +43,9 @@
   .mobile-header-content { display: flex; align-items: center; justify-content: space-between; }
   .mobile-menu-btn { background: #f5f5f4; border: 1px solid #e7e5e4; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .mobile-menu-btn svg { width: 20px; height: 20px; stroke: #57534e; }
+  .sidebar-close-btn { display: none; position: absolute; top: 16px; right: 16px; background: #f5f5f4; border: 1px solid #e7e5e4; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; align-items: center; justify-content: center; }
+  .sidebar-close-btn svg { width: 18px; height: 18px; stroke: #57534e; }
+  .sidebar-close-btn:hover { background: #e7e5e4; }
   .mobile-logo { display: flex; align-items: center; gap: 10px; }
   .mobile-logo-icon { width: 36px; height: 36px; background: #c2410c; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
   .mobile-logo-icon svg { width: 20px; height: 20px; fill: white; }
@@ -58,6 +61,7 @@
     body { padding-top: 64px; }
     aside { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; }
     aside.open { transform: translateX(0); }
+    .sidebar-close-btn { display: flex; }
     main { margin-left: 0 !important; padding: 1rem; }
     main h2 { font-size: 1.5rem; }
     .grid.md\\:grid-cols-2 { grid-template-columns: 1fr; }
@@ -93,6 +97,9 @@
 <!-- Sidebar -->
 <aside class="w-64 bg-white border-r border-stone-200 p-6 flex flex-col shadow-sm">
   <div class="flex items-center gap-3 mb-10">
+    <button class="sidebar-close-btn" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
     <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-white">
       <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
     </div>
