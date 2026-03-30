@@ -74,12 +74,27 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .footer-row span{display:flex;align-items:center;gap:.3rem;}
 .footer-row svg{width:4px;height:4px;fill:var(--text-dim);}
 #recaptcha-container{position:fixed;bottom:0;left:0;z-index:-1;opacity:0;}
+/* Mobile Responsive */
+@media(max-width:480px){
+  body{padding:1rem;}
+  .login-card{padding:1.5rem 1.25rem;border-radius:14px;}
+  .login-title{font-size:1.35rem;}
+  .logo-row{margin-bottom:1.5rem;}
+  .btn-primary,.btn-outline{padding:.9rem;font-size:.875rem;min-height:48px;}
+  .field-input{padding:.85rem 1rem;font-size:16px;min-height:48px;}
+  .phone-row{flex-direction:column;gap:.5rem;}
+  .country-select-wrap{width:100%;}
+  .footer-row{flex-wrap:wrap;gap:.5rem;}
+}
 </style>
 </head>
 <body>
 
 <div class="login-card">
-  <a href="/" class="logo-row" style="text-decoration:none"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;" data-brand-logo-dark></a>
+  <div class="logo-row">
+    <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+    <span>RestOrder</span>
+  </div>
 
   <h2 class="login-title">Welcome <span class="serif-accent">back</span></h2>
   <p class="login-sub">Sign in to your workspace to continue.</p>
@@ -340,6 +355,5 @@ async function handleFirebaseToken(idToken){
   localStorage.setItem('customerToken',data.token);window.location.href=data.redirectTo||'/dashboard';
 }
 </script>
-<script src="/js/branding-loader.js"></script>
 </body>
 </html>

@@ -23,7 +23,7 @@ h1,h2,h3{font-family:"DM Sans",sans-serif;font-weight:700;letter-spacing:-.025em
 a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
 .hidden{display:none!important;}
 /* Brand sidebar */
-.brand-sidebar{width:280px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem 2rem;position:fixed;left:0;top:0;bottom:0;z-index:10;}
+.brand-sidebar{width:50%;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem 3rem;position:fixed;left:0;top:0;bottom:0;z-index:10;}
 .brand-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:3rem;}
 .brand-logo .icon-box{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
 .brand-logo .icon-box svg{width:18px;height:18px;fill:white;}
@@ -43,7 +43,7 @@ a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
 .testimonial-box .aname{font-size:.8125rem;font-weight:600;color:var(--text);}
 .testimonial-box .arole{font-size:.75rem;color:var(--text-dim);}
 /* Main area */
-.main-area{flex:1;margin-left:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.main-area{flex:1;margin-left:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
 /* Step dots */
 .step-dots{display:flex;align-items:center;gap:0;margin-bottom:.5rem;justify-content:center;}
 .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;border:2px solid var(--border);color:var(--text-dim);position:relative;transition:all .3s;}
@@ -122,6 +122,16 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
   .brand-sidebar{display:none;}
   .main-area{margin-left:0;padding:1.5rem 1rem;}
 }
+@media(max-width:480px){
+  .main-area{padding:1rem .75rem;}
+  .form-card{max-width:100%;}
+  .field-input{font-size:16px;min-height:48px;}
+  .btn-primary,.btn-outline{min-height:48px;font-size:.875rem;}
+  .phone-row{flex-direction:column;gap:.5rem;}
+  .country-select-wrap{width:100%;}
+  .step-dots{gap:0;}
+  .step-line{width:40px;}
+}
 /* Mobile header */
 .mobile-header{display:none;align-items:center;justify-content:space-between;padding:1rem;width:100%;max-width:480px;}
 @media(max-width:900px){.mobile-header{display:flex;}}
@@ -137,7 +147,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <!-- LEFT BRAND SIDEBAR -->
 <aside class="brand-sidebar">
   <div>
-    <a href="/" class="brand-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;" data-brand-logo-dark></a>
+    <div class="brand-logo">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+      <span>RestOrder</span>
+    </div>
     <h2 class="brand-tagline">Your digital menu,<br><span class="serif-accent">live in seconds.</span></h2>
     <p class="brand-desc">Complete digital menu platform for restaurants, cafes, bars &amp; eateries. QR codes, real-time updates, analytics &amp; online ordering.</p>
     <ul class="brand-checks">
@@ -166,7 +179,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <!-- MAIN AREA -->
 <div class="main-area">
   <div class="mobile-header">
-    <a href="/" class="mobile-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="32" style="height:32px;width:auto;" data-brand-logo-dark></a>
+    <a href="/" class="mobile-logo">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
+      <span>RestOrder</span>
+    </a>
     <span style="font-size:.8125rem;color:var(--text-dim)">Already have an account? <a href="/login">Sign in</a></span>
   </div>
 
@@ -606,6 +622,5 @@ function resetPhoneFlow(){
 //  Firebase init on load 
 (async()=>{try{const cfg=await fetch('/api/firebase-config').then(r=>r.json());if(cfg&&cfg.enabled)await initFirebaseReg(cfg);}catch(e){console.warn('Firebase config:',e);}})();
 </script>
-<script src="/js/branding-loader.js"></script>
 </body>
 </html>
