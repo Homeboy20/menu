@@ -1,9 +1,9 @@
 // Service Worker for aggressive caching and offline functionality
 // Version: 1.4.1 - Increment when updating cache strategy
 
-const CACHE_NAME = 'restorder-v1.4.2';
-const STATIC_CACHE = 'static-v1.4.2';
-const DYNAMIC_CACHE = 'dynamic-v1.4.2';
+const CACHE_NAME = 'restorder-v1.4.3';
+const STATIC_CACHE = 'static-v1.4.3';
+const DYNAMIC_CACHE = 'dynamic-v1.4.3';
 
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
@@ -81,11 +81,17 @@ self.addEventListener('fetch', event => {
   
   const url = new URL(event.request.url);
   
+  // IMPORTANT: Never intercept API requests — the SW strips Set-Cookie
+  // headers from fetch responses, which breaks CSRF cookie flow.
+  if (isAPIRequest(url)) return;
+
+  // IMPORTANT: Never intercept font file requests — SW fetch() uses
+  // connect-src CSP instead of font-src, causing CSP violations.
+  if (url.hostname === 'fonts.gstatic.com') return;
+  
   // Handle different types of requests with optimized strategies
   if (isStaticAsset(url)) {
     event.respondWith(handleStaticAsset(event.request));
-  } else if (isAPIRequest(url)) {
-    event.respondWith(handleAPIRequest(event.request));
   } else if (isExternalResource(url)) {
     event.respondWith(handleExternalResource(event.request));
   } else {
