@@ -44,33 +44,75 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  .brand-panel { background: linear-gradient(150deg, #7c2d12 0%, #9a3412 25%, #c2410c 65%, #ea580c 100%); }
 </style>
 </head>
-<body class="bg-bg text-stone-900 min-h-screen">
+<body class="bg-bg text-stone-900 min-h-screen flex">
 
-<!-- Header -->
-<header class="border-b border-stone-200 bg-white sticky top-0 z-40 shadow-sm">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-3 text-decoration-none">
-      <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
-        <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
+<!-- LEFT BRAND PANEL -->
+<aside class="brand-panel hidden lg:flex lg:w-[44%] xl:w-[42%] flex-col justify-between p-12 relative overflow-hidden shrink-0">
+  <div class="absolute -top-20 -right-20 size-72 rounded-full pointer-events-none" style="background:rgba(255,255,255,.07)"></div>
+  <div class="absolute top-1/2 -right-32 size-80 rounded-full pointer-events-none" style="background:rgba(255,255,255,.05)"></div>
+  <div class="absolute -bottom-12 -left-16 size-64 rounded-full pointer-events-none" style="background:rgba(0,0,0,.1)"></div>
+
+  <div class="relative z-10">
+    <a href="/" class="inline-flex items-center gap-3 mb-14 no-underline">
+      <div class="size-12 rounded-2xl flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.18)">
+        <svg class="material-symbols-outlined text-white" style="font-size:24px" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       </div>
       <div>
-        <h1 class="font-bold text-lg text-stone-900">RestOrder</h1>
-        <p class="text-xs text-stone-500">Digital Menu Platform</p>
+        <p class="text-white font-bold text-xl leading-none" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</p>
+        <p style="color:rgba(255,220,200,.8);font-size:12px;margin-top:2px">Digital Menu Platform</p>
       </div>
     </a>
-    <div class="flex items-center gap-4">
-      <span class="text-sm text-stone-600">Don't have an account?</span>
-      <a href="/register" class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-light rounded-xl hover:shadow-lg transition">
-        Sign Up Free
-      </a>
+    <h2 class="text-white font-bold mb-4 leading-tight" style="font-size:2rem;font-family:'Plus Jakarta Sans',sans-serif">
+      Your menu,<br>always in reach
+    </h2>
+    <p style="color:rgba(255,220,200,.9);font-size:15px;line-height:1.65;margin-bottom:2.5rem">
+      Manage items, track orders, and keep your menu fresh — all from one dashboard.
+    </p>
+    <ul class="space-y-3.5">
+      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Real-time menu updates</span></li>
+      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Mobile-friendly ordering</span></li>
+      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Analytics &amp; insights</span></li>
+      <li class="flex items-center gap-3"><div class="size-6 rounded-full flex items-center justify-center shrink-0" style="background:rgba(255,255,255,.2)"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="color:rgba(255,220,200,.95);font-size:14px">Secure &amp; always available</span></li>
+    </ul>
+  </div>
+
+  <div class="relative z-10 rounded-2xl p-5" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px)">
+    <div class="flex gap-1 mb-3" aria-label="5 stars">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="#fbbf24" aria-hidden="true"><path d="M7 1l1.545 3.09L12 4.635l-2.5 2.455.59 3.455L7 8.91 3.91 10.545l.59-3.455L2 4.635l3.455-.545z"/></svg>
+    </div>
+    <p style="color:rgba(255,255,255,.9);font-size:13px;font-style:italic;line-height:1.6;margin-bottom:12px">"Our menu has never been more up to date. I update prices from my phone in seconds — customers always see the right prices."</p>
+    <div class="flex items-center gap-3">
+      <div class="size-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style="background:rgba(255,255,255,.2)">JT</div>
+      <div>
+        <p style="color:#fff;font-size:13px;font-weight:700;line-height:1.3">James T.</p>
+        <p style="color:rgba(255,220,200,.75);font-size:12px">Manager, The Urban Kitchen</p>
+      </div>
     </div>
   </div>
-</header>
+</aside>
+
+<!-- RIGHT FORM PANEL -->
+<div class="flex-1 flex flex-col min-h-screen">
+  <div class="flex items-center justify-between px-6 py-4 shrink-0">
+    <a href="/" class="lg:hidden flex items-center gap-2 no-underline">
+      <div class="size-8 rounded-lg flex items-center justify-center text-white" style="background:linear-gradient(135deg,#c2410c,#ea580c)">
+        <svg class="material-symbols-outlined" style="font-size:17px" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
+      </div>
+      <span class="font-bold text-stone-900 text-sm" style="font-family:'Plus Jakarta Sans',sans-serif">RestOrder</span>
+    </a>
+    <div class="lg:hidden"></div>
+    <span class="text-sm text-stone-500">Don't have an account? <a href="/register" class="text-primary font-semibold hover:underline">Sign Up Free</a></span>
+  </div>
 
 <!-- Main Content -->
-<main class="flex items-center justify-center min-h-[calc(100vh-80px)] p-6">
+  <main class="flex-1 flex items-center justify-center p-6">
   <div class="w-full max-w-md">
     <!-- Logo & Title -->
     <div class="text-center mb-8">
@@ -195,7 +237,8 @@
       </a>
     </div>
   </div>
-</main>
+  </main>
+</div><!-- /right panel -->
 
 <script>
 document.getElementById('login-form').addEventListener('submit', async (e) => {

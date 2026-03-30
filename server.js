@@ -356,6 +356,10 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// ── Legacy/alternate registration URLs — redirect to canonical /register ──────
+app.get('/start', (req, res) => res.redirect(301, '/register'));
+app.get('/register-new', (req, res) => res.redirect(301, '/register'));
+
 // ── Clean URLs - Remove .html Extension ────────────────────────────────────────
 // This middleware serves HTML files without the .html extension
 app.use((req, res, next) => {
@@ -375,7 +379,6 @@ app.use((req, res, next) => {
     '/menu': 'menu.html',
     '/admin': 'admin.html',
     '/register': 'register.html',
-    '/start': 'register-new.html',
     '/admin-dashboard': 'admin-dashboard.html',
     '/customers': 'customers.html',
     '/subscriptions': 'subscriptions.html',
