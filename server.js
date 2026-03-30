@@ -348,7 +348,7 @@ app.use('/api', (req, res, next) => {
   }
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, x-customer-token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-token, x-customer-token, x-csrf-token');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
   
@@ -1601,8 +1601,10 @@ app.get('/health', (req, res) => {
 });
 
 // CSRF token endpoint - Returns a token for forms
+// overwrite=true: always issue a fresh token, never validate stale cookies
+// (CSRF_SECRET rotates on restart; old cookies would otherwise throw 403)
 app.get('/api/csrf-token', (req, res) => {
-  const csrfToken = generateToken(req, res);
+  const csrfToken = generateToken(req, res, true);
   res.json({ csrfToken });
 });
 

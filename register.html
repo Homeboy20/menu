@@ -500,7 +500,7 @@ async function doRegister(){
   const email=el('s1-email').value.trim(),pw=el('s1-pw').value,biz=el('s2-biz').value.trim();
   await animateCheck('s3-c1',600);
   try{
-    const res=await fetch('/api/customers/register',{method:'POST',headers:{'Content-Type':'application/json','CSRF-Token':csrfToken},credentials:'include',body:JSON.stringify({email,password:pw,businessName:biz,registrationType:'email'})});
+    const res=await fetch('/api/customers/register',{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},credentials:'include',body:JSON.stringify({email,password:pw,businessName:biz,registrationType:'email'})});
     const data=await res.json();
     if(!res.ok){showRegError(data.error||'Registration failed.');return;}
     if(data.token)localStorage.setItem('customerToken',data.token);
