@@ -20,7 +20,7 @@
     },
   } };
 </script>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17?plugins=forms"></script>
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
@@ -127,7 +127,7 @@
 <!-- -- Sidebar -------------------------------------------------------------- -->
 <aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
   <div class="flex items-center gap-3 mb-10">
-    <img src="/logo-mark.svg" width="40" height="40" alt="RestOrder" class="rounded-xl flex-shrink-0">
+    <img src="/logo-mark.svg" width="40" height="40" alt="RestOrder" class="rounded-xl flex-shrink-0" data-brand-mark>
     <div>
       <h1 class="font-bold text-lg">RestOrder Admin</h1>
       <p class="text-xs text-slate-400">Internal Management</p>
@@ -1670,5 +1670,6 @@ async function testFirebaseConfig() {
 checkAuth();
 </script>
 <script src="/js/icons.js"></script>
+<script src="/js/branding-loader.js"></script>
 </body>
 </html>

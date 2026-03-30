@@ -25,7 +25,7 @@
     },
   } };
 </script>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17?plugins=forms"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
@@ -213,7 +213,7 @@
 <!-- -- Sidebar --------------------------------------------------------------- -->
 <aside class="w-60 shrink-0 border-r border-stone-200 bg-white hidden md:flex flex-col h-screen sticky top-0">
   <div class="h-16 flex items-center px-5 border-b border-stone-200 gap-3">
-    <img src="/logo-mark.svg" width="32" height="32" alt="RestOrder" class="rounded flex-shrink-0">
+    <img src="/logo-mark.svg" width="32" height="32" alt="RestOrder" class="rounded flex-shrink-0" data-brand-mark>
     <span id="sidebar-app-title" class="text-base font-bold tracking-tight text-stone-900">RestOrder</span>
   </div>
   <!-- Back to Dashboard link (shown only in customer mode) -->
@@ -3550,5 +3550,6 @@ document.getElementById('s-brand-color').addEventListener('input', function() {
   document.getElementById('s-brand-color-hex').textContent = this.value;
 });
 </script>
+<script src="/js/branding-loader.js"></script>
 </body>
 </html>

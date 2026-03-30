@@ -25,7 +25,7 @@
     },
   } };
 </script>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17?plugins=forms"></script>
 <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
@@ -152,7 +152,7 @@
     <!-- Logo + title -->
     <div class="flex items-center gap-3">
       <a href="/" class="flex-shrink-0">
-        <img src="/logo-mark.svg" width="36" height="36" alt="RestOrder" class="rounded-xl">
+        <img src="/logo-mark.svg" width="36" height="36" alt="RestOrder" class="rounded-xl" data-brand-mark>
       </a>
       <div class="hidden sm:block">
         <p class="font-bold text-sm text-stone-900 leading-tight">Staff Panel</p>
@@ -812,5 +812,6 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 init();
 </script>
 <script src="/js/icons.js"></script>
+<script src="/js/branding-loader.js"></script>
 </body>
 </html>

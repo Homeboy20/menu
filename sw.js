@@ -1,9 +1,9 @@
 // Service Worker for aggressive caching and offline functionality
 // Version: 1.4.1 - Increment when updating cache strategy
 
-const CACHE_NAME = 'restorder-v1.4.2';
-const STATIC_CACHE = 'static-v1.4.2';
-const DYNAMIC_CACHE = 'dynamic-v1.4.2';
+const CACHE_NAME = 'restorder-v1.4.3';
+const STATIC_CACHE = 'static-v1.4.3';
+const DYNAMIC_CACHE = 'dynamic-v1.4.3';
 
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
@@ -12,6 +12,10 @@ const STATIC_ASSETS = [
   '/menu.html',
   '/admin.html',
   '/js/icons.js',
+  '/js/branding-loader.js',
+  '/logo-mark.svg',
+  '/logo-full-light.svg',
+  '/logo-full-dark.svg',
   '/icons/sprite.svg',
   '/api/menus/demo',
   'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap'

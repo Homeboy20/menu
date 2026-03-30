@@ -137,7 +137,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <!-- LEFT BRAND SIDEBAR -->
 <aside class="brand-sidebar">
   <div>
-    <a href="/" class="brand-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;"></a>
+    <a href="/" class="brand-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;" data-brand-logo-dark></a>
     <h2 class="brand-tagline">Your digital menu,<br><span class="serif-accent">live in seconds.</span></h2>
     <p class="brand-desc">Complete digital menu platform for restaurants, cafes, bars &amp; eateries. QR codes, real-time updates, analytics &amp; online ordering.</p>
     <ul class="brand-checks">
@@ -166,7 +166,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <!-- MAIN AREA -->
 <div class="main-area">
   <div class="mobile-header">
-    <a href="/" class="mobile-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="32" style="height:32px;width:auto;"></a>
+    <a href="/" class="mobile-logo"><img src="/logo-full-dark.svg" alt="RestOrder" height="32" style="height:32px;width:auto;" data-brand-logo-dark></a>
     <span style="font-size:.8125rem;color:var(--text-dim)">Already have an account? <a href="/login">Sign in</a></span>
   </div>
 
@@ -606,5 +606,6 @@ function resetPhoneFlow(){
 //  Firebase init on load 
 (async()=>{try{const cfg=await fetch('/api/firebase-config').then(r=>r.json());if(cfg&&cfg.enabled)await initFirebaseReg(cfg);}catch(e){console.warn('Firebase config:',e);}})();
 </script>
+<script src="/js/branding-loader.js"></script>
 </body>
 </html>

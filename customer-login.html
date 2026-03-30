@@ -79,7 +79,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <body>
 
 <div class="login-card">
-  <a href="/" class="logo-row" style="text-decoration:none"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;"></a>
+  <a href="/" class="logo-row" style="text-decoration:none"><img src="/logo-full-dark.svg" alt="RestOrder" height="36" style="height:36px;width:auto;" data-brand-logo-dark></a>
 
   <h2 class="login-title">Welcome <span class="serif-accent">back</span></h2>
   <p class="login-sub">Sign in to your workspace to continue.</p>
@@ -340,5 +340,6 @@ async function handleFirebaseToken(idToken){
   localStorage.setItem('customerToken',data.token);window.location.href=data.redirectTo||'/dashboard';
 }
 </script>
+<script src="/js/branding-loader.js"></script>
 </body>
 </html>
