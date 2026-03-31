@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<link rel="icon" href="/favicon.ico" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="mobile-web-app-capable" content="yes"/>
@@ -660,7 +660,7 @@ html[data-theme="dark"] #add-to-cart-btn{background:var(--brand);}
 .cust-field{
   width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--r-md);
   background:var(--surf2);color:var(--head);font-size:14px;font-family:var(--font);font-weight:500;
-  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;
 }
 .cust-field:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(var(--brand-rgb),.15);}
 .cust-field.err{border-color:#ef4444;}
@@ -741,7 +741,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     margin:10px 0 10px 10px!important;
   }
   .item-card-name{font-size:14.5px!important;}
-  .item-card-desc{-webkit-line-clamp:1!important;}
+  .item-card-desc{display:-webkit-box!important;-webkit-line-clamp:1!important;line-clamp:1!important;-webkit-box-orient:vertical!important;overflow:hidden!important;}
   /* -- Hero -- */
   #hero-restaurant-name{font-size:28px!important;line-height:1.15!important;}
   /* -- Hide view toggle -- */
@@ -1171,8 +1171,8 @@ function applyBranding(data){
   const rgb=hexToRgb(col);
   const bg=data.bgColor||pal.bg;
   const surf=data.cardBg||pal.surf;
-  const surf2=lighten(surf,dark?.06:-.02);
-  const surf3=lighten(surf,dark?.10:-.08);
+  const surf2=lighten(surf,dark?0.06:-0.02);
+  const surf3=lighten(surf,dark?0.10:-0.08);
   const head=data.headingColor||(dark?'#f2ede8':'#1c1917');
   const text=data.textColor||(dark?'#9b9590':'#78716c');
   baseCurrencyCode=data.currency||'USD';menuCurrencyCode=baseCurrencyCode;
@@ -1601,7 +1601,7 @@ async function callWaiter(){
   if(!menuData||!currentTableLabel)return;
   const btn=document.getElementById('call-waiter-btn');
   const sm=document.getElementById('waiter-sent-msg');
-  btn.disabled=true;haptic([40,30,40]);
+  btn.disabled=true;haptic(40);
   try{
     const r=await fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/alerts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({table:currentTableLabel,message:'Service requested at '+currentTableLabel})});
     if(!r.ok)throw new Error();
