@@ -305,6 +305,7 @@ html[data-theme="dark"] .icon-btn{background:rgba(26,25,23,.85);}
   padding:2px 16px 0;
 }
 #count-label{font-size:12px;font-weight:600;color:var(--text);opacity:.7;letter-spacing:.04em;text-transform:uppercase;}
+#currency-notice{display:none;font-size:11px;color:var(--text);opacity:.65;padding:2px 16px 6px;letter-spacing:.02em;}
 .view-toggle{display:flex;gap:2px;background:var(--surf2);border-radius:var(--r-sm);padding:3px;}
 .view-btn{
   padding:5px 8px;border:none;background:transparent;border-radius:7px;
@@ -848,6 +849,9 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     </div>
   </div>
 
+  <!-- Currency notice -->
+  <div id="currency-notice"></div>
+
   <!-- Items -->
   <div id="menu-section-label" style="display:none">Menu</div>
   <div id="items-container"></div>
@@ -983,7 +987,49 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
 
 <script>
 /* -- CURRENCIES -- */
-const CURRENCIES={USD:'$',EUR:'&#8364;',GBP:'&#163;',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'&#8377;',PKR:'&#8360;',BDT:'&#2547;',JPY:'&#165;',CNY:'&#165;',KRW:'&#8361;',MYR:'RM',SGD:'S$',THB:'&#3647;',PHP:'&#8369;',IDR:'Rp',TRY:'&#8378;',NGN:'&#8358;',GHS:'&#8373;',KES:'KSh',TZS:'TSh',ZAR:'R'};
+const CURRENCIES={
+  USD:'$',EUR:'€',GBP:'£',BRL:'R$',CAD:'CA$',AUD:'A$',NZD:'NZ$',
+  AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',ILS:'₪',JOD:'JD ',LBP:'LL ',IQD:'IQD ',
+  INR:'₹',PKR:'₨',BDT:'৳',LKR:'Rs ',NPR:'Rs ',JPY:'¥',CNY:'¥',KRW:'₩',HKD:'HK$',TWD:'NT$',
+  MYR:'RM',SGD:'S$',THB:'฿',PHP:'₱',IDR:'Rp',VND:'₫',MMK:'K ',KHR:'KHR ',
+  TRY:'₺',RUB:'₽',UAH:'₴',PLN:'zł',CZK:'Kč',HUF:'Ft',RON:'lei ',BGN:'лв ',HRK:'kn ',RST:'RSD ',
+  SEK:'kr',NOK:'kr',DKK:'kr',CHF:'CHF',MXN:'$',ARS:'$',CLP:'$',COP:'$',PEN:'S/',
+  NGN:'₦',GHS:'₵',KES:'KSh',TZS:'TSh',ZAR:'R',UGX:'USh',RWF:'FRw',ETB:'Br',
+  XOF:'CFA',XAF:'FCFA',EGP:'E£',MAD:'MAD ',DZD:'DZD ',TND:'DT ',LYD:'LYD ',
+  ZMW:'ZK ',MZN:'MT ',NAD:'N$',BWP:'P ',MWK:'MK ',AOA:'Kz ',SDG:'SDG ',
+  GMD:'D ',GNF:'FG ',BIF:'FBu',SOS:'Sh ',SSP:'£',DJF:'Fdj',KMF:'CF ',SCR:'SR ',
+  MUR:'Rs ',MGA:'Ar ',ERN:'Nfk',RWF:'FRw',CDF:'FC ',SZL:'L ',LSL:'L '
+};
+
+/* -- COUNTRY → CURRENCY -- */
+const COUNTRY_CURRENCY={
+  US:'USD',CA:'CAD',MX:'MXN',BR:'BRL',AR:'ARS',CL:'CLP',CO:'COP',PE:'PEN',
+  GB:'GBP',DE:'EUR',FR:'EUR',IT:'EUR',ES:'EUR',PT:'EUR',NL:'EUR',BE:'EUR',
+  AT:'EUR',IE:'EUR',FI:'EUR',EE:'EUR',LV:'EUR',LT:'EUR',SK:'EUR',SI:'EUR',
+  MT:'EUR',CY:'EUR',LU:'EUR',CH:'CHF',SE:'SEK',NO:'NOK',DK:'DKK',
+  PL:'PLN',CZ:'CZK',HU:'HUF',RO:'RON',BG:'BGN',HR:'HRK',RS:'RSD',UA:'UAH',
+  AE:'AED',SA:'SAR',QA:'QAR',KW:'KWD',BH:'BHD',OM:'OMR',EG:'EGP',
+  IQ:'IQD',JO:'JOD',LB:'LBP',IL:'ILS',TR:'TRY',
+  IN:'INR',PK:'PKR',BD:'BDT',LK:'LKR',NP:'NPR',
+  CN:'CNY',JP:'JPY',KR:'KRW',HK:'HKD',TW:'TWD',
+  SG:'SGD',MY:'MYR',TH:'THB',ID:'IDR',PH:'PHP',VN:'VND',MM:'MMK',KH:'KHR',
+  NG:'NGN',GH:'GHS',KE:'KES',TZ:'TZS',UG:'UGX',RW:'RWF',ET:'ETB',
+  ZA:'ZAR',MA:'MAD',DZ:'DZD',TN:'TND',LY:'LYD',
+  CI:'XOF',SN:'XOF',ML:'XOF',BF:'XOF',NE:'XOF',TG:'XOF',BJ:'XOF',GW:'XOF',MR:'XOF',
+  CM:'XAF',CG:'XAF',GA:'XAF',CF:'XAF',TD:'XAF',GQ:'XAF',CD:'CDF',
+  ZM:'ZMW',MZ:'MZN',ZW:'ZWL',NA:'NAD',BW:'BWP',MW:'MWK',AO:'AOA',
+  GM:'GMD',GN:'GNF',BI:'BIF',SO:'SOS',SS:'SSP',DJ:'DJF',KM:'KMF',
+  SC:'SCR',MU:'MUR',MG:'MGA',ER:'ERN',SD:'SDG',SZ:'SZL',LS:'LSL',
+  AU:'AUD',NZ:'NZD',RU:'RUB',
+};
+
+/* -- CURRENCY CONVERSION -- */
+let baseCurrencyCode='USD';
+let conversionRate=1;
+let menuCurrencyCode='USD';
+function fmtAmt(n){
+  return menuCurrency+((parseFloat(n)||0)*conversionRate).toFixed(2).replace('.00','');
+}
 
 const CAT_ICONS={food:'lunch_dining',drinks:'local_bar',beverages:'local_bar',dessert:'cake',desserts:'cake',appetizer:'tapas',appetizers:'tapas',snacks:'fastfood',pizza:'local_pizza',burgers:'lunch_dining',bakery:'bakery_dining',seafood:'set_meal',salads:'eco',soups:'soup_kitchen',breakfast:'egg_alt',coffee:'coffee',cocktails:'nightlife',wine:'wine_bar',beer:'sports_bar',starters:'tapas',mains:'restaurant',sides:'rice_bowl',pasta:'dinner_dining',sushi:'set_meal',grill:'outdoor_grill'};
 function getCatIcon(c){return CAT_ICONS[(c||'').toLowerCase()]||'restaurant_menu';}
@@ -1063,13 +1109,48 @@ function clearSearch(){
     document.title=(d.restaurantName||'Menu')+' \u2014 Menu';
     applyBranding(d);
     allItems=d.items||[];
-    buildTabs();renderItems();setView(viewMode);
+    buildTabs();renderItems();setView(viewMode);initGeoConversion();
     if(currentTableLabel&&d.tablesEnabled){
       document.getElementById('table-banner-label').textContent='\uD83D\uDCCD '+currentTableLabel;
       document.getElementById('table-banner').classList.add('visible');
     }
   }catch(e){showError(e.message);}
 })();
+
+/* -- GEO CURRENCY CONVERSION -- */
+function showCurrencyNotice(){
+  const el=document.getElementById('currency-notice');
+  if(!el)return;
+  const approx=conversionRate!==1?'· est. ':'';
+  el.textContent=`Prices shown in ${menuCurrencyCode} ${approx}`;
+  el.style.display='block';
+}
+async function initGeoConversion(){
+  let cc='';
+  try{const r=await fetch('/api/geo');if(r.ok){const d=await r.json();cc=d.country||'';}}catch(_){}
+  if(!cc){
+    try{
+      const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});
+      if(r.ok){const d=await r.json();cc=(d.country_code||'').toUpperCase();}
+    }catch(_){}
+  }
+  if(!cc)return;
+  const target=COUNTRY_CURRENCY[cc];
+  if(!target||target===baseCurrencyCode)return;
+  const ckey='fx_'+baseCurrencyCode+'_'+target;
+  const hit=localStorage.getItem(ckey);
+  if(hit){try{const{rate,ts}=JSON.parse(hit);if(Date.now()-ts<3600000){conversionRate=rate;menuCurrencyCode=target;menuCurrency=CURRENCIES[target]||target+' ';showCurrencyNotice();renderItems();updateCartUI();return;}}catch(_){}}
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/'+baseCurrencyCode,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)return;
+    const d=await r.json();
+    const rate=d.rates&&d.rates[target];
+    if(!rate||rate<=0)return;
+    conversionRate=rate;menuCurrencyCode=target;menuCurrency=CURRENCIES[target]||target+' ';
+    localStorage.setItem(ckey,JSON.stringify({rate,ts:Date.now()}));
+    showCurrencyNotice();renderItems();updateCartUI();
+  }catch(_){}
+}
 
 const FONT_URLS={modern:'Inter:wght@400;500;600;700;800;900',elegant:'Playfair+Display:wght@400;600;700',casual:'Poppins:wght@400;600;700;800',bold:'Oswald:wght@400;500;600;700',minimal:'Inter:wght@400;500;600;700;800'};
 const FONT_FAM={modern:"'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",elegant:"'Playfair Display',serif",casual:"'Poppins',sans-serif",bold:"'Oswald',sans-serif",minimal:"'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"};
@@ -1094,7 +1175,8 @@ function applyBranding(data){
   const surf3=lighten(surf,dark?.10:-.08);
   const head=data.headingColor||(dark?'#f2ede8':'#1c1917');
   const text=data.textColor||(dark?'#9b9590':'#78716c');
-  menuCurrency=CURRENCIES[data.currency]||'$';
+  baseCurrencyCode=data.currency||'USD';menuCurrencyCode=baseCurrencyCode;
+  menuCurrency=CURRENCIES[baseCurrencyCode]||'$';
   const dv=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
   const dv2=dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)';
   let s=document.getElementById('branding-overrides');
@@ -1261,7 +1343,7 @@ function buildGridSection(sub,items,idx){
 function buildListCard(item){
   const idx=item._idx??0;
   const px=parseFloat(item.price);const hasPx=!isNaN(px)&&px>0;
-  const pxStr=hasPx?menuCurrency+px.toFixed(2).replace('.00',''):'';
+  const pxStr=hasPx?fmtAmt(px):'';
   const desc=(item.description||'').trim();
   const tags=Array.isArray(item.tags)?item.tags:[];
   const img=(item.imageUrl||'').trim();
@@ -1291,7 +1373,7 @@ function buildListCard(item){
 function buildGridCard(item){
   const idx=item._idx??0;
   const px=parseFloat(item.price);const hasPx=!isNaN(px)&&px>0;
-  const pxStr=hasPx?menuCurrency+px.toFixed(2).replace('.00',''):'';
+  const pxStr=hasPx?fmtAmt(px):'';
   const img=(item.imageUrl||'').trim();
   const cartItem=cart.find(c=>c._idx===idx);
   const qty=cartItem?cartItem.qty:0;
@@ -1398,7 +1480,7 @@ function openItemDetail(idx){
   document.getElementById('item-modal-name').textContent=item.name||'';
   document.getElementById('item-modal-desc').textContent=item.description||'';
   const px=parseFloat(item.price);
-  document.getElementById('item-modal-price').textContent=(!isNaN(px)&&px>0)?menuCurrency+px.toFixed(2).replace('.00',''):'';
+  document.getElementById('item-modal-price').textContent=(!isNaN(px)&&px>0)?fmtAmt(px):'';
   let meta='';
   if(item.size)meta+=`<span class="modal-tag">${esc(item.size)}</span>`;
   (Array.isArray(item.tags)?item.tags:[]).forEach(t=>{meta+=`<span class="modal-tag">${esc(t)}</span>`;});
@@ -1456,7 +1538,7 @@ function updateCartUI(){
   let ti=0,tp=0;cart.forEach(c=>{ti+=c.qty;tp+=(parseFloat(c.price)||0)*c.qty;});
   const fab=document.getElementById('cart-fab');
   const badge=document.getElementById('bnav-cart-badge');
-  if(ti>0){fab.classList.add('visible');document.getElementById('cart-fab-count').textContent=ti;document.getElementById('cart-fab-total').textContent=menuCurrency+tp.toFixed(2).replace('.00','');badge.textContent=ti>9?'9+':ti;badge.classList.add('show');}
+  if(ti>0){fab.classList.add('visible');document.getElementById('cart-fab-count').textContent=ti;document.getElementById('cart-fab-total').textContent=fmtAmt(tp);badge.textContent=ti>9?'9+':ti;badge.classList.add('show');}
   else{fab.classList.remove('visible');badge.classList.remove('show');}
   document.querySelectorAll('[id^="card-qty-"]').forEach(el=>{
     const idx=parseInt(el.id.replace('card-qty-',''));
@@ -1472,10 +1554,10 @@ function renderCartSheet(){
   empty.style.display='none';footer.style.display='block';
   list.innerHTML=cart.map(c=>{
     const p=(parseFloat(c.price)||0)*c.qty;
-    return`<div class="cart-item">${c.imageUrl?`<img class="cart-item-img" src="${esc(c.imageUrl)}" alt=""/>`:`<div class="cart-item-img"></div>`}<div style="flex:1;min-width:0"><div class="cart-item-name">${esc(c.name)}</div><div class="cart-item-price">${menuCurrency}${p.toFixed(2).replace('.00','')}</div></div><div class="cart-item-qty"><button class="cart-qty-btn" onclick="updateCartQty(${c._idx},-1)">\u2212</button><span class="cart-qty-num">${c.qty}</span><button class="cart-qty-btn" onclick="updateCartQty(${c._idx},1)">+</button></div></div>`;
+    return`<div class="cart-item">${c.imageUrl?`<img class="cart-item-img" src="${esc(c.imageUrl)}" alt=""/>`:`<div class="cart-item-img"></div>`}<div style="flex:1;min-width:0"><div class="cart-item-name">${esc(c.name)}</div><div class="cart-item-price">${fmtAmt(p)}</div></div><div class="cart-item-qty"><button class="cart-qty-btn" onclick="updateCartQty(${c._idx},-1)">\u2212</button><span class="cart-qty-num">${c.qty}</span><button class="cart-qty-btn" onclick="updateCartQty(${c._idx},1)">+</button></div></div>`;
   }).join('');
   let total=0;cart.forEach(c=>{total+=(parseFloat(c.price)||0)*c.qty;});
-  document.getElementById('cart-total-value').textContent=menuCurrency+total.toFixed(2).replace('.00','');
+  document.getElementById('cart-total-value').textContent=fmtAmt(total);
 }
 function openCart(){renderCartSheet();document.getElementById('cart-overlay').classList.add('open');document.getElementById('cart-sheet').classList.add('open');updateNavActive('cart');haptic(10);}
 function closeCart(){document.getElementById('cart-overlay').classList.remove('open');document.getElementById('cart-sheet').classList.remove('open');updateNavActive('menu');}
@@ -1493,11 +1575,11 @@ function placeOrder(){
   const ok=/^\+?\d{7,15}$/.test(pd);
   if(!cp||!ok){document.getElementById('cart-cust-phone').classList.add('err');pe.textContent=!cp?'Phone number is required':'Enter a valid phone number';pe.style.display='block';ps.textContent='\u2717';ps.style.color='#ef4444';ps.style.display='inline';document.getElementById('cart-cust-phone').focus();return;}
   document.getElementById('cart-cust-phone').classList.remove('err');pe.style.display='none';ps.textContent='\u2713';ps.style.color='#22c55e';ps.style.display='inline';
-  const lines=cart.map(c=>`${c.name} \u00d7${c.qty} \u2014 ${menuCurrency}${((parseFloat(c.price)||0)*c.qty).toFixed(2)}`);
+  const lines=cart.map(c=>`${c.name} \u00d7${c.qty} \u2014 ${fmtAmt((parseFloat(c.price)||0)*c.qty)}`);
   let total=0;cart.forEach(c=>{total+=(parseFloat(c.price)||0)*c.qty;});
   const rn=menuData?.restaurantName||'';
   const tn=currentTableLabel?`\nTable: ${currentTableLabel}`:'';
-  const msg=`${rn?'Order from '+rn+':\n':'Order:\n'}Customer: ${cn} (${pd})\n${lines.join('\n')}${tn}\n\nTotal: ${menuCurrency}${total.toFixed(2)}`;
+  const msg=`${rn?'Order from '+rn+':\n':'Order:\n'}Customer: ${cn} (${pd})\n${lines.join('\n')}${tn}\n\nTotal: ${fmtAmt(total)}`;
   const items=cart.map(c=>({name:c.name,qty:c.qty,price:parseFloat(c.price)||0}));
   fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,table:currentTableLabel,currency:menuData.currency||'USD',customer_name:cn,customer_phone:pd})}).catch(()=>{});
   const ph=menuData?.phone?.replace(/[^\d+]/g,'');
