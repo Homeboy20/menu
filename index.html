@@ -2676,19 +2676,54 @@
   </footer>
 
   <script>
-    // Geolocation and Dynamic Pricing System
-    // East African countries get local currency display; everyone else sees USD
-    const EA_COUNTRIES = ['KE','TZ','UG','RW','BI','ET','SO','SS','ER','DJ','SD'];
-    const currencyData = {
-      'KE': { symbol: 'KSh', rate: 130, name: 'KES' },
-      'TZ': { symbol: 'TSh', rate: 2500, name: 'TZS' },
-      'UG': { symbol: 'USh', rate: 3700, name: 'UGX' },
-      'RW': { symbol: 'FRw', rate: 1300, name: 'RWF' },
-      'BI': { symbol: 'FBu', rate: 2850, name: 'BIF' },
-      'ET': { symbol: 'Br', rate: 56, name: 'ETB' },
-      'DEFAULT': { symbol: '$', rate: 1, name: 'USD' }
+    // Geolocation and Dynamic Pricing System with Live Exchange Rates
+    const CURRENCIES={
+      USD:'$',EUR:'€',GBP:'£',BRL:'R$',CAD:'CA$',AUD:'A$',NZD:'NZ$',
+      AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',ILS:'₪',JOD:'JD ',LBP:'LL ',IQD:'IQD ',
+      INR:'₹',PKR:'₨',BDT:'৳',LKR:'Rs ',NPR:'Rs ',JPY:'¥',CNY:'¥',KRW:'₩',HKD:'HK$',TWD:'NT$',
+      MYR:'RM',SGD:'S$',THB:'฿',PHP:'₱',IDR:'Rp',VND:'₫',MMK:'K ',KHR:'KHR ',
+      TRY:'₺',RUB:'₽',UAH:'₴',PLN:'zł',CZK:'Kč',HUF:'Ft',RON:'lei ',BGN:'лв ',HRK:'kn ',RSD:'RSD ',
+      SEK:'kr',NOK:'kr',DKK:'kr',CHF:'CHF',MXN:'$',ARS:'$',CLP:'$',COP:'$',PEN:'S/',
+      NGN:'₦',GHS:'₵',KES:'KSh',TZS:'TSh',ZAR:'R',UGX:'USh',RWF:'FRw',ETB:'Br',
+      XOF:'CFA',XAF:'FCFA',EGP:'E£',MAD:'MAD ',DZD:'DZD ',TND:'DT ',LYD:'LYD ',
+      ZMW:'ZK ',MZN:'MT ',NAD:'N$',BWP:'P ',MWK:'MK ',AOA:'Kz ',SDG:'SDG ',
+      GMD:'D ',GNF:'FG ',BIF:'FBu',SOS:'Sh ',SSP:'£',DJF:'Fdj',KMF:'CF ',SCR:'SR ',
+      MUR:'Rs ',MGA:'Ar ',ERN:'Nfk',CDF:'FC ',SZL:'L ',LSL:'L '
     };
-    
+
+    const COUNTRY_CURRENCY={
+      US:'USD',CA:'CAD',MX:'MXN',BR:'BRL',AR:'ARS',CL:'CLP',CO:'COP',PE:'PEN',
+      GB:'GBP',DE:'EUR',FR:'EUR',IT:'EUR',ES:'EUR',PT:'EUR',NL:'EUR',BE:'EUR',
+      AT:'EUR',IE:'EUR',FI:'EUR',EE:'EUR',LV:'EUR',LT:'EUR',SK:'EUR',SI:'EUR',
+      MT:'EUR',CY:'EUR',LU:'EUR',CH:'CHF',SE:'SEK',NO:'NOK',DK:'DKK',
+      PL:'PLN',CZ:'CZK',HU:'HUF',RO:'RON',BG:'BGN',HR:'HRK',RS:'RSD',UA:'UAH',
+      AE:'AED',SA:'SAR',QA:'QAR',KW:'KWD',BH:'BHD',OM:'OMR',EG:'EGP',
+      IQ:'IQD',JO:'JOD',LB:'LBP',IL:'ILS',TR:'TRY',
+      IN:'INR',PK:'PKR',BD:'BDT',LK:'LKR',NP:'NPR',
+      CN:'CNY',JP:'JPY',KR:'KRW',HK:'HKD',TW:'TWD',
+      SG:'SGD',MY:'MYR',TH:'THB',ID:'IDR',PH:'PHP',VN:'VND',MM:'MMK',KH:'KHR',
+      NG:'NGN',GH:'GHS',KE:'KES',TZ:'TZS',UG:'UGX',RW:'RWF',ET:'ETB',
+      ZA:'ZAR',MA:'MAD',DZ:'DZD',TN:'TND',LY:'LYD',
+      CI:'XOF',SN:'XOF',ML:'XOF',BF:'XOF',NE:'XOF',TG:'XOF',BJ:'XOF',GW:'XOF',MR:'XOF',
+      CM:'XAF',CG:'XAF',GA:'XAF',CF:'XAF',TD:'XAF',GQ:'XAF',CD:'CDF',
+      ZM:'ZMW',MZ:'MZN',ZW:'ZWL',NA:'NAD',BW:'BWP',MW:'MWK',AO:'AOA',
+      GM:'GMD',GN:'GNF',BI:'BIF',SO:'SOS',SS:'SSP',DJ:'DJF',KM:'KMF',
+      SC:'SCR',MU:'MUR',MG:'MGA',ER:'ERN',SD:'SDG',SZ:'SZL',LS:'LSL',
+      AU:'AUD',NZ:'NZD',RU:'RUB',
+    };
+
+    // Currency conversion state
+    let baseCurrencyCode='USD';
+    let conversionRate=1;
+    let menuCurrencyCode='USD';
+    let currentCurrency={symbol:'$',name:'USD'};
+
+    function formatPrice(priceUSD){
+      const converted=priceUSD*conversionRate;
+      const symbol=CURRENCIES[menuCurrencyCode]||'$';
+      return symbol+converted.toFixed(2).replace('.00','');
+    }
+
     const countryNames = {
       'US': 'United States',
       'GB': 'United Kingdom',
@@ -2848,32 +2883,52 @@
         }
       ]
     };
-    
-    let currentCurrency = currencyData.DEFAULT;
+
     let currentCountry = 'Unknown';
-    
+
+    // Initialize geo-based currency conversion
+    async function initGeoConversion(){
+      let cc='';
+      try{
+        const r=await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(4000)});
+        if(r.ok){const d=await r.json();cc=(d.country_code||'').toUpperCase();}
+      }catch(_){}
+      if(!cc)return;
+      const target=COUNTRY_CURRENCY[cc];
+      if(!target||target===baseCurrencyCode)return;
+      const ckey='fx_'+baseCurrencyCode+'_'+target;
+      const hit=localStorage.getItem(ckey);
+      if(hit){try{const{rate,ts}=JSON.parse(hit);if(Date.now()-ts<3600000){conversionRate=rate;menuCurrencyCode=target;currentCurrency={symbol:CURRENCIES[target]||target+' ',name:target};updateLocationDisplay();renderMenuItems('pizza');return;}}catch(_){}}
+      try{
+        const r=await fetch('https://open.er-api.com/v6/latest/'+baseCurrencyCode,{signal:AbortSignal.timeout(5000)});
+        if(!r.ok)return;
+        const d=await r.json();
+        const rate=d.rates&&d.rates[target];
+        if(!rate||rate<=0)return;
+        conversionRate=rate;menuCurrencyCode=target;currentCurrency={symbol:CURRENCIES[target]||target+' ',name:target};
+        localStorage.setItem(ckey,JSON.stringify({rate,ts:Date.now()}));
+        updateLocationDisplay();renderMenuItems('pizza');
+      }catch(_){}
+    }
+
     // Get user's location and currency
     async function getUserLocation() {
       try {
         const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
         const data = await response.json();
-        
+
         const countryCode = data.country_code;
         currentCountry = countryNames[countryCode] || data.country_name || countryCode;
-        
-        // East African countries get local currency; everyone else sees USD
-        if (EA_COUNTRIES.includes(countryCode) && currencyData[countryCode]) {
-          currentCurrency = currencyData[countryCode];
-        } else {
-          currentCurrency = currencyData.DEFAULT;
-        }
-        
+
+        // Initialize currency conversion
+        await initGeoConversion();
+
         updateLocationDisplay();
         renderMenuItems('pizza');
       } catch (error) {
         console.log('Geolocation failed, using default currency');
         currentCountry = 'Global';
-        currentCurrency = currencyData.DEFAULT;
+        currentCurrency = {symbol:'$',name:'USD'};
         updateLocationDisplay();
         renderMenuItems('pizza');
       }
@@ -2890,20 +2945,7 @@
         menuLocation.textContent = `${currentCountry} • ${currentCurrency.name}`;
       }
     }
-    
-    function formatPrice(priceUSD) {
-      const converted = priceUSD * currentCurrency.rate;
-      
-      // Handle decimal places based on currency
-      let decimals = 2;
-      if (['JPY', 'CNY'].includes(currentCurrency.name)) {
-        decimals = 0;
-      }
-      
-      const formatted = converted.toFixed(decimals);
-      return `${currentCurrency.symbol}${formatted}`;
-    }
-    
+
     function renderMenuItems(category) {
       const container = document.getElementById('menu-items');
       const items = menuData[category] || [];
