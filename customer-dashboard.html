@@ -640,6 +640,17 @@ function getToken() {
   return localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken');
 }
 
+let _csrfToken = null;
+async function getCsrf() {
+  if (_csrfToken) return _csrfToken;
+  try {
+    const r = await fetch('/api/csrf-token');
+    const d = await r.json();
+    _csrfToken = d.csrfToken || d.token || '';
+  } catch (_) { _csrfToken = ''; }
+  return _csrfToken;
+}
+
 async function checkAuth() {
   customerToken = getToken();
   if (!customerToken) {
@@ -1266,9 +1277,10 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
       window.paypal.Buttons({
         style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
         createOrder: async () => {
+          const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
             body: JSON.stringify({ plan_id: planId, menu_id: targetMenuId })
           });
           const d = await r.json();
@@ -1276,10 +1288,11 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
           return d.order_id;
         },
         onApprove: async (data) => {
-          showSubToast('Processing payment�');
+          showSubToast('Processing payment…');
+          const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
             body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: targetMenuId })
           });
           const d = await r.json();
@@ -1338,10 +1351,11 @@ function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey
     customizations: { title: 'RestOrder', description: `${planName} Plan`, logo: '/icon-192.png' },
     callback: async (response) => {
       if (response.status === 'successful' || response.status === 'completed') {
-        showSubToast('Verifying payment�');
+        showSubToast('Verifying payment…');
+        const csrf = await getCsrf();
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
           body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: planId })
         });
         const d = await r.json();

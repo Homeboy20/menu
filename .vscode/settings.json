@@ -1,3 +1,4 @@
 {
-    "claudeCode.useTerminal": false
+    "claudeCode.useTerminal": false,
+    "chat.editing.autoAcceptDelay": 3
 }

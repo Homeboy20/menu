@@ -94,12 +94,19 @@ const SESSION_TTL = parseInt(process.env.SESSION_TTL_MS || '28800000', 10); // 8
 const PASSWORD_RESET_TTL_MS = parseInt(process.env.PASSWORD_RESET_TTL_MS || '3600000', 10); // 1 h
 
 // In-memory session store: token → { createdAt, user }
-// Good enough for a single-process app; swap for Redis in multi-instance deploys.
+// Backed by admin_sessions DB table for persistence across restarts.
 const sessions = new Map();
 
 function createSession(user) {
   const token = crypto.randomBytes(32).toString('hex');
-  sessions.set(token, { createdAt: Date.now(), user: user || null });
+  const now = Date.now();
+  const expiresAt = now + SESSION_TTL;
+  sessions.set(token, { createdAt: now, user: user || null });
+  // Persist to DB
+  pool.query(
+    'INSERT INTO admin_sessions (token, user_id, user_data, created_at, expires_at) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (token) DO NOTHING',
+    [token, (user && user.id) || 0, JSON.stringify(user || null), now, expiresAt]
+  ).catch(err => console.error('Failed to persist admin session:', err.message));
   return token;
 }
 
@@ -107,7 +114,7 @@ function isValidSession(token) {
   if (!token) return false;
   const s = sessions.get(token);
   if (!s) return false;
-  if (Date.now() - s.createdAt > SESSION_TTL) { sessions.delete(token); return false; }
+  if (Date.now() - s.createdAt > SESSION_TTL) { sessions.delete(token); pool.query('DELETE FROM admin_sessions WHERE token = $1', [token]).catch(() => {}); return false; }
   return true;
 }
 
@@ -115,8 +122,28 @@ function getSessionUser(token) {
   if (!token) return null;
   const s = sessions.get(token);
   if (!s) return null;
-  if (Date.now() - s.createdAt > SESSION_TTL) { sessions.delete(token); return null; }
+  if (Date.now() - s.createdAt > SESSION_TTL) { sessions.delete(token); pool.query('DELETE FROM admin_sessions WHERE token = $1', [token]).catch(() => {}); return null; }
   return s.user || null;
+}
+
+// Restore admin sessions from DB on startup
+async function restoreAdminSessions() {
+  try {
+    const now = Date.now();
+    await pool.query('DELETE FROM admin_sessions WHERE expires_at <= $1', [now]);
+    const { rows } = await pool.query('SELECT token, user_data, created_at FROM admin_sessions WHERE expires_at > $1', [now]);
+    for (const row of rows) {
+      try {
+        sessions.set(row.token, { createdAt: Number(row.created_at), user: JSON.parse(row.user_data) });
+      } catch { /* skip corrupted rows */ }
+    }
+    if (rows.length) console.log(`  ✓ Restored ${rows.length} admin session(s) from DB`);
+  } catch (err) {
+    // Table may not exist yet on first boot — safe to ignore
+    if (!String(err.message).includes('does not exist')) {
+      console.error('Failed to restore admin sessions:', err.message);
+    }
+  }
 }
 
 // ── Input Sanitization ─────────────────────────────────────────────────────────
@@ -137,6 +164,15 @@ function sanitizeInput(input, maxLength = 1000) {
   str = validator.escape(str);
   
   return str;
+}
+
+// Compute HMAC-SHA256 hash of a normalized phone number for O(1) lookup
+function computePhoneHash(phone) {
+  if (!phone) return null;
+  const normalized = String(phone).replace(/\D/g, '');
+  if (!normalized) return null;
+  const secret = process.env.PHONE_HASH_SECRET || FIELD_ENC_KEY_HEX || 'phone-hash-fallback-key';
+  return crypto.createHmac('sha256', secret).update(normalized).digest('hex');
 }
 
 // Validate and sanitize email
@@ -543,7 +579,7 @@ app.use('/api/', apiLimiter);
 
 // ── Auth middleware (protects write routes) ────────────────────────────────────
 function requireAuth(req, res, next) {
-  const token = req.headers['x-admin-token'] || req.cookies?.adminToken || req.query?.token;
+  const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (isValidSession(token)) {
     req.adminUser = getSessionUser(token);
     return next();
@@ -554,7 +590,7 @@ function requireAuth(req, res, next) {
 // Require specific roles
 function requireRole(...roles) {
   return (req, res, next) => {
-    const token = req.headers['x-admin-token'] || req.cookies?.adminToken || req.query?.token;
+    const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
     if (!isValidSession(token)) {
       return res.status(401).json({ error: 'Unauthorised. Please log in.' });
     }
@@ -569,12 +605,12 @@ function requireRole(...roles) {
 
 // ── Accept admin OR customer auth (shared menu-editor endpoints) ───────────────
 function requireAnyAuth(req, res, next) {
-  const adminToken = req.headers['x-admin-token'] || req.cookies?.adminToken || req.query?.token;
+  const adminToken = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (isValidSession(adminToken)) {
     req.adminUser = getSessionUser(adminToken);
     return next();
   }
-  const customerToken = req.headers['x-customer-token'] || req.cookies?.customerToken || req.query?.ctoken;
+  const customerToken = req.headers['x-customer-token'] || req.cookies?.customerToken;
   const session = isValidCustomerSession(customerToken);
   if (session) {
     req.customer = session;
@@ -1054,6 +1090,10 @@ async function initDB() {
     await client.query(`ALTER TABLE customers ALTER COLUMN email DROP NOT NULL`).catch(() => {});
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS registration_type TEXT NOT NULL DEFAULT 'email'`).catch(() => {});
 
+    // Migration: phone_hash for O(1) phone login lookup
+    await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS phone_hash TEXT`).catch(() => {});
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_phone_hash ON customers (phone_hash) WHERE phone_hash IS NOT NULL`).catch(() => {});
+
     // ── Subscription Management Tables ──────────────────────────────────────────
     
     // Subscription Plans table
@@ -1181,20 +1221,38 @@ async function initDB() {
       END $$;
     `);
 
+    // Add login_attempts and lockout_until columns if missing (security hardening)
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_users' AND column_name='login_attempts') THEN
+          ALTER TABLE admin_users ADD COLUMN login_attempts INTEGER NOT NULL DEFAULT 0;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_users' AND column_name='lockout_until') THEN
+          ALTER TABLE admin_users ADD COLUMN lockout_until TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_users' AND column_name='must_change_password') THEN
+          ALTER TABLE admin_users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0;
+        END IF;
+      END $$;
+    `);
+
     // Seed default super admin if no admin users exist
     const { rows: existingAdmins } = await client.query('SELECT COUNT(*) FROM admin_users');
     if (parseInt(existingAdmins[0].count) === 0) {
       const now = new Date().toISOString();
       // Use ADMIN_SECRET_HASH from env if available, otherwise hash a default
       let defaultHash = ADMIN_SECRET_HASH;
+      let mustChange = 0;
       if (!defaultHash || !defaultHash.startsWith('$2') || defaultHash.length < 59) {
         defaultHash = await bcrypt.hash('admin123', 12);
+        mustChange = 1;
         console.log('  ⚠ No ADMIN_SECRET_HASH set – seeded super admin with default password "admin123". CHANGE THIS IMMEDIATELY!');
       }
       await client.query(`
-        INSERT INTO admin_users (email, password_hash, name, role, status, created_at, updated_at)
-        VALUES ($1, $2, $3, 'super_admin', 'active', $4, $4)
-      `, ['admin@restorder.online', defaultHash, 'Super Admin', now]);
+        INSERT INTO admin_users (email, password_hash, name, role, status, must_change_password, created_at, updated_at)
+        VALUES ($1, $2, $3, 'super_admin', 'active', $4, $5, $5)
+      `, ['admin@restorder.online', defaultHash, 'Super Admin', mustChange, now]);
       console.log('  ✓ Seeded default super admin (admin@restorder.online)');
     }
 
@@ -1277,6 +1335,19 @@ async function initDB() {
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_csessions_customer ON customer_sessions (customer_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_csessions_expires ON customer_sessions (expires_at)`);
+
+    // Persistent admin sessions (survives server restarts)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS admin_sessions (
+        token      TEXT PRIMARY KEY,
+        user_id    INTEGER NOT NULL,
+        user_data  TEXT NOT NULL,
+        created_at BIGINT NOT NULL,
+        expires_at BIGINT NOT NULL
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_asessions_user ON admin_sessions (user_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_asessions_expires ON admin_sessions (expires_at)`);
 
     // Staff members table – sub-users per business (manager / waiter / cashier)
     await client.query(`
@@ -1862,14 +1933,14 @@ async function handleAdminLogin(req, res) {
     if (loginEmail) {
       // Multi-user login: look up by email
       const { rows } = await pool.query(
-        'SELECT id, email, password_hash, name, role, status FROM admin_users WHERE email = $1',
+        'SELECT id, email, password_hash, name, role, status, login_attempts, lockout_until, must_change_password FROM admin_users WHERE email = $1',
         [loginEmail]
       );
       if (rows.length) user = rows[0];
     } else {
       // Legacy fallback: try all admin users (single-password mode)
       const { rows } = await pool.query(
-        'SELECT id, email, password_hash, name, role, status FROM admin_users ORDER BY id ASC'
+        'SELECT id, email, password_hash, name, role, status, login_attempts, lockout_until, must_change_password FROM admin_users ORDER BY id ASC'
       );
       for (const row of rows) {
         if (await bcrypt.compare(loginPassword, row.password_hash)) {
@@ -1891,6 +1962,12 @@ async function handleAdminLogin(req, res) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
+    // Check account lockout
+    if (user.lockout_until && new Date(user.lockout_until) > new Date()) {
+      const mins = Math.ceil((new Date(user.lockout_until) - new Date()) / 60000);
+      return res.status(429).json({ error: `Account temporarily locked due to too many failed attempts. Try again in ${mins} minute(s).` });
+    }
+
     if (user.status === 'disabled') {
       return res.status(403).json({ error: 'This account has been disabled. Contact a super admin.' });
     }
@@ -1903,17 +1980,31 @@ async function handleAdminLogin(req, res) {
     if (loginEmail) {
       const match = await bcrypt.compare(loginPassword, user.password_hash);
       if (!match) {
+        // Increment failed attempt counter; lock at 5
+        const attempts = (user.login_attempts || 0) + 1;
+        const lockUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
+        await pool.query(
+          'UPDATE admin_users SET login_attempts = $1, lockout_until = $2 WHERE id = $3',
+          [attempts, lockUntil, user.id]
+        );
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
     }
 
-    // Update last_login
+    // Update last_login and reset lockout counters
     const now = new Date().toISOString();
-    await pool.query('UPDATE admin_users SET last_login = $1 WHERE id = $2', [now, user.id]);
+    await pool.query('UPDATE admin_users SET last_login = $1, login_attempts = 0, lockout_until = NULL WHERE id = $2', [now, user.id]);
 
     const sessionUser = { id: user.id, email: user.email, name: user.name, role: user.role };
     const token = createSession(sessionUser);
-    res.json({ token, expiresIn: SESSION_TTL, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+    const response = { token, expiresIn: SESSION_TTL, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+
+    // Flag if password change is required (default password)
+    if (user.must_change_password) {
+      response.mustChangePassword = true;
+    }
+
+    res.json(response);
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error.' });
@@ -1921,19 +2012,21 @@ async function handleAdminLogin(req, res) {
 }
 
 // POST /api/auth/login – multi-user admin login
-app.post('/api/auth/login', loginLimiter, handleAdminLogin);
+app.post('/api/auth/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 // Alias for admin-dashboard pages that use /api/admin/login
-app.post('/api/admin/login', loginLimiter, handleAdminLogin);
+app.post('/api/admin/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 
 // POST /api/auth/logout  – invalidate current session token
 app.post('/api/auth/logout', (req, res) => {
-  const token = req.headers['x-admin-token'];
-  if (token) sessions.delete(token);
+  const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
+  if (token) { sessions.delete(token); pool.query('DELETE FROM admin_sessions WHERE token = $1', [token]).catch(() => {}); }
+  res.clearCookie('adminToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
   res.json({ ok: true });
 });
 app.post('/api/admin/logout', (req, res) => {
-  const token = req.headers['x-admin-token'];
-  if (token) sessions.delete(token);
+  const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
+  if (token) { sessions.delete(token); pool.query('DELETE FROM admin_sessions WHERE token = $1', [token]).catch(() => {}); }
+  res.clearCookie('adminToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
   res.json({ ok: true });
 });
 
@@ -1960,6 +2053,9 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
   if (typeof newPassword !== 'string' || newPassword.length < 8) {
     return res.status(400).json({ error: 'New password must be at least 8 characters.' });
   }
+  if (!validator.isStrongPassword(newPassword, { minLength: 8, minLowercase: 1, minUppercase: 0, minNumbers: 1, minSymbols: 0 })) {
+    return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 lowercase letter and 1 number.' });
+  }
 
   try {
     const user = req.adminUser;
@@ -1980,6 +2076,7 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
         fs.writeFileSync(envPath, envContent, 'utf8');
       } catch (e) { console.error('Could not update .env:', e.message); }
       sessions.clear();
+      pool.query('DELETE FROM admin_sessions').catch(() => {});
       return res.json({ ok: true });
     }
 
@@ -1992,12 +2089,13 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
 
     const newHash = await bcrypt.hash(newPassword, 12);
     const now = new Date().toISOString();
-    await pool.query('UPDATE admin_users SET password_hash = $1, updated_at = $2 WHERE id = $3', [newHash, now, user.id]);
+    await pool.query('UPDATE admin_users SET password_hash = $1, updated_at = $2, must_change_password = 0 WHERE id = $3', [newHash, now, user.id]);
 
-    // Invalidate this user's sessions
+    // Invalidate this user's sessions (memory + DB)
     for (const [tok, sess] of sessions.entries()) {
       if (sess.user && sess.user.id === user.id) sessions.delete(tok);
     }
+    pool.query('DELETE FROM admin_sessions WHERE user_id = $1', [user.id]).catch(() => {});
 
     res.json({ ok: true });
   } catch (err) {
@@ -2436,7 +2534,7 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     res.json({ customer: { id: customer.id, email: customer.email, businessName: customer.business_name }, token, defaultMenuId: menuId });
   } catch (err) {
     console.error('Checkout register error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
 
@@ -2526,11 +2624,12 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     
     // Create customer (email may be NULL for phone-only accounts)
     const now = new Date().toISOString();
+    const phoneHashVal = isPhoneOnly ? computePhoneHash(sanitizeInput(phone || '', 50)) : computePhoneHash(sanitizeInput(phone || '', 50));
     const { rows } = await pool.query(`
-      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months, registration_type)
-      VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, $9, $10)
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, phone_hash, status, created_at, promo_code, discount_percent, discount_months, registration_type)
+      VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $8, $9, $10, $11)
       RETURNING id, email, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months, registration_type
-    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
+    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, phoneHashVal, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
     
     const customer = rows[0];
 
@@ -2703,14 +2802,27 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
       const { rows } = await pool.query('SELECT * FROM customers WHERE email = $1', [cleanEmail]);
       customer = rows[0] || null;
     } else {
-      // Phone login — look up all active customers and compare decrypted phone
+      // Phone login — use phone_hash for O(1) lookup, fall back to scan if no hash
       const cleanPhone = sanitizeInput(phone, 50);
-      const { rows } = await pool.query("SELECT * FROM customers WHERE status = 'active' AND registration_type = 'phone' LIMIT 200");
-      for (const row of rows) {
-        const decrypted = decryptField(row.phone);
-        if (decrypted && (decrypted === cleanPhone || decrypted.replace(/\D/g,'') === cleanPhone.replace(/\D/g,''))) {
-          customer = row;
-          break;
+      const phoneHash = computePhoneHash(cleanPhone);
+      if (phoneHash) {
+        const { rows } = await pool.query(
+          "SELECT * FROM customers WHERE phone_hash = $1 AND status = 'active' LIMIT 1",
+          [phoneHash]
+        );
+        customer = rows[0] || null;
+      }
+      // Fallback for customers without phone_hash (pre-migration)
+      if (!customer) {
+        const { rows } = await pool.query("SELECT * FROM customers WHERE status = 'active' AND registration_type = 'phone' AND phone_hash IS NULL LIMIT 200");
+        for (const row of rows) {
+          const decrypted = decryptField(row.phone);
+          if (decrypted && (decrypted === cleanPhone || decrypted.replace(/\D/g,'') === cleanPhone.replace(/\D/g,''))) {
+            customer = row;
+            // Backfill phone_hash for future lookups
+            pool.query('UPDATE customers SET phone_hash = $1 WHERE id = $2', [phoneHash, row.id]).catch(() => {});
+            break;
+          }
         }
       }
     }
@@ -2718,10 +2830,23 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
     if (!customer) {
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
+
+    // Check account lockout
+    if (customer.lockout_until && new Date(customer.lockout_until) > new Date()) {
+      const mins = Math.ceil((new Date(customer.lockout_until) - new Date()) / 60000);
+      return res.status(429).json({ error: `Account temporarily locked due to too many failed attempts. Try again in ${mins} minute(s).` });
+    }
     
     // Check password
     const match = await bcrypt.compare(password, customer.password_hash);
     if (!match) {
+      // Increment failed attempt counter; lock at 5
+      const attempts = (customer.login_attempts || 0) + 1;
+      const lockUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
+      await pool.query(
+        'UPDATE customers SET login_attempts = $1, lockout_until = $2 WHERE id = $3',
+        [attempts, lockUntil, customer.id]
+      );
       return res.status(401).json({ error: 'Invalid credentials.' });
     }
     
@@ -2729,7 +2854,7 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
       return res.status(403).json({ error: 'Account is not active. Please contact support.' });
     }
     
-    await pool.query('UPDATE customers SET last_login = $1 WHERE id = $2', [new Date().toISOString(), customer.id]);
+    await pool.query('UPDATE customers SET last_login = $1, login_attempts = 0, lockout_until = NULL WHERE id = $2', [new Date().toISOString(), customer.id]);
     
     const token = await createCustomerSession(customer.id, customer.email || String(customer.id));
     
@@ -2764,7 +2889,7 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
     });
   } catch (err) {
     console.error('Customer login error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 });
 
@@ -5911,7 +6036,7 @@ app.get('/api/payments/gateways', async (req, res) => {  try {
 });
 
 // POST /api/payments/flutterwave/verify – Verify a Flutterwave transaction + activate subscription
-app.post('/api/payments/flutterwave/verify', requireCustomerAuth, async (req, res) => {
+app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { transaction_id, menu_id, plan_id } = req.body;
   if (!transaction_id || !menu_id || !plan_id)
     return res.status(400).json({ error: 'transaction_id, menu_id, plan_id required.' });
@@ -5943,11 +6068,11 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, async (req, re
       `Flutterwave tx ${transaction_id}`
     );
     res.json({ success: true, subscription_id: subId });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('Flutterwave verify error:', err); res.status(500).json({ error: 'Payment verification failed. Please contact support.' }); }
 });
 
 // POST /api/payments/paypal/create-order – Create a PayPal order for a plan
-app.post('/api/payments/paypal/create-order', requireCustomerAuth, async (req, res) => {
+app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { plan_id, menu_id } = req.body;
   if (!plan_id || !menu_id) return res.status(400).json({ error: 'plan_id and menu_id required.' });
 
@@ -5992,11 +6117,11 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, async (req, r
     if (!orderData.id) return res.status(500).json({ error: 'Failed to create PayPal order.', detail: orderData });
 
     res.json({ order_id: orderData.id });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('PayPal create-order error:', err); res.status(500).json({ error: 'Failed to create PayPal order. Please try again.' }); }
 });
 
 // POST /api/payments/paypal/capture-order – Capture approved PayPal order + activate subscription
-app.post('/api/payments/paypal/capture-order', requireCustomerAuth, async (req, res) => {
+app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { order_id, menu_id, plan_id } = req.body;
   if (!order_id || !menu_id || !plan_id) return res.status(400).json({ error: 'order_id, menu_id, plan_id required.' });
 
@@ -6040,7 +6165,7 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, async (req, 
       'paypal', order_id, `PayPal order ${order_id}`
     );
     res.json({ success: true, subscription_id: subId });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('PayPal capture-order error:', err); res.status(500).json({ error: 'Payment capture failed. Please contact support.' }); }
 });
 
 // POST /webhooks/flutterwave – Flutterwave async payment webhook
@@ -6560,6 +6685,7 @@ app.use((err, req, res, next) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 (async () => {
   await initDB();
+  await restoreAdminSessions();
   await loadCustomerSessionsFromDB();
   // Load Firebase Admin SDK from DB settings if not already configured via .env
   if (!firebaseAdmin) {

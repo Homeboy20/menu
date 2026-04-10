@@ -482,14 +482,17 @@ async function handleLogin(e) {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
+    if (res.status === 429) throw new Error(data.error || 'Account temporarily locked. Please wait and try again.');
     if (!res.ok) throw new Error(data.error || 'Login failed');
     if (data.userType !== 'owner') throw new Error('Please use an owner account to subscribe.');
 
     setToken(data.token);
-    localStorage.setItem('customerEmail', data.email || email);
-    localStorage.setItem('customerBusiness', data.businessName || '');
+    const custEmail = (data.customer && data.customer.email) || email;
+    const custBiz   = (data.customer && data.customer.businessName) || '';
+    localStorage.setItem('customerEmail', custEmail);
+    localStorage.setItem('customerBusiness', custBiz);
 
-    afterAuth(data.email || email, data.businessName || '');
+    afterAuth(custEmail, custBiz);
   } catch (err) {
     errEl.textContent = err.message;
     errEl.classList.remove('hidden');
@@ -600,9 +603,10 @@ async function renderGateways(gateways) {
         createOrder: async () => {
           const menuId = getTargetMenuId();
           if (!menuId) throw new Error('No menu selected');
+          const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
             body: JSON.stringify({ plan_id: selectedPlan.id, menu_id: menuId })
           });
           const d = await r.json();
@@ -610,11 +614,12 @@ async function renderGateways(gateways) {
           return d.order_id;
         },
         onApprove: async (data) => {
-          showMsg('Processing payment�');
+          showMsg('Processing payment…');
           const menuId = getTargetMenuId();
+          const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
             body: JSON.stringify({ order_id: data.orderID, plan_id: selectedPlan.id, menu_id: menuId })
           });
           const d = await r.json();
@@ -651,10 +656,11 @@ function doFlutterwave(publicKey) {
     customizations: { title: 'RestOrder', description: `${selectedPlan.display_name} Plan`, logo: '/icon-192.png' },
     callback: async (response) => {
       if (response.status === 'successful' || response.status === 'completed') {
-        showMsg('Verifying payment�');
+        showMsg('Verifying payment…');
+        const csrf = await getCsrf();
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
+          headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
           body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: selectedPlan.id })
         });
         const d = await r.json();
