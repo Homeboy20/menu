@@ -131,8 +131,8 @@
 
           <!-- Register Form -->
           <form id="register-form" class="space-y-4" onsubmit="handleRegister(event)">
-            <h3 class="text-lg font-bold text-stone-900">Create your free account</h3>
-            <p class="text-sm text-stone-500">Your 7-day trial starts immediately. No credit card needed until you pay.</p>
+            <h3 class="text-lg font-bold text-stone-900">Create your account</h3>
+            <p class="text-sm text-stone-500" id="reg-subtext">Create a free account to continue with your subscription.</p>
             <div>
               <label class="block text-sm font-medium text-stone-700 mb-1">Business Name *</label>
               <input id="reg-business" type="text" required placeholder="e.g., Joe's Pizza"
@@ -787,7 +787,7 @@ async function init() {
         isLoggedIn = true;
         document.getElementById('logged-in-notice').classList.remove('hidden');
         document.getElementById('logged-in-email').textContent = me.email || email;
-        document.getElementById('logged-in-name').textContent = me.businessName || biz || 'You\'re signed in';
+        document.getElementById('logged-in-name').textContent = me.business_name || me.businessName || biz || 'You\'re signed in';
         // Already logged in - go straight to payment (step 2 in 2-step flow)
         setStep(2);
         document.getElementById('payment-section').classList.remove('hidden');
@@ -799,8 +799,8 @@ async function init() {
     clearToken();
   }
 
-  // Not logged in � show auth section (step 1 in 2-step flow)
-  setStep(1);
+  // Not logged in � show auth section (step 1 in 2-step flow)  // Default to login tab when upgrading (plan preselected) — user likely already has an account
+  if (hasPlanPreselected) showTab('login');  setStep(1);
   document.getElementById('auth-section').classList.remove('hidden');
 }
 
