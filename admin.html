@@ -2092,7 +2092,10 @@ async function proceedToPublish() {
       body:    JSON.stringify({ restaurantName, currency, ...getBranding(), items }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || (isEditing ? 'Update failed' : 'Publish failed'));
+    if (!res.ok) {
+      if (data.upgrade_required) { showUpgradePrompt(data, editingMenuId || null); return; }
+      throw new Error(data.error || (isEditing ? 'Update failed' : 'Publish failed'));
+    }
 
     currentMenuUrl   = data.menuUrl;
     currentQrDataUrl = data.qrDataUrl;
@@ -2524,6 +2527,20 @@ async function unlinkQR(id) {
     showStatusBadge('QR link removed', 'green');
     loadLinkedQRs();
   } catch (_) {}
+}
+
+// -- Upgrade Required Prompt -------------------------------------------------
+function showUpgradePrompt(data, menuId) {
+  const planLabels = { starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise', trial: 'Trial' };
+  const current = planLabels[data.current_plan] || (data.current_plan || 'Current Plan');
+  const required = planLabels[data.required_plan] || (data.required_plan || 'Higher Plan');
+  document.getElementById('ugm-title').textContent = `${required} Plan Required`;
+  document.getElementById('ugm-desc').textContent = data.error || `This feature requires the ${required} plan or higher.`;
+  document.getElementById('ugm-current').textContent = current;
+  document.getElementById('ugm-required').textContent = required;
+  const ctaHref = menuId ? `/dashboard?upgrade=1&menu_id=${encodeURIComponent(menuId)}` : '/dashboard';
+  document.getElementById('ugm-cta').href = ctaHref;
+  document.getElementById('upgrade-required-modal').classList.remove('hidden');
 }
 
 // -- Misc UI -------------------------------------------------------------------

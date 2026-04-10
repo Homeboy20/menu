@@ -1470,8 +1470,12 @@ async function loadTeam() {
   container.innerHTML = '<div class="p-12 text-center"><svg class="material-symbols-outlined text-[48px] text-stone-300 block mb-3 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg><p class="text-stone-400">Loading...</p></div>';
   try {
     const res = await fetch('/api/staff', { headers: { 'x-customer-token': customerToken } });
-    if (!res.ok) throw new Error((await res.json()).error || 'Failed to load staff');
-    const staff = await res.json();
+    const staffData = await res.json();
+    if (!res.ok) {
+      if (staffData.upgrade_required) { showUpgradePrompt(staffData); return; }
+      throw new Error(staffData.error || 'Failed to load staff');
+    }
+    const staff = staffData;
     staffMap = {};
     staff.forEach(s => { staffMap[s.id] = s; });
     if (!staff.length) {
@@ -1573,7 +1577,10 @@ async function saveStaffMember() {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to save');
+    if (!res.ok) {
+      if (data.upgrade_required) { showUpgradePrompt(data); return; }
+      throw new Error(data.error || 'Failed to save');
+    }
     closeStaffModal();
     await loadTeam();
   } catch (err) {
@@ -1593,7 +1600,11 @@ async function toggleStaffStatus(id, newStatus) {
       headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
       body: JSON.stringify({ status: newStatus }),
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Failed to update');
+    const upd = await res.json();
+    if (!res.ok) {
+      if (upd.upgrade_required) { showUpgradePrompt(upd); return; }
+      throw new Error(upd.error || 'Failed to update');
+    }
     await loadTeam();
   } catch (err) { alert('Error: ' + err.message); }
 }
@@ -1605,7 +1616,11 @@ async function deleteStaff(id, name) {
       method: 'DELETE',
       headers: { 'x-customer-token': customerToken },
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Failed to delete');
+    const del = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (del.upgrade_required) { showUpgradePrompt(del); return; }
+      throw new Error(del.error || 'Failed to delete');
+    }
     await loadTeam();
   } catch (err) { alert('Error: ' + err.message); }
 }
@@ -1655,6 +1670,46 @@ async function showTrialExpiredOverlay(menuId) {
     }
   } catch(e) { console.error('Failed to load plans for trial overlay:', e); }
   document.getElementById('trial-expired-overlay').classList.remove('hidden');
+}
+
+// -- Upgrade Required Prompt -------------------------------------------------
+function showUpgradePrompt(data, menuId) {
+  const planLabels = { starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise', trial: 'Trial' };
+  const required = planLabels[data.required_plan] || (data.required_plan || 'Higher Plan');
+  const current = planLabels[data.current_plan] || (data.current_plan || 'Current Plan');
+  document.getElementById('fgate-title').textContent = `${required} Plan Required`;
+  document.getElementById('fgate-desc').textContent =
+    `${data.error || 'This feature is not available on your current plan.'} You\'re on the ${current} plan.`;
+  const href = menuId
+    ? `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
+    : `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}`;
+  document.getElementById('fgate-cta').href = href;
+  document.getElementById('fgate-cta').textContent = `Upgrade to ${required}`;
+  document.getElementById('feature-gate-modal').classList.remove('hidden');
+}
+
+// -- Upgrade Required Prompt -------------------------------------------------
+function showUpgradePrompt(data, menuId) {
+  const planLabels = { starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise', trial: 'Trial' };
+  const required = planLabels[data.required_plan] || (data.required_plan || 'Higher Plan');
+  const current = planLabels[data.current_plan] || (data.current_plan || 'Current Plan');
+  document.getElementById('fgate-title').textContent = `${required} Plan Required`;
+  document.getElementById('fgate-desc').textContent =
+    `${data.error || 'This feature is not available on your current plan.'}`;
+  // Show plan upgrade arrow row
+  if (data.current_plan && data.required_plan) {
+    document.getElementById('fgate-current-plan').textContent = current;
+    document.getElementById('fgate-required-plan').textContent = required;
+    document.getElementById('fgate-plan-row').classList.remove('hidden');
+  } else {
+    document.getElementById('fgate-plan-row').classList.add('hidden');
+  }
+  const href = menuId
+    ? `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
+    : `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}`;
+  document.getElementById('fgate-cta').href = href;
+  document.getElementById('fgate-cta').textContent = `Upgrade to ${required}`;
+  document.getElementById('feature-gate-modal').classList.remove('hidden');
 }
 
 function dismissOnboard() {
@@ -1775,7 +1830,12 @@ async function showSubscribePrompt() {
       <svg class="material-symbols-outlined text-[30px]" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>
     </div>
     <h2 class="text-xl font-bold text-stone-900 mb-2" id="fgate-title">Upgrade to Print QR Codes</h2>
-    <p class="text-stone-500 text-sm mb-6" id="fgate-desc">Print and download QR codes for your tables, flyers, and more with any paid plan.</p>
+    <p class="text-stone-500 text-sm mb-4" id="fgate-desc">Print and download QR codes for your tables, flyers, and more with any paid plan.</p>
+    <div id="fgate-plan-row" class="hidden flex items-center justify-center gap-3 mb-5 text-sm">
+      <span class="px-3 py-1 bg-stone-100 text-stone-500 rounded-full font-medium" id="fgate-current-plan"></span>
+      <svg class="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span class="px-3 py-1 bg-primary/10 text-primary rounded-full font-semibold" id="fgate-required-plan"></span>
+    </div>
     <a id="fgate-cta" href="/pricing" class="block w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm transition mb-3">
       View Plans &amp; Upgrade
     </a>
