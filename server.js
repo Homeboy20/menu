@@ -5223,6 +5223,73 @@ app.post('/api/public/validate-promo', async (req, res) => {
   } catch (err) { res.status(500).json({ valid: false, error: err.message }); }
 });
 
+// GET /api/admin/upgrade-requests – Admin: list pending manual upgrade requests
+app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT p.id AS payment_id, p.amount, p.currency, p.notes, p.created_at,
+             s.id AS subscription_id, s.menu_id, s.status AS sub_status,
+             m.restaurant_name,
+             c.email AS customer_email, c.business_name AS customer_business,
+             sp.id AS plan_id, sp.display_name AS plan_name, sp.price AS plan_price
+      FROM payments p
+      JOIN subscriptions s ON p.subscription_id = s.id
+      JOIN menus m ON s.menu_id = m.id
+      LEFT JOIN customers c ON m.customer_id = c.id
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE p.payment_method = 'customer_upgrade' AND p.status = 'pending'
+      ORDER BY p.created_at DESC
+      LIMIT 200
+    `);
+    res.json(rows);
+  } catch (err) { console.error('upgrade-requests error:', err); res.status(500).json({ error: 'Failed to load upgrade requests.' }); }
+});
+
+// POST /api/admin/upgrade-requests/:id/approve – Admin: approve a manual upgrade request
+app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCsrfProtection, async (req, res) => {
+  const paymentId = parseInt(req.params.paymentId);
+  if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
+  try {
+    const { rows: pRows } = await pool.query(
+      `SELECT p.id, p.subscription_id, p.amount, p.currency, s.plan_id, s.menu_id
+       FROM payments p JOIN subscriptions s ON p.subscription_id = s.id
+       WHERE p.id = $1 AND p.payment_method = 'customer_upgrade' AND p.status = 'pending'`,
+      [paymentId]
+    );
+    if (!pRows.length) return res.status(404).json({ error: 'Pending upgrade request not found.' });
+    const pay = pRows[0];
+    const now = new Date().toISOString();
+    const nextDate = new Date();
+    nextDate.setMonth(nextDate.getMonth() + 1);
+    const nextBilling = nextDate.toISOString();
+    await pool.query(
+      `UPDATE payments SET status = 'completed', paid_at = $1 WHERE id = $2`,
+      [now, paymentId]
+    );
+    await pool.query(
+      `UPDATE subscriptions SET status = 'active', end_date = $1, next_billing_date = $1, updated_at = $2 WHERE id = $3`,
+      [nextBilling, now, pay.subscription_id]
+    );
+    queuePaymentReceiptEmailForPayment(paymentId);
+    res.json({ success: true });
+  } catch (err) { console.error('approve upgrade error:', err); res.status(500).json({ error: 'Failed to approve upgrade.' }); }
+});
+
+// POST /api/admin/upgrade-requests/:id/dismiss – Admin: dismiss/reject a manual upgrade request
+app.post('/api/admin/upgrade-requests/:paymentId/dismiss', requireAuth, doubleCsrfProtection, async (req, res) => {
+  const paymentId = parseInt(req.params.paymentId);
+  if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
+  try {
+    const { rowCount } = await pool.query(
+      `UPDATE payments SET status = 'failed', notes = COALESCE(notes, '') || ' [dismissed by admin]'
+       WHERE id = $1 AND payment_method = 'customer_upgrade' AND status = 'pending'`,
+      [paymentId]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Pending upgrade request not found.' });
+    res.json({ success: true });
+  } catch (err) { console.error('dismiss upgrade error:', err); res.status(500).json({ error: 'Failed to dismiss upgrade.' }); }
+});
+
 // GET /api/admin/payments - Admin: List all payments across all subscriptions
 app.get('/api/admin/payments', requireAuth, async (req, res) => {
   try {
