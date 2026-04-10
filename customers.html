@@ -383,6 +383,46 @@
   </div>
 </div>
 
+<!-- Assign Menu Modal -->
+<div id="assign-menu-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-xl font-bold">Assign Menu</h3>
+        <p class="text-sm text-slate-400 mt-1">Assign to: <strong id="assign-customer-name" class="text-slate-200"></strong></p>
+      </div>
+      <button onclick="closeAssignMenuModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
+      </button>
+    </div>
+    <input type="hidden" id="assign-customer-id" />
+    
+    <!-- Search -->
+    <div class="relative mb-4">
+      <svg class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
+      <input id="assign-menu-search" type="text" placeholder="Search menus by name..."
+        class="w-full pl-10 pr-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+    </div>
+
+    <!-- Menu List -->
+    <div id="assign-menu-list" class="max-h-[340px] overflow-y-auto space-y-2">
+      <div class="text-center py-8 text-slate-400">
+        <svg class="material-symbols-outlined text-[32px] block mb-2 opacity-30 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>
+        Loading menus...
+      </div>
+    </div>
+
+    <p id="assign-menu-error" class="text-red-400 text-sm mt-3 hidden"></p>
+
+    <div class="flex justify-end pt-4 mt-2 border-t border-slate-700">
+      <button type="button" onclick="closeAssignMenuModal()"
+        class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // -- State -------------------------------------------------------------------
 let isAuthenticated = false;
@@ -723,6 +763,12 @@ async function viewCustomer(customerId) {
       <div class="bg-bg-dark/50 rounded-2xl p-6">
         <div class="flex items-center justify-between mb-4">
           <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Menus (${menus.length})</h4>
+          ${isSuperAdmin ? `
+          <button onclick="openAssignMenuModal(${customer.id}, '${escapeHtml(customer.business_name)}')" class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-semibold rounded-lg hover:bg-primary/20 transition flex items-center gap-1.5">
+            <svg class="material-symbols-outlined text-[14px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add"/></svg>
+            Assign Menu
+          </button>
+          ` : ''}
         </div>
         ${menus.length ? `
           <div class="space-y-3">
@@ -741,6 +787,11 @@ async function viewCustomer(customerId) {
                     <p class="text-xs text-slate-500">scans</p>
                   </div>
                   ${m.subscription_status ? `<span class="badge badge-${m.subscription_status === 'active' ? 'active' : 'inactive'}" style="font-size:11px">${m.subscription_status}</span>` : '<span class="text-xs text-slate-600">no sub</span>'}
+                  ${isSuperAdmin ? `
+                  <button onclick="unassignMenu(${customer.id}, '${escapeHtml(m.id)}', '${escapeHtml(m.restaurant_name)}')" class="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition" title="Unassign menu">
+                    <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-link_off"/></svg>
+                  </button>
+                  ` : ''}
                 </div>
               </div>
             `).join('')}
@@ -959,8 +1010,110 @@ document.addEventListener('keydown', (e) => {
     closeDrawer();
     closeEditModal();
     closeResetPwModal();
+    closeAssignMenuModal();
   }
 });
+
+// -- Assign Menu Modal -------------------------------------------------------
+let unassignedMenus = [];
+
+async function openAssignMenuModal(customerId, customerName) {
+  document.getElementById('assign-customer-id').value = customerId;
+  document.getElementById('assign-customer-name').textContent = customerName;
+  document.getElementById('assign-menu-search').value = '';
+  document.getElementById('assign-menu-error').classList.add('hidden');
+  const modal = document.getElementById('assign-menu-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const listEl = document.getElementById('assign-menu-list');
+  listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><svg class="material-symbols-outlined text-[32px] block mb-2 opacity-30 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading menus...</div>`;
+
+  try {
+    const res = await fetch('/api/admin/menus/unassigned', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load menus');
+    unassignedMenus = await res.json();
+    renderAssignMenuList(unassignedMenus);
+  } catch (err) {
+    listEl.innerHTML = `<div class="text-center py-8 text-red-400">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderAssignMenuList(menus) {
+  const listEl = document.getElementById('assign-menu-list');
+  if (!menus.length) {
+    listEl.innerHTML = `<div class="text-center py-8 text-slate-500"><svg class="material-symbols-outlined text-[32px] block mb-2 opacity-20" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-inbox"/></svg>No unassigned menus available.</div>`;
+    return;
+  }
+  listEl.innerHTML = menus.map(m => `
+    <div class="flex items-center justify-between p-3 bg-bg-dark rounded-xl border border-slate-700 hover:border-primary/40 transition">
+      <div class="flex items-center gap-3 min-w-0">
+        <svg class="material-symbols-outlined text-[20px] text-amber-400 flex-shrink-0" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
+        <div class="min-w-0">
+          <p class="font-medium text-sm truncate">${escapeHtml(m.restaurant_name)}</p>
+          <p class="text-xs text-slate-500">${(parseInt(m.total_scans) || 0).toLocaleString()} scans &middot; Created ${formatDate(m.created_at)}</p>
+        </div>
+      </div>
+      <button onclick="assignMenu('${escapeHtml(m.id)}')" class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-semibold rounded-lg hover:bg-primary/20 transition flex-shrink-0">
+        Assign
+      </button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('assign-menu-search').addEventListener('input', () => {
+  const q = document.getElementById('assign-menu-search').value.toLowerCase();
+  const filtered = unassignedMenus.filter(m => (m.restaurant_name || '').toLowerCase().includes(q));
+  renderAssignMenuList(filtered);
+});
+
+async function assignMenu(menuId) {
+  const customerId = document.getElementById('assign-customer-id').value;
+  const errorEl = document.getElementById('assign-menu-error');
+  errorEl.classList.add('hidden');
+
+  try {
+    const res = await fetch(`/api/admin/customers/${customerId}/assign-menu`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ menuId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to assign menu');
+    showToast(data.message || 'Menu assigned successfully.');
+    closeAssignMenuModal();
+    await loadCustomers();
+    viewCustomer(parseInt(customerId));
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  }
+}
+
+function closeAssignMenuModal() {
+  const modal = document.getElementById('assign-menu-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+async function unassignMenu(customerId, menuId, menuName) {
+  if (!confirm(`Unassign "${menuName}" from this customer?\n\nThe menu will become unassigned and can be reassigned later.`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/customers/${customerId}/unassign-menu`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ menuId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to unassign menu');
+    showToast(data.message || 'Menu unassigned.');
+    await loadCustomers();
+    viewCustomer(customerId);
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
 
 // -- Helpers -----------------------------------------------------------------
 function escapeHtml(str) {

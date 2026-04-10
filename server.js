@@ -3551,6 +3551,104 @@ app.get('/api/admin/customers/:id/menus', requireAuth, async (req, res) => {
   }
 });
 
+// Admin endpoint: GET /api/admin/menus/unassigned - List menus not assigned to any customer
+app.get('/api/admin/menus/unassigned', requireRole('super_admin'), async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT id, restaurant_name, total_scans, created_at, updated_at
+      FROM menus WHERE customer_id IS NULL
+      ORDER BY created_at DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error('Get unassigned menus error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin endpoint: POST /api/admin/customers/:id/assign-menu - Assign an existing menu to a customer
+app.post('/api/admin/customers/:id/assign-menu', requireRole('super_admin'), async (req, res) => {
+  try {
+    const customerId = parseInt(req.params.id);
+    const { menuId } = req.body || {};
+
+    if (!menuId) return res.status(400).json({ error: 'Menu ID is required.' });
+
+    // Verify customer exists
+    const { rows: custRows } = await pool.query('SELECT id, business_name FROM customers WHERE id = $1', [customerId]);
+    if (!custRows.length) return res.status(404).json({ error: 'Customer not found.' });
+
+    // Verify menu exists
+    const { rows: menuRows } = await pool.query('SELECT id, restaurant_name, customer_id FROM menus WHERE id = $1', [menuId]);
+    if (!menuRows.length) return res.status(404).json({ error: 'Menu not found.' });
+
+    if (menuRows[0].customer_id && menuRows[0].customer_id !== customerId) {
+      return res.status(400).json({ error: 'This menu is already assigned to another customer. Unassign it first.' });
+    }
+    if (menuRows[0].customer_id === customerId) {
+      return res.status(400).json({ error: 'This menu is already assigned to this customer.' });
+    }
+
+    await pool.query('UPDATE menus SET customer_id = $1, updated_at = $2 WHERE id = $3', [customerId, new Date().toISOString(), menuId]);
+
+    res.json({ ok: true, message: `Menu "${menuRows[0].restaurant_name}" assigned to "${custRows[0].business_name}".` });
+  } catch (err) {
+    console.error('Assign menu error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin endpoint: POST /api/admin/customers/:id/unassign-menu - Unassign a menu from a customer
+app.post('/api/admin/customers/:id/unassign-menu', requireRole('super_admin'), async (req, res) => {
+  try {
+    const customerId = parseInt(req.params.id);
+    const { menuId } = req.body || {};
+
+    if (!menuId) return res.status(400).json({ error: 'Menu ID is required.' });
+
+    // Verify menu belongs to this customer
+    const { rows: menuRows } = await pool.query('SELECT id, restaurant_name, customer_id FROM menus WHERE id = $1', [menuId]);
+    if (!menuRows.length) return res.status(404).json({ error: 'Menu not found.' });
+    if (menuRows[0].customer_id !== customerId) {
+      return res.status(400).json({ error: 'This menu is not assigned to this customer.' });
+    }
+
+    await pool.query('UPDATE menus SET customer_id = NULL, updated_at = $1 WHERE id = $2', [new Date().toISOString(), menuId]);
+
+    res.json({ ok: true, message: `Menu "${menuRows[0].restaurant_name}" has been unassigned.` });
+  } catch (err) {
+    console.error('Unassign menu error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin endpoint: POST /api/admin/menus/:menuId/transfer - Transfer a menu to a different customer
+app.post('/api/admin/menus/:menuId/transfer', requireRole('super_admin'), async (req, res) => {
+  try {
+    const { menuId } = req.params;
+    const { targetCustomerId } = req.body || {};
+
+    if (!targetCustomerId) return res.status(400).json({ error: 'Target customer ID is required.' });
+
+    const { rows: menuRows } = await pool.query('SELECT id, restaurant_name, customer_id FROM menus WHERE id = $1', [menuId]);
+    if (!menuRows.length) return res.status(404).json({ error: 'Menu not found.' });
+
+    const { rows: custRows } = await pool.query('SELECT id, business_name FROM customers WHERE id = $1', [parseInt(targetCustomerId)]);
+    if (!custRows.length) return res.status(404).json({ error: 'Target customer not found.' });
+
+    if (menuRows[0].customer_id === parseInt(targetCustomerId)) {
+      return res.status(400).json({ error: 'Menu is already assigned to this customer.' });
+    }
+
+    await pool.query('UPDATE menus SET customer_id = $1, updated_at = $2 WHERE id = $3', [parseInt(targetCustomerId), new Date().toISOString(), menuId]);
+
+    res.json({ ok: true, message: `Menu "${menuRows[0].restaurant_name}" transferred to "${custRows[0].business_name}".` });
+  } catch (err) {
+    console.error('Transfer menu error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin endpoint: DELETE /api/admin/customers/:id - Delete a customer
 app.delete('/api/admin/customers/:id', requireRole('super_admin'), async (req, res) => {
   try {
