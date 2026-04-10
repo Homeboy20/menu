@@ -2186,6 +2186,11 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
       return res.status(400).json({ error: 'You cannot disable your own account.' });
     }
 
+    // Prevent migrating yourself to customer
+    if (req.adminUser && req.adminUser.id === userId && role === 'customer') {
+      return res.status(400).json({ error: 'You cannot convert your own account to customer.' });
+    }
+
     const roleChangingAwayFromSuper = role && validRoles.includes(role) && role !== 'super_admin';
     const disablingTarget = status === 'disabled';
     if (targetUser.role === 'super_admin' && (roleChangingAwayFromSuper || disablingTarget)) {
@@ -2218,6 +2223,72 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
     updates.push(`updated_at = $${idx++}`);
     values.push(new Date().toISOString());
     values.push(userId);
+
+    // ── If changing role to 'customer', migrate to customers table and remove from admin ──
+    if (role === 'customer' && targetUser.role !== 'customer') {
+      // Fetch full admin record for migration
+      const { rows: fullRows } = await pool.query(
+        'SELECT id, email, password_hash, name FROM admin_users WHERE id = $1', [userId]
+      );
+      if (!fullRows.length) return res.status(404).json({ error: 'Admin user not found.' });
+      const adminUser = fullRows[0];
+      const finalName = (name !== undefined ? sanitizeStr(name, 100) : adminUser.name) || '';
+
+      // Check if email already exists in customers table
+      const { rows: existingCustomer } = await pool.query(
+        'SELECT id FROM customers WHERE email = $1', [adminUser.email]
+      );
+      if (existingCustomer.length) {
+        return res.status(400).json({ error: 'A customer account with this email already exists.' });
+      }
+
+      // Hash new password if provided, otherwise keep existing
+      let finalHash = adminUser.password_hash;
+      if (password && typeof password === 'string' && password.length >= 8) {
+        finalHash = await bcrypt.hash(password, 12);
+      }
+
+      const now = new Date().toISOString();
+
+      // Insert into customers table
+      const { rows: newCustomer } = await pool.query(`
+        INSERT INTO customers (email, password_hash, business_name, contact_name, phone, status, created_at, registration_type)
+        VALUES ($1, $2, $3, $4, '', 'active', $5, 'email')
+        RETURNING id, email, business_name, status, created_at
+      `, [adminUser.email, finalHash, finalName, encryptField(finalName), now]);
+
+      // Auto-create a default menu for the new customer
+      try {
+        const menuId = crypto.randomUUID();
+        const defaultQr = await generateQRCode(menuId, 1).catch(() => '');
+        await pool.query(`
+          INSERT INTO menus (id, restaurant_name, currency, brand_color, logo_url, tagline,
+            font_style, bg_style, show_logo, show_name, header_layout,
+            text_color, heading_color, bg_color, card_bg, price_color,
+            phone, email, address, website,
+            social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
+            tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
+          VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
+            '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
+        `, [menuId, finalName, defaultQr, now, newCustomer[0].id]);
+      } catch (menuErr) {
+        console.warn('Default menu setup for migrated customer failed:', menuErr.message);
+      }
+
+      // Delete from admin_users
+      await pool.query('DELETE FROM admin_users WHERE id = $1', [userId]);
+
+      // Invalidate all admin sessions for this user
+      for (const [tok, sess] of sessions.entries()) {
+        if (sess.user && sess.user.id === userId) sessions.delete(tok);
+      }
+
+      return res.json({
+        migrated: true,
+        customerId: newCustomer[0].id,
+        message: `User "${finalName || adminUser.email}" has been migrated to a customer account and removed from admin.`
+      });
+    }
 
     const { rows } = await pool.query(
       `UPDATE admin_users SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, email, name, role, status, last_login, created_at`,

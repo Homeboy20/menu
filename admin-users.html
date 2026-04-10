@@ -512,6 +512,21 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
   const role = document.getElementById('form-role').value;
   const status = document.getElementById('form-status').value;
 
+  // Confirm migration when changing an existing user to customer role
+  if (id && role === 'customer') {
+    const existingUser = allUsers.find(u => u.id === parseInt(id));
+    if (existingUser && existingUser.role !== 'customer') {
+      const confirmed = confirm(
+        `⚠️ Changing "${existingUser.name || existingUser.email}" to Customer role will:\n\n` +
+        `• Migrate them to the Customers section\n` +
+        `• Remove their admin access permanently\n` +
+        `• Create a new customer account with their credentials\n\n` +
+        `This action cannot be undone. Continue?`
+      );
+      if (!confirmed) return;
+    }
+  }
+
   try {
     let res;
     if (id) {
@@ -542,6 +557,11 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
       errorEl.textContent = data.error || 'Operation failed.';
       errorEl.classList.remove('hidden');
       return;
+    }
+
+    // Show migration success message
+    if (data.migrated) {
+      alert(`✅ ${data.message}\n\nThey can now log in at the Customer portal.`);
     }
 
     closeModal();
