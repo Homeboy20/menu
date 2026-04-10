@@ -644,6 +644,21 @@ const PLAN_ORDER = ['trial', 'starter', 'professional', 'enterprise'];
 // Admin users always bypass.
 function requirePlan(minPlan) {
   return async (req, res, next) => {
+    // Helper: browser navigations accept text/html; fetch/XHR requests accept application/json.
+    // When called directly from a browser tab, redirect to the dashboard upgrade page instead of
+    // returning raw JSON which the user cannot act on.
+    const isBrowserNav = (req.headers['accept'] || '').includes('text/html') &&
+                         !req.headers['x-customer-token'] && !req.headers['x-admin-token'];
+    const upgradeRedirect = (data) => {
+      if (isBrowserNav) {
+        const params = new URLSearchParams({ upgrade: '1' });
+        if (data.required_plan) params.set('plan', data.required_plan);
+        if (req.params.id) params.set('menu_id', req.params.id);
+        return res.redirect(302, `/dashboard?${params.toString()}`);
+      }
+      return res.status(403).json(data);
+    };
+
     try {
       if (req.adminUser) return next();
 
@@ -661,21 +676,21 @@ function requirePlan(minPlan) {
         `, [menuId]));
 
         if (!rows.length) {
-          return res.status(403).json({ error: 'No subscription found for this menu.', upgrade_required: true });
+          return upgradeRedirect({ error: 'No subscription found for this menu.', upgrade_required: true });
         }
 
         const sub = rows[0];
         if (sub.status === 'trial' && sub.trial_end && new Date(sub.trial_end) < new Date()) {
-          return res.status(403).json({ error: 'Your free trial has expired. Please upgrade to continue.', trial_expired: true, upgrade_required: true });
+          return upgradeRedirect({ error: 'Your free trial has expired. Please upgrade to continue.', trial_expired: true, upgrade_required: true });
         }
         if (sub.status !== 'active' && sub.status !== 'trial') {
-          return res.status(403).json({ error: 'Your subscription is not active. Please renew to continue.', subscription_status: sub.status, upgrade_required: true });
+          return upgradeRedirect({ error: 'Your subscription is not active. Please renew to continue.', subscription_status: sub.status, upgrade_required: true });
         }
 
         const currentIdx = PLAN_ORDER.indexOf(sub.plan_name);
         const requiredIdx = PLAN_ORDER.indexOf(minPlan);
         if (currentIdx < requiredIdx) {
-          return res.status(403).json({
+          return upgradeRedirect({
             error: `This feature requires the ${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)} plan or higher.`,
             current_plan: sub.plan_name, required_plan: minPlan, upgrade_required: true
           });
@@ -697,13 +712,13 @@ function requirePlan(minPlan) {
         `, [customerId, new Date().toISOString()]));
 
         if (!rows.length) {
-          return res.status(403).json({ error: 'No active subscription found.', upgrade_required: true });
+          return upgradeRedirect({ error: 'No active subscription found.', upgrade_required: true });
         }
 
         const currentIdx = PLAN_ORDER.indexOf(rows[0].plan_name);
         const requiredIdx = PLAN_ORDER.indexOf(minPlan);
         if (currentIdx < requiredIdx) {
-          return res.status(403).json({
+          return upgradeRedirect({
             error: `This feature requires the ${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)} plan or higher.`,
             current_plan: rows[0].plan_name, required_plan: minPlan, upgrade_required: true
           });
