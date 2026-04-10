@@ -1094,6 +1094,21 @@ async function initDB() {
     await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS phone_hash TEXT`).catch(() => {});
     await client.query(`CREATE INDEX IF NOT EXISTS idx_customers_phone_hash ON customers (phone_hash) WHERE phone_hash IS NOT NULL`).catch(() => {});
 
+    // Migration: track whether customer has used their free trial (prevents re-use)
+    await client.query(`ALTER TABLE customers ADD COLUMN IF NOT EXISTS had_trial INTEGER NOT NULL DEFAULT 0`).catch(() => {});
+    // Backfill: mark existing customers who already consumed a trial
+    await client.query(`
+      UPDATE customers SET had_trial = 1
+      WHERE had_trial = 0
+        AND id IN (
+          SELECT DISTINCT m.customer_id
+          FROM subscriptions s
+          JOIN menus m ON m.id = s.menu_id
+          WHERE m.customer_id IS NOT NULL
+            AND s.plan_id = (SELECT id FROM subscription_plans WHERE name = 'trial' LIMIT 1)
+        )
+    `).catch(() => {});
+
     // ── Subscription Management Tables ──────────────────────────────────────────
     
     // Subscription Plans table
@@ -2405,6 +2420,9 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     if (!planRows.length) return res.status(400).json({ error: 'Invalid plan selected.' });
     const plan = planRows[0];
 
+    // Block trial plan for new registrations via checkout-register — trial is handled through /register
+    if (plan.name === 'trial') return res.status(400).json({ error: 'The trial plan is not available via this flow. Please register directly.' });
+
     // Compute effective price (apply promo if valid)
     let effectivePrice = parseFloat(plan.price);
     let promoRecord = null;
@@ -2661,6 +2679,8 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
             VALUES ($1, $2, 'trial', $3, $4, $3)
             ON CONFLICT (menu_id) DO NOTHING
           `, [defaultMenuId, trialPlan[0].id, menuNow, trialEnd]);
+          // Mark customer as having used their free trial
+          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
         }
       }
     } catch (setupErr) {
@@ -3018,6 +3038,8 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
              VALUES ($1,$2,'trial',$3,$4,$3) ON CONFLICT (menu_id) DO NOTHING`,
             [menuId, trialPlan[0].id, now, trialEnd]
           );
+          // Mark customer as having used their free trial
+          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
         }
       } catch (setupErr) {
         console.warn('Firebase auth: default menu setup failed:', setupErr.message);
@@ -4187,6 +4209,8 @@ app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, checkMenuLimit, as
             VALUES ($1, $2, 'trial', $3, $4, $3)
             ON CONFLICT (menu_id) DO NOTHING
           `, [menuId, trialPlan[0].id, trialNow, trialEnd]);
+          // Mark customer as having used their free trial
+          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [req.customer.id]).catch(() => {});
         }
       } catch (trialErr) {
         console.warn('Trial subscription auto-assign failed:', trialErr.message);
@@ -5999,13 +6023,33 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
 }
 
 // GET /api/public/plans – All active subscription plans (no auth required)
+// If an authenticated customer token is passed, the trial plan is hidden for customers who already used it
 app.get('/api/public/plans', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, name, display_name, price, annual_price, interval, menu_limit, location_limit, features, sort_order
        FROM subscription_plans WHERE is_active = 1 ORDER BY sort_order ASC`
     );
+    // If customer is authenticated, check whether they already used their trial
+    const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
+    const session = token ? isValidCustomerSession(token) : null;
+    if (session) {
+      const { rows: custRows } = await pool.query('SELECT had_trial FROM customers WHERE id = $1', [session.customerId || session.id]);
+      if (custRows.length && custRows[0].had_trial) {
+        return res.json(rows.filter(p => p.name !== 'trial'));
+      }
+    }
     res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/customers/trial-eligibility – Check whether the current customer can start a free trial
+app.get('/api/customers/trial-eligibility', requireCustomerAuth, async (req, res) => {
+  try {
+    const customerId = req.customer.customerId || req.customer.id;
+    const { rows } = await pool.query('SELECT had_trial FROM customers WHERE id = $1', [customerId]);
+    const hadTrial = rows.length ? !!rows[0].had_trial : false;
+    res.json({ trialEligible: !hadTrial });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

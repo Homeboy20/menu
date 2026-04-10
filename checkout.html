@@ -725,7 +725,8 @@ function showMsg(msg, isErr = false) {
 async function init() {
   // 1. Load plan details
   try {
-    const plans = await fetch('/api/public/plans').then(r => r.json());
+    const _plansToken = getToken();
+    const plans = await fetch('/api/public/plans', _plansToken ? { headers: { 'x-customer-token': _plansToken } } : {}).then(r => r.json());
     selectedPlan = plans.find(p => p.name === planSlug) || null;
 
     // Determine billing price based on interval
