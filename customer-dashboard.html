@@ -1630,21 +1630,22 @@ async function showTrialExpiredOverlay(menuId) {
     const plansRes = await fetch('/api/subscription-plans');
     if (plansRes.ok) {
       const plans = await plansRes.json();
-      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise');
+      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise' && p.name !== 'trial');
       const container = document.getElementById('trial-expired-plans');
       container.innerHTML = paidPlans.map(p => {
         const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
+        const href = `/checkout?plan=${encodeURIComponent(p.name)}${menuId ? '&menu_id=' + menuId : ''}`;
         return `
-          <div class="border border-stone-200 rounded-xl p-4 hover:border-primary/50 transition">
+          <a href="${href}" class="block border border-stone-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition cursor-pointer no-underline">
             <div class="flex items-center justify-between mb-2">
               <div>
                 <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
                 <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
               </div>
-              <a href="/checkout?plan=${encodeURIComponent(p.name)}${menuId ? '&menu_id=' + menuId : ''}" class="px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition">Upgrade</a>
+              <span class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm">Upgrade &rarr;</span>
             </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>? ' + escapeHtml(f) + '</span>').join('')}</div>
-          </div>`;
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>&#10003; ' + escapeHtml(f) + '</span>').join('')}</div>
+          </a>`;
       }).join('');
       // Also add enterprise contact option
       container.innerHTML += `
@@ -1682,21 +1683,21 @@ async function showSubscribePrompt() {
     const plansRes = await fetch('/api/subscription-plans');
     if (plansRes.ok) {
       const plans = await plansRes.json();
-      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise');
+      const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise' && p.name !== 'trial');
       const container = document.getElementById('subscribe-prompt-plans');
       container.innerHTML = paidPlans.map(p => {
         const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
         return `
-          <div class="border border-stone-200 rounded-xl p-4 hover:border-primary/50 transition">
+          <a href="/checkout?plan=${encodeURIComponent(p.name)}" class="block border border-stone-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition cursor-pointer no-underline">
             <div class="flex items-center justify-between mb-2">
               <div>
                 <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
                 <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
               </div>
-              <a href="/checkout?plan=${encodeURIComponent(p.name)}" class="px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition">Choose</a>
+              <span class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm">Choose &rarr;</span>
             </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>\u2713 ' + escapeHtml(f) + '</span>').join('')}</div>
-          </div>`;
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>&#10003; ' + escapeHtml(f) + '</span>').join('')}</div>
+          </a>`;
       }).join('');
     }
   } catch(e) { console.error('Failed to load plans for subscribe prompt:', e); }
