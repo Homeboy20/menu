@@ -562,9 +562,11 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   errorEl.classList.add('hidden');
   
   try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
     const res = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ email, password })
     });
     
@@ -966,6 +968,24 @@ document.addEventListener('keydown', e => {
 });
 
 // -- Filters & Search --------------------------------------------------------
+function filterAndRender() {
+  const statusFilter = document.getElementById('filter-status').value;
+  const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+  let filtered = allSubscriptions;
+  if (statusFilter) {
+    filtered = filtered.filter(s => s.status === statusFilter);
+  }
+  if (searchTerm) {
+    filtered = filtered.filter(s =>
+      (s.restaurant_name || '').toLowerCase().includes(searchTerm) ||
+      (s.menu_id || '').toLowerCase().includes(searchTerm) ||
+      (s.plan_name || '').toLowerCase().includes(searchTerm)
+    );
+  }
+  renderSubscriptions(filtered);
+  updateStats(filtered);
+}
+
 document.getElementById('filter-status').addEventListener('change', filterAndRender);
 document.getElementById('search-input').addEventListener('input', filterAndRender);
 document.getElementById('refresh-btn').addEventListener('click', loadSubscriptions);
