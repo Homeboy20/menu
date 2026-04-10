@@ -1277,7 +1277,7 @@
 
 <script>
 // -- State ---------------------------------------------------------------------
-let sessionToken   = localStorage.getItem('adminToken') || '';
+let sessionToken   = localStorage.getItem('admin-token') || localStorage.getItem('adminToken') || '';
 let customerToken  = localStorage.getItem('customerToken') || sessionStorage.getItem('customerToken') || '';
 let isCustomerMode = false;
 
@@ -2554,6 +2554,7 @@ async function initAuth() {
       if (data.authenticated) { showApp(); return; }
     } catch { /* fall through */ }
     sessionToken = '';
+    localStorage.removeItem('admin-token');
     localStorage.removeItem('adminToken');
   }
   // 2. Try customer token
@@ -2731,7 +2732,9 @@ async function doLogin() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     sessionToken = data.token;
-    localStorage.setItem('adminToken', sessionToken);
+    localStorage.setItem('admin-token', sessionToken);
+    // Remove legacy key if present
+    localStorage.removeItem('adminToken');
     document.getElementById('login-email').value = '';
     document.getElementById('login-password').value = '';
     showApp();
@@ -2764,6 +2767,7 @@ async function doLogout() {
     });
   } catch { /* ignore */ }
   sessionToken = '';
+  localStorage.removeItem('admin-token');
   localStorage.removeItem('adminToken');
   showLogin();
 }
@@ -2829,11 +2833,11 @@ function hardRefreshPage() {
 
 function clearAppCache() {
   // Clear non-auth localStorage items
-  const token = localStorage.getItem('adminToken');
+  const token = localStorage.getItem('admin-token');
   const custToken = localStorage.getItem('customerToken');
   const keys = Object.keys(localStorage);
   keys.forEach(key => {
-    if (key !== 'adminToken' && key !== 'customerToken') {
+    if (key !== 'admin-token' && key !== 'adminToken' && key !== 'customerToken') {
       localStorage.removeItem(key);
     }
   });

@@ -721,7 +721,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 
 // Check existing session
 (async () => {
-  const token = localStorage.getItem('admin-token');
+  const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
   if (!token) return;
   
   try {

@@ -539,7 +539,7 @@ function applyUserUI(user) {
 
 async function checkAuth() {
   try {
-    const token = localStorage.getItem('admin-token');
+    const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
     if (!token) return;
     const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
     const data = await res.json();
