@@ -1863,11 +1863,19 @@ app.get('/health', (req, res) => {
 });
 
 // CSRF token endpoint - Returns a token for forms
-// overwrite=false: reuse the existing valid cookie so multiple tabs never fight;
-// a fresh token+cookie is only created when no valid cookie exists.
+// overwrite=false: reuse the existing valid cookie so multiple tabs never fight.
+// validateOnReuse=false: if the existing cookie is stale/invalid (e.g. after a
+// server restart that generated a new CSRF_SECRET), generate a fresh one instead
+// of throwing – otherwise login returns 403 until the old cookie expires.
 app.get('/api/csrf-token', (req, res) => {
-  const csrfToken = generateToken(req, res, false);
-  res.json({ csrfToken });
+  try {
+    const csrfToken = generateToken(req, res, false, false);
+    res.json({ csrfToken });
+  } catch (err) {
+    // Fallback: force-create a fresh token if anything unexpected throws
+    const csrfToken = generateToken(req, res, true);
+    res.json({ csrfToken });
+  }
 });
 
 // GET /api/geo – return visitor country code from Cloudflare CF-IPCountry header
