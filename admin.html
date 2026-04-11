@@ -104,111 +104,35 @@
 <!-- -- Login Overlay -------------------------------------------------------- -->
 <div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
   <div class="bg-white border border-stone-200 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
-    <!-- Tab switcher -->
-    <div class="flex rounded-xl border border-stone-200 overflow-hidden">
-      <button id="tab-customer" onclick="switchLoginTab('customer')"
-        class="flex-1 py-2 text-sm font-semibold transition-colors bg-primary text-white">
-        My Account
-      </button>
-      <button id="tab-staff" onclick="switchLoginTab('staff')"
-        class="flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50">
-        Staff
-      </button>
-      <button id="tab-admin" onclick="switchLoginTab('admin')"
-        class="flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50">
-        Admin
-      </button>
-    </div>
-
-    <!-- Customer login panel -->
-    <div id="panel-customer" class="space-y-4">
+    <!-- Single unified login form -->
+    <div class="space-y-4">
       <div class="flex items-center gap-3">
         <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
           <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
         </div>
         <div>
-          <h2 class="font-bold text-lg text-stone-900">Menu Editor</h2>
-          <p class="text-stone-500 text-xs">Sign in to create &amp; manage your menus</p>
+          <h2 class="font-bold text-lg text-stone-900">Sign In</h2>
+          <p class="text-stone-500 text-xs">Business owner, staff, or admin</p>
         </div>
       </div>
       <div>
         <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
-        <input id="cust-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
+        <input id="unified-email" type="email" autocomplete="email" placeholder="you@restaurant.com"
                class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')document.getElementById('cust-password').focus()"/>
+               onkeydown="if(event.key==='Enter')document.getElementById('unified-password').focus()"/>
       </div>
       <div>
         <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
-        <input id="cust-password" type="password" autocomplete="current-password" placeholder="Enter password"
+        <input id="unified-password" type="password" autocomplete="current-password" placeholder="Enter password"
                class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')doCustomerLogin()"/>
+               onkeydown="if(event.key==='Enter')doUnifiedLogin()"/>
       </div>
-      <p id="cust-login-error" class="text-red-600 text-sm hidden"></p>
-      <button onclick="doCustomerLogin()"
+      <p id="unified-login-error" class="text-red-600 text-sm hidden"></p>
+      <button id="unified-login-btn" onclick="doUnifiedLogin()"
               class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-[18px]">login</span> Sign In
       </button>
       <p class="text-center text-xs text-stone-500">Don't have an account? <a href="/register" class="text-primary hover:underline font-medium">Register free</a></p>
-    </div>
-
-    <!-- Staff login panel -->
-    <div id="panel-staff" class="space-y-4 hidden">
-      <div class="flex items-center gap-3">
-        <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
-          <span class="material-symbols-outlined text-[22px]">badge</span>
-        </div>
-        <div>
-          <h2 class="font-bold text-lg text-stone-900">Staff Login</h2>
-          <p class="text-stone-500 text-xs">Sign in with your staff credentials</p>
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
-        <input id="staff-email" type="email" autocomplete="email" placeholder="staff@restaurant.com"
-               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')document.getElementById('staff-password').focus()"/>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
-        <input id="staff-password" type="password" autocomplete="current-password" placeholder="Enter password"
-               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')doStaffLogin()"/>
-      </div>
-      <p id="staff-login-error" class="text-red-600 text-sm hidden"></p>
-      <button onclick="doStaffLogin()"
-              class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[18px]">login</span> Sign In
-      </button>
-    </div>
-
-    <!-- Admin login panel -->
-    <div id="panel-admin" class="space-y-4 hidden">
-      <div class="flex items-center gap-3">
-        <div class="size-10 rounded-xl bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
-          <span class="material-symbols-outlined text-[22px]">lock</span>
-        </div>
-        <div>
-          <h2 class="font-bold text-lg text-stone-900">Admin Access</h2>
-          <p class="text-stone-600 text-xs">Sign in with your admin credentials</p>
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
-        <input id="login-email" type="email" autocomplete="email" placeholder="admin@restorder.online"
-               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()"/>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-stone-700 mb-1.5">Password</label>
-        <input id="login-password" type="password" autocomplete="current-password" placeholder="Enter password"
-               class="w-full bg-white border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-stone-400"
-               onkeydown="if(event.key==='Enter')doLogin()"/>
-      </div>
-      <p id="login-error" class="text-red-600 text-sm hidden"></p>
-      <button onclick="doLogin()"
-              class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold py-3 rounded-xl hover:shadow-lg active:scale-[.98] transition-all flex items-center justify-center gap-2">
-        <span class="material-symbols-outlined text-[18px]">login</span> Sign In
-      </button>
     </div>
   </div>
 </div>
@@ -2608,21 +2532,74 @@ async function initAuth() {
 function showLogin() {
   document.getElementById('login-overlay').classList.remove('hidden');
   document.getElementById('logout-btn').classList.add('hidden');
-  // Default to customer tab unless it looks like an admin-only context
-  switchLoginTab('customer');
-  setTimeout(() => document.getElementById('cust-email')?.focus(), 150);
+  setTimeout(() => document.getElementById('unified-email')?.focus(), 150);
 }
 
-function switchLoginTab(tab) {
-  const active   = 'flex-1 py-2 text-sm font-semibold transition-colors bg-primary text-white';
-  const inactive = 'flex-1 py-2 text-sm font-semibold transition-colors text-stone-500 hover:bg-stone-50';
-  ['customer', 'staff', 'admin'].forEach(t => {
-    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
-    document.getElementById(`tab-${t}`).className = t === tab ? active : inactive;
-  });
-  if (tab === 'customer') setTimeout(() => document.getElementById('cust-email')?.focus(), 50);
-  else if (tab === 'staff') setTimeout(() => document.getElementById('staff-email')?.focus(), 50);
-  else setTimeout(() => document.getElementById('login-email')?.focus(), 50);
+async function doUnifiedLogin() {
+  const errEl   = document.getElementById('unified-login-error');
+  const btn     = document.getElementById('unified-login-btn');
+  const email   = document.getElementById('unified-email').value.trim();
+  const password = document.getElementById('unified-password').value;
+  errEl.classList.add('hidden');
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined spin text-[18px]">progress_activity</span> Signing in…';
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    const res = await fetch('/api/auth/unified-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    document.getElementById('unified-email').value = '';
+    document.getElementById('unified-password').value = '';
+
+    if (data.type === 'customer') {
+      customerToken = data.token;
+      localStorage.setItem('customerToken', customerToken);
+      localStorage.setItem('customerEmail', data.customer.email);
+      localStorage.setItem('customerBusiness', data.customer.businessName);
+      localStorage.removeItem('staffName');
+      localStorage.removeItem('staffRole');
+      isCustomerMode = true;
+      showApp();
+      const menuParam = new URLSearchParams(window.location.search).get('menu');
+      if (menuParam) loadMenuForEditing(menuParam);
+    } else if (data.type === 'staff') {
+      customerToken = data.token;
+      localStorage.setItem('customerToken', customerToken);
+      localStorage.setItem('staffName', data.staff.name);
+      localStorage.setItem('staffRole', data.staff.role);
+      localStorage.removeItem('customerBusiness');
+      isCustomerMode = true;
+      if (data.staff.role !== 'manager') {
+        window.location.href = '/staff-panel';
+        return;
+      }
+      showApp({ staffName: data.staff.name, staffRole: data.staff.role, isStaff: true });
+      const menuParam = new URLSearchParams(window.location.search).get('menu');
+      if (menuParam) loadMenuForEditing(menuParam);
+    } else if (data.type === 'admin') {
+      sessionToken = data.token;
+      localStorage.setItem('admin-token', sessionToken);
+      localStorage.removeItem('adminToken');
+      showApp();
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">login</span> Sign In';
+  }
 }
 
 function showApp(custData) {
@@ -2644,120 +2621,6 @@ function showApp(custData) {
         titleEl.textContent = business || 'Menu Admin';
       }
     }
-  }
-}
-
-async function doCustomerLogin() {
-  const errEl    = document.getElementById('cust-login-error');
-  const email    = document.getElementById('cust-email').value.trim();
-  const password = document.getElementById('cust-password').value;
-  errEl.classList.add('hidden');
-  if (!email || !password) {
-    errEl.textContent = 'Please enter your email and password.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  try {
-    const csrfRes = await fetch('/api/csrf-token');
-    const { csrfToken } = await csrfRes.json();
-    const res  = await fetch('/api/customers/login', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email, password, csrfToken }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    customerToken = data.token;
-    localStorage.setItem('customerToken', customerToken);
-    localStorage.setItem('customerEmail', data.customer.email);
-    localStorage.setItem('customerBusiness', data.customer.businessName);
-    localStorage.removeItem('staffName');
-    localStorage.removeItem('staffRole');
-    isCustomerMode = true;
-    document.getElementById('cust-email').value    = '';
-    document.getElementById('cust-password').value = '';
-    showApp();
-    // If a menu was requested, load it now
-    const menuParam = new URLSearchParams(window.location.search).get('menu');
-    if (menuParam) loadMenuForEditing(menuParam);
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.classList.remove('hidden');
-  }
-}
-
-async function doStaffLogin() {
-  const errEl    = document.getElementById('staff-login-error');
-  const email    = document.getElementById('staff-email').value.trim();
-  const password = document.getElementById('staff-password').value;
-  errEl.classList.add('hidden');
-  if (!email || !password) {
-    errEl.textContent = 'Please enter your email and password.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  try {
-    const csrfRes = await fetch('/api/csrf-token');
-    const { csrfToken } = await csrfRes.json();
-    const res = await fetch('/api/staff/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, csrfToken }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    customerToken = data.token;
-    localStorage.setItem('customerToken', customerToken);
-    localStorage.setItem('staffName', data.staff.name);
-    localStorage.setItem('staffRole', data.staff.role);
-    localStorage.removeItem('customerBusiness');
-    isCustomerMode = true;
-    document.getElementById('staff-email').value    = '';
-    document.getElementById('staff-password').value = '';
-    // Non-manager staff get their own panel; managers stay on menu editor
-    if (data.staff.role !== 'manager') {
-      window.location.href = '/staff-panel';
-      return;
-    }
-    showApp({ staffName: data.staff.name, staffRole: data.staff.role, isStaff: true });
-    const menuParam = new URLSearchParams(window.location.search).get('menu');
-    if (menuParam) loadMenuForEditing(menuParam);
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.classList.remove('hidden');
-  }
-}
-
-async function doLogin() {
-  const errEl   = document.getElementById('login-error');
-  const email   = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  errEl.classList.add('hidden');
-  if (!email || !password) {
-    errEl.textContent = 'Please enter your email and password.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  try {
-    const csrfRes = await fetch('/api/csrf-token');
-    const { csrfToken } = await csrfRes.json();
-    const res  = await fetch('/api/auth/login', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
-      body:    JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    sessionToken = data.token;
-    localStorage.setItem('admin-token', sessionToken);
-    // Remove legacy key if present
-    localStorage.removeItem('adminToken');
-    document.getElementById('login-email').value = '';
-    document.getElementById('login-password').value = '';
-    showApp();
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.classList.remove('hidden');
   }
 }
 
@@ -2917,7 +2780,7 @@ async function fullCacheClear() {
       document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
     });
     alert('All cache cleared. The page will now reload.');
-    location.href = '/admin.html';
+    location.href = '/admin';
   } catch (err) {
     alert('Error clearing cache: ' + err.message);
   }

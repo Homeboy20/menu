@@ -2098,6 +2098,118 @@ app.post('/api/auth/login', loginLimiter, doubleCsrfProtection, handleAdminLogin
 // Alias for admin-dashboard pages that use /api/admin/login
 app.post('/api/admin/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 
+// POST /api/auth/unified-login – single form that tries customer → staff → admin
+app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ error: 'Email and password required.' });
+
+    const cleanEmail = sanitizeEmail(email);
+    if (!isValidEmail(cleanEmail)) return res.status(400).json({ error: 'Invalid email address.' });
+
+    // 1. Try customer login
+    const custResult = await pool.query('SELECT * FROM customers WHERE email = $1', [cleanEmail]);
+    if (custResult.rows.length) {
+      const cust = custResult.rows[0];
+      // Check lockout
+      if (cust.lockout_until && new Date(cust.lockout_until) > new Date()) {
+        return res.status(429).json({ error: 'Account temporarily locked. Try again later.' });
+      }
+      const custMatch = await bcrypt.compare(password, cust.password_hash);
+      if (custMatch) {
+        // Reset failed attempts
+        await pool.query('UPDATE customers SET login_attempts = 0, lockout_until = NULL WHERE id = $1', [cust.id]);
+        const token = await createCustomerSession(cust.id, cust.email);
+        // Check subscription
+        const subRes = await pool.query(
+          `SELECT s.status FROM subscriptions s WHERE s.customer_id = $1 AND s.status IN ('active','trial') LIMIT 1`,
+          [cust.id]
+        );
+        const hasSub = subRes.rows.length > 0;
+        res.cookie('customerToken', token, {
+          httpOnly: true, secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict', maxAge: SESSION_TTL,
+        });
+        return res.json({
+          type: 'customer',
+          token,
+          customer: {
+            id: cust.id, email: cust.email,
+            businessName: decryptField(cust.business_name),
+            status: cust.status, hasSubscription: hasSub,
+          },
+          expiresIn: SESSION_TTL,
+        });
+      }
+      // Wrong password — increment attempts
+      const attempts = (cust.login_attempts || 0) + 1;
+      const lockout = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
+      await pool.query('UPDATE customers SET login_attempts = $1, lockout_until = $2 WHERE id = $3', [attempts, lockout, cust.id]);
+    }
+
+    // 2. Try staff login
+    const staffResult = await pool.query('SELECT * FROM staff_members WHERE email = $1', [cleanEmail]);
+    if (staffResult.rows.length) {
+      const staff = staffResult.rows[0];
+      if (staff.status !== 'active') {
+        return res.status(401).json({ error: 'Your staff account has been disabled. Contact your manager.' });
+      }
+      const staffMatch = await bcrypt.compare(password, staff.password_hash);
+      if (staffMatch) {
+        const token = await createStaffSession(staff.id, staff.email, staff.name, staff.role, staff.customer_id);
+        res.cookie('customerToken', token, {
+          httpOnly: true, secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict', maxAge: SESSION_TTL,
+        });
+        return res.json({
+          type: 'staff',
+          token,
+          staff: { id: staff.id, name: staff.name, email: staff.email, role: staff.role },
+          redirectTo: staff.role === 'manager' ? '/menu-editor' : '/staff-panel',
+          expiresIn: SESSION_TTL,
+        });
+      }
+    }
+
+    // 3. Try admin login
+    const adminResult = await pool.query('SELECT * FROM admin_users WHERE email = $1', [cleanEmail]);
+    if (adminResult.rows.length) {
+      const admin = adminResult.rows[0];
+      if (admin.role === 'customer') {
+        // customer role in admin_users shouldn't log in via admin path
+        return res.status(401).json({ error: 'Invalid email or password.' });
+      }
+      if (admin.lockout_until && new Date(admin.lockout_until) > new Date()) {
+        return res.status(429).json({ error: 'Account temporarily locked. Try again later.' });
+      }
+      const adminMatch = await bcrypt.compare(password, admin.password_hash);
+      if (adminMatch) {
+        await pool.query('UPDATE admin_users SET login_attempts = 0, lockout_until = NULL WHERE id = $1', [admin.id]);
+        const token = crypto.randomUUID();
+        sessions.set(token, {
+          userId: admin.id, email: admin.email, name: admin.name, role: admin.role,
+          createdAt: Date.now(), lastActivity: Date.now(),
+        });
+        return res.json({
+          type: 'admin',
+          token,
+          user: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
+          expiresIn: SESSION_TTL,
+        });
+      }
+      // Wrong password — increment attempts
+      const attempts = (admin.login_attempts || 0) + 1;
+      const lockout = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
+      await pool.query('UPDATE admin_users SET login_attempts = $1, lockout_until = $2 WHERE id = $3', [attempts, lockout, admin.id]);
+    }
+
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  } catch (err) {
+    console.error('Unified login error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // POST /api/auth/logout  – invalidate current session token
 app.post('/api/auth/logout', (req, res) => {
   const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
