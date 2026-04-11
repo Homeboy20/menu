@@ -5298,7 +5298,7 @@ app.get('/api/subscription-plans', async (_req, res) => {
 });
 
 // POST /api/admin/customers/:id/assign-subscription – Admin: assign a subscription plan to a customer and optionally record payment
-app.post('/api/admin/customers/:id/assign-subscription', requireAuth, doubleCsrfProtection, async (req, res) => {
+app.post('/api/admin/customers/:id/assign-subscription', requireRole('super_admin'), async (req, res) => {
   const customerId = parseInt(req.params.id);
   if (!customerId) return res.status(400).json({ error: 'Invalid customer ID.' });
   try {
