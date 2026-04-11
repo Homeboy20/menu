@@ -5297,6 +5297,107 @@ app.get('/api/subscription-plans', async (_req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// POST /api/admin/customers/:id/assign-subscription – Admin: assign a subscription plan to a customer and optionally record payment
+app.post('/api/admin/customers/:id/assign-subscription', requireAuth, doubleCsrfProtection, async (req, res) => {
+  const customerId = parseInt(req.params.id);
+  if (!customerId) return res.status(400).json({ error: 'Invalid customer ID.' });
+  try {
+    const planId = parseInt(req.body.plan_id);
+    if (!planId) return res.status(400).json({ error: 'plan_id is required.' });
+
+    const paymentMethod = sanitizeStr(req.body.payment_method || 'manual', 50);
+    const paymentRef = sanitizeStr(req.body.payment_ref || '', 200);
+    const paymentNotes = sanitizeStr(req.body.notes || '', 500);
+    const paymentStatus = sanitizeStr(req.body.payment_status || 'completed', 20);
+    const amountOverride = req.body.amount !== undefined ? parseFloat(req.body.amount) : null;
+
+    // Validate customer exists
+    const { rows: custRows } = await pool.query('SELECT id, email FROM customers WHERE id = $1', [customerId]);
+    if (!custRows.length) return res.status(404).json({ error: 'Customer not found.' });
+
+    // Validate plan exists
+    const { rows: planRows } = await pool.query(
+      'SELECT id, display_name, price, interval FROM subscription_plans WHERE id = $1', [planId]
+    );
+    if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
+    const plan = planRows[0];
+    const amount = amountOverride !== null ? amountOverride : plan.price;
+
+    // Get customer's primary menu (needed for subscription record)
+    const { rows: menuRows } = await pool.query(
+      'SELECT id FROM menus WHERE customer_id = $1 ORDER BY created_at ASC LIMIT 1', [customerId]
+    );
+    const menuId = menuRows.length ? menuRows[0].id : null;
+
+    const now = new Date();
+    const billing = new Date(now);
+    if ((plan.interval || 'month') === 'year') billing.setFullYear(billing.getFullYear() + 1);
+    else billing.setMonth(billing.getMonth() + 1);
+    const billingISO = billing.toISOString();
+    const nowISO = now.toISOString();
+    const isActive = paymentStatus === 'completed' || amount === 0;
+    const subStatus = isActive ? 'active' : 'pending';
+
+    // Upsert subscription for this customer
+    const { rows: existing } = await pool.query('SELECT id FROM subscriptions WHERE customer_id = $1', [customerId]);
+    let subId;
+    if (existing.length) {
+      subId = existing[0].id;
+      const updates = [`plan_id = $1`, `status = $2`, `updated_at = $3`];
+      const vals = [planId, subStatus, nowISO];
+      let p = 4;
+      if (isActive) {
+        updates.push(`end_date = $${p}`, `next_billing_date = $${p}`);
+        vals.push(billingISO);
+        p++;
+      }
+      vals.push(subId);
+      await pool.query(`UPDATE subscriptions SET ${updates.join(', ')} WHERE id = $${p}`, vals);
+    } else {
+      const ins = await pool.query(
+        `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $6, $5, $5) RETURNING id`,
+        [menuId, customerId, planId, subStatus, nowISO, isActive ? billingISO : null]
+      );
+      subId = ins.rows[0].id;
+    }
+
+    // Record payment
+    let paymentId = null;
+    if (amount > 0) {
+      const paidAt = paymentStatus === 'completed' ? nowISO : null;
+      const { rows: payRows } = await pool.query(
+        `INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, paid_at, notes, created_at)
+         VALUES ($1, $2, 'USD', $3, $4, $5, $6, $7, $8) RETURNING id`,
+        [subId, amount, paymentMethod, paymentRef, paymentStatus, paidAt, paymentNotes, nowISO]
+      );
+      paymentId = payRows[0].id;
+      if (paymentStatus === 'completed') {
+        queuePaymentReceiptEmailForPayment(paymentId);
+      }
+    }
+
+    // Resolve any open upgrade/support requests for this customer
+    await pool.query(
+      `UPDATE customer_contact_requests
+       SET status = 'approved', handled_at = $1, handled_by = $2, updated_at = $1
+       WHERE customer_id = $3 AND request_type IN ('upgrade', 'support') AND status = 'open'`,
+      [nowISO, req.adminUser?.id || null, customerId]
+    );
+
+    res.json({
+      success: true,
+      subscription_id: subId,
+      payment_id: paymentId,
+      status: subStatus,
+      plan: plan.display_name,
+    });
+  } catch (err) {
+    console.error('assign-subscription error:', err);
+    res.status(500).json({ error: 'Failed to assign subscription.' });
+  }
+});
+
 // GET /api/admin/subscription-plans - Admin: Get ALL plans (including inactive)
 app.get('/api/admin/subscription-plans', requireAuth, async (_req, res) => {
   try {

@@ -423,6 +423,72 @@
   </div>
 </div>
 
+<!-- Assign Subscription Modal -->
+<div id="assign-sub-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-surface border border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-xl font-bold">Assign Subscription</h3>
+        <p class="text-sm text-slate-400 mt-1">Customer: <strong id="assign-sub-customer-name" class="text-slate-200"></strong></p>
+      </div>
+      <button onclick="closeAssignSubModal()" class="text-slate-400 hover:text-slate-200 transition">
+        <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
+      </button>
+    </div>
+    <input type="hidden" id="assign-sub-customer-id" />
+    <form id="assign-sub-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Subscription Plan</label>
+        <select id="assign-sub-plan" required class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="">Loading plans...</option>
+        </select>
+        <p id="assign-sub-plan-price" class="text-xs text-slate-500 mt-1"></p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Payment Method</label>
+        <select id="assign-sub-method" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="manual">Manual / Cash</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="card">Card</option>
+          <option value="mobile_money">Mobile Money</option>
+          <option value="free">Free / Promo</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Amount (USD)</label>
+        <input id="assign-sub-amount" type="number" step="0.01" min="0" placeholder="Auto-filled from plan"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+        <p class="text-xs text-slate-500 mt-1">Leave blank to use plan price</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Payment Status</label>
+        <select id="assign-sub-pay-status" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="completed">Completed (activate immediately)</option>
+          <option value="pending">Pending (awaiting payment)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Payment Reference / Transaction ID</label>
+        <input id="assign-sub-ref" type="text" placeholder="e.g. TXN-12345 (optional)"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Notes</label>
+        <textarea id="assign-sub-notes" rows="2" maxlength="500" placeholder="Optional admin notes"
+          class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"></textarea>
+      </div>
+      <p id="assign-sub-error" class="text-red-400 text-sm hidden"></p>
+      <div class="flex justify-end gap-3 pt-2 border-t border-slate-700">
+        <button type="button" onclick="closeAssignSubModal()" class="px-4 py-2.5 bg-bg-dark border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-slate-800 transition">Cancel</button>
+        <button type="submit" id="assign-sub-submit" class="px-6 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
+          <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check"/></svg>
+          Assign & Record Payment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 // -- State -------------------------------------------------------------------
 let isAuthenticated = false;
@@ -801,6 +867,20 @@ async function viewCustomer(customerId) {
           </div>
         ` : '<p class="text-slate-500 text-sm text-center py-4">No menus created yet.</p>'}
       </div>
+
+      <!-- Subscription Actions -->
+      ${isSuperAdmin ? `
+      <div class="bg-bg-dark/50 rounded-2xl p-6 mt-6">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Subscription</h4>
+          <button onclick="openAssignSubModal(${customer.id}, '${escapeHtml(customer.business_name)}')" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-semibold rounded-lg hover:bg-emerald-500/20 transition flex items-center gap-1.5">
+            <svg class="material-symbols-outlined text-[14px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-add"/></svg>
+            Assign / Change Plan
+          </button>
+        </div>
+        <p class="text-xs text-slate-500">Manually assign a subscription plan and register payment for this customer.</p>
+      </div>
+      ` : ''}
     `;
   } catch (err) {
     body.innerHTML = `<div class="text-center py-12 text-red-400"><svg class="material-symbols-outlined text-[48px] block mb-2 opacity-30" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>${escapeHtml(err.message)}</div>`;
@@ -1098,6 +1178,106 @@ function closeAssignMenuModal() {
   modal.classList.add('hidden');
   modal.classList.remove('flex');
 }
+
+// -- Assign Subscription Modal -----------------------------------------------
+let assignSubPlans = [];
+
+async function openAssignSubModal(customerId, customerName) {
+  document.getElementById('assign-sub-customer-id').value = customerId;
+  document.getElementById('assign-sub-customer-name').textContent = customerName;
+  document.getElementById('assign-sub-error').classList.add('hidden');
+  document.getElementById('assign-sub-amount').value = '';
+  document.getElementById('assign-sub-ref').value = '';
+  document.getElementById('assign-sub-notes').value = '';
+  document.getElementById('assign-sub-method').value = 'manual';
+  document.getElementById('assign-sub-pay-status').value = 'completed';
+  document.getElementById('assign-sub-plan-price').textContent = '';
+
+  const modal = document.getElementById('assign-sub-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const select = document.getElementById('assign-sub-plan');
+  select.innerHTML = '<option value="">Loading plans...</option>';
+
+  try {
+    const res = await fetch('/api/admin/subscription-plans', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load plans');
+    assignSubPlans = await res.json();
+    select.innerHTML = '<option value="">Select a plan</option>' +
+      assignSubPlans.filter(p => p.is_active).map(p =>
+        `<option value="${p.id}">${escapeHtml(p.display_name)} — $${p.price}/${p.interval || 'month'}</option>`
+      ).join('');
+  } catch (err) {
+    select.innerHTML = `<option value="">Error loading plans</option>`;
+  }
+}
+
+document.getElementById('assign-sub-plan').addEventListener('change', () => {
+  const planId = parseInt(document.getElementById('assign-sub-plan').value);
+  const plan = assignSubPlans.find(p => p.id === planId);
+  const priceEl = document.getElementById('assign-sub-plan-price');
+  if (plan) {
+    priceEl.textContent = plan.price === 0 ? 'Free plan — no payment needed' : `Plan price: $${plan.price}/${plan.interval || 'month'}`;
+    if (!document.getElementById('assign-sub-amount').value) {
+      document.getElementById('assign-sub-amount').placeholder = plan.price === 0 ? '0' : plan.price.toFixed(2);
+    }
+  } else {
+    priceEl.textContent = '';
+  }
+});
+
+function closeAssignSubModal() {
+  const modal = document.getElementById('assign-sub-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('assign-sub-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const customerId = document.getElementById('assign-sub-customer-id').value;
+  const errorEl = document.getElementById('assign-sub-error');
+  const btn = document.getElementById('assign-sub-submit');
+  errorEl.classList.add('hidden');
+
+  const planId = parseInt(document.getElementById('assign-sub-plan').value);
+  if (!planId) { errorEl.textContent = 'Please select a plan.'; errorEl.classList.remove('hidden'); return; }
+
+  const amountVal = document.getElementById('assign-sub-amount').value.trim();
+  const body = {
+    plan_id: planId,
+    payment_method: document.getElementById('assign-sub-method').value,
+    payment_status: document.getElementById('assign-sub-pay-status').value,
+    payment_ref: document.getElementById('assign-sub-ref').value.trim(),
+    notes: document.getElementById('assign-sub-notes').value.trim(),
+  };
+  if (amountVal !== '') body.amount = parseFloat(amountVal);
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="material-symbols-outlined text-[18px] spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Processing...';
+
+  try {
+    const res = await fetch(`/api/admin/customers/${customerId}/assign-subscription`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to assign subscription');
+    closeAssignSubModal();
+    showToast(`${data.plan} subscription assigned (${data.status}). ${data.payment_id ? 'Payment #' + data.payment_id + ' recorded.' : ''}`);
+    await loadCustomers();
+    if (!document.getElementById('detail-drawer').classList.contains('hidden')) {
+      viewCustomer(parseInt(customerId));
+    }
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check"/></svg> Assign & Record Payment';
+  }
+});
 
 async function unassignMenu(customerId, menuId, menuName) {
   if (!confirm(`Unassign "${menuName}" from this customer?\n\nThe menu will become unassigned and can be reassigned later.`)) return;
