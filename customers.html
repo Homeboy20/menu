@@ -471,9 +471,12 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   const errorEl = document.getElementById('login-error');
   errorEl.classList.add('hidden');
   try {
+    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+    const { csrfToken } = await csrfRes.json();
     const res = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      credentials: 'include',
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
