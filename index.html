@@ -8,7 +8,7 @@
   <meta name="description" content="Complete digital menu solution for restaurants, cafes, bars & juice bars. QR codes, real-time updates, analytics, online ordering. Boost sales by 30%. Get started today.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,700;1,9..144,800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -48,8 +48,10 @@
       --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
       --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
       --shadow-xl: 0 20px 50px rgba(0,0,0,0.15);
-      --font-display: 'Plus Jakarta Sans', sans-serif;
-      --font-body: 'DM Sans', sans-serif;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body: 'Outfit', system-ui, sans-serif;
+      --gold: #c9a96e;
+      --rich-dark: #1a0e06;
     }
     
     /* Grain texture overlay */
@@ -95,7 +97,66 @@
       0% { background-position: -200% center; }
       100% { background-position: 200% center; }
     }
-    
+
+    /* Feature Ticker Marquee */
+    .feature-ticker {
+      background: var(--primary);
+      color: white;
+      padding: 11px 0;
+      overflow: hidden;
+      position: relative;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .feature-ticker::before,
+    .feature-ticker::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 72px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .feature-ticker::before { left: 0; background: linear-gradient(to right, var(--primary), transparent); }
+    .feature-ticker::after  { right: 0; background: linear-gradient(to left,  var(--primary), transparent); }
+    .ticker-track {
+      display: flex;
+      animation: ticker-scroll 38s linear infinite;
+      width: max-content;
+      will-change: transform;
+    }
+    .ticker-list {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 0 24px;
+      border-right: 1px solid rgba(255,255,255,0.18);
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+    }
+    .ticker-item .ticker-dot {
+      width: 5px;
+      height: 5px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    @keyframes ticker-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track { animation: none; }
+    }
+
     body {
       font-family: var(--font-body);
       font-size: 16px;
@@ -103,13 +164,13 @@
       color: var(--text);
       background: var(--bg);
       -webkit-font-smoothing: antialiased;
-      letter-spacing: -0.01em;
+      letter-spacing: 0;
     }
     
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--font-display);
       font-weight: 700;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.01em;
       line-height: 1.2;
     }
     
@@ -153,14 +214,15 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--primary);
       text-decoration: none;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.01em;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       font-family: var(--font-display);
+      font-style: italic;
     }
     
     .logo:hover {
@@ -455,22 +517,24 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255,255,255,0.9);
-      padding: 8px 20px;
+      background: rgba(255,255,255,0.95);
+      padding: 9px 22px;
       border-radius: 50px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--primary);
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-sm);
+      margin-bottom: 28px;
+      box-shadow: 0 2px 16px rgba(194,65,12,0.14), 0 0 0 1px rgba(194,65,12,0.1);
+      font-family: var(--font-body);
+      letter-spacing: 0.01em;
     }
     
     .hero h1 {
-      font-size: clamp(36px, 5vw, 56px);
+      font-size: clamp(42px, 6.5vw, 76px);
       font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 20px;
-      letter-spacing: -0.03em;
+      line-height: 1.08;
+      margin-bottom: 22px;
+      letter-spacing: -0.02em;
       color: var(--text);
       position: relative;
     }
@@ -482,6 +546,8 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       animation: shimmer 3s ease infinite;
+      font-style: italic;
+      font-weight: 900;
     }
     
     .hero .subtitle {
@@ -566,27 +632,38 @@
     }
     
     .stat-card {
-      background: rgba(255,255,255,0.9);
-      padding: 24px;
+      background: rgba(255,255,255,0.95);
+      padding: 28px 20px 24px;
       border-radius: 16px;
       text-align: center;
       box-shadow: var(--shadow-md);
       backdrop-filter: blur(10px);
+      border-bottom: 3px solid var(--primary);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
     }
     
     .stat-number {
-      font-size: 36px;
-      font-weight: 900;
+      font-size: 52px;
+      font-weight: 800;
       color: var(--primary);
       display: block;
       margin-bottom: 4px;
-      letter-spacing: -1px;
+      letter-spacing: -2px;
+      font-family: var(--font-display);
+      line-height: 1;
     }
     
     .stat-label {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-light);
-      font-weight: 600;
+      font-weight: 500;
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
     
     /* Trust Bar */
@@ -643,12 +720,12 @@
     }
     
     .section-title {
-      font-size: clamp(28px, 4vw, 40px);
+      font-size: clamp(30px, 4.5vw, 50px);
       font-weight: 800;
       margin-bottom: 16px;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.015em;
       color: var(--text);
-      line-height: 1.15;
+      line-height: 1.1;
     }
     
     .section-subtitle {
@@ -721,22 +798,24 @@
     }
     
     .feature-icon {
-      width: 64px;
-      height: 64px;
-      background: white;
-      border: 3px solid var(--primary);
-      border-radius: 12px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(145deg, rgba(194,65,12,0.1) 0%, rgba(234,88,12,0.06) 100%);
+      border: none;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 26px;
       flex-shrink: 0;
-      transition: all 0.3s ease;
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: inset 0 0 0 1.5px rgba(194,65,12,0.18);
     }
     
     .feature-card:hover .feature-icon {
-      background: var(--primary);
-      transform: scale(1.05) rotate(-5deg);
+      background: var(--gradient-1);
+      transform: scale(1.1) rotate(-10deg);
+      box-shadow: 0 8px 24px rgba(194,65,12,0.35);
     }
     
     .feature-card h3 {
@@ -1101,7 +1180,19 @@
     
     /* Testimonials - Professional UI/UX Design */
     .testimonials {
-      background: #fef3c7;
+      background: #fdf5ec;
+      position: relative;
+    }
+    .testimonials::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent, transparent 40px,
+        rgba(194,65,12,0.025) 40px, rgba(194,65,12,0.025) 41px
+      );
+      pointer-events: none;
     }
     
     .testimonials-grid {
@@ -1113,19 +1204,32 @@
     .testimonial-card {
       background: white;
       padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      border: 2px solid #fed7aa;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      border: 1.5px solid rgba(201,169,110,0.3);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
       min-height: 320px;
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: '\201C';
+      position: absolute;
+      top: 20px;
+      right: 28px;
+      font-family: var(--font-display);
+      font-size: 96px;
+      line-height: 1;
+      color: rgba(194,65,12,0.08);
+      font-style: italic;
+      pointer-events: none;
     }
     
     .testimonial-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
-      border-color: #fdba74;
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+      border-color: var(--gold);
     }
     
     .stars {
@@ -1149,7 +1253,7 @@
       align-items: center;
       gap: 16px;
       padding-top: 24px;
-      border-top: 2px solid #fed7aa;
+      border-top: 1.5px solid rgba(201,169,110,0.3);
     }
     
     .author-avatar {
@@ -1377,11 +1481,11 @@
     }
     
     .demo-content h2 {
-      font-size: 42px;
-      font-weight: 900;
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
       margin-bottom: 20px;
-      line-height: 1.2;
-      letter-spacing: -1px;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
     }
     
     .demo-content p {
@@ -2089,11 +2193,11 @@
       </div>
       
       <div style="margin-top: 24px; text-align: center;">
-        <p style="color: rgba(255,255,255,0.9); font-size: 15px; font-weight: 600;">
-          🛡️ 30-Day Money-Back Guarantee • 🔒 Bank-Level Security • ✓ Cancel Anytime
+        <p style="color: var(--text-light); font-size: 13.5px; font-weight: 500; font-family: var(--font-body);">
+          🛡️ 30-Day Money-Back Guarantee &nbsp;•&nbsp; 🔒 Bank-Level Security &nbsp;•&nbsp; ✓ Cancel Anytime
         </p>
-        <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin-top: 12px;">
-          Already have an account? <a href="/login" style="color: #2dd4bf; font-weight: 600; text-decoration: none;">Sign in →</a>
+        <p style="color: var(--text-light); font-size: 13.5px; margin-top: 10px; font-family: var(--font-body);">
+          Already have an account? <a href="/login" style="color: var(--primary); font-weight: 700; text-decoration: none;">Sign in →</a>
         </p>
       </div>
       
@@ -2117,6 +2221,40 @@
       </div>
     </div>
   </section>
+
+  <!-- Feature Ticker -->
+  <div class="feature-ticker" role="marquee" aria-label="Platform features">
+    <div class="ticker-track" aria-hidden="true">
+      <ul class="ticker-list">
+        <li class="ticker-item"><span class="ticker-dot"></span>QR Code Menus</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Real-Time Updates</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Online Ordering</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Analytics Dashboard</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Custom Branding</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Staff Management</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Multiple Currencies</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Table Alerts</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>CSV Import</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Email Receipts</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Mobile-First Design</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Inventory Tracking</li>
+      </ul>
+      <ul class="ticker-list" aria-hidden="true">
+        <li class="ticker-item"><span class="ticker-dot"></span>QR Code Menus</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Real-Time Updates</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Online Ordering</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Analytics Dashboard</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Custom Branding</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Staff Management</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Multiple Currencies</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Table Alerts</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>CSV Import</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Email Receipts</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Mobile-First Design</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Inventory Tracking</li>
+      </ul>
+    </div>
+  </div>
 
   <!-- Trust Bar -->
   <div class="trust-bar">
