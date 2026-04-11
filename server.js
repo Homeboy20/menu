@@ -1863,10 +1863,10 @@ app.get('/health', (req, res) => {
 });
 
 // CSRF token endpoint - Returns a token for forms
-// overwrite=true: always issue a fresh token, never validate stale cookies
-// (CSRF_SECRET rotates on restart; old cookies would otherwise throw 403)
+// overwrite=false: reuse the existing valid cookie so multiple tabs never fight;
+// a fresh token+cookie is only created when no valid cookie exists.
 app.get('/api/csrf-token', (req, res) => {
-  const csrfToken = generateToken(req, res, true);
+  const csrfToken = generateToken(req, res, false);
   res.json({ csrfToken });
 });
 
@@ -2808,6 +2808,18 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     // Create session token
     const token = await createCustomerSession(customer.id, customer.email || customer.id);
 
+    // Generate and send email verification token (email-path accounts only)
+    if (customer.email && !isPhoneOnly) {
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      await pool.query('UPDATE customers SET verification_token = $1 WHERE id = $2', [verificationToken, customer.id]);
+      queueEmailVerificationEmail({
+        to: customer.email,
+        token: verificationToken,
+        businessName: cleanBusinessName,
+        contactName: cleanContactNamePlain,
+      });
+    }
+
     // Only queue welcome email for accounts with a valid email address
     if (customer.email) {
       queueWelcomeEmail({
@@ -2845,6 +2857,53 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
   } catch (err) {
     console.error('Customer registration error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/customers/verify-email – Click-through email verification link
+app.get('/api/customers/verify-email', async (req, res) => {
+  const rawToken = sanitizeStr(String(req.query.token || ''), 128);
+  if (!rawToken) return res.redirect('/login?verified=invalid');
+  try {
+    const { rows } = await pool.query(
+      `SELECT id FROM customers WHERE verification_token = $1 AND email_verified = 0 AND status = 'active' LIMIT 1`,
+      [rawToken]
+    );
+    if (!rows.length) return res.redirect('/login?verified=invalid');
+    await pool.query(
+      `UPDATE customers SET email_verified = 1, verification_token = '' WHERE id = $1`,
+      [rows[0].id]
+    );
+    return res.redirect('/login?verified=1');
+  } catch (err) {
+    console.error('Email verification error:', err);
+    return res.redirect('/login?verified=error');
+  }
+});
+
+// POST /api/customers/resend-verification – Resend verification email (authenticated)
+app.post('/api/customers/resend-verification', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, email, business_name, contact_name, email_verified FROM customers WHERE id = $1 LIMIT 1',
+      [req.customer.customerId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Account not found.' });
+    const customer = rows[0];
+    if (customer.email_verified) return res.status(400).json({ error: 'Email is already verified.' });
+    if (!customer.email) return res.status(400).json({ error: 'No email address on file.' });
+    const token = crypto.randomBytes(32).toString('hex');
+    await pool.query('UPDATE customers SET verification_token = $1 WHERE id = $2', [token, customer.id]);
+    queueEmailVerificationEmail({
+      to: customer.email,
+      token,
+      businessName: customer.business_name,
+      contactName: decryptField(customer.contact_name || ''),
+    });
+    res.json({ message: 'Verification email sent. Please check your inbox.' });
+  } catch (err) {
+    console.error('Resend verification error:', err);
+    res.status(500).json({ error: 'Failed to send verification email.' });
   }
 });
 
@@ -3209,8 +3268,8 @@ app.get('/api/customers/check', (req, res) => {
 app.get('/api/customers/me', requireCustomerAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT id, email, business_name, contact_name, phone, address, city, country, 
-             status, email_verified, created_at, last_login
+      SELECT id, email, business_name, contact_name, phone, address, city, country,
+             status, email_verified, phone_verified, registration_type, created_at, last_login
       FROM customers WHERE id = $1
     `, [req.customer.customerId]);
     
@@ -6635,6 +6694,38 @@ async function upsertCustomerContactRequest({
     ]
   );
   return rows[0]?.id || null;
+}
+
+function queueEmailVerificationEmail({ to, token, businessName, contactName }) {
+  if (!to || !token) return;
+  const safeBusiness = sanitizeStr(businessName || 'your business', 120);
+  const safeContact  = sanitizeStr(contactName || '', 120);
+  const greeting     = safeContact ? `Hi ${safeContact},` : 'Hi there,';
+  const verifyUrl    = `${getPublicBaseUrl()}/api/customers/verify-email?token=${encodeURIComponent(token)}`;
+  const supportEmail = process.env.SUPPORT_EMAIL || 'support@restorder.online';
+
+  const subject = 'Verify your RestOrder email address';
+  const text = [
+    greeting, '',
+    `Please verify your email to complete your RestOrder account for ${safeBusiness}.`,
+    `Verify here: ${verifyUrl}`, '',
+    'This link expires in 24 hours.',
+    'If you did not register, you can safely ignore this email.',
+    '', supportEmail,
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:640px;margin:0 auto;padding:20px;">
+      <h2 style="margin:0 0 12px 0;color:#ea580c;">Verify your email</h2>
+      <p style="margin:0 0 10px 0;">${validator.escape(greeting)}</p>
+      <p style="margin:0 0 16px 0;">Please verify your email for <strong>${validator.escape(safeBusiness)}</strong> to activate your account.</p>
+      <p style="margin:0 0 20px 0;"><a href="${verifyUrl}" style="display:inline-block;padding:12px 28px;background:#ea580c;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Verify Email Address</a></p>
+      <p style="margin:0 0 8px 0;color:#475569;font-size:13px;">Or paste this link: <a href="${verifyUrl}">${verifyUrl}</a></p>
+      <p style="margin:0 0 8px 0;color:#475569;font-size:13px;">This link expires in 24 hours.</p>
+      <p style="margin:0;color:#94a3b8;font-size:12px;">If you did not create a RestOrder account you can safely ignore this email.</p>
+    </div>
+  `;
+  queueTransactionalEmail({ to, subject, text, html }, 'email-verification');
 }
 
 function queueWelcomeEmail({ to, businessName, contactName }) {

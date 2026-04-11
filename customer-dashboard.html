@@ -151,6 +151,25 @@
       <p class="text-stone-500">Welcome back! Here's your restaurant overview.</p>
     </div>
 
+    <!-- Email verification banner -->
+    <div id="email-verify-banner" class="hidden mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start justify-between gap-4">
+      <div class="flex items-start gap-3">
+        <div class="size-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <p class="font-semibold text-amber-900 text-sm">Verify your email address</p>
+          <p class="text-amber-700 text-xs mt-0.5">Check your inbox for a verification link. Your account works normally until then.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button id="resend-verify-btn" onclick="resendVerification()" class="px-3 py-1.5 text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition">Resend email</button>
+        <button onclick="document.getElementById('email-verify-banner').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 transition p-1" aria-label="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
@@ -1427,7 +1446,7 @@ function closePlanChangeModal() {
   if (contactEl) contactEl.value = 'email';
 }
 
-function openSupportModal() {
+async function resendVerification() {\n  const btn = document.getElementById('resend-verify-btn');\n  btn.disabled = true;\n  btn.textContent = 'Sending...';\n  try {\n    const csrf = await getCsrf();\n    const res = await fetch('/api/customers/resend-verification', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },\n      body: '{}'\n    });\n    const d = await res.json();\n    if (res.ok) {\n      btn.textContent = 'Sent!';\n      showSubToast(d.message || 'Verification email sent.');\n    } else {\n      btn.textContent = 'Resend email';\n      btn.disabled = false;\n      showSubToast(d.error || 'Failed to send.', true);\n    }\n  } catch(e) {\n    btn.textContent = 'Resend email';\n    btn.disabled = false;\n    showSubToast('Failed to send verification email.', true);\n  }\n}\n\nfunction openSupportModal() {
   const menus = window.customerMenus || [];
   const select = document.getElementById('support-menu-id');
   select.innerHTML = ['<option value="">General account support</option>']
@@ -1877,6 +1896,16 @@ async function showSubscribePrompt() {
   const authed = await checkAuth();
   if (authed) {
     await loadDashboard();
+    // Show email verification banner if needed
+    try {
+      const meRes = await fetch('/api/customers/me', { headers: { 'x-customer-token': getToken() } });
+      if (meRes.ok) {
+        const me = await meRes.json();
+        if (!me.email_verified && me.email && me.registration_type !== 'phone') {
+          document.getElementById('email-verify-banner').classList.remove('hidden');
+        }
+      }
+    } catch(e) { /* profile check failed, skip banner */ }
     // Show onboarding welcome for brand-new signups
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('onboard') === '1') {

@@ -173,6 +173,9 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 
   <div id="firebase-error" class="err-msg hidden" style="margin-top:.75rem"></div>
 
+  <!-- Email verified / error notices from verification link -->
+  <div id="verified-notice" class="hidden" style="margin-top:.75rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:.6rem .85rem;font-size:.8125rem;color:#86efac;"></div>
+
   <div style="text-align:center;margin-top:1.5rem;font-size:.8125rem;color:var(--text-dim)">
     Don't have an account? <a href="/register" style="font-weight:600">Start for free &rarr;</a>
   </div>
@@ -293,6 +296,15 @@ window.addEventListener('load',async()=>{
   if(token){try{const res=await fetch('/api/customers/check',{headers:{'x-customer-token':token}});const data=await res.json();
     if(data.authenticated){if(data.customer?.isStaff){window.location.href=data.customer?.staffRole==='manager'?'/menu-editor':'/staff-panel';}else{window.location.href='/dashboard';}}}catch(_){}}
   await handleResetTokenFromUrl();
+
+  // Show email verification result from ?verified= param
+  (()=>{
+    const p=new URLSearchParams(window.location.search).get('verified');
+    const n=document.getElementById('verified-notice');
+    if(!n)return;
+    if(p==='1'){n.textContent='\u2713 Email verified! You can now sign in.';n.classList.remove('hidden');window.history.replaceState({},'',window.location.pathname);}
+    else if(p==='invalid'||p==='error'){n.textContent='This verification link has already been used or has expired.';n.style.background='rgba(239,68,68,.1)';n.style.borderColor='rgba(239,68,68,.25)';n.style.color='#fca5a5';n.classList.remove('hidden');}
+  })();
 
   // Country detect
   let code='';try{const r=await fetch('/api/geo');const d=await r.json();code=d.country||'';}catch(e){}
