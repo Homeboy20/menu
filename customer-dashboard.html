@@ -1067,7 +1067,7 @@ async function loadSubscription() {
 
         ${currentPlan?.price > 0 && currentSub?.subscription_id ? `
         <div class="mt-6 flex gap-3">
-          <button onclick="openCancelModal('${currentSub.menu_id}', '${escapeHtml(currentPlan.display_name)}')"
+          <button onclick="openCancelModal('${escapeHtml(currentPlan.display_name)}')"
             class="px-5 py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-semibold rounded-xl text-sm transition">
             Cancel Subscription
           </button>
@@ -1083,7 +1083,7 @@ async function loadSubscription() {
               <p class="font-semibold text-sm ${expired ? 'text-red-800' : 'text-amber-800'}">${expired ? 'Your trial has expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left in your free trial`}</p>
               <p class="text-xs ${expired ? 'text-red-600' : 'text-amber-600'} mt-0.5">${expired ? 'Upgrade now to keep your menu online.' : `Trial ends ${trialEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}</p>
             </div>
-            <a href="/checkout?plan=professional&menu_id=${currentSub.menu_id}" class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition flex-shrink-0">Upgrade Now</a>
+            <a href="/checkout?plan=professional" class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition flex-shrink-0">Upgrade Now</a>
           </div>`;
         })() : ''}
       </div>
@@ -1112,7 +1112,7 @@ async function loadSubscription() {
                 ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
               </div>
               ${!isCurrent ? `
-                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}')"
+                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price})"
                   class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
                   ${isUpgrade ? '? Upgrade' : '? Downgrade'} to ${escapeHtml(plan.display_name)}
                 </button>` : `
@@ -1263,15 +1263,13 @@ function loadPayPalSDK(clientId, environment) {
 }
 
 // Plan click: open plan-change modal for all plans (payment gateways loaded inside modal)
-function handlePlanClick(planId, planName, planPrice, menuId) {
-  openChangePlanModal(planId, planName, planPrice, menuId);
+function handlePlanClick(planId, planName, planPrice) {
+  openChangePlanModal(planId, planName, planPrice);
 }
 
 // Plan change modal
-async function openChangePlanModal(planId, planName, planPrice, menuId) {
+async function openChangePlanModal(planId, planName, planPrice) {
   const modal = document.getElementById('plan-change-modal');
-  const menus = window.customerMenus || [];
-  const targetMenuId = menuId || menus[0]?.id;
 
   document.getElementById('pcm-plan-name').textContent = planName;
   document.getElementById('pcm-price').textContent = planPrice === 0 ? 'FREE' : `$${planPrice}/month`;
@@ -1289,7 +1287,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
 
   if (planPrice === 0) {
     document.getElementById('pcm-note').textContent = 'You will be moved to the free plan immediately.';
-    confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId);
+    confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice);
     return;
   }
 
@@ -1312,7 +1310,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
       section.innerHTML = '';
       document.getElementById('pcm-note').textContent = 'Our team will contact you within 24 hours with payment instructions.';
       confirmBtn.classList.remove('hidden');
-      confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId);
+      confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice);
       return;
     }
 
@@ -1337,7 +1335,7 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
     if (hasFW) {
       await loadScript('https://checkout.flutterwave.com/v3.js');
       document.getElementById('fw-pay-btn').onclick = () =>
-        handleFlutterwavePayment(planId, planPrice, planName, targetMenuId, gateways.flutterwave.public_key);
+        handleFlutterwavePayment(planId, planPrice, planName, null, gateways.flutterwave.public_key);
     }
 
     if (hasPP) {
@@ -1346,10 +1344,12 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
         style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
         createOrder: async () => {
           const csrf = await getCsrf();
+          const menus = window.customerMenus || [];
+          const firstMenuId = menus[0]?.id;
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ plan_id: planId, menu_id: targetMenuId })
+            body: JSON.stringify({ plan_id: planId, menu_id: firstMenuId })
           });
           const d = await r.json();
           if (!d.order_id) throw new Error(d.error || 'Failed to create order');
@@ -1358,25 +1358,25 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
         onApprove: async (data) => {
           showSubToast('Processing payment…');
           const csrf = await getCsrf();
+          const menus = window.customerMenus || [];
+          const firstMenuId = menus[0]?.id;
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: targetMenuId })
+            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: firstMenuId })
           });
           const d = await r.json();
-          closePlanChangeModal();
           if (d.success) {
-            showSubToast('Payment successful! Subscription activated.');
-            await loadSubscription(); await loadDashboard();
-          } else { showSubToast('Capture failed: ' + d.error, true); }
+            showPaymentResult(true, planId, planName, planPrice, targetMenuId);
+          } else { showPaymentResult(false, planId, planName, planPrice, targetMenuId, d.error || 'Capture failed'); }
         },
-        onError: (err) => showSubToast('PayPal error. Please try again.', true)
+        onError: (err) => showPaymentResult(false, planId, planName, planPrice, targetMenuId, 'PayPal error. Please try again.')
       }).render('#paypal-button-container');
     }
 
     if (hasBT) {
       document.getElementById('bt-pay-btn').onclick = () => {
-        doChangePlan(planId, planName, planPrice, targetMenuId, 'bank_transfer');
+        doChangePlan(planId, planName, planPrice, null, 'bank_transfer');
       };
     }
 
@@ -1403,6 +1403,43 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
   }
 }
 
+function showPaymentResult(success, planId, planName, planPrice, menuId, errorMsg) {
+  const section = document.getElementById('pcm-payment-section');
+  document.getElementById('pcm-confirm-btn').classList.add('hidden');
+  if (success) {
+    section.innerHTML = `
+      <div class="p-5 bg-green-50 border border-green-200 rounded-xl text-center">
+        <svg class="material-symbols-outlined text-green-600 text-[44px] mx-auto mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>
+        <p class="font-bold text-green-800 text-lg">Payment Successful!</p>
+        <p class="text-green-700 text-sm mt-1">Your ${escapeHtml(planName)} subscription is now active.</p>
+      </div>`;
+    setTimeout(async () => { closePlanChangeModal(); await loadSubscription(); await loadDashboard(); }, 2000);
+    return;
+  }
+  section.innerHTML = `
+    <div class="p-5 bg-red-50 border border-red-200 rounded-xl">
+      <div class="text-center mb-4">
+        <svg class="material-symbols-outlined text-red-500 text-[44px] mx-auto mb-2" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg>
+        <p class="font-bold text-red-800 text-lg">Payment Failed</p>
+        <p class="text-red-600 text-sm mt-1">${escapeHtml(errorMsg || 'Your payment could not be processed.')}</p>
+      </div>
+      <div class="space-y-2">
+        <button onclick="openChangePlanModal('${escapeHtml(planId)}','${escapeHtml(planName)}',${planPrice},'${escapeHtml(menuId)}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm transition">
+          <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-refresh"/></svg>
+          Retry Payment
+        </button>
+        <button onclick="openChangePlanModal('${escapeHtml(planId)}','${escapeHtml(planName)}',${planPrice},'${escapeHtml(menuId)}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-sm transition">
+          <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-swap_horiz"/></svg>
+          Try Different Payment Method
+        </button>
+        <button onclick="closePlanChangeModal();openSupportModal();" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 font-semibold text-sm transition">
+          <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
+          Contact Support
+        </button>
+      </div>
+    </div>`;
+}
+
 function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey) {
   if (!window.FlutterwaveCheckout) { showSubToast('Flutterwave SDK not loaded.', true); return; }
   const txRef = `${menuId}:${planId}:${Date.now()}`;
@@ -1427,11 +1464,10 @@ function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey
           body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: planId })
         });
         const d = await r.json();
-        closePlanChangeModal();
-        if (d.success) { showSubToast('Payment successful! Subscription activated.'); await loadSubscription(); await loadDashboard(); }
-        else showSubToast('Verification failed: ' + d.error, true);
+        if (d.success) { showPaymentResult(true, planId, planName, planPrice, menuId); }
+        else showPaymentResult(false, planId, planName, planPrice, menuId, d.error || 'Verification failed');
       } else {
-        showSubToast('Payment was not completed.', true);
+        showPaymentResult(false, planId, planName, planPrice, menuId, 'Payment was not completed.');
       }
     },
     onclose: () => {}
@@ -1526,11 +1562,8 @@ async function submitSupportRequest() {
 
 async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) {
   const btn = document.getElementById('pcm-confirm-btn');
-  const menus = window.customerMenus || [];
-  const targetMenuId = menuId || (menus[0]?.id);
   const requestMessage = (document.getElementById('pcm-message')?.value || '').trim();
   const preferredContact = document.getElementById('pcm-contact-method')?.value || 'email';
-  if (!targetMenuId) { showSubToast('No menu found. Please create a menu first.', true); return; }
 
   btn.disabled = true;
   btn.textContent = 'Processing...';
@@ -1540,7 +1573,6 @@ async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) 
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
       body: JSON.stringify({
-        menu_id: targetMenuId,
         plan_id: planId,
         payment_method: paymentMethod || 'manual',
         request_message: requestMessage,
@@ -1567,8 +1599,7 @@ async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) 
 }
 
 // Cancel modal
-function openCancelModal(menuId, planName) {
-  document.getElementById('cancel-menu-id').value = menuId;
+function openCancelModal(planName) {
   document.getElementById('cancel-plan-name').textContent = planName;
   document.getElementById('cancel-modal').classList.remove('hidden');
 }
@@ -1578,15 +1609,15 @@ function closeCancelModal() {
 }
 
 async function doCancel() {
-  const menuId = document.getElementById('cancel-menu-id').value;
   const btn = document.getElementById('cancel-confirm-btn');
   btn.disabled = true;
   btn.textContent = 'Cancelling...';
   try {
+    const csrf = await getCsrf();
     const res = await fetch('/api/customers/subscription/cancel', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
-      body: JSON.stringify({ menu_id: menuId })
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+      body: JSON.stringify({})
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to cancel');
@@ -1799,7 +1830,7 @@ function formatDate(isoStr) {
 }
 
 // Show trial-expired overlay with upgrade options
-async function showTrialExpiredOverlay(menuId) {
+async function showTrialExpiredOverlay() {
   try {
     const plansRes = await fetch('/api/subscription-plans');
     if (plansRes.ok) {
@@ -1808,7 +1839,7 @@ async function showTrialExpiredOverlay(menuId) {
       const container = document.getElementById('trial-expired-plans');
       container.innerHTML = paidPlans.map(p => {
         const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
-        const href = `/checkout?plan=${encodeURIComponent(p.name)}${menuId ? '&menu_id=' + menuId : ''}`;
+        const href = `/checkout?plan=${encodeURIComponent(p.name)}`;
         return `
           <a href="${href}" class="block border border-stone-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition cursor-pointer no-underline">
             <div class="flex items-center justify-between mb-2">
@@ -1946,7 +1977,7 @@ async function showSubscribePrompt() {
         const trialSub = subs.find(s => s.status === 'trial' && s.trial_end);
         if (trialSub && new Date(trialSub.trial_end) < new Date()) {
           showSection('subscription');
-          showTrialExpiredOverlay(trialSub.menu_id);
+          showTrialExpiredOverlay();
         } else {
           // Prompt subscription for phone-only registrations or explicit ?subscribe=1
           // Don't show on ?onboard=1 — let them explore first

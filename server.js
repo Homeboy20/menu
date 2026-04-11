@@ -665,18 +665,27 @@ function requirePlan(minPlan) {
       const menuId = req.params.id || req.body?.menu_id;
       const customerId = req.customer?.customerId || req.customer?.id;
 
+      // Per-business subscription: always resolve to customer_id and look up the single business subscription
+      let resolvedCustomerId = customerId;
+      if (!resolvedCustomerId && menuId) {
+        const { rows: mRows } = await pool.query('SELECT customer_id FROM menus WHERE id=$1', [menuId]);
+        if (mRows.length) resolvedCustomerId = mRows[0].customer_id;
+      }
+
       let rows;
 
-      if (menuId) {
+      if (resolvedCustomerId) {
         ({ rows } = await pool.query(`
           SELECT s.status, s.trial_end, sp.name AS plan_name, sp.display_name
           FROM subscriptions s
           JOIN subscription_plans sp ON s.plan_id = sp.id
-          WHERE s.menu_id = $1
-        `, [menuId]));
+          WHERE s.customer_id = $1
+          ORDER BY sp.menu_limit DESC
+          LIMIT 1
+        `, [resolvedCustomerId]));
 
         if (!rows.length) {
-          return upgradeRedirect({ error: 'No subscription found for this menu.', upgrade_required: true });
+          return upgradeRedirect({ error: 'No subscription found for this account.', upgrade_required: true });
         }
 
         const sub = rows[0];
@@ -696,33 +705,6 @@ function requirePlan(minPlan) {
           });
         }
         req.subscription = sub;
-
-      } else if (customerId) {
-        // No menu context – check the customer's best active plan
-        ({ rows } = await pool.query(`
-          SELECT sp.name AS plan_name
-          FROM subscriptions s
-          JOIN subscription_plans sp ON s.plan_id = sp.id
-          JOIN menus m ON m.id = s.menu_id
-          WHERE m.customer_id = $1
-            AND s.status IN ('active', 'trial')
-            AND (s.trial_end IS NULL OR s.trial_end > $2)
-          ORDER BY sp.menu_limit DESC
-          LIMIT 1
-        `, [customerId, new Date().toISOString()]));
-
-        if (!rows.length) {
-          return upgradeRedirect({ error: 'No active subscription found.', upgrade_required: true });
-        }
-
-        const currentIdx = PLAN_ORDER.indexOf(rows[0].plan_name);
-        const requiredIdx = PLAN_ORDER.indexOf(minPlan);
-        if (currentIdx < requiredIdx) {
-          return upgradeRedirect({
-            error: `This feature requires the ${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)} plan or higher.`,
-            current_plan: rows[0].plan_name, required_plan: minPlan, upgrade_required: true
-          });
-        }
       }
 
       next();
@@ -741,13 +723,12 @@ async function checkMenuLimit(req, res, next) {
 
     const customerId = req.customer.customerId || req.customer.id;
 
-    // Find the customer's best active plan
+    // Find the customer's active plan by customer_id (per-business subscription)
     const { rows: planRows } = await pool.query(`
       SELECT sp.menu_limit, sp.name AS plan_name, sp.display_name
       FROM subscriptions s
       JOIN subscription_plans sp ON s.plan_id = sp.id
-      JOIN menus m ON m.id = s.menu_id
-      WHERE m.customer_id = $1
+      WHERE s.customer_id = $1
         AND s.status IN ('active', 'trial')
         AND (s.trial_end IS NULL OR s.trial_end > $2)
       ORDER BY sp.menu_limit DESC
@@ -1164,6 +1145,26 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_plan ON subscriptions (plan_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_status ON subscriptions (status)`);
     await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS next_billing_date TEXT`);
+    // Per-business subscription: add customer_id column and migrate from menu_id
+    await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_customer ON subscriptions (customer_id)`);
+    // Unique constraint on customer_id for per-business subscription upserts
+    await client.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'uq_subscriptions_customer_id'
+        ) THEN
+          ALTER TABLE subscriptions ADD CONSTRAINT uq_subscriptions_customer_id UNIQUE (customer_id);
+        END IF;
+      END $$
+    `);
+    // Backfill customer_id from menus for existing rows that don't have it
+    await client.query(`
+      UPDATE subscriptions s
+      SET customer_id = m.customer_id
+      FROM menus m
+      WHERE s.menu_id = m.id AND s.customer_id IS NULL
+    `);
 
     // Payments table
     await client.query(`
@@ -2638,12 +2639,12 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
     `, [menuId, cleanBusinessName, qrCode, now, customer.id]);
 
-    // Create subscription
+    // Create subscription (per-business: keyed on customer.id)
     if (effectivePrice > 0) {
       if (payment_method === 'bank_transfer') {
         // Bank transfer: create subscription as pending_payment, insert pending payment record
         const billing = new Date(); billing.setMonth(billing.getMonth() + 1);
-        const { rows: subRows } = await pool.query(`INSERT INTO subscriptions (menu_id, plan_id, status, start_date, next_billing_date, created_at) VALUES ($1,$2,'pending_payment',$3,$4,$3) ON CONFLICT (menu_id) DO UPDATE SET plan_id=$2, status='pending_payment', next_billing_date=$4 RETURNING id`, [menuId, plan.id, now, billing.toISOString()]);
+        const { rows: subRows } = await pool.query(`INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, next_billing_date, created_at) VALUES ($1,$2,$3,'pending_payment',$4,$5,$4) ON CONFLICT (customer_id) DO UPDATE SET plan_id=$3, status='pending_payment', next_billing_date=$5 RETURNING id`, [menuId, customer.id, plan.id, now, billing.toISOString()]);
         const subId = subRows[0].id;
         await pool.query(`INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, notes, created_at) VALUES ($1,$2,'USD','bank_transfer',$3,'pending',$4,$5)`, [subId, effectivePrice, `BT-${Date.now()}`, `${plan.display_name} - bank transfer pending confirmation`, now]);
       } else {
@@ -2651,16 +2652,16 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
       }
       if (plan.name === 'trial') {
         const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-        await pool.query(`UPDATE subscriptions SET trial_end=$1, status='trial' WHERE menu_id=$2`, [trialEnd, menuId]);
+        await pool.query(`UPDATE subscriptions SET trial_end=$1, status='trial' WHERE customer_id=$2`, [trialEnd, customer.id]);
       }
     } else if (plan.name === 'trial') {
       // Trial plan (price=0): create subscription with trial status and 7-day expiry
       const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const billing = new Date(); billing.setMonth(billing.getMonth() + 1);
-      await pool.query(`INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, next_billing_date, created_at) VALUES ($1,$2,'trial',$3,$4,$5,$3) ON CONFLICT (menu_id) DO UPDATE SET plan_id=$2, status='trial', trial_end=$4, next_billing_date=$5`, [menuId, plan.id, now, trialEnd, billing.toISOString()]);
+      await pool.query(`INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, next_billing_date, created_at) VALUES ($1,$2,$3,'trial',$4,$5,$6,$4) ON CONFLICT (customer_id) DO UPDATE SET plan_id=$3, status='trial', trial_end=$5, next_billing_date=$6`, [menuId, customer.id, plan.id, now, trialEnd, billing.toISOString()]);
     } else {
       const billing = new Date(); billing.setMonth(billing.getMonth() + 1);
-      await pool.query(`INSERT INTO subscriptions (menu_id, plan_id, status, start_date, next_billing_date, created_at) VALUES ($1,$2,'active',$3,$4,$3) ON CONFLICT (menu_id) DO UPDATE SET plan_id=$2, status='active', next_billing_date=$4`, [menuId, plan.id, now, billing.toISOString()]);
+      await pool.query(`INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, next_billing_date, created_at) VALUES ($1,$2,$3,'active',$4,$5,$4) ON CONFLICT (customer_id) DO UPDATE SET plan_id=$3, status='active', next_billing_date=$5`, [menuId, customer.id, plan.id, now, billing.toISOString()]);
     }
 
     // Increment promo usage
@@ -2800,10 +2801,10 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
         const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
         if (trialPlan.length > 0) {
           await pool.query(`
-            INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, created_at)
-            VALUES ($1, $2, 'trial', $3, $4, $3)
-            ON CONFLICT (menu_id) DO NOTHING
-          `, [defaultMenuId, trialPlan[0].id, menuNow, trialEnd]);
+            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
+            VALUES ($1, $2, $3, 'trial', $4, $5, $4)
+            ON CONFLICT (customer_id) DO NOTHING
+          `, [defaultMenuId, customer.id, trialPlan[0].id, menuNow, trialEnd]);
           // Mark customer as having used their free trial
           await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
         }
@@ -3218,9 +3219,9 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
         if (trialPlan.length) {
           const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
           await pool.query(
-            `INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, created_at)
-             VALUES ($1,$2,'trial',$3,$4,$3) ON CONFLICT (menu_id) DO NOTHING`,
-            [menuId, trialPlan[0].id, now, trialEnd]
+            `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
+             VALUES ($1,$2,$3,'trial',$4,$5,$4) ON CONFLICT (customer_id) DO NOTHING`,
+            [menuId, customer.id, trialPlan[0].id, now, trialEnd]
           );
           // Mark customer as having used their free trial
           await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
@@ -4480,17 +4481,17 @@ app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, checkMenuLimit, as
     if (req.isCustomer) {
       await pool.query('UPDATE menus SET customer_id = $1 WHERE id = $2', [req.customer.id, menuId]);
 
-      // Auto-assign trial subscription to new menus (first menu gets 7-day trial)
+      // Auto-assign trial subscription to new customers that don't have one yet (per-business)
       try {
         const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
         if (trialPlan.length > 0) {
           const trialNow = new Date().toISOString();
           const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
           await pool.query(`
-            INSERT INTO subscriptions (menu_id, plan_id, status, start_date, trial_end, created_at)
-            VALUES ($1, $2, 'trial', $3, $4, $3)
-            ON CONFLICT (menu_id) DO NOTHING
-          `, [menuId, trialPlan[0].id, trialNow, trialEnd]);
+            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
+            VALUES ($1, $2, $3, 'trial', $4, $5, $4)
+            ON CONFLICT (customer_id) DO NOTHING
+          `, [menuId, req.customer.id, trialPlan[0].id, trialNow, trialEnd]);
           // Mark customer as having used their free trial
           await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [req.customer.id]).catch(() => {});
         }
@@ -5593,7 +5594,7 @@ app.get('/api/subscriptions', requireAuth, async (req, res) => {
     const where = status === 'all' ? '' : 'WHERE s.status = $1';
     const params = status === 'all' ? [] : [status];
     const { rows } = await pool.query(`
-      SELECT 
+      SELECT
         s.*,
         sp.display_name as plan_name,
         sp.price as plan_price,
@@ -5601,12 +5602,13 @@ app.get('/api/subscriptions', requireAuth, async (req, res) => {
         sp.menu_limit,
         sp.location_limit,
         sp.features,
-        m.restaurant_name,
+        COALESCE(m.restaurant_name, c.business_name, 'N/A') as restaurant_name,
         m.email,
-        m.total_scans
+        COALESCE(m.total_scans, 0) as total_scans
       FROM subscriptions s
       JOIN subscription_plans sp ON s.plan_id = sp.id
-      JOIN menus m ON s.menu_id = m.id
+      LEFT JOIN menus m ON s.menu_id = m.id
+      LEFT JOIN customers c ON s.customer_id = c.id
       ${where}
       ORDER BY s.created_at DESC
     `, params);
@@ -5618,7 +5620,7 @@ app.get('/api/subscriptions', requireAuth, async (req, res) => {
 app.get('/api/subscriptions/:id', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT 
+      SELECT
         s.*,
         sp.display_name as plan_name,
         sp.price as plan_price,
@@ -5626,13 +5628,14 @@ app.get('/api/subscriptions/:id', requireAuth, async (req, res) => {
         sp.menu_limit,
         sp.location_limit,
         sp.features,
-        m.restaurant_name
+        COALESCE(m.restaurant_name, c.business_name, 'N/A') as restaurant_name
       FROM subscriptions s
       JOIN subscription_plans sp ON s.plan_id = sp.id
-      JOIN menus m ON s.menu_id = m.id
+      LEFT JOIN menus m ON s.menu_id = m.id
+      LEFT JOIN customers c ON s.customer_id = c.id
       WHERE s.id = $1
     `, [req.params.id]);
-    
+
     if (!rows.length) return res.status(404).json({ error: 'Subscription not found.' });
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -5857,17 +5860,16 @@ app.get('/api/menus/:id/usage', async (req, res) => {
 
 // ── Customer Subscription Management ──────────────────────────────────────────
 
-// GET /api/customers/subscriptions - Get customer's subscriptions for all menus
+// GET /api/customers/subscriptions - Get customer's subscription (per-business model)
 app.get('/api/customers/subscriptions', requireCustomerAuth, async (req, res) => {
   try {
     const customerId = req.customer.id;
-    
-    // Get all menus for this customer with their subscriptions
+
+    // Return the single business-level subscription for this customer
     const { rows } = await pool.query(`
-      SELECT 
-        m.id as menu_id,
-        m.restaurant_name,
+      SELECT
         s.id as subscription_id,
+        s.customer_id,
         s.status,
         s.start_date,
         s.end_date,
@@ -5880,20 +5882,16 @@ app.get('/api/customers/subscriptions', requireCustomerAuth, async (req, res) =>
         sp.interval,
         sp.menu_limit,
         sp.location_limit,
-        sp.features,
-        u.menus_count,
-        u.locations_count,
-        u.scans_count
-      FROM menus m
-      LEFT JOIN subscriptions s ON m.id = s.menu_id
-      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
-      LEFT JOIN usage_tracking u ON m.id = u.menu_id
-      WHERE m.customer_id = $1
-      ORDER BY m.created_at DESC
+        sp.features
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.customer_id = $1
+      ORDER BY s.created_at DESC
+      LIMIT 1
     `, [customerId]);
-    
+
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { res.status(500).json({ error: 'Failed to load subscription.' }); }
 });
 
 // GET /api/customers/payments - Get payment history for the authenticated customer
@@ -5902,17 +5900,16 @@ app.get('/api/customers/payments', requireCustomerAuth, async (req, res) => {
     const customerId = req.customer.id;
     const { rows } = await pool.query(`
       SELECT p.id, p.amount, p.currency, p.payment_method, p.status, p.paid_at, p.notes, p.created_at,
-             s.menu_id, sp.display_name as plan_name, m.restaurant_name
+             sp.display_name as plan_name
       FROM payments p
       JOIN subscriptions s ON p.subscription_id = s.id
-      JOIN menus m ON s.menu_id = m.id
       LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
-      WHERE m.customer_id = $1
+      WHERE s.customer_id = $1
       ORDER BY p.created_at DESC
       LIMIT 20
     `, [customerId]);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { res.status(500).json({ error: 'Failed to load payments.' }); }
 });
 
 // GET /api/customers/support-requests - Get all contact/request history for the authenticated customer
@@ -6025,80 +6022,72 @@ app.post('/api/customers/support-requests', requireCustomerAuth, doubleCsrfProte
   }
 });
 
-// POST /api/customers/subscription/change - Customer: Change subscription plan
+// POST /api/customers/subscription/change - Customer: Change subscription plan (per-business)
 app.post('/api/customers/subscription/change', requireCustomerAuth, requireCustomerOwner, doubleCsrfProtection, async (req, res) => {
   try {
     const customerId = req.customer.id;
-    const menuId = sanitizeStr(req.body.menu_id, 100);
     const planId = parseInt(req.body.plan_id);
     const paymentMethod = sanitizeStr(req.body.payment_method, 50) || 'manual';
     const requestMessage = sanitizeStr(req.body.request_message, 1200);
     const preferredContactRaw = sanitizeStr(req.body.preferred_contact, 20).toLowerCase();
     const preferredContact = ['email', 'phone', 'either'].includes(preferredContactRaw) ? preferredContactRaw : 'email';
-    
-    if (!menuId || !planId) {
-      return res.status(400).json({ error: 'menu_id and plan_id required.' });
+
+    if (!planId) {
+      return res.status(400).json({ error: 'plan_id required.' });
     }
-    
-    // Verify the menu belongs to this customer
-    const { rows: menuRows } = await pool.query(
-      `SELECT m.id, m.restaurant_name, c.email AS customer_email, c.business_name, c.phone AS encrypted_phone
-       FROM menus m
-       LEFT JOIN customers c ON m.customer_id = c.id
-       WHERE m.id = $1 AND m.customer_id = $2`,
-      [menuId, customerId]
+
+    // Get customer info
+    const { rows: custRows } = await pool.query(
+      `SELECT c.id, c.email, c.business_name, c.phone AS encrypted_phone
+       FROM customers c WHERE c.id = $1`,
+      [customerId]
     );
-    
-    if (!menuRows.length) {
-      return res.status(403).json({ error: 'You do not have permission to modify this menu.' });
-    }
-    
+    if (!custRows.length) return res.status(404).json({ error: 'Customer not found.' });
+    const custInfo = custRows[0];
+
     // Get the new plan details
     const { rows: planRows } = await pool.query(
       'SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1',
       [planId]
     );
-    
     if (!planRows.length) {
       return res.status(404).json({ error: 'Subscription plan not found.' });
     }
-    
+
     const newPlan = planRows[0];
     const now = new Date().toISOString();
-    
-    // Check if subscription exists
+
+    const customerEmail = sanitizeEmail(custInfo.email || req.customer.email || '');
+    const customerPhone = sanitizeStr(decryptField(custInfo.encrypted_phone || '') || '', 80);
+    const businessName = sanitizeStr(custInfo.business_name || '', 120);
+    const requestSubject = `Upgrade request to ${sanitizeStr(newPlan.display_name || 'paid plan', 120)}`;
+
+    // Check if subscription exists for this customer
     const { rows: existingSub } = await pool.query(
       `SELECT s.id, s.plan_id, sp.display_name AS current_plan_name
        FROM subscriptions s
        LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
-       WHERE s.menu_id = $1`,
-      [menuId]
+       WHERE s.customer_id = $1`,
+      [customerId]
     );
-    const menuInfo = menuRows[0];
-    const customerEmail = sanitizeEmail(menuInfo.customer_email || req.customer.email || '');
-    const customerPhone = sanitizeStr(decryptField(menuInfo.encrypted_phone || '') || '', 80);
-    const businessName = sanitizeStr(menuInfo.business_name || '', 120);
-    const restaurantName = sanitizeStr(menuInfo.restaurant_name || '', 120);
-    const requestSubject = `Upgrade request to ${sanitizeStr(newPlan.display_name || 'paid plan', 120)}`;
-    
+
     if (existingSub.length) {
       // Update existing subscription
       const subId = existingSub[0].id;
       const oldPlanId = existingSub[0].plan_id;
       const currentPlanName = sanitizeStr(existingSub[0].current_plan_name || '', 120);
-      
+
       await pool.query(`
-        UPDATE subscriptions 
-        SET plan_id = $1, status = 'active', updated_at = $2 
+        UPDATE subscriptions
+        SET plan_id = $1, status = 'active', updated_at = $2
         WHERE id = $3
       `, [planId, now, subId]);
-      
+
       // Log payment if upgrading to paid plan
       if (newPlan.price > 0) {
         const paymentNotes = [
           `Plan changed from plan_id ${oldPlanId} to ${planId}`,
           businessName ? `Business: ${businessName}` : '',
-          restaurantName ? `Menu: ${restaurantName}` : '',
           customerEmail ? `Email: ${customerEmail}` : '',
           customerPhone ? `Phone: ${customerPhone}` : '',
           `Preferred contact: ${preferredContact}`,
@@ -6107,11 +6096,9 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
         ].filter(Boolean).join(' | ');
 
         const { rows: pendingPaymentRows } = await pool.query(
-          `SELECT id
-           FROM payments
+          `SELECT id FROM payments
            WHERE subscription_id = $1 AND payment_method = 'customer_upgrade' AND status = 'pending'
-           ORDER BY created_at DESC
-           LIMIT 1`,
+           ORDER BY created_at DESC LIMIT 1`,
           [subId]
         );
 
@@ -6119,29 +6106,21 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
         if (pendingPaymentRows.length) {
           paymentId = pendingPaymentRows[0].id;
           await pool.query(
-            `UPDATE payments
-             SET amount = $1, currency = 'USD', notes = $2, created_at = $3
-             WHERE id = $4`,
+            `UPDATE payments SET amount = $1, currency = 'USD', notes = $2, created_at = $3 WHERE id = $4`,
             [newPlan.price, paymentNotes, now, paymentId]
           );
         } else {
           const { rows: paymentRows } = await pool.query(`
             INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
-            VALUES ($1, $2, 'USD', 'customer_upgrade', 'pending', $3, $4)
-            RETURNING id
-          `, [
-            subId,
-            newPlan.price,
-            paymentNotes,
-            now
-          ]);
+            VALUES ($1, $2, 'USD', 'customer_upgrade', 'pending', $3, $4) RETURNING id
+          `, [subId, newPlan.price, paymentNotes, now]);
           paymentId = paymentRows[0]?.id || null;
         }
 
         await upsertCustomerContactRequest({
           paymentId,
           customerId,
-          menuId,
+          menuId: null,
           subscriptionId: subId,
           requestType: 'upgrade',
           requestedPlanId: planId,
@@ -6154,7 +6133,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
 
         queueUpgradeRequestNotification({
           businessName,
-          restaurantName,
+          restaurantName: businessName,
           customerEmail,
           customerPhone,
           requestedPlanName: newPlan.display_name,
@@ -6162,102 +6141,89 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
           paymentMethod,
           preferredContact,
           requestMessage,
-          menuId,
+          menuId: null,
         });
       }
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: 'Subscription updated successfully',
         subscription_id: subId,
         plan: newPlan
       });
     } else {
-      // Create new subscription
+      // Create new subscription — use first menu for legacy menu_id field
+      const { rows: firstMenu } = await pool.query('SELECT id FROM menus WHERE customer_id=$1 ORDER BY created_at ASC LIMIT 1', [customerId]);
+      const legacyMenuId = firstMenu[0]?.id || null;
+
       const { rows: newSub } = await pool.query(`
-        INSERT INTO subscriptions (menu_id, plan_id, status, start_date, created_at)
-        VALUES ($1, $2, 'active', $3, $3) RETURNING id
-      `, [menuId, planId, now]);
-      
+        INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, created_at)
+        VALUES ($1, $2, $3, 'active', $4, $4) RETURNING id
+      `, [legacyMenuId, customerId, planId, now]);
+
       const subId = newSub[0].id;
-      
-      // Initialize usage tracking
-      await pool.query(`
-        INSERT INTO usage_tracking (menu_id, menus_count, locations_count, scans_count, updated_at)
-        VALUES ($1, 1, 1, 0, $2)
-        ON CONFLICT (menu_id) DO NOTHING
-      `, [menuId, now]);
-      
-      // Log payment if it's a paid plan
+
+      // Log payment if paid plan
       if (newPlan.price > 0) {
         await pool.query(`
           INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
           VALUES ($1, $2, 'USD', 'customer_signup', 'pending', 'New subscription', $3)
         `, [subId, newPlan.price, now]);
       }
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: 'Subscription created successfully',
         subscription_id: subId,
         plan: newPlan
       });
     }
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('Subscription change error:', err);
+    res.status(500).json({ error: 'Failed to update subscription. Please try again.' });
+  }
 });
 
-// POST /api/customers/subscription/cancel - Customer: Cancel subscription
-app.post('/api/customers/subscription/cancel', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+// POST /api/customers/subscription/cancel - Customer: Cancel subscription (per-business)
+app.post('/api/customers/subscription/cancel', requireCustomerAuth, requireCustomerOwner, doubleCsrfProtection, async (req, res) => {
   try {
     const customerId = req.customer.id;
-    const menuId = sanitizeStr(req.body.menu_id, 100);
-    
-    if (!menuId) {
-      return res.status(400).json({ error: 'menu_id required.' });
-    }
-    
-    // Verify the menu belongs to this customer
-    const { rows: menuRows } = await pool.query(
-      'SELECT id FROM menus WHERE id = $1 AND customer_id = $2',
-      [menuId, customerId]
-    );
-    
-    if (!menuRows.length) {
-      return res.status(403).json({ error: 'You do not have permission to modify this menu.' });
-    }
-    
-    // Get subscription
+
+    // Get the business-level subscription
     const { rows: subRows } = await pool.query(
-      'SELECT id, plan_id FROM subscriptions WHERE menu_id = $1',
-      [menuId]
+      'SELECT id, plan_id FROM subscriptions WHERE customer_id = $1',
+      [customerId]
     );
-    
+
     if (!subRows.length) {
       return res.status(404).json({ error: 'No subscription found.' });
     }
-    
+
     const now = new Date().toISOString();
-    
-    // Set to cancel at end of period (downgrade to starter)
+
+    // Downgrade to starter plan
     const { rows: starterPlan } = await pool.query(
       "SELECT id FROM subscription_plans WHERE name = 'starter' LIMIT 1"
     );
-    
+
     if (starterPlan.length) {
       await pool.query(`
-        UPDATE subscriptions 
-        SET plan_id = $1, cancel_at_end = 1, updated_at = $2 
+        UPDATE subscriptions
+        SET plan_id = $1, cancel_at_end = 1, updated_at = $2
         WHERE id = $3
       `, [starterPlan[0].id, now, subRows[0].id]);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: 'Subscription will be downgraded to Starter (Free) plan.'
       });
     } else {
       res.status(500).json({ error: 'Unable to process cancellation.' });
     }
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('Subscription cancel error:', err);
+    res.status(500).json({ error: 'Failed to cancel subscription. Please try again.' });
+  }
 });
 
 // ── Payment Gateway Integration ───────────────────────────────────────────────
@@ -6879,6 +6845,11 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   if (!planRows.length) throw new Error('Plan not found');
   const plan = planRows[0];
 
+  // Resolve the customer_id for this menu
+  const { rows: menuRows } = await pool.query('SELECT customer_id FROM menus WHERE id=$1', [menuId]);
+  if (!menuRows.length) throw new Error('Menu not found');
+  const customerId = menuRows[0].customer_id;
+
   const now = new Date();
   const billing = new Date(now);
   if ((plan.interval || 'month') === 'year') billing.setFullYear(billing.getFullYear() + 1);
@@ -6886,7 +6857,8 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   const billingISO = billing.toISOString();
   const nowISO = now.toISOString();
 
-  const { rows: existing } = await pool.query('SELECT id FROM subscriptions WHERE menu_id = $1', [menuId]);
+  // Per-business: look up the single subscription for this customer
+  const { rows: existing } = await pool.query('SELECT id FROM subscriptions WHERE customer_id = $1', [customerId]);
   let subId;
   if (existing.length) {
     subId = existing[0].id;
@@ -6896,8 +6868,8 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
     );
   } else {
     const ins = await pool.query(
-      `INSERT INTO subscriptions (menu_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at) VALUES ($1,$2,'active',$3,$4,$4,$3,$3) RETURNING id`,
-      [menuId, planId, nowISO, billingISO]
+      `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at) VALUES ($1,$2,$3,'active',$4,$5,$5,$4,$4) RETURNING id`,
+      [menuId, customerId, planId, nowISO, billingISO]
     );
     subId = ins.rows[0].id;
     await pool.query(

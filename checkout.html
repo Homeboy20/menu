@@ -624,9 +624,9 @@ async function renderGateways(gateways) {
           });
           const d = await r.json();
           if (d.success) onPaymentSuccess();
-          else showMsg('Payment capture failed: ' + d.error, true);
+          else onPaymentFailure(d.error || 'Payment capture failed');
         },
-        onError: () => showMsg('PayPal error. Please try again.', true)
+        onError: () => onPaymentFailure('PayPal error. Please try again.')
       }).render('#paypal-btn-wrap');
     } catch(e) { /* paypal load failed silently */ }
   }
@@ -665,9 +665,9 @@ function doFlutterwave(publicKey) {
         });
         const d = await r.json();
         if (d.success) onPaymentSuccess();
-        else showMsg('Verification failed: ' + d.error, true);
+        else onPaymentFailure(d.error || 'Verification failed');
       } else {
-        showMsg('Payment was not completed.', true);
+        onPaymentFailure('Payment was not completed.');
       }
     },
     onclose: () => {}
@@ -704,7 +704,32 @@ function onPaymentSuccess() {
     </div>`;
   setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
 }
-
+function onPaymentFailure(errorMsg) {
+  const planName = escHtml(selectedPlan?.display_name || '');
+  const planSlugVal = escHtml(selectedPlan?.name || '');
+  document.getElementById('gateway-container').innerHTML = `
+    <div class="p-6 bg-red-50 border border-red-200 rounded-xl">
+      <div class="text-center mb-4">
+        <span class="material-symbols-outlined text-red-500 text-[48px] block mb-2">error</span>
+        <p class="font-bold text-red-800 text-lg">Payment Failed</p>
+        <p class="text-red-600 text-sm mt-1">${escHtml(errorMsg || 'Your payment could not be processed.')}</p>
+      </div>
+      <div class="space-y-2">
+        <button onclick="loadMenusAndGateways()" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm transition">
+          <span class="material-symbols-outlined text-[18px]">refresh</span>
+          Retry Payment
+        </button>
+        <button onclick="loadMenusAndGateways()" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-sm transition">
+          <span class="material-symbols-outlined text-[18px]">swap_horiz</span>
+          Try Different Payment Method
+        </button>
+        <a href="/contact" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 font-semibold text-sm transition">
+          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+          Contact Support
+        </a>
+      </div>
+    </div>`;
+}
 // -- Toast / inline message ---------------------------------------------------
 function showMsg(msg, isErr = false) {
   let el = document.getElementById('checkout-msg');
