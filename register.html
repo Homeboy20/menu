@@ -8,7 +8,7 @@
 <meta name="description" content="Launch your digital restaurant menu in under 60 seconds. No credit card needed."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,700;1,9..144,800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -18,8 +18,8 @@
   --success:#22c55e;--error:#ef4444;
 }
 body{font-family:"Outfit",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
-h1,h2,h3{font-family:"Outfit",sans-serif;font-weight:700;letter-spacing:-.015em;}
-.serif-accent{font-family:"Instrument Serif",Georgia,serif;font-style:italic;color:var(--accent);}
+h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:700;letter-spacing:-.015em;}
+.serif-accent{font-family:"Fraunces",Georgia,serif;font-style:italic;font-weight:600;color:var(--accent);}
 a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
 .hidden{display:none!important;}
 /* Brand sidebar */
@@ -27,8 +27,8 @@ a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
 .brand-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:3rem;}
 .brand-logo .icon-box{width:36px;height:36px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
 .brand-logo .icon-box svg{width:18px;height:18px;fill:white;}
-.brand-logo span{font-weight:700;font-size:1.1rem;color:var(--text);}
-.brand-tagline{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:1rem;color:var(--text);}
+.brand-logo span{font-weight:700;font-size:1.1rem;color:var(--text);font-family:"Fraunces",Georgia,serif;font-style:italic;}
+.brand-tagline{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:1rem;color:var(--text);font-family:"Fraunces",Georgia,serif;}
 .brand-desc{color:var(--text-muted);font-size:.875rem;line-height:1.65;margin-bottom:2rem;}
 .brand-checks{list-style:none;display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;}
 .brand-checks li{display:flex;align-items:center;gap:.6rem;font-size:.8125rem;color:var(--text-muted);}
@@ -57,7 +57,7 @@ a{color:var(--accent);text-decoration:none;}a:hover{text-decoration:underline;}
 .form-card{width:100%;max-width:480px;}
 .section-label{display:flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;}
 .section-label::before{content:"";width:16px;height:2px;background:var(--accent);}
-.form-title{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;}
+.form-title{font-size:1.75rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;font-family:"Fraunces",Georgia,serif;}
 .form-subtitle{color:var(--text-muted);font-size:.9rem;margin-bottom:2rem;line-height:1.5;}
 /* Inputs */
 .field-label{display:block;font-size:.8125rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;}
