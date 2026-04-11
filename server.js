@@ -1148,6 +1148,25 @@ async function initDB() {
     // Per-business subscription: add customer_id column and migrate from menu_id
     await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_customer ON subscriptions (customer_id)`);
+
+    // Backfill customer_id from menus BEFORE adding unique constraint
+    // Use a sub-select to only pick one subscription per customer (the latest active/trial, or latest overall)
+    await client.query(`
+      UPDATE subscriptions s
+      SET customer_id = m.customer_id
+      FROM menus m
+      WHERE s.menu_id = m.id AND s.customer_id IS NULL
+        AND s.id = (
+          SELECT sub.id FROM subscriptions sub
+          JOIN menus mm ON sub.menu_id = mm.id
+          WHERE mm.customer_id = m.customer_id AND sub.customer_id IS NULL
+          ORDER BY
+            CASE sub.status WHEN 'active' THEN 0 WHEN 'trial' THEN 1 WHEN 'pending' THEN 2 ELSE 3 END,
+            sub.id DESC
+          LIMIT 1
+        )
+    `);
+
     // Unique constraint on customer_id for per-business subscription upserts
     await client.query(`
       DO $$ BEGIN
@@ -1157,13 +1176,6 @@ async function initDB() {
           ALTER TABLE subscriptions ADD CONSTRAINT uq_subscriptions_customer_id UNIQUE (customer_id);
         END IF;
       END $$
-    `);
-    // Backfill customer_id from menus for existing rows that don't have it
-    await client.query(`
-      UPDATE subscriptions s
-      SET customer_id = m.customer_id
-      FROM menus m
-      WHERE s.menu_id = m.id AND s.customer_id IS NULL
     `);
 
     // Payments table
