@@ -1446,7 +1446,34 @@ function closePlanChangeModal() {
   if (contactEl) contactEl.value = 'email';
 }
 
-async function resendVerification() {\n  const btn = document.getElementById('resend-verify-btn');\n  btn.disabled = true;\n  btn.textContent = 'Sending...';\n  try {\n    const csrf = await getCsrf();\n    const res = await fetch('/api/customers/resend-verification', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },\n      body: '{}'\n    });\n    const d = await res.json();\n    if (res.ok) {\n      btn.textContent = 'Sent!';\n      showSubToast(d.message || 'Verification email sent.');\n    } else {\n      btn.textContent = 'Resend email';\n      btn.disabled = false;\n      showSubToast(d.error || 'Failed to send.', true);\n    }\n  } catch(e) {\n    btn.textContent = 'Resend email';\n    btn.disabled = false;\n    showSubToast('Failed to send verification email.', true);\n  }\n}\n\nfunction openSupportModal() {
+async function resendVerification() {
+  const btn = document.getElementById('resend-verify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const csrf = await getCsrf();
+    const res = await fetch('/api/customers/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+      body: '{}'
+    });
+    const d = await res.json();
+    if (res.ok) {
+      btn.textContent = 'Sent!';
+      showSubToast(d.message || 'Verification email sent.');
+    } else {
+      btn.textContent = 'Resend email';
+      btn.disabled = false;
+      showSubToast(d.error || 'Failed to send.', true);
+    }
+  } catch(e) {
+    btn.textContent = 'Resend email';
+    btn.disabled = false;
+    showSubToast('Failed to send verification email.', true);
+  }
+}
+
+function openSupportModal() {
   const menus = window.customerMenus || [];
   const select = document.getElementById('support-menu-id');
   select.innerHTML = ['<option value="">General account support</option>']
