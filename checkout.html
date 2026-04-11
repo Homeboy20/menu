@@ -683,11 +683,11 @@ async function doManualUpgrade() {
     const res = await fetch('/api/customers/subscription/change', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-      body: JSON.stringify({ menu_id: menuId, plan_id: selectedPlan.id })
+      body: JSON.stringify({ menu_id: menuId, plan_id: selectedPlan.id, payment_method: 'manual' })
     });
     const d = await res.json();
     if (res.ok) {
-      showMsg(`Upgrade to ${selectedPlan.display_name} requested! We'll contact you with payment details within 24 hours.`);
+      showMsg(`Upgrade to ${selectedPlan.display_name} requested. Admin/support has received your request and will contact you within 24 hours.`);
       setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
     } else throw new Error(d.error);
   } catch(err) { showMsg('Error: ' + err.message, true); }

@@ -1183,6 +1183,33 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_sub ON payments (subscription_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
 
+    // Customer contact / upgrade requests table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS customer_contact_requests (
+        id                SERIAL PRIMARY KEY,
+        payment_id        INTEGER REFERENCES payments(id) ON DELETE SET NULL,
+        customer_id       INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+        menu_id           TEXT NOT NULL DEFAULT '',
+        subscription_id   INTEGER REFERENCES subscriptions(id) ON DELETE SET NULL,
+        request_type      TEXT NOT NULL DEFAULT 'support',
+        requested_plan_id INTEGER REFERENCES subscription_plans(id) ON DELETE SET NULL,
+        status            TEXT NOT NULL DEFAULT 'open',
+        subject           TEXT NOT NULL DEFAULT '',
+        message           TEXT NOT NULL DEFAULT '',
+        preferred_contact TEXT NOT NULL DEFAULT 'email',
+        customer_email    TEXT NOT NULL DEFAULT '',
+        customer_phone    TEXT NOT NULL DEFAULT '',
+        created_at        TEXT NOT NULL,
+        updated_at        TEXT NOT NULL,
+        handled_at        TEXT,
+        handled_by        INTEGER
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ccr_status_type ON customer_contact_requests (status, request_type)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ccr_customer ON customer_contact_requests (customer_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ccr_menu ON customer_contact_requests (menu_id)`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_ccr_payment ON customer_contact_requests (payment_id)`);
+
     // Usage tracking table
     await client.query(`
       CREATE TABLE IF NOT EXISTS usage_tracking (
@@ -1352,6 +1379,10 @@ async function initDB() {
       }
       console.log('  ✓ Seeded default app settings');
     }
+    await client.query(
+      'INSERT INTO app_settings (key, value, updated_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING',
+      ['support_email', 'support@restorder.online', new Date().toISOString()]
+    );
 
     // Persistent customer sessions (survives server restarts)
     await client.query(`
@@ -5242,22 +5273,85 @@ app.post('/api/public/validate-promo', async (req, res) => {
 app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT p.id AS payment_id, p.amount, p.currency, p.notes, p.created_at,
-             s.id AS subscription_id, s.menu_id, s.status AS sub_status,
+      SELECT r.id AS request_id,
+             p.id AS payment_id,
+             p.amount,
+             p.currency,
+             p.notes,
+             p.created_at,
+             s.id AS subscription_id,
+             s.menu_id,
+             s.status AS sub_status,
              m.restaurant_name,
-             c.email AS customer_email, c.business_name AS customer_business,
-             sp.id AS plan_id, sp.display_name AS plan_name, sp.price AS plan_price
-      FROM payments p
-      JOIN subscriptions s ON p.subscription_id = s.id
-      JOIN menus m ON s.menu_id = m.id
-      LEFT JOIN customers c ON m.customer_id = c.id
-      JOIN subscription_plans sp ON s.plan_id = sp.id
-      WHERE p.payment_method = 'customer_upgrade' AND p.status = 'pending'
-      ORDER BY p.created_at DESC
+             COALESCE(NULLIF(r.customer_email, ''), c.email, '') AS customer_email,
+             r.customer_phone,
+             c.business_name AS customer_business,
+             r.preferred_contact,
+             r.subject,
+             r.message AS request_message,
+             sp.id AS plan_id,
+             sp.display_name AS plan_name,
+             sp.price AS plan_price
+      FROM customer_contact_requests r
+      LEFT JOIN payments p ON r.payment_id = p.id
+      LEFT JOIN subscriptions s ON COALESCE(r.subscription_id, p.subscription_id) = s.id
+      LEFT JOIN menus m ON COALESCE(r.menu_id, s.menu_id) = m.id
+      LEFT JOIN customers c ON r.customer_id = c.id
+      LEFT JOIN subscription_plans sp ON r.requested_plan_id = sp.id
+      WHERE r.request_type = 'upgrade' AND r.status = 'open'
+      ORDER BY r.created_at DESC
       LIMIT 200
     `);
-    res.json(rows);
+    res.json(rows.map(row => ({ ...row, customer_phone: decryptField(row.customer_phone || '') })));
   } catch (err) { console.error('upgrade-requests error:', err); res.status(500).json({ error: 'Failed to load upgrade requests.' }); }
+});
+
+// GET /api/admin/support-requests – Admin: list open support inbox requests
+app.get('/api/admin/support-requests', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT r.id AS request_id,
+             r.menu_id,
+             r.subject,
+             r.message AS request_message,
+             r.preferred_contact,
+             r.customer_email,
+             r.customer_phone,
+             r.created_at,
+             c.business_name AS customer_business,
+             m.restaurant_name
+      FROM customer_contact_requests r
+      LEFT JOIN customers c ON r.customer_id = c.id
+      LEFT JOIN menus m ON r.menu_id = m.id
+      WHERE r.request_type = 'support' AND r.status = 'open'
+      ORDER BY r.created_at DESC
+      LIMIT 200
+    `);
+    res.json(rows.map(row => ({ ...row, customer_phone: decryptField(row.customer_phone || '') })));
+  } catch (err) {
+    console.error('support-requests error:', err);
+    res.status(500).json({ error: 'Failed to load support requests.' });
+  }
+});
+
+// POST /api/admin/support-requests/:id/resolve – Admin: mark a support request resolved
+app.post('/api/admin/support-requests/:requestId/resolve', requireAuth, doubleCsrfProtection, async (req, res) => {
+  const requestId = parseInt(req.params.requestId, 10);
+  if (!requestId) return res.status(400).json({ error: 'Invalid request ID.' });
+  try {
+    const now = new Date().toISOString();
+    const { rowCount } = await pool.query(
+      `UPDATE customer_contact_requests
+       SET status = 'resolved', handled_at = $1, handled_by = $2, updated_at = $1
+       WHERE id = $3 AND request_type = 'support' AND status = 'open'`,
+      [now, req.adminUser?.id || null, requestId]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Open support request not found.' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('resolve support request error:', err);
+    res.status(500).json({ error: 'Failed to resolve support request.' });
+  }
 });
 
 // POST /api/admin/upgrade-requests/:id/approve – Admin: approve a manual upgrade request
@@ -5285,6 +5379,12 @@ app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCs
       `UPDATE subscriptions SET status = 'active', end_date = $1, next_billing_date = $1, updated_at = $2 WHERE id = $3`,
       [nextBilling, now, pay.subscription_id]
     );
+    await pool.query(
+      `UPDATE customer_contact_requests
+       SET status = 'approved', handled_at = $1, handled_by = $2, updated_at = $1
+       WHERE payment_id = $3 AND request_type = 'upgrade' AND status = 'open'`,
+      [now, req.adminUser?.id || null, paymentId]
+    );
     queuePaymentReceiptEmailForPayment(paymentId);
     res.json({ success: true });
   } catch (err) { console.error('approve upgrade error:', err); res.status(500).json({ error: 'Failed to approve upgrade.' }); }
@@ -5295,12 +5395,19 @@ app.post('/api/admin/upgrade-requests/:paymentId/dismiss', requireAuth, doubleCs
   const paymentId = parseInt(req.params.paymentId);
   if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
   try {
+    const now = new Date().toISOString();
     const { rowCount } = await pool.query(
       `UPDATE payments SET status = 'failed', notes = COALESCE(notes, '') || ' [dismissed by admin]'
        WHERE id = $1 AND payment_method = 'customer_upgrade' AND status = 'pending'`,
       [paymentId]
     );
     if (!rowCount) return res.status(404).json({ error: 'Pending upgrade request not found.' });
+    await pool.query(
+      `UPDATE customer_contact_requests
+       SET status = 'dismissed', handled_at = $1, handled_by = $2, updated_at = $1
+       WHERE payment_id = $3 AND request_type = 'upgrade' AND status = 'open'`,
+      [now, req.adminUser?.id || null, paymentId]
+    );
     res.json({ success: true });
   } catch (err) { console.error('dismiss upgrade error:', err); res.status(500).json({ error: 'Failed to dismiss upgrade.' }); }
 });
@@ -5741,12 +5848,126 @@ app.get('/api/customers/payments', requireCustomerAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// GET /api/customers/support-requests - Get all contact/request history for the authenticated customer
+app.get('/api/customers/support-requests', requireCustomerAuth, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const { rows } = await pool.query(
+      `SELECT r.id AS request_id,
+              r.menu_id,
+              r.request_type,
+              r.requested_plan_id,
+              sp.name AS requested_plan_name,
+              r.subject,
+              r.message,
+              r.preferred_contact,
+              r.status,
+              r.created_at,
+              r.updated_at,
+              r.handled_at,
+              m.restaurant_name
+       FROM customer_contact_requests r
+       LEFT JOIN menus m ON r.menu_id = m.id
+       LEFT JOIN subscription_plans sp ON r.requested_plan_id = sp.id
+       WHERE r.customer_id = $1
+       ORDER BY r.created_at DESC
+       LIMIT 50`,
+      [customerId]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('customer contact history error:', err);
+    res.status(500).json({ error: 'Failed to load request history.' });
+  }
+});
+
+// POST /api/customers/support-requests - Customer: submit a general support request
+app.post('/api/customers/support-requests', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
+  try {
+    const customerId = req.customer.id;
+    const menuId = sanitizeStr(req.body.menu_id, 100);
+    const subject = sanitizeStr(req.body.subject, 160) || 'General support request';
+    const message = sanitizeStr(req.body.message, 1200);
+    const preferredContactRaw = sanitizeStr(req.body.preferred_contact, 20).toLowerCase();
+    const preferredContact = ['email', 'phone', 'either'].includes(preferredContactRaw) ? preferredContactRaw : 'email';
+
+    if (!message) {
+      return res.status(400).json({ error: 'A support message is required.' });
+    }
+
+    let restaurantName = '';
+    if (menuId) {
+      const { rows: menuRows } = await pool.query(
+        'SELECT id, restaurant_name FROM menus WHERE id = $1 AND customer_id = $2',
+        [menuId, customerId]
+      );
+      if (!menuRows.length) {
+        return res.status(403).json({ error: 'You do not have permission to contact support for this menu.' });
+      }
+      restaurantName = sanitizeStr(menuRows[0].restaurant_name || '', 120);
+    }
+
+    const { rows: customerRows } = await pool.query(
+      'SELECT email, business_name, phone FROM customers WHERE id = $1 LIMIT 1',
+      [customerId]
+    );
+    if (!customerRows.length) {
+      return res.status(404).json({ error: 'Customer account not found.' });
+    }
+
+    const customer = customerRows[0];
+    const customerEmail = sanitizeEmail(customer.email || req.customer.email || '');
+    const customerPhone = sanitizeStr(decryptField(customer.phone || '') || '', 80);
+    const businessName = sanitizeStr(customer.business_name || '', 120);
+
+    const { rows } = await pool.query(
+      `INSERT INTO customer_contact_requests (
+         payment_id, customer_id, menu_id, subscription_id, request_type, requested_plan_id,
+         status, subject, message, preferred_contact, customer_email, customer_phone,
+         created_at, updated_at
+       )
+       VALUES (NULL, $1, $2, NULL, 'support', NULL, 'open', $3, $4, $5, $6, $7, $8, $8)
+       RETURNING id`,
+      [
+        customerId,
+        menuId || '',
+        subject,
+        message,
+        preferredContact,
+        customerEmail,
+        encryptField(customerPhone || ''),
+        new Date().toISOString(),
+      ]
+    );
+
+    queueSupportRequestNotification({
+      businessName,
+      restaurantName,
+      customerEmail,
+      customerPhone,
+      preferredContact,
+      subject,
+      message,
+      menuId,
+    });
+
+    res.json({ success: true, request_id: rows[0]?.id || null });
+  } catch (err) {
+    console.error('customer support request error:', err);
+    res.status(500).json({ error: 'Failed to submit support request.' });
+  }
+});
+
 // POST /api/customers/subscription/change - Customer: Change subscription plan
-app.post('/api/customers/subscription/change', requireCustomerAuth, requireCustomerOwner, async (req, res) => {
+app.post('/api/customers/subscription/change', requireCustomerAuth, requireCustomerOwner, doubleCsrfProtection, async (req, res) => {
   try {
     const customerId = req.customer.id;
     const menuId = sanitizeStr(req.body.menu_id, 100);
     const planId = parseInt(req.body.plan_id);
+    const paymentMethod = sanitizeStr(req.body.payment_method, 50) || 'manual';
+    const requestMessage = sanitizeStr(req.body.request_message, 1200);
+    const preferredContactRaw = sanitizeStr(req.body.preferred_contact, 20).toLowerCase();
+    const preferredContact = ['email', 'phone', 'either'].includes(preferredContactRaw) ? preferredContactRaw : 'email';
     
     if (!menuId || !planId) {
       return res.status(400).json({ error: 'menu_id and plan_id required.' });
@@ -5754,7 +5975,10 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
     
     // Verify the menu belongs to this customer
     const { rows: menuRows } = await pool.query(
-      'SELECT id FROM menus WHERE id = $1 AND customer_id = $2',
+      `SELECT m.id, m.restaurant_name, c.email AS customer_email, c.business_name, c.phone AS encrypted_phone
+       FROM menus m
+       LEFT JOIN customers c ON m.customer_id = c.id
+       WHERE m.id = $1 AND m.customer_id = $2`,
       [menuId, customerId]
     );
     
@@ -5777,14 +6001,24 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
     
     // Check if subscription exists
     const { rows: existingSub } = await pool.query(
-      'SELECT id, plan_id FROM subscriptions WHERE menu_id = $1',
+      `SELECT s.id, s.plan_id, sp.display_name AS current_plan_name
+       FROM subscriptions s
+       LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+       WHERE s.menu_id = $1`,
       [menuId]
     );
+    const menuInfo = menuRows[0];
+    const customerEmail = sanitizeEmail(menuInfo.customer_email || req.customer.email || '');
+    const customerPhone = sanitizeStr(decryptField(menuInfo.encrypted_phone || '') || '', 80);
+    const businessName = sanitizeStr(menuInfo.business_name || '', 120);
+    const restaurantName = sanitizeStr(menuInfo.restaurant_name || '', 120);
+    const requestSubject = `Upgrade request to ${sanitizeStr(newPlan.display_name || 'paid plan', 120)}`;
     
     if (existingSub.length) {
       // Update existing subscription
       const subId = existingSub[0].id;
       const oldPlanId = existingSub[0].plan_id;
+      const currentPlanName = sanitizeStr(existingSub[0].current_plan_name || '', 120);
       
       await pool.query(`
         UPDATE subscriptions 
@@ -5794,15 +6028,75 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
       
       // Log payment if upgrading to paid plan
       if (newPlan.price > 0) {
-        await pool.query(`
-          INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
-          VALUES ($1, $2, 'USD', 'customer_upgrade', 'pending', $3, $4)
-        `, [
-          subId,
-          newPlan.price,
+        const paymentNotes = [
           `Plan changed from plan_id ${oldPlanId} to ${planId}`,
-          now
-        ]);
+          businessName ? `Business: ${businessName}` : '',
+          restaurantName ? `Menu: ${restaurantName}` : '',
+          customerEmail ? `Email: ${customerEmail}` : '',
+          customerPhone ? `Phone: ${customerPhone}` : '',
+          `Preferred contact: ${preferredContact}`,
+          `Payment method: ${paymentMethod}`,
+          requestMessage ? `Message: ${requestMessage}` : ''
+        ].filter(Boolean).join(' | ');
+
+        const { rows: pendingPaymentRows } = await pool.query(
+          `SELECT id
+           FROM payments
+           WHERE subscription_id = $1 AND payment_method = 'customer_upgrade' AND status = 'pending'
+           ORDER BY created_at DESC
+           LIMIT 1`,
+          [subId]
+        );
+
+        let paymentId = null;
+        if (pendingPaymentRows.length) {
+          paymentId = pendingPaymentRows[0].id;
+          await pool.query(
+            `UPDATE payments
+             SET amount = $1, currency = 'USD', notes = $2, created_at = $3
+             WHERE id = $4`,
+            [newPlan.price, paymentNotes, now, paymentId]
+          );
+        } else {
+          const { rows: paymentRows } = await pool.query(`
+            INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
+            VALUES ($1, $2, 'USD', 'customer_upgrade', 'pending', $3, $4)
+            RETURNING id
+          `, [
+            subId,
+            newPlan.price,
+            paymentNotes,
+            now
+          ]);
+          paymentId = paymentRows[0]?.id || null;
+        }
+
+        await upsertCustomerContactRequest({
+          paymentId,
+          customerId,
+          menuId,
+          subscriptionId: subId,
+          requestType: 'upgrade',
+          requestedPlanId: planId,
+          subject: requestSubject,
+          message: requestMessage,
+          preferredContact,
+          customerEmail,
+          customerPhone,
+        });
+
+        queueUpgradeRequestNotification({
+          businessName,
+          restaurantName,
+          customerEmail,
+          customerPhone,
+          requestedPlanName: newPlan.display_name,
+          currentPlanName,
+          paymentMethod,
+          preferredContact,
+          requestMessage,
+          menuId,
+        });
       }
       
       res.json({ 
@@ -6088,6 +6382,259 @@ function queueTransactionalEmail(payload, context = 'transactional') {
       console.warn(`⚠ ${context} email skipped/failed:`, result.reason || 'unknown');
     }
   });
+}
+
+async function getSupportNotificationRecipients() {
+  const recipients = new Set();
+  const envSupport = sanitizeEmail(process.env.SUPPORT_EMAIL || '');
+  if (envSupport && isValidEmail(envSupport)) recipients.add(envSupport);
+
+  try {
+    const { rows: supportRows } = await pool.query(
+      "SELECT value FROM app_settings WHERE key = 'support_email' LIMIT 1"
+    );
+    const supportEmail = sanitizeEmail(supportRows[0]?.value || '');
+    if (supportEmail && isValidEmail(supportEmail)) recipients.add(supportEmail);
+
+    const { rows: adminRows } = await pool.query(
+      `SELECT email
+       FROM admin_users
+       WHERE status = 'active' AND email IS NOT NULL AND email <> ''
+       ORDER BY id ASC
+       LIMIT 20`
+    );
+    for (const row of adminRows) {
+      const email = sanitizeEmail(row.email || '');
+      if (email && isValidEmail(email)) recipients.add(email);
+    }
+  } catch (err) {
+    console.warn('⚠ support recipients lookup failed:', err.message || err);
+  }
+
+  return Array.from(recipients);
+}
+
+function queueUpgradeRequestNotification({
+  businessName,
+  restaurantName,
+  customerEmail,
+  customerPhone,
+  requestedPlanName,
+  currentPlanName,
+  paymentMethod,
+  preferredContact,
+  requestMessage,
+  menuId,
+}) {
+  setImmediate(async () => {
+    const recipients = await getSupportNotificationRecipients();
+    if (!recipients.length) return;
+
+    const safeBusiness = sanitizeStr(businessName || restaurantName || 'Customer', 120);
+    const safeRestaurant = sanitizeStr(restaurantName || businessName || 'Restaurant', 120);
+    const safeEmail = sanitizeEmail(customerEmail || '');
+    const safePhone = sanitizeStr(customerPhone || '', 80);
+    const safeRequestedPlan = sanitizeStr(requestedPlanName || 'Requested plan', 120);
+    const safeCurrentPlan = sanitizeStr(currentPlanName || 'Current plan', 120);
+    const safePaymentMethod = sanitizeStr(paymentMethod || 'manual', 50);
+    const safePreferredContact = sanitizeStr(preferredContact || 'email', 20);
+    const safeMessage = sanitizeStr(requestMessage || '', 1200);
+    const dashboardUrl = `${getPublicBaseUrl()}/subscriptions`;
+
+    const subject = `Upgrade request: ${safeBusiness} → ${safeRequestedPlan}`;
+    const text = [
+      'A customer requested a subscription upgrade.',
+      '',
+      `Business: ${safeBusiness}`,
+      `Restaurant/Menu: ${safeRestaurant}`,
+      `Menu ID: ${menuId || ''}`,
+      `Current plan: ${safeCurrentPlan}`,
+      `Requested plan: ${safeRequestedPlan}`,
+      `Payment method: ${safePaymentMethod}`,
+      `Preferred contact: ${safePreferredContact}`,
+      safeEmail ? `Customer email: ${safeEmail}` : '',
+      safePhone ? `Customer phone: ${safePhone}` : '',
+      safeMessage ? `Message: ${safeMessage}` : '',
+      '',
+      `Review in admin: ${dashboardUrl}`,
+    ].filter(Boolean).join('\n');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:680px;margin:0 auto;padding:20px;">
+        <h2 style="margin:0 0 12px 0;color:#0ea5e9;">New Upgrade Request</h2>
+        <p style="margin:0 0 12px 0;">A customer requested a subscription upgrade.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Business</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeBusiness)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Restaurant/Menu</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeRestaurant)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Menu ID</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(String(menuId || ''))}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Current plan</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeCurrentPlan)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Requested plan</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeRequestedPlan)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Payment method</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePaymentMethod)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Preferred contact</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePreferredContact)}</td></tr>
+          ${safeEmail ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Customer email</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeEmail)}</td></tr>` : ''}
+          ${safePhone ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Customer phone</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePhone)}</td></tr>` : ''}
+        </table>
+        ${safeMessage ? `<p style="margin:12px 0 0 0;"><strong>Message:</strong> ${validator.escape(safeMessage)}</p>` : ''}
+        <p style="margin:16px 0 0 0;"><a href="${dashboardUrl}">Open Subscriptions Admin</a></p>
+      </div>
+    `;
+
+    for (const to of recipients) {
+      queueTransactionalEmail({
+        to,
+        subject,
+        text,
+        html,
+        replyTo: safeEmail && isValidEmail(safeEmail) ? safeEmail : undefined,
+      }, 'upgrade-request');
+    }
+  });
+}
+
+function queueSupportRequestNotification({
+  businessName,
+  restaurantName,
+  customerEmail,
+  customerPhone,
+  preferredContact,
+  subject,
+  message,
+  menuId,
+}) {
+  setImmediate(async () => {
+    const recipients = await getSupportNotificationRecipients();
+    if (!recipients.length) return;
+
+    const safeBusiness = sanitizeStr(businessName || restaurantName || 'Customer', 120);
+    const safeRestaurant = sanitizeStr(restaurantName || businessName || 'Restaurant', 120);
+    const safeEmail = sanitizeEmail(customerEmail || '');
+    const safePhone = sanitizeStr(customerPhone || '', 80);
+    const safePreferredContact = sanitizeStr(preferredContact || 'email', 20);
+    const safeSubject = sanitizeStr(subject || 'Support request', 160);
+    const safeMessage = sanitizeStr(message || '', 1200);
+    const dashboardUrl = `${getPublicBaseUrl()}/subscriptions`;
+
+    const text = [
+      'A customer submitted a support request.',
+      '',
+      `Business: ${safeBusiness}`,
+      `Restaurant/Menu: ${safeRestaurant}`,
+      `Menu ID: ${menuId || ''}`,
+      `Preferred contact: ${safePreferredContact}`,
+      `Subject: ${safeSubject}`,
+      safeEmail ? `Customer email: ${safeEmail}` : '',
+      safePhone ? `Customer phone: ${safePhone}` : '',
+      safeMessage ? `Message: ${safeMessage}` : '',
+      '',
+      `Review in admin: ${dashboardUrl}`,
+    ].filter(Boolean).join('\n');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:680px;margin:0 auto;padding:20px;">
+        <h2 style="margin:0 0 12px 0;color:#0ea5e9;">New Support Request</h2>
+        <p style="margin:0 0 12px 0;">A customer submitted a support request.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Business</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeBusiness)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Restaurant/Menu</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeRestaurant)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Menu ID</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(String(menuId || ''))}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Preferred contact</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePreferredContact)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Subject</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeSubject)}</td></tr>
+          ${safeEmail ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Customer email</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeEmail)}</td></tr>` : ''}
+          ${safePhone ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Customer phone</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePhone)}</td></tr>` : ''}
+        </table>
+        ${safeMessage ? `<p style="margin:12px 0 0 0;"><strong>Message:</strong> ${validator.escape(safeMessage)}</p>` : ''}
+        <p style="margin:16px 0 0 0;"><a href="${dashboardUrl}">Open Support Inbox</a></p>
+      </div>
+    `;
+
+    for (const to of recipients) {
+      queueTransactionalEmail({
+        to,
+        subject: `Support request: ${safeBusiness} — ${safeSubject}`,
+        text,
+        html,
+        replyTo: safeEmail && isValidEmail(safeEmail) ? safeEmail : undefined,
+      }, 'support-request');
+    }
+  });
+}
+
+async function upsertCustomerContactRequest({
+  paymentId,
+  customerId,
+  menuId,
+  subscriptionId,
+  requestType,
+  requestedPlanId,
+  subject,
+  message,
+  preferredContact,
+  customerEmail,
+  customerPhone,
+}) {
+  const now = new Date().toISOString();
+  const { rows: existingRows } = await pool.query(
+    `SELECT id
+     FROM customer_contact_requests
+     WHERE customer_id = $1 AND menu_id = $2 AND request_type = $3 AND status = 'open'
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [customerId, menuId || '', requestType]
+  );
+
+  if (existingRows.length) {
+    await pool.query(
+      `UPDATE customer_contact_requests
+       SET payment_id = $1,
+           subscription_id = $2,
+           requested_plan_id = $3,
+           subject = $4,
+           message = $5,
+           preferred_contact = $6,
+           customer_email = $7,
+           customer_phone = $8,
+           updated_at = $9
+       WHERE id = $10`,
+      [
+        paymentId || null,
+        subscriptionId || null,
+        requestedPlanId || null,
+        subject || '',
+        message || '',
+        preferredContact || 'email',
+        customerEmail || '',
+        encryptField(customerPhone || ''),
+        now,
+        existingRows[0].id,
+      ]
+    );
+    return existingRows[0].id;
+  }
+
+  const { rows } = await pool.query(
+    `INSERT INTO customer_contact_requests (
+       payment_id, customer_id, menu_id, subscription_id, request_type, requested_plan_id,
+       status, subject, message, preferred_contact, customer_email, customer_phone,
+       created_at, updated_at
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, 'open', $7, $8, $9, $10, $11, $12, $12)
+     RETURNING id`,
+    [
+      paymentId || null,
+      customerId,
+      menuId || '',
+      subscriptionId || null,
+      requestType || 'support',
+      requestedPlanId || null,
+      subject || '',
+      message || '',
+      preferredContact || 'email',
+      customerEmail || '',
+      encryptField(customerPhone || ''),
+      now,
+    ]
+  );
+  return rows[0]?.id || null;
 }
 
 function queueWelcomeEmail({ to, businessName, contactName }) {

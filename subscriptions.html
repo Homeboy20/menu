@@ -181,6 +181,20 @@
     </div>
   </div>
 
+  <div id="support-inbox-section" class="hidden mb-8">
+    <div class="bg-sky-900/20 border border-sky-500/40 rounded-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-sky-500/20">
+        <div class="flex items-center gap-3">
+          <svg class="material-symbols-outlined text-sky-400 text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
+          <h3 class="font-bold text-sky-300">Support Inbox</h3>
+          <span id="support-inbox-count" class="px-2 py-0.5 bg-sky-500 text-bg-dark rounded-full text-xs font-bold">0</span>
+        </div>
+        <p class="text-sky-400/70 text-xs">General customer questions and support requests from the dashboard</p>
+      </div>
+      <div id="support-inbox-list" class="divide-y divide-sky-500/10"></div>
+    </div>
+  </div>
+
   <!-- Stats Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
@@ -564,6 +578,7 @@ async function checkAuth() {
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadUpgradeRequests();
+      loadSupportInbox();
       loadSubscriptions();
     }
   } catch (err) {
@@ -594,6 +609,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadUpgradeRequests();
+      loadSupportInbox();
       loadSubscriptions();
     } else {
       errorEl.textContent = data.error || 'Invalid email or password.';
@@ -636,7 +652,12 @@ async function loadUpgradeRequests() {
       <div class="flex items-center justify-between px-6 py-4 gap-4 flex-wrap" id="upgrade-req-${r.payment_id}">
         <div class="flex-1 min-w-[200px]">
           <p class="font-semibold text-slate-100">${escapeHtml(r.restaurant_name)}</p>
-          <p class="text-xs text-slate-400">${escapeHtml(r.customer_email || '')}${r.customer_business ? ' &middot; ' + escapeHtml(r.customer_business) : ''}</p>
+          <p class="text-xs text-slate-400">${escapeHtml(r.customer_email || '')}${r.customer_business ? ' &middot; ' + escapeHtml(r.customer_business) : ''}${r.customer_phone ? ' &middot; ' + escapeHtml(r.customer_phone) : ''}</p>
+          ${(r.request_message || r.preferred_contact || r.notes) ? `<div class="mt-2 space-y-1">
+            ${r.preferred_contact ? `<p class="text-[11px] uppercase tracking-wide text-amber-400">Preferred contact: ${escapeHtml(r.preferred_contact)}</p>` : ''}
+            ${r.request_message ? `<p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(r.request_message)}</p>` : ''}
+            ${!r.request_message && r.notes ? `<p class="text-xs text-slate-500 leading-relaxed">${escapeHtml(r.notes)}</p>` : ''}
+          </div>` : ''}
         </div>
         <div class="flex items-center gap-6">
           <div class="text-center">
@@ -709,6 +730,64 @@ async function dismissUpgrade(paymentId) {
     if (!remaining) document.getElementById('upgrade-requests-section').classList.add('hidden');
     else document.getElementById('upgrade-requests-count').textContent = remaining;
     showToast('Request dismissed.');
+  } catch(err) { showToast('Error: ' + err.message, 'error'); }
+}
+
+async function loadSupportInbox() {
+  try {
+    const res = await fetch('/api/admin/support-requests', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) return;
+    const requests = await res.json();
+    const section = document.getElementById('support-inbox-section');
+    const list = document.getElementById('support-inbox-list');
+    const badge = document.getElementById('support-inbox-count');
+    if (!requests.length) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+    badge.textContent = requests.length;
+    list.innerHTML = requests.map(r => `
+      <div class="flex items-center justify-between px-6 py-4 gap-4 flex-wrap" id="support-req-${r.request_id}">
+        <div class="flex-1 min-w-[240px]">
+          <p class="font-semibold text-slate-100">${escapeHtml(r.subject || 'Support request')}</p>
+          <p class="text-xs text-slate-400">${escapeHtml(r.customer_email || '')}${r.customer_business ? ' &middot; ' + escapeHtml(r.customer_business) : ''}${r.restaurant_name ? ' &middot; ' + escapeHtml(r.restaurant_name) : ''}${r.customer_phone ? ' &middot; ' + escapeHtml(r.customer_phone) : ''}</p>
+          <div class="mt-2 space-y-1">
+            ${r.preferred_contact ? `<p class="text-[11px] uppercase tracking-wide text-sky-400">Preferred contact: ${escapeHtml(r.preferred_contact)}</p>` : ''}
+            ${r.request_message ? `<p class="text-xs text-slate-300 leading-relaxed">${escapeHtml(r.request_message)}</p>` : ''}
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <div class="text-center">
+            <p class="text-xs text-slate-400">Requested</p>
+            <p class="text-sm">${formatDate(r.created_at)}</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="resolveSupportRequest(${r.request_id})" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1">
+            <svg class="material-symbols-outlined text-[14px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="/icons/sprite.svg#icon-check"/></svg>
+            Mark Resolved
+          </button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('Failed to load support inbox:', e);
+  }
+}
+
+async function resolveSupportRequest(requestId) {
+  if (!confirm('Mark this support request as resolved?')) return;
+  try {
+    const csrf = await getUpgradeCsrf();
+    const res = await fetch(`/api/admin/support-requests/${requestId}/resolve`, {
+      method: 'POST',
+      headers: { 'x-admin-token': adminToken, 'x-csrf-token': csrf, 'Content-Type': 'application/json' }
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Failed');
+    document.getElementById(`support-req-${requestId}`)?.remove();
+    const remaining = document.getElementById('support-inbox-list').children.length;
+    if (!remaining) document.getElementById('support-inbox-section').classList.add('hidden');
+    else document.getElementById('support-inbox-count').textContent = remaining;
+    showToast('Support request resolved.');
   } catch(err) { showToast('Error: ' + err.message, 'error'); }
 }
 
@@ -1099,7 +1178,7 @@ function filterAndRender() {
 
 document.getElementById('filter-status').addEventListener('change', filterAndRender);
 document.getElementById('search-input').addEventListener('input', filterAndRender);
-document.getElementById('refresh-btn').addEventListener('click', () => { loadUpgradeRequests(); loadSubscriptions(); });
+document.getElementById('refresh-btn').addEventListener('click', () => { loadUpgradeRequests(); loadSupportInbox(); loadSubscriptions(); });
 
 // -- Helpers -----------------------------------------------------------------
 function showToast(msg, type = 'success') {

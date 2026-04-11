@@ -215,7 +215,7 @@
           </div>
         </a>
         
-        <a href="mailto:support@restorder.online" class="flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition">
+        <button type="button" onclick="openSupportModal()" class="w-full text-left flex items-center gap-3 p-4 bg-stone-50 border border-stone-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition">
           <div class="size-10 rounded-lg bg-blue-100 flex items-center justify-center">
             <svg class="material-symbols-outlined text-blue-600 text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
           </div>
@@ -223,7 +223,7 @@
             <p class="font-semibold text-sm text-stone-800">Get Support</p>
             <p class="text-xs text-stone-400">Contact our team</p>
           </div>
-        </a>
+        </button>
       </div>
     </div>
 
@@ -975,10 +975,11 @@ async function loadSubscription() {
   container.innerHTML = '<div class="p-12 text-center"><svg class="material-symbols-outlined text-[64px] text-stone-300 block mb-3 spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg><p class="text-stone-400">Loading subscription details...</p></div>';
 
   try {
-    const [plansRes, subsRes, paymentsRes] = await Promise.all([
+    const [plansRes, subsRes, paymentsRes, supportRes] = await Promise.all([
       fetch('/api/subscription-plans'),
       fetch('/api/customers/subscriptions', { headers: { 'x-customer-token': getToken() } }),
-      fetch('/api/customers/payments', { headers: { 'x-customer-token': getToken() } })
+      fetch('/api/customers/payments', { headers: { 'x-customer-token': getToken() } }),
+      fetch('/api/customers/support-requests', { headers: { 'x-customer-token': getToken() } })
     ]);
 
     if (!plansRes.ok || !subsRes.ok) throw new Error('Failed to load subscription data');
@@ -986,6 +987,7 @@ async function loadSubscription() {
     const plans = await plansRes.json();
     const subscriptions = await subsRes.json();
     const payments = paymentsRes.ok ? await paymentsRes.json() : [];
+    const supportRequests = supportRes.ok ? await supportRes.json() : [];
 
     const currentSub = subscriptions.find(s => s.subscription_id) || subscriptions[0];
     const currentPlanId = currentSub?.plan_id || plans.find(p => p.name === 'starter')?.id;
@@ -1091,7 +1093,7 @@ async function loadSubscription() {
                 ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
               </div>
               ${!isCurrent ? `
-                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}', '${escapeHtml(plan.name)}')"
+                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price}, '${currentSub?.menu_id || ''}')"
                   class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
                   ${isUpgrade ? '? Upgrade' : '? Downgrade'} to ${escapeHtml(plan.display_name)}
                 </button>` : `
@@ -1143,9 +1145,62 @@ async function loadSubscription() {
           <p class="font-semibold text-stone-900 text-sm">Questions about your subscription?</p>
           <p class="text-stone-500 text-xs mt-0.5">Our team responds within 24 hours.</p>
         </div>
-        <a href="mailto:support@restorder.online" class="px-4 py-2 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-orange-700 transition flex-shrink-0">
+        <button type="button" onclick="openSupportModal()" class="px-4 py-2 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-orange-700 transition flex-shrink-0">
           Contact Support
-        </a>
+        </button>
+      </div>
+
+      <div class="mt-6 bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="p-6 border-b border-stone-100 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h3 class="text-lg font-bold text-stone-900">Contact &amp; Request History</h3>
+            <p class="text-stone-500 text-sm mt-1">Track all your upgrade and support requests.</p>
+          </div>
+          <button type="button" onclick="openSupportModal()" class="px-4 py-2 bg-stone-100 text-stone-700 font-semibold rounded-xl text-sm hover:bg-stone-200 transition">
+            New Request
+          </button>
+        </div>
+        ${supportRequests.length === 0 ? `
+          <div class="p-10 text-center">
+            <svg class="material-symbols-outlined text-[48px] text-stone-300 block mb-3" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support_agent"/></svg>
+            <p class="text-stone-400 text-sm">No requests yet.</p>
+          </div>` : `
+          <div class="divide-y divide-stone-100">
+            ${supportRequests.map(req => {
+              const isUpgrade = req.request_type === 'upgrade';
+              const typeLabel = isUpgrade ? 'Plan Upgrade' : 'Support';
+              const typeBadgeClass = isUpgrade ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700';
+              const statusColors = {
+                open: 'bg-amber-100 text-amber-700',
+                approved: 'bg-green-100 text-green-700',
+                resolved: 'bg-green-100 text-green-700',
+                dismissed: 'bg-red-100 text-red-600'
+              };
+              const statusColor = statusColors[req.status] || 'bg-stone-100 text-stone-500';
+              const statusLabel = req.status === 'dismissed' ? 'declined' : (req.status || 'open');
+              const handledLabel = req.handled_at
+                ? (isUpgrade ? ' &middot; ' + (req.status === 'approved' ? 'Approved' : 'Declined') + ' ' + formatDate(req.handled_at)
+                             : ' &middot; Resolved ' + formatDate(req.handled_at))
+                : '';
+              const subjectLine = isUpgrade
+                ? (req.requested_plan_name ? 'Upgrade to ' + escapeHtml(req.requested_plan_name) + ' plan' : 'Plan upgrade request')
+                : escapeHtml(req.subject || 'Support request');
+              return `<div class="p-6">
+                <div class="flex items-start justify-between gap-4 flex-wrap mb-2">
+                  <div>
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                      <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${typeBadgeClass}">${typeLabel}</span>
+                      <p class="font-semibold text-stone-900">${subjectLine}</p>
+                    </div>
+                    <p class="text-xs text-stone-500">${req.restaurant_name ? escapeHtml(req.restaurant_name) + ' &middot; ' : ''}Submitted ${formatDate(req.created_at)}${handledLabel}</p>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${statusColor}">${escapeHtml(statusLabel)}</span>
+                </div>
+                <p class="text-xs uppercase tracking-wide text-stone-400 mb-2">Preferred contact: ${escapeHtml(req.preferred_contact || 'email')}</p>
+                ${req.message ? `<p class="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">${escapeHtml(req.message)}</p>` : ''}
+              </div>`;
+            }).join('')}
+          </div>`}
       </div>
     `;
 
@@ -1188,16 +1243,8 @@ function loadPayPalSDK(clientId, environment) {
   return _paypalLoaded;
 }
 
-// Plan click: redirect to checkout for paid plans, use modal for free downgrade
-function handlePlanClick(planId, planName, planPrice, menuId, planSlug) {
-  if (planPrice > 0) {
-    const slug = planSlug || planName.toLowerCase();
-    const params = new URLSearchParams({ plan: slug });
-    if (menuId) params.set('menu_id', menuId);
-    window.location.href = `/checkout?${params.toString()}`;
-    return;
-  }
-  // Free downgrade � use existing modal
+// Plan click: open plan-change modal for all plans (payment gateways loaded inside modal)
+function handlePlanClick(planId, planName, planPrice, menuId) {
   openChangePlanModal(planId, planName, planPrice, menuId);
 }
 
@@ -1211,6 +1258,8 @@ async function openChangePlanModal(planId, planName, planPrice, menuId) {
   document.getElementById('pcm-price').textContent = planPrice === 0 ? 'FREE' : `$${planPrice}/month`;
   document.getElementById('pcm-note').textContent = '';
   document.getElementById('pcm-payment-section').innerHTML = '';
+  document.getElementById('pcm-message').value = '';
+  document.getElementById('pcm-contact-method').value = 'email';
 
   const confirmBtn = document.getElementById('pcm-confirm-btn');
   confirmBtn.classList.remove('hidden');
@@ -1372,21 +1421,85 @@ function handleFlutterwavePayment(planId, planPrice, planName, menuId, publicKey
 
 function closePlanChangeModal() {
   document.getElementById('plan-change-modal').classList.add('hidden');
+  const messageEl = document.getElementById('pcm-message');
+  const contactEl = document.getElementById('pcm-contact-method');
+  if (messageEl) messageEl.value = '';
+  if (contactEl) contactEl.value = 'email';
+}
+
+function openSupportModal() {
+  const menus = window.customerMenus || [];
+  const select = document.getElementById('support-menu-id');
+  select.innerHTML = ['<option value="">General account support</option>']
+    .concat(menus.map(menu => `<option value="${escapeHtml(menu.id)}">${escapeHtml(menu.restaurant_name)}</option>`))
+    .join('');
+  document.getElementById('support-subject').value = '';
+  document.getElementById('support-message').value = '';
+  document.getElementById('support-contact-method').value = 'email';
+  document.getElementById('support-modal').classList.remove('hidden');
+}
+
+function closeSupportModal() {
+  document.getElementById('support-modal').classList.add('hidden');
+}
+
+async function submitSupportRequest() {
+  const subject = (document.getElementById('support-subject').value || '').trim();
+  const message = (document.getElementById('support-message').value || '').trim();
+  const preferredContact = document.getElementById('support-contact-method').value || 'email';
+  const menuId = document.getElementById('support-menu-id').value || '';
+  const btn = document.getElementById('support-submit-btn');
+
+  if (!message) { showSubToast('Please enter your support message.', true); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const csrf = await getCsrf();
+    const res = await fetch('/api/customers/support-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+      body: JSON.stringify({
+        menu_id: menuId,
+        subject,
+        message,
+        preferred_contact: preferredContact
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit support request');
+    closeSupportModal();
+    showSubToast('Support request sent. Admin/support will contact you within 24 hours.');
+  } catch (err) {
+    showSubToast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
+  }
 }
 
 async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) {
   const btn = document.getElementById('pcm-confirm-btn');
   const menus = window.customerMenus || [];
   const targetMenuId = menuId || (menus[0]?.id);
+  const requestMessage = (document.getElementById('pcm-message')?.value || '').trim();
+  const preferredContact = document.getElementById('pcm-contact-method')?.value || 'email';
   if (!targetMenuId) { showSubToast('No menu found. Please create a menu first.', true); return; }
 
   btn.disabled = true;
   btn.textContent = 'Processing...';
   try {
+    const csrf = await getCsrf();
     const res = await fetch('/api/customers/subscription/change', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken() },
-      body: JSON.stringify({ menu_id: targetMenuId, plan_id: planId, payment_method: paymentMethod || 'manual' })
+      headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+      body: JSON.stringify({
+        menu_id: targetMenuId,
+        plan_id: planId,
+        payment_method: paymentMethod || 'manual',
+        request_message: requestMessage,
+        preferred_contact: preferredContact
+      })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to change plan');
@@ -1395,7 +1508,7 @@ async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) 
     showSubToast(paymentMethod === 'bank_transfer'
       ? `Bank transfer received! Your ${planName} plan will be activated once payment is confirmed.`
       : planPrice > 0
-      ? `Upgrade to ${planName} requested! We'll contact you with payment details.`
+      ? `Upgrade to ${planName} requested. Admin/support has received your contact details.`
       : `Downgraded to ${planName} successfully.`);
     await loadSubscription();
     await loadDashboard();
@@ -1808,6 +1921,21 @@ async function showSubscribePrompt() {
       <p class="text-primary font-semibold text-xl" id="pcm-price"></p>
       <p class="text-stone-500 text-sm mt-1" id="pcm-note"></p>
     </div>
+    <div class="space-y-3 mb-5">
+      <div>
+        <label for="pcm-contact-method" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Preferred contact</label>
+        <select id="pcm-contact-method" class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 focus:border-primary focus:outline-none">
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+          <option value="either">Either email or phone</option>
+        </select>
+      </div>
+      <div>
+        <label for="pcm-message" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Message for admin/support</label>
+        <textarea id="pcm-message" rows="3" maxlength="1200" placeholder="Optional: best time to reach you, billing notes, or anything the team should know." class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 placeholder:text-stone-400 focus:border-primary focus:outline-none resize-none"></textarea>
+      </div>
+      <p class="text-xs text-stone-500">Your account email and phone will be included with this request so support can follow up.</p>
+    </div>
     <!-- Gateway payment options rendered here -->
     <div id="pcm-payment-section"></div>
     <!-- Fallback confirm for free plans / manual billing -->
@@ -1819,6 +1947,44 @@ async function showSubscribePrompt() {
 </div>
 
 <!-- Cancel Subscription Modal -->
+
+<div id="support-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeSupportModal()"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+    <button onclick="closeSupportModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition">
+      <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
+    </button>
+    <h3 class="text-xl font-bold text-stone-900 mb-1">Contact Support</h3>
+    <p class="text-stone-500 text-sm mb-5">Send a message to admin/support and we will follow up within 24 hours.</p>
+    <div class="space-y-4">
+      <div>
+        <label for="support-menu-id" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Menu</label>
+        <select id="support-menu-id" class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 focus:border-primary focus:outline-none"></select>
+      </div>
+      <div>
+        <label for="support-contact-method" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Preferred contact</label>
+        <select id="support-contact-method" class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 focus:border-primary focus:outline-none">
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+          <option value="either">Either email or phone</option>
+        </select>
+      </div>
+      <div>
+        <label for="support-subject" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Subject</label>
+        <input id="support-subject" type="text" maxlength="160" placeholder="Optional summary" class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 placeholder:text-stone-400 focus:border-primary focus:outline-none" />
+      </div>
+      <div>
+        <label for="support-message" class="block text-xs font-semibold uppercase tracking-wide text-stone-500 mb-1">Message</label>
+        <textarea id="support-message" rows="5" maxlength="1200" placeholder="Tell us what you need help with." class="w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 placeholder:text-stone-400 focus:border-primary focus:outline-none resize-none"></textarea>
+      </div>
+      <p class="text-xs text-stone-500">Your account email and phone will be attached so support can reply directly.</p>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button id="support-submit-btn" onclick="submitSupportRequest()" class="flex-1 px-5 py-2.5 bg-primary hover:bg-orange-700 text-white font-bold rounded-xl transition">Send Request</button>
+      <button onclick="closeSupportModal()" class="flex-1 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl transition">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- Feature Gate Modal (QR print / advanced features on free plans) -->
 <div id="feature-gate-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);">
