@@ -980,10 +980,13 @@ async function initDB() {
         menu_id   TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
         label     TEXT NOT NULL DEFAULT '',
         qr_code   TEXT NOT NULL DEFAULT '',
+        is_room   INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL
       );
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_tables_menu ON menu_tables (menu_id)`);
+    // Migration: add is_room column to menu_tables for room-service QR support
+    await client.query(`ALTER TABLE menu_tables ADD COLUMN IF NOT EXISTS is_room INTEGER NOT NULL DEFAULT 0`).catch(() => {});
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS table_alerts (
@@ -5077,27 +5080,29 @@ app.get('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), as
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/menus/:id/tables - Create a table + generate its QR
+// POST /api/menus/:id/tables - Create a table or room entry + generate its QR
 app.post('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     const menuId = req.params.id;
     const label = sanitizeStr(req.body.label, 100) || 'Table';
+    const isRoom = req.body.is_room || req.body.isRoom || 0;
     const menu = await dbGetMenu(menuId);
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
     if (req.isCustomer && !await assertMenuOwnership(menuId, req.customer.id, res)) return;
 
     const QRCode = require('qrcode');
     const HOST = process.env.HOST || `http://localhost:${PORT}`;
-    const tableUrl = `${HOST}/menu.html?id=${menuId}&table=${encodeURIComponent(label)}`;
+    // If this is a room-style QR, link with `room=` param, otherwise `table=`
+    const tableUrl = isRoom ? `${HOST}/menu.html?id=${menuId}&room=${encodeURIComponent(label)}` : `${HOST}/menu.html?id=${menuId}&table=${encodeURIComponent(label)}`;
     const qrCode = await QRCode.toDataURL(tableUrl, {
       width: 512, margin: 2,
       color: { dark: '#000000', light: '#ffffff' }
     });
 
     const { rows } = await pool.query(
-      `INSERT INTO menu_tables (menu_id, label, qr_code, created_at)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [menuId, label, qrCode, new Date().toISOString()]
+      `INSERT INTO menu_tables (menu_id, label, qr_code, is_room, created_at)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [menuId, label, qrCode, isRoom ? 1 : 0, new Date().toISOString()]
     );
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
