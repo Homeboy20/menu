@@ -1045,6 +1045,7 @@ let menuData=null,userTheme=null;
 let viewMode=localStorage.getItem('menuViewMode')||'list';
 let cart=[],modalItem=null,modalQty=1;
 let currentTableLabel='';
+let currentRoomNumber='';
 
 /* -- THEME -- */
 (function(){
@@ -1098,7 +1099,9 @@ function clearSearch(){
 (async()=>{
   const p=new URLSearchParams(location.search);
   const id=p.get('id');
-  currentTableLabel=p.get('table')||'';
+  // Accept both table QR and room-service QR via URL params
+  currentTableLabel = p.get('table') || '';
+  currentRoomNumber = p.get('room') || '';
   if(!id){showError('No menu ID provided in the URL.');return;}
   showSkeleton();
   try{
@@ -1110,8 +1113,11 @@ function clearSearch(){
     applyBranding(d);
     allItems=d.items||[];
     buildTabs();renderItems();setView(viewMode);initGeoConversion();
-    if(currentTableLabel&&d.tablesEnabled){
+    if (currentTableLabel && d.tablesEnabled) {
       document.getElementById('table-banner-label').textContent='\uD83D\uDCCD '+currentTableLabel;
+      document.getElementById('table-banner').classList.add('visible');
+    } else if (currentRoomNumber) {
+      document.getElementById('table-banner-label').textContent='\ud83c\udfe8 Room: '+currentRoomNumber;
       document.getElementById('table-banner').classList.add('visible');
     }
   }catch(e){showError(e.message);}
@@ -1578,10 +1584,10 @@ function placeOrder(){
   const lines=cart.map(c=>`${c.name} \u00d7${c.qty} \u2014 ${fmtAmt((parseFloat(c.price)||0)*c.qty)}`);
   let total=0;cart.forEach(c=>{total+=(parseFloat(c.price)||0)*c.qty;});
   const rn=menuData?.restaurantName||'';
-  const tn=currentTableLabel?`\nTable: ${currentTableLabel}`:'';
+  const tn = currentTableLabel ? `\nTable: ${currentTableLabel}` : (currentRoomNumber ? `\nRoom: ${currentRoomNumber}` : '');
   const msg=`${rn?'Order from '+rn+':\n':'Order:\n'}Customer: ${cn} (${pd})\n${lines.join('\n')}${tn}\n\nTotal: ${fmtAmt(total)}`;
   const items=cart.map(c=>({name:c.name,qty:c.qty,price:parseFloat(c.price)||0}));
-  fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,table:currentTableLabel,currency:menuData.currency||'USD',customer_name:cn,customer_phone:pd})}).catch(()=>{});
+  fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,table:currentTableLabel,room:currentRoomNumber,currency:menuData.currency||'USD',customer_name:cn,customer_phone:pd})}).catch(()=>{});
   const ph=menuData?.phone?.replace(/[^\d+]/g,'');
   if(ph)window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(msg),'_blank');
   else alert(msg);
@@ -1598,12 +1604,13 @@ function makeSwipeable(sheetId,closeFn){
 
 /* -- CALL WAITER -- */
 async function callWaiter(){
-  if(!menuData||!currentTableLabel)return;
+  if(!menuData||(!currentTableLabel && !currentRoomNumber))return;
   const btn=document.getElementById('call-waiter-btn');
   const sm=document.getElementById('waiter-sent-msg');
   btn.disabled=true;haptic(40);
   try{
-    const r=await fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/alerts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({table:currentTableLabel,message:'Service requested at '+currentTableLabel})});
+    const payload = currentRoomNumber ? { room: currentRoomNumber, message: 'Service requested at Room '+currentRoomNumber } : { table: currentTableLabel, message: 'Service requested at '+currentTableLabel };
+    const r=await fetch('/api/menus/'+encodeURIComponent(menuData.id)+'/alerts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok)throw new Error();
     btn.style.display='none';sm.style.display='block';showToast('Waiter has been notified \u2713');
     setTimeout(()=>{btn.style.display='';sm.style.display='none';btn.disabled=false;},8000);

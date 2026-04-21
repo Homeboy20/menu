@@ -307,6 +307,7 @@ let staffName     = localStorage.getItem('staffName') || 'Staff';
 let selectedMenuId = null;
 let menus = [];
 let pollTimer = null;
+let lastPendingAlerts = 0;
 
 // -- Role config ---------------------------------------------------------------
 const ROLE_CONFIG = {
@@ -559,7 +560,7 @@ async function loadOrders() {
             <div>
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold text-stone-900 text-base">#${order.id}</span>
-                ${order.table_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full"><svg class="material-symbols-outlined text-[13px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg> ${escapeHtml(order.table_label)}</span>` : ''}
+                ${order.table_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full"><svg class="material-symbols-outlined text-[13px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg> ${escapeHtml(order.table_label)}</span>` : (order.room_label ? `<span class="text-xs bg-stone-100 text-stone-600 font-semibold px-2.5 py-1 rounded-full">🏨 ${escapeHtml(order.room_label)}</span>` : '')}
                 ${order.customer_name ? `<span class="text-xs text-stone-500">${escapeHtml(order.customer_name)}</span>` : ''}
               </div>
               <p class="text-xs text-stone-400 mt-1">
@@ -633,6 +634,28 @@ async function loadAlerts() {
       tabBadge?.classList.add('hidden');
     }
 
+    // Notify staff (vibrate + optional notification) when pending alerts increase
+    try {
+      const prev = lastPendingAlerts || 0;
+      if (pending.length > prev) {
+        if (navigator.vibrate) navigator.vibrate([200,100,200]);
+        // Show a system notification where supported
+        if (window.Notification && Notification.permission === 'granted') {
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg && reg.showNotification) {
+              reg.showNotification('New Table Alerts', { body: `${pending.length} pending`, vibrate: [200,100,200], badge: '/favicon.ico' });
+            }
+          } else {
+            try { new Notification('New Table Alerts', { body: `${pending.length} pending` }); } catch(e) {}
+          }
+        } else if (window.Notification && Notification.permission !== 'denied') {
+          Notification.requestPermission().then(permission => { if (permission === 'granted') { if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(r=>r?.showNotification && r.showNotification('New Table Alerts', { body: `${pending.length} pending`, vibrate: [200,100,200], badge: '/favicon.ico' })); } });
+        }
+      }
+      lastPendingAlerts = pending.length;
+    } catch (_) {}
+
     if (!alerts.length) {
       container.innerHTML = `
         <div class="p-12 text-center text-stone-400">
@@ -653,7 +676,7 @@ async function loadAlerts() {
             <div>
               <p class="font-semibold text-stone-900">
                 <svg class="material-symbols-outlined text-[15px] align-middle text-stone-500 mr-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg>
-                ${escapeHtml(alert.table_label)}
+                ${escapeHtml(alert.table_label || (alert.room_label ? 'Room: ' + alert.room_label : ''))}
               </p>
               <p class="text-sm text-stone-600 mt-0.5">${escapeHtml(alert.message)}</p>
               <p class="text-xs text-stone-400 mt-1">
@@ -771,7 +794,7 @@ async function loadSummary() {
               const items = Array.isArray(o.items) ? o.items : JSON.parse(o.items || '[]');
               return `<div class="py-3 flex items-center justify-between gap-3">
                 <div>
-                  <p class="font-semibold text-stone-900 text-sm">#${o.id}${o.table_label ? ` � <span class="text-stone-500 font-normal">${escapeHtml(o.table_label)}</span>` : ''}</p>
+                  <p class="font-semibold text-stone-900 text-sm">#${o.id}${o.table_label ? ` � <span class="text-stone-500 font-normal">${escapeHtml(o.table_label)}</span>` : (o.room_label ? ` � <span class="text-stone-500 font-normal">Room: ${escapeHtml(o.room_label)}</span>` : '')}</p>
                   <p class="text-xs text-stone-400">${items.length} item${items.length !== 1 ? 's' : ''} � ${formatTime(o.created_at)}</p>
                 </div>
                 <span class="font-bold text-stone-900">${formatCurrency(o.total, o.currency)}</span>

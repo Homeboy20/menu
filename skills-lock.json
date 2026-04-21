@@ -1,0 +1,345 @@
+﻿{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/claude-code",
+      "sourceType": "github",
+      "computedHash": "e8118284a6365753790d44bb2758a6032b3af27fa84696428d9233f2be0f4e78"
+    },
+    "browser-use": {
+      "source": "browser-use/browser-use",
+      "sourceType": "github",
+      "computedHash": "a8cdeb87bf175560613183071a60c82b6224230ead100ede025e8658b8d410ec"
+    },
+    "angular-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4738b4cd63f2e3d5d386400f8437e19f7fd2cb4d56faeca899c5374627fa567d"
+    },
+    "api-designer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "185d4b3c6cae71bc2a2ed4b8ec73db7240b0055430c83eb9fe8a7714400a7204"
+    },
+    "architecture-designer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "56893022cddf577cb5a556146c731dafdd62635abc08a683767cb461cc1c4f85"
+    },
+    "atlassian-mcp": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "690d789c5a93051acdd8ca0a59dd48573b40f01407ce623183b5dbea2f04bb6c"
+    },
+    "chaos-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "f522058316a7f78276f0f7efd7dd01c66c8a5086ba14208702b6ec1a33eae2e2"
+    },
+    "cli-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "dff03b2cfd86c5547c71f193d63cfc4befbe198b8f39026c1cc4443dcc3ad5dd"
+    },
+    "cloud-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "15a96274082c41ab4b1ac4dc7d930930ac177e6482b0f00e487b2e2ac2fa3551"
+    },
+    "code-documenter": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "ca2ca4dd2d33d89b8ab462d6d75738ff3a132034e6338d0be9d58c0ceeca6f60"
+    },
+    "code-reviewer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "777841d763d199f85c64e3fd38189443505db6e1443e0a7e8a52a5f228c43ab1"
+    },
+    "cpp-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "47728f9a6e9e38ac92c44f63680eafb012aa23d32bb092d143dbefbf1c3845cc"
+    },
+    "csharp-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "cb0c509d3bc65de7faec3ada9c6de3e5bc9ef5f47e16af7bd6e21ea940b18ae6"
+    },
+    "database-optimizer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4a3cbc21d3ad86dd322b13bc4384f38d673e7a18e32f8f51e1f5ea6ee59bc0a7"
+    },
+    "debugging-wizard": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "aa54134d05e690a8399ddc5aeb8f7b73fceb44ad2c256f39f930e4332ab5e917"
+    },
+    "devops-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "f9a5535180a03b93ec97d431b7110bbcfa8f86b5607ebc8b5b8d23edd3fd1343"
+    },
+    "django-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "d6c131b07f539a977b1926cbdce71c1003252adb94ef0b27303b1bc4a8e947f7"
+    },
+    "dotnet-core-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "2fedab16de0930c5e0ed034af0d2b62e510ea57ffc660d7e98ef750599bda436"
+    },
+    "embedded-systems": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "cfafb2c335cfcd6b295a98e32dbc2e6193d8ab7587aac4e145c12dd8b01b05a6"
+    },
+    "fastapi-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "46ab22dc2caeeee5c12735ef1a1e9dddc462ed036b4ca56a2fdf0087ff9b9aca"
+    },
+    "feature-forge": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "15f96203c3d2f890e740662b0740bb07978a12ac6646e53e4843457190c01292"
+    },
+    "fine-tuning-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "72f0382f8e003d55d18e3a99fb9840d1f189097cf3b74c5eb518fc828cc8edf7"
+    },
+    "flutter-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4e80b00ec5d5010cffb20e30e16018d4970de4f523bc3b7e915eb5585c9dfd71"
+    },
+    "fullstack-guardian": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "3000a75cdce92198825b56b2a5e254e35f511b45992775e2ae440359b89d7556"
+    },
+    "game-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "a7221459f6d28662e58441f9bb2e8b593e7432428186b720e7101c1e690e2708"
+    },
+    "golang-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "02b5b77b4678636dbb601a879ba30af5a5360943b3a7641d4b6b0809bd9058b2"
+    },
+    "graphql-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4d4d4c6643db66de72a16ed943f92b00fdc99d8beb015d6b351f7e0712357a73"
+    },
+    "java-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "a2ade65946b092e925936a03d8c4d3575ae0013f5ec4faf5a22d7179f18a2eaa"
+    },
+    "javascript-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "52eb230ceb322ab1e4b0c2ed1e537b6ac49c4af32bd120f40e42a50b0c0582c7"
+    },
+    "kotlin-specialist": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "c026b7152c53e98366e29c0300cedce103b0135359c932f829e93d4311429523"
+    },
+    "kubernetes-specialist": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "a53962a8d166ad68b653a594ce0d1e9477947b617200a21f1d602e66cb3cb511"
+    },
+    "laravel-specialist": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "d7637ae586bfbba8a0af739631474d2f0bfc90ee08566a352bf7c1f5176a869b"
+    },
+    "legacy-modernizer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "cdef74f9bcfe925e59b6cd7142ec53539ef288b9b26f58620e06285a2ffeb95c"
+    },
+    "mcp-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "782436273335ab4e6f32db0068ae47fecfe22e92648ca18214fb0308764cda3d"
+    },
+    "microservices-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "29f718ed587da15f31bb83a31c09921754458aabbfeb18e18243f2bcb7d2b766"
+    },
+    "ml-pipeline": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "6a26ae61516bd0708da2d8aa9cb5c49a34293c9c6e4b58e579d48e80e8f182aa"
+    },
+    "monitoring-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "3d1d6d8d850abde267151cdb8a59615e1c7b2bacf6e43b04b0404a9007fb5f04"
+    },
+    "nestjs-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "074daa0b193e00ade229ef617a30788ab42a34ec97edcae446e2cdcac8cf3394"
+    },
+    "nextjs-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "a9f1262dce3e36fc0c1225a111f4aadc45f364a56c2de86f584174d583d1bda7"
+    },
+    "pandas-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "528518b4cddf2e71636ba8772e6aa5cbc65b4fa90aac2e33cf5d392c68994bc3"
+    },
+    "php-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "585706f474de2e86cffbd756396b4ac4ded86443b4100c8a4aec66cde786f56b"
+    },
+    "playwright-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "ceff0f9fd5e8cb5576a6f5c86a822287088173e6a4412c7d8eae34bf122aab34"
+    },
+    "postgres-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "16c95af36cc6782ceeea6740d8c2607cf50541f5200dc7ed862c641d0ce70dbe"
+    },
+    "prompt-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "cc47f5b1278e5f192a4d6b8eefe7fb0e4fc766e6c7b2cb9be65f597c76bae075"
+    },
+    "python-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "de993ff64a3364bc8cb5daa9fe3ce21e9ae51316f72eb065a1fe174db6bed3e1"
+    },
+    "rag-architect": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "95e2590e5bffec27e78907536161efa106b4576da6e0cf0eb6bbe8a1a7e2c7b8"
+    },
+    "rails-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "1579515f3ad2091be309b55a56fa593b2ccf4502117f4feaf5fbb7b95f49ed9c"
+    },
+    "react-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "f349e26b87435bfd37b908ae3832148c46d49e0182ef6a0b5c6f7d4ee2f23c50"
+    },
+    "react-native-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "927fee5379afb4207889f57470a2340f7cfdc7ff3ad983e2a3217e4c7d4338af"
+    },
+    "rust-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "2d2f54b45fa2c9aa294de9b957d4df9155acf1fc329602b70abc1480ba93e5ab"
+    },
+    "salesforce-developer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "c20e206122ea2cbc0e6c0c7bf55d97fb56f7c13510e9ce3c96af3b6852cf1608"
+    },
+    "secure-code-guardian": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "b3b15d078ccfaccc50d4574203816bcac6a3e6a29f2d62e78213afc5ad8391ee"
+    },
+    "security-reviewer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "7f2ad1385a237213b88bdda7c6529e05f839fd5cbe3af23aa222209576c50a2d"
+    },
+    "shopify-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "0638b4839c1c22603496e5efa620190f03e27c5254b9129835a87172d6e9b873"
+    },
+    "spark-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4844b7aa4007220de9e52609e455b48ae31fe55853de1187ada8bdfb741bf420"
+    },
+    "spec-miner": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4e744c93f38dcb10b2da55941d0555cd3b99178c37e2f30f891a3bec65360d17"
+    },
+    "spring-boot-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "e0e9a590c3d723b91e3d012fec0112b01cdb42e234cfa12fd69d15389ef0ffed"
+    },
+    "sql-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "5f265ffc6d634d2b2e3f85c2d9d6ad88046fd4794e97cdf4ce3ef976e609b5a6"
+    },
+    "sre-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "9b50b6dbaeca4e73896e3f84741056cb22e361f776b3b376dedf4f485bbe1302"
+    },
+    "swift-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "d3c27b68cb68d9e4f3970178d351d65d8e8595144e05483ad1ba233f4d5e4f4c"
+    },
+    "terraform-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4066202d9bb0c38418543dfd820002bf38cd7906280697f75ca41fbe4256ca6b"
+    },
+    "test-master": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "3b416535ff01edf746b47b6082eb834385bb8d62885cbf8277649e072d288f89"
+    },
+    "the-fool": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "0ebcb5cb173c1ca69cfe8fee36fafd7dce2dd6d8bc868e471d8ead55d3a670d8"
+    },
+    "typescript-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "0e7f44ede0844c6d1521731f09d945055299d6e9dcd31adbca481f838c492245"
+    },
+    "vue-expert": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "93ce6b58d490d2b79ab71d3360dc0b5bb9b2a9704cda96fa8c12420be7aab0ff"
+    },
+    "vue-expert-js": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "ad10bfab9859c3eb5dfc15540c09014575e2b180b4625d2e67ed291afa8e75d0"
+    },
+    "websocket-engineer": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "4cae3c84e6c84e09b8ca5b1d630422fb663710a5014d27a2764002c6e5e4afcb"
+    },
+    "wordpress-pro": {
+      "source": "claude-skills/skills",
+      "sourceType": "github",
+      "computedHash": "7f9b5a8d1d21197043e41a064566dcfe6ed7f1d4ddf10f7bf04799b01a31f61a"
+    }
+  }
+}

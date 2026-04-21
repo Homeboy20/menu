@@ -859,17 +859,27 @@ try {
 const isLocalDB = _pgConnStr.includes('localhost') || _pgConnStr.includes('127.0.0.1');
 const sslConfig = isLocalDB ? false : { rejectUnauthorized: false };
 
-const pool = new Pool({
-  connectionString: _pgConnStr,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-  ssl: sslConfig,
-});
+let pool;
+if (process.env.MOCK_DB) {
+  console.log('⚠️ Running with MOCK_DB enabled — using in-memory DB stubs');
+  pool = {
+    query: async () => ({ rows: [] }),
+    connect: async () => ({ query: async () => ({ rows: [] }), release: () => {} }),
+    on: () => {}
+  };
+} else {
+  pool = new Pool({
+    connectionString: _pgConnStr,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+    ssl: sslConfig,
+  });
 
-pool.on('error', (err) => {
-  console.error('Unexpected PG pool error:', err);
-});
+  pool.on('error', (err) => {
+    console.error('Unexpected PG pool error:', err);
+  });
+}
 
 // ── Schema setup (runs once on startup) ──────────────────────────────────────
 async function initDB() {
@@ -1007,6 +1017,7 @@ async function initDB() {
         id         SERIAL PRIMARY KEY,
         menu_id    TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
         table_label TEXT NOT NULL DEFAULT '',
+        room_label  TEXT NOT NULL DEFAULT '',
         items      JSONB NOT NULL DEFAULT '[]',
         total      REAL NOT NULL DEFAULT 0,
         currency   TEXT NOT NULL DEFAULT 'USD',
@@ -1016,6 +1027,8 @@ async function initDB() {
         created_at TEXT NOT NULL
       );
     `);
+    // Migration: add room_label to orders for room-service support
+    await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS room_label TEXT NOT NULL DEFAULT ''`).catch(() => {});
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_menu ON orders (menu_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)`);
     // Migration: add customer columns if missing
@@ -5105,9 +5118,12 @@ app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('profes
 app.post('/api/menus/:id/alerts', async (req, res) => {
   try {
     const menuId = req.params.id;
-    const tableLabel = sanitizeStr(req.body.table, 100);
+    const rawTable = req.body.table || req.body.room || '';
     const message = sanitizeStr(req.body.message, 300) || 'Service requested';
-    if (!tableLabel) return res.status(400).json({ error: 'Table label required.' });
+    if (!rawTable) return res.status(400).json({ error: 'Table or room label required.' });
+
+    // Build a label: if a room was provided prefer 'Room: N' so staff sees it clearly
+    const tableLabel = req.body.room ? `Room: ${sanitizeStr(req.body.room, 100)}` : sanitizeStr(req.body.table, 100);
 
     // Check tables are enabled for this menu
     const menu = await dbGetMenu(menuId);
@@ -5195,15 +5211,16 @@ app.post('/api/menus/:id/orders', async (req, res) => {
     if (!items.length) return res.status(400).json({ error: 'No items.' });
 
     const tableLabel = sanitizeStr(req.body.table, 100) || '';
+    const roomLabel = sanitizeStr(req.body.room || req.body.room_label, 100) || '';
     const total = items.reduce((s, it) => s + it.price * it.qty, 0);
     const currency = sanitizeStr(req.body.currency, 10) || menu.currency || 'USD';
     const customerName = sanitizeStr(req.body.customer_name, 200) || '';
     const customerPhone = sanitizeStr(req.body.customer_phone, 20) || '';
 
     const { rows } = await pool.query(
-      `INSERT INTO orders (menu_id, table_label, items, total, currency, status, customer_name, customer_phone, created_at)
-       VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8) RETURNING *`,
-      [menuId, tableLabel, JSON.stringify(items), total, currency, customerName, customerPhone, new Date().toISOString()]
+      `INSERT INTO orders (menu_id, table_label, room_label, items, total, currency, status, customer_name, customer_phone, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending', $7, $8, $9) RETURNING *`,
+      [menuId, tableLabel, roomLabel, JSON.stringify(items), total, currency, customerName, customerPhone, new Date().toISOString()]
     );
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -7822,7 +7839,8 @@ app.use((err, req, res, next) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 (async () => {
-  await initDB();
+  if (!process.env.MOCK_DB) await initDB();
+  else console.log('Skipping DB migrations (MOCK_DB=1)');
   await restoreAdminSessions();
   await loadCustomerSessionsFromDB();
   // Load Firebase Admin SDK from DB settings if not already configured via .env

@@ -3175,7 +3175,7 @@ async function loadAlerts() {
       <div class="flex items-start gap-3 p-3 bg-amber-400/10 border border-amber-400/30 rounded-xl">
         <span class="material-symbols-outlined text-amber-400 text-[20px] mt-0.5">notifications_active</span>
         <div class="flex-1">
-          <p class="text-sm font-semibold text-stone-800">${esc(r.table_label)}</p>
+          <p class="text-sm font-semibold text-stone-800">${esc(r.table_label || (r.room_label ? 'Room: ' + r.room_label : ''))}</p>
           <p class="text-xs text-stone-600 mt-0.5">${esc(r.message)}</p>
           <p class="text-xs text-stone-400 mt-0.5">${new Date(r.created_at).toLocaleString()}</p>
         </div>
@@ -3221,7 +3221,7 @@ async function loadOrders() {
         <div class="bg-stone-50/50 border border-stone-200 rounded-xl p-4 space-y-2">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-sm font-semibold text-stone-800">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : ''}</span>
+              <span class="text-sm font-semibold text-stone-800">#${r.id}${r.table_label ? ' &mdash; ' + esc(r.table_label) : (r.room_label ? ' &mdash; Room: ' + esc(r.room_label) : '')}</span>
               <span class="text-xs text-stone-400 ml-2">${new Date(r.created_at).toLocaleString()}</span>
               ${r.customer_name ? '<br/><span class="text-xs text-stone-600">' + esc(r.customer_name) + (r.customer_phone ? ' &mdash; ' + esc(r.customer_phone) : '') + '</span>' : ''}
             </div>
@@ -3349,10 +3349,10 @@ function showAlertToast(alert) {
   const container = document.getElementById('alert-toast-container');
   const div = document.createElement('div');
   div.className = 'alert-toast';
-  div.innerHTML = `
+    div.innerHTML = `
     <div class="toast-icon"><span class="material-symbols-outlined">notifications_active</span></div>
     <div class="toast-body">
-      <div class="toast-title">${esc(alert.table_label)} � ${esc(alert.restaurant_name || 'Table Alert')}</div>
+      <div class="toast-title">${esc(alert.table_label || (alert.room_label ? 'Room: ' + alert.room_label : 'Table'))} � ${esc(alert.restaurant_name || 'Table Alert')}</div>
       <div class="toast-msg">${esc(alert.message)}</div>
       <div class="toast-time">${new Date(alert.created_at).toLocaleTimeString()}</div>
     </div>
@@ -3360,6 +3360,7 @@ function showAlertToast(alert) {
       <span class="material-symbols-outlined" style="font-size:16px">close</span>
     </button>`;
   container.appendChild(div);
+  try { if (navigator.vibrate) navigator.vibrate([200,100,200]); } catch(_) {}
   // Auto-remove after 15 seconds
   setTimeout(() => { if (div.parentElement) { div.classList.add('out'); setTimeout(() => div.remove(), 300); } }, 15000);
 }
@@ -3367,13 +3368,20 @@ function showAlertToast(alert) {
 function sendBrowserNotification(alert) {
   if (Notification.permission !== 'granted') return;
   try {
-    const n = new Notification('?? ' + (alert.table_label || 'Table Alert'), {
-      body: alert.message + (alert.restaurant_name ? ' � ' + alert.restaurant_name : ''),
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">??</text></svg>',
-      tag: 'table-alert-' + alert.id,
-      requireInteraction: true,
-    });
-    n.onclick = () => { window.focus(); showSection('tables'); n.close(); };
+    // Vibrate where supported and try to show a service-worker-backed notification
+    try { if (navigator.vibrate) navigator.vibrate([200,100,200]); } catch(_) {}
+    const title = (alert.table_label ? 'Table: ' + alert.table_label : (alert.room_label ? 'Room: ' + alert.room_label : 'Table Alert'));
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.showNotification) {
+          reg.showNotification(title, { body: alert.message + (alert.restaurant_name ? ' � ' + alert.restaurant_name : ''), tag: 'table-alert-' + alert.id, vibrate: [200,100,200], badge: '/favicon.ico' });
+        } else {
+          try { const n = new Notification(title, { body: alert.message }); n.onclick = () => { window.focus(); showSection('tables'); n.close(); }; } catch(_) {}
+        }
+      });
+    } else {
+      try { const n = new Notification(title, { body: alert.message }); n.onclick = () => { window.focus(); showSection('tables'); n.close(); }; } catch(_) {}
+    }
   } catch (_) {}
 }
 
