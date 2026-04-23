@@ -618,8 +618,20 @@ function resetPhoneFlow(){
   clearError('phone-error');setTimeout(()=>el('auth-phone').focus(),40);
 }
 
-//  Firebase init on load 
+//  Firebase init on load
 (async()=>{
+  // If redirected from login page after Google sign-in with a new account,
+  // pick up the pending token and jump straight to step 2 (business name)
+  if(new URLSearchParams(window.location.search).get('google')==='1'){
+    const pending=sessionStorage.getItem('pendingGoogleIdToken');
+    if(pending){
+      sessionStorage.removeItem('pendingGoogleIdToken');
+      window._pendingFirebaseIdToken=pending;
+      window.history.replaceState({},'',window.location.pathname);
+      goToStep(2);
+    }
+  }
+
   try{
     const cfg=await fetch('/api/firebase-config').then(r=>r.json());
     if(cfg&&cfg.enabled){

@@ -358,13 +358,17 @@ async function handleFirebaseToken(idToken){
   const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken})});
   const data=await res.json();
   if(res.status===422&&data.requiresRegistration){
-    const biz=prompt('Welcome! What is your restaurant / business name?');if(!biz)return;
-    const res2=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken,businessName:biz.trim()})});
-    const data2=await res2.json();if(!res2.ok){firebaseErr(data2.error||'Registration failed.');return;}
-    localStorage.setItem('customerToken',data2.token);window.location.href=data2.redirectTo||'/dashboard';return;
+    // New account — store token and hand off to register page step 2
+    // (window.prompt() is blocked by browsers after a popup, so we redirect instead)
+    sessionStorage.setItem('pendingGoogleIdToken',idToken);
+    window.location.href='/register?google=1';
+    return;
   }
   if(!res.ok){firebaseErr(data.error||'Sign-in failed.');return;}
-  localStorage.setItem('customerToken',data.token);window.location.href=data.redirectTo||'/dashboard';
+  localStorage.setItem('customerToken',data.token);
+  if(data.customer?.businessName)localStorage.setItem('customerBusiness',data.customer.businessName);
+  if(data.customer?.email)localStorage.setItem('customerEmail',data.customer.email);
+  window.location.href=data.redirectTo||'/dashboard';
 }
 </script>
 </body>
