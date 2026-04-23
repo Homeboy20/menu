@@ -2788,10 +2788,16 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     // Create customer
     const passwordHash = await bcrypt.hash(password, 12);
     const now = new Date().toISOString();
+    const coRawPhone = sanitizeInput(phone || '', 50);
+    const coPhoneHash = computePhoneHash(coRawPhone);
     const { rows: newCust } = await pool.query(`
-      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, address, country, city, status, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9) RETURNING id, email, business_name
-    `, [cleanEmail, passwordHash, cleanBusinessName, encryptField(cleanContactName), encryptField(sanitizeInput(phone || '', 50)), encryptField(sanitizeInput(address || '', 300)), encryptField(sanitizeInput(country || '', 100)), encryptField(sanitizeInput(city || '', 200)), now]);
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, phone_hash,
+        address, country, city, registration_type, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'email', 'active', $10) RETURNING id, email, business_name
+    `, [cleanEmail, passwordHash, cleanBusinessName, encryptField(cleanContactName),
+        encryptField(coRawPhone), coPhoneHash,
+        encryptField(sanitizeInput(address || '', 300)), encryptField(sanitizeInput(country || '', 100)),
+        encryptField(sanitizeInput(city || '', 200)), now]);
     const customer = newCust[0];
 
     // Create default menu
@@ -2937,12 +2943,16 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     
     // Create customer (email may be NULL for phone-only accounts)
     const now = new Date().toISOString();
-    const phoneHashVal = isPhoneOnly ? computePhoneHash(sanitizeInput(phone || '', 50)) : computePhoneHash(sanitizeInput(phone || '', 50));
+    const rawPhoneStr = sanitizeInput(phone || '', 50);
+    const phoneHashVal = computePhoneHash(rawPhoneStr);
     const { rows } = await pool.query(`
-      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, phone_hash, status, created_at, promo_code, discount_percent, discount_months, registration_type)
-      VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $8, $9, $10, $11)
+      INSERT INTO customers (email, password_hash, business_name, contact_name, phone, phone_hash,
+        phone_verified, status, created_at, promo_code, discount_percent, discount_months, registration_type)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11, $12)
       RETURNING id, email, business_name, contact_name, phone, status, created_at, promo_code, discount_percent, discount_months, registration_type
-    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, phoneHashVal, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
+    `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, phoneHashVal,
+        isPhoneOnly ? 1 : 0,
+        now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
     
     const customer = rows[0];
 
@@ -3043,7 +3053,7 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     });
   } catch (err) {
     console.error('Customer registration error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
 
@@ -3328,8 +3338,13 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
       if (byEmail.rows.length) { customer = byEmail.rows[0]; }
     }
     if (!customer && phone) {
-      const byPhone = await pool.query('SELECT * FROM customers WHERE phone = $1 LIMIT 1', [phone]);
-      if (byPhone.rows.length) { customer = byPhone.rows[0]; }
+      const phoneHash = computePhoneHash(phone);
+      if (phoneHash) {
+        const { rows: byHash } = await pool.query(
+          "SELECT * FROM customers WHERE phone_hash = $1 LIMIT 1", [phoneHash]
+        );
+        if (byHash.length) { customer = byHash[0]; }
+      }
     }
 
     if (customer) {
@@ -3357,26 +3372,34 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
       const randomPwd  = crypto.randomBytes(32).toString('hex');
       const passwordHash = await bcrypt.hash(randomPwd, 12);
 
+      const fbRegType = phone && !email ? 'phone' : 'google';
+      const rawPhone = phone || '';
+      const fbPhoneHash = rawPhone ? computePhoneHash(rawPhone) : null;
       const ins = await pool.query(
-        `INSERT INTO customers (email, password_hash, business_name, contact_name, phone,
-           email_verified, phone_verified, firebase_uid, status, created_at, updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$9) RETURNING *`,
+        `INSERT INTO customers (email, password_hash, business_name, contact_name, phone, phone_hash,
+           email_verified, phone_verified, firebase_uid, registration_type, status, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'active',$11,$11) RETURNING *`,
         [
           cleanEmail, passwordHash,
           cleanBusinessName,
           cleanDisplayName,
-          phone || '',
+          rawPhone,
+          fbPhoneHash,
           email ? 1 : 0,
           phone ? 1 : 0,
-          uid, now
+          uid,
+          fbRegType,
+          now
         ]
       );
       customer = ins.rows[0];
-      welcomeEmailContext = {
-        to: customer.email,
-        businessName: cleanBusinessName,
-        contactName: cleanDisplayName,
-      };
+      if (email && !email.endsWith('@restorder.local')) {
+        welcomeEmailContext = {
+          to: customer.email,
+          businessName: cleanBusinessName,
+          contactName: cleanDisplayName,
+        };
+      }
 
       // Create default menu + trial subscription
       try {
