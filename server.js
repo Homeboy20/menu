@@ -2690,7 +2690,7 @@ app.post('/api/payments/paypal/create-order-public', async (req, res) => {
     const orderData = await orderRes.json();
     if (!orderData.id) return res.status(400).json({ error: 'Failed to create PayPal order.', detail: orderData });
     res.json({ order_id: orderData.id });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('POST /api/payments/paypal/create-order-public error:', err); res.status(500).json({ error: 'Failed to create PayPal order. Please try again.' }); }
 });
 
 // POST /api/customers/checkout-register - Paywall-first: verify payment, then create account
@@ -5829,7 +5829,7 @@ app.get('/api/admin/payments', requireAuth, async (req, res) => {
       LIMIT 500
     `, params);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('GET /api/admin/payments error:', err); res.status(500).json({ error: 'Failed to load payments.' }); }
 });
 
 // PUT /api/admin/payments/:id - Admin: Update payment status
@@ -5838,8 +5838,10 @@ app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
     const { rows: existingPaymentRows } = await pool.query('SELECT status FROM payments WHERE id = $1 LIMIT 1', [req.params.id]);
     if (!existingPaymentRows.length) return res.status(404).json({ error: 'Payment not found.' });
 
+    const ALLOWED_STATUSES = ['pending', 'completed', 'failed', 'refunded'];
     const previousStatus = sanitizeStr(existingPaymentRows[0].status, 20);
-    const status = sanitizeStr(req.body.status, 20);
+    const rawStatus = sanitizeStr(req.body.status, 20);
+    const status = rawStatus && ALLOWED_STATUSES.includes(rawStatus) ? rawStatus : null;
     const notes = sanitizeStr(req.body.notes, 500);
     const now = new Date().toISOString();
     const updates = [];
@@ -5874,7 +5876,7 @@ app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
       queuePaymentReceiptEmailForPayment(req.params.id);
     }
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('PUT /api/admin/payments/:id error:', err); res.status(500).json({ error: 'Failed to update payment.' }); }
 });
 
 // POST /api/admin/payments - Admin: Create a new payment record
@@ -5884,7 +5886,9 @@ app.post('/api/admin/payments', requireAuth, async (req, res) => {
     const amount = parseFloat(req.body.amount);
     const currency = sanitizeStr(req.body.currency, 10) || 'USD';
     const paymentMethod = sanitizeStr(req.body.payment_method, 50) || 'manual';
-    const status = sanitizeStr(req.body.status, 20) || 'pending';
+    const ALLOWED_STATUSES = ['pending', 'completed', 'failed', 'refunded'];
+    const rawStatus = sanitizeStr(req.body.status, 20) || 'pending';
+    const status = ALLOWED_STATUSES.includes(rawStatus) ? rawStatus : 'pending';
     const notes = sanitizeStr(req.body.notes, 500) || '';
     const now = new Date().toISOString();
     if (!subId || isNaN(amount) || amount < 0) {
@@ -5915,7 +5919,7 @@ app.post('/api/admin/payments', requireAuth, async (req, res) => {
       queuePaymentReceiptEmailForPayment(rows[0].id);
     }
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('POST /api/admin/payments error:', err); res.status(500).json({ error: 'Failed to create payment.' }); }
 });
 
 // GET /api/subscriptions - Admin: List all subscriptions
@@ -7252,7 +7256,7 @@ app.get('/api/public/plans', async (req, res) => {
       }
     }
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('GET /api/public/plans error:', err); res.status(500).json({ error: 'Failed to load plans.' }); }
 });
 
 // GET /api/customers/trial-eligibility – Check whether the current customer can start a free trial
@@ -7262,7 +7266,7 @@ app.get('/api/customers/trial-eligibility', requireCustomerAuth, async (req, res
     const { rows } = await pool.query('SELECT had_trial FROM customers WHERE id = $1', [customerId]);
     const hadTrial = rows.length ? !!rows[0].had_trial : false;
     res.json({ trialEligible: !hadTrial });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('GET /api/customers/trial-eligibility error:', err); res.status(500).json({ error: 'Failed to check trial eligibility.' }); }
 });
 
 // East African country codes for gateway routing
@@ -7288,7 +7292,7 @@ app.get('/api/payments/gateways', async (req, res) => {  try {
       } catch(e) { /* skip malformed */ }
     }
     res.json(gateways);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { console.error('GET /api/payments/gateways error:', err); res.status(500).json({ error: 'Failed to load payment gateways.' }); }
 });
 
 // POST /api/payments/flutterwave/verify – Verify a Flutterwave transaction + activate subscription
@@ -7439,13 +7443,15 @@ app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
     const { event, data } = req.body || {};
     if (event === 'charge.completed' && data?.status === 'successful') {
       const { tx_ref, id: txId } = data;
+      const webhookAmount = parseFloat(data.amount) || 0;
+      if (webhookAmount <= 0) return;
       // tx_ref format written by the client: menuId:planId:timestamp
       const parts = String(tx_ref || '').split(':');
       if (parts.length >= 2) {
         const [menu_id, plan_id] = parts;
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(txId)]);
         if (!dup.length) {
-          await activateSubscriptionPayment(menu_id, parseInt(plan_id), data.amount, data.currency, 'flutterwave', String(txId), `Webhook FW tx ${txId}`);
+          await activateSubscriptionPayment(menu_id, parseInt(plan_id), webhookAmount, data.currency, 'flutterwave', String(txId), `Webhook FW tx ${txId}`);
         }
       }
     }
@@ -7518,14 +7524,15 @@ app.post('/webhooks/clickpesa', express.json(), async (req, res) => {
     if (!cfg?.enabled) return;
 
     const { reference, status, amount, currency } = req.body || {};
-    if (status === 'COMPLETED' && reference) {
+    const webhookAmount = parseFloat(amount) || 0;
+    if (status === 'COMPLETED' && reference && webhookAmount > 0) {
       // reference format: menuId:planId:timestamp
       const parts = String(reference || '').split(':');
       if (parts.length >= 2) {
         const [menu_id, plan_id] = parts;
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(reference)]);
         if (!dup.length) {
-          await activateSubscriptionPayment(menu_id, parseInt(plan_id), parseFloat(amount) || 0, currency || 'USD', 'clickpesa', String(reference), `Webhook ClickPesa ref ${reference}`);
+          await activateSubscriptionPayment(menu_id, parseInt(plan_id), webhookAmount, currency || 'USD', 'clickpesa', String(reference), `Webhook ClickPesa ref ${reference}`);
         }
       }
     }
@@ -7574,6 +7581,7 @@ app.post('/webhooks/paypal', express.json(), async (req, res) => {
       const orderId = resource.supplementary_data?.related_ids?.order_id || resource.id;
       const amount = parseFloat(resource.amount?.value || '0');
       const currency = resource.amount?.currency_code || 'USD';
+      if (amount <= 0) return;
       const customId = resource.custom_id || '';
       // custom_id format: menuId:planId
       const parts = String(customId).split(':');
