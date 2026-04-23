@@ -2945,8 +2945,17 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
             VALUES ($1, $2, $3, 'trial', $4, $5, $4)
             ON CONFLICT (customer_id) DO NOTHING
           `, [defaultMenuId, customer.id, trialPlan[0].id, menuNow, trialEnd]);
-          // Mark customer as having used their free trial
           await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
+        }
+      } else {
+        // Phone-only accounts get a free Starter plan so they can access the dashboard immediately
+        const { rows: starterPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='starter' LIMIT 1");
+        if (starterPlan.length > 0) {
+          await pool.query(`
+            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, created_at)
+            VALUES ($1, $2, $3, 'active', $4, $4)
+            ON CONFLICT (customer_id) DO NOTHING
+          `, [defaultMenuId, customer.id, starterPlan[0].id, menuNow]);
         }
       }
     } catch (setupErr) {
@@ -2994,13 +3003,13 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
         registrationType: customer.registration_type || 'email',
         status: customer.status,
         createdAt: customer.created_at,
-        hasSubscription: !isPhoneOnly,
+        hasSubscription: true,
       },
       promoApplied: promoDetails ? true : false,
       promoDetails,
       token,
       defaultMenuId,
-      requiresSubscription: isPhoneOnly,
+      requiresSubscription: false,
       expiresIn: SESSION_TTL
     });
   } catch (err) {
@@ -3662,12 +3671,13 @@ app.get('/api/customers/:id/menus', requireCustomerAuth, async (req, res) => {
     }
     
     const { rows } = await pool.query(`
-      SELECT m.*, 
+      SELECT m.*,
         (SELECT COUNT(*) FROM menu_items WHERE menu_id = m.id) AS item_count,
         s.status as subscription_status,
-        sp.display_name as plan_name
+        sp.display_name as plan_name,
+        sp.menu_limit as plan_menu_limit
       FROM menus m
-      LEFT JOIN subscriptions s ON s.menu_id = m.id
+      LEFT JOIN subscriptions s ON s.customer_id = m.customer_id
       LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
       WHERE m.customer_id = $1
       ORDER BY m.created_at DESC
