@@ -5316,7 +5316,10 @@ app.get('/api/subscription-plans', async (_req, res) => {
       'SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY sort_order'
     );
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/subscription-plans error:', err);
+    res.status(500).json({ error: 'Failed to load plans.' });
+  }
 });
 
 // POST /api/admin/customers/:id/assign-subscription – Admin: assign a subscription plan to a customer and optionally record payment
@@ -5360,52 +5363,65 @@ app.post('/api/admin/customers/:id/assign-subscription', requireRole('super_admi
     const isActive = paymentStatus === 'completed' || amount === 0;
     const subStatus = isActive ? 'active' : 'pending';
 
-    // Upsert subscription for this customer
-    const { rows: existing } = await pool.query('SELECT id FROM subscriptions WHERE customer_id = $1', [customerId]);
+    const client = await pool.connect();
     let subId;
-    if (existing.length) {
-      subId = existing[0].id;
-      const updates = [`plan_id = $1`, `status = $2`, `updated_at = $3`];
-      const vals = [planId, subStatus, nowISO];
-      let p = 4;
-      if (isActive) {
-        updates.push(`end_date = $${p}`, `next_billing_date = $${p}`);
-        vals.push(billingISO);
-        p++;
-      }
-      vals.push(subId);
-      await pool.query(`UPDATE subscriptions SET ${updates.join(', ')} WHERE id = $${p}`, vals);
-    } else {
-      const ins = await pool.query(
-        `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $6, $5, $5) RETURNING id`,
-        [menuId, customerId, planId, subStatus, nowISO, isActive ? billingISO : null]
-      );
-      subId = ins.rows[0].id;
-    }
-
-    // Record payment
     let paymentId = null;
-    if (amount > 0) {
-      const paidAt = paymentStatus === 'completed' ? nowISO : null;
-      const { rows: payRows } = await pool.query(
-        `INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, paid_at, notes, created_at)
-         VALUES ($1, $2, 'USD', $3, $4, $5, $6, $7, $8) RETURNING id`,
-        [subId, amount, paymentMethod, paymentRef, paymentStatus, paidAt, paymentNotes, nowISO]
-      );
-      paymentId = payRows[0].id;
-      if (paymentStatus === 'completed') {
-        queuePaymentReceiptEmailForPayment(paymentId);
+    try {
+      await client.query('BEGIN');
+
+      // Upsert subscription for this customer
+      const { rows: existing } = await client.query('SELECT id FROM subscriptions WHERE customer_id = $1', [customerId]);
+      if (existing.length) {
+        subId = existing[0].id;
+        const updates = [`plan_id = $1`, `status = $2`, `updated_at = $3`];
+        const vals = [planId, subStatus, nowISO];
+        let p = 4;
+        if (isActive) {
+          updates.push(`end_date = $${p}`, `next_billing_date = $${p}`);
+          vals.push(billingISO);
+          p++;
+        }
+        vals.push(subId);
+        await client.query(`UPDATE subscriptions SET ${updates.join(', ')} WHERE id = $${p}`, vals);
+      } else {
+        const ins = await client.query(
+          `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $6, $5, $5) RETURNING id`,
+          [menuId, customerId, planId, subStatus, nowISO, isActive ? billingISO : null]
+        );
+        subId = ins.rows[0].id;
       }
+
+      // Record payment
+      if (amount > 0) {
+        const paidAt = paymentStatus === 'completed' ? nowISO : null;
+        const { rows: payRows } = await client.query(
+          `INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, paid_at, notes, created_at)
+           VALUES ($1, $2, 'USD', $3, $4, $5, $6, $7, $8) RETURNING id`,
+          [subId, amount, paymentMethod, paymentRef, paymentStatus, paidAt, paymentNotes, nowISO]
+        );
+        paymentId = payRows[0].id;
+      }
+
+      // Resolve any open upgrade/support requests for this customer
+      await client.query(
+        `UPDATE customer_contact_requests
+         SET status = 'approved', handled_at = $1, handled_by = $2, updated_at = $1
+         WHERE customer_id = $3 AND request_type IN ('upgrade', 'support') AND status = 'open'`,
+        [nowISO, req.adminUser?.id || null, customerId]
+      );
+
+      await client.query('COMMIT');
+    } catch (txErr) {
+      await client.query('ROLLBACK');
+      throw txErr;
+    } finally {
+      client.release();
     }
 
-    // Resolve any open upgrade/support requests for this customer
-    await pool.query(
-      `UPDATE customer_contact_requests
-       SET status = 'approved', handled_at = $1, handled_by = $2, updated_at = $1
-       WHERE customer_id = $3 AND request_type IN ('upgrade', 'support') AND status = 'open'`,
-      [nowISO, req.adminUser?.id || null, customerId]
-    );
+    if (paymentId && paymentStatus === 'completed') {
+      queuePaymentReceiptEmailForPayment(paymentId);
+    }
 
     res.json({
       success: true,
@@ -5425,7 +5441,10 @@ app.get('/api/admin/subscription-plans', requireAuth, async (_req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM subscription_plans ORDER BY sort_order');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/admin/subscription-plans error:', err);
+    res.status(500).json({ error: 'Failed to load plans.' });
+  }
 });
 
 // POST /api/admin/subscription-plans - Admin: Create plan
@@ -5835,7 +5854,7 @@ app.post('/api/admin/payments', requireAuth, async (req, res) => {
 });
 
 // GET /api/subscriptions - Admin: List all subscriptions
-app.get('/api/subscriptions', requireAuth, async (req, res) => {
+app.get('/api/subscriptions', requireRole('super_admin'), async (req, res) => {
   try {
     const status = req.query.status || 'all';
     const where = status === 'all' ? '' : 'WHERE s.status = $1';
@@ -5860,11 +5879,14 @@ app.get('/api/subscriptions', requireAuth, async (req, res) => {
       ORDER BY s.created_at DESC
     `, params);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/subscriptions error:', err);
+    res.status(500).json({ error: 'Failed to load subscriptions.' });
+  }
 });
 
 // GET /api/subscriptions/:id - Get subscription details
-app.get('/api/subscriptions/:id', requireAuth, async (req, res) => {
+app.get('/api/subscriptions/:id', requireRole('super_admin'), async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -5885,16 +5907,19 @@ app.get('/api/subscriptions/:id', requireAuth, async (req, res) => {
 
     if (!rows.length) return res.status(404).json({ error: 'Subscription not found.' });
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/subscriptions/:id error:', err);
+    res.status(500).json({ error: 'Failed to load subscription.' });
+  }
 });
 
-// GET /api/menus/:id/subscription - Get subscription for a menu
+// GET /api/menus/:id/subscription - Get subscription for a menu (read-only; use assign-subscription to create)
 app.get('/api/menus/:id/subscription', async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT 
-        s.*, 
-        sp.display_name as plan_name, 
+      SELECT
+        s.*,
+        sp.display_name as plan_name,
         sp.price as plan_price,
         sp.menu_limit,
         sp.location_limit,
@@ -5903,49 +5928,17 @@ app.get('/api/menus/:id/subscription', async (req, res) => {
       JOIN subscription_plans sp ON s.plan_id = sp.id
       WHERE s.menu_id = $1
     `, [req.params.id]);
-    
-    if (!rows.length) {
-      // Auto-assign Starter plan if no subscription exists
-      const { rows: starterPlan } = await pool.query(
-        "SELECT id FROM subscription_plans WHERE name = 'starter' LIMIT 1"
-      );
-      
-      if (starterPlan.length) {
-        const now = new Date().toISOString();
-        const { rows: newSub } = await pool.query(`
-          INSERT INTO subscriptions (menu_id, plan_id, status, start_date, created_at)
-          VALUES ($1, $2, 'active', $3, $3)
-          ON CONFLICT (menu_id) DO NOTHING
-          RETURNING *
-        `, [req.params.id, starterPlan[0].id, now]);
-        
-        if (newSub.length) {
-          const { rows: fullSub } = await pool.query(`
-            SELECT 
-              s.*, 
-              sp.display_name as plan_name, 
-              sp.price as plan_price,
-              sp.menu_limit,
-              sp.location_limit,
-              sp.features
-            FROM subscriptions s
-            JOIN subscription_plans sp ON s.plan_id = sp.id
-            WHERE s.id = $1
-          `, [newSub[0].id]);
-          
-          return res.json(fullSub[0]);
-        }
-      }
-      
-      return res.status(404).json({ error: 'No subscription found.' });
-    }
-    
+
+    if (!rows.length) return res.status(404).json({ error: 'No subscription found.' });
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/menus/:id/subscription error:', err);
+    res.status(500).json({ error: 'Failed to load subscription.' });
+  }
 });
 
 // POST /api/subscriptions - Admin: Create subscription
-app.post('/api/subscriptions', requireAuth, async (req, res) => {
+app.post('/api/subscriptions', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const menuId = sanitizeStr(req.body.menu_id, 100);
     const planId = parseInt(req.body.plan_id) || 0;
@@ -5974,11 +5967,14 @@ app.post('/api/subscriptions', requireAuth, async (req, res) => {
     `, [menuId, now]);
     
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('POST /api/subscriptions error:', err);
+    res.status(500).json({ error: 'Failed to create subscription.' });
+  }
 });
 
 // PUT /api/subscriptions/:id - Admin: Update subscription (upgrade/downgrade)
-app.put('/api/subscriptions/:id', requireAuth, async (req, res) => {
+app.put('/api/subscriptions/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const subId = req.params.id;
     const planId = parseInt(req.body.plan_id);
@@ -6034,43 +6030,72 @@ app.put('/api/subscriptions/:id', requireAuth, async (req, res) => {
     }
     
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('PUT /api/subscriptions/:id error:', err);
+    res.status(500).json({ error: 'Failed to update subscription.' });
+  }
 });
 
 // DELETE /api/subscriptions/:id - Admin: Cancel subscription
-app.delete('/api/subscriptions/:id', requireAuth, async (req, res) => {
+app.delete('/api/subscriptions/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     await pool.query(
       `UPDATE subscriptions SET status = 'cancelled', cancel_at_end = 1, updated_at = $1 WHERE id = $2`,
       [new Date().toISOString(), req.params.id]
     );
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('DELETE /api/subscriptions/:id error:', err);
+    res.status(500).json({ error: 'Failed to cancel subscription.' });
+  }
 });
 
 // GET /api/subscriptions/:id/payments - Get payment history
-app.get('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
+app.get('/api/subscriptions/:id/payments', requireRole('super_admin'), async (req, res) => {
   try {
     const { rows } = await pool.query(
       'SELECT * FROM payments WHERE subscription_id = $1 ORDER BY created_at DESC LIMIT 50',
       [req.params.id]
     );
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/subscriptions/:id/payments error:', err);
+    res.status(500).json({ error: 'Failed to load payment history.' });
+  }
 });
 
 // POST /api/subscriptions/:id/payments - Admin: Record payment
-app.post('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
+app.post('/api/subscriptions/:id/payments', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const subId = req.params.id;
-    const amount = parseFloat(req.body.amount) || 0;
+    const amount = parseFloat(req.body.amount);
     const currency = sanitizeStr(req.body.currency, 10) || 'USD';
     const paymentMethod = sanitizeStr(req.body.payment_method, 50) || 'manual';
     const status = sanitizeStr(req.body.status, 20) || 'completed';
     const notes = sanitizeStr(req.body.notes, 500) || '';
+
+    if (isNaN(amount) || amount < 0) {
+      return res.status(400).json({ error: 'amount must be a non-negative number.' });
+    }
+
+    // Validate amount matches plan price unless an explicit override note is provided
+    const { rows: subRows } = await pool.query(
+      `SELECT sp.price FROM subscriptions s
+       JOIN subscription_plans sp ON s.plan_id = sp.id
+       WHERE s.id = $1`, [subId]
+    );
+    if (!subRows.length) return res.status(404).json({ error: 'Subscription not found.' });
+
+    const planPrice = parseFloat(subRows[0].price);
+    if (planPrice > 0 && amount !== planPrice && !notes) {
+      return res.status(400).json({
+        error: `Amount ${amount} does not match plan price ${planPrice}. Supply a notes field to record an override.`,
+      });
+    }
+
     const now = new Date().toISOString();
     const paidAt = status === 'completed' ? now : null;
-    
+
     const { rows } = await pool.query(`
       INSERT INTO payments (subscription_id, amount, currency, payment_method, status, paid_at, notes, created_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
@@ -6079,9 +6104,12 @@ app.post('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
     if (status === 'completed') {
       queuePaymentReceiptEmailForPayment(rows[0].id);
     }
-    
+
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('POST /api/subscriptions/:id/payments error:', err);
+    res.status(500).json({ error: 'Failed to record payment.' });
+  }
 });
 
 // GET /api/menus/:id/usage - Get usage stats for a menu
@@ -6102,7 +6130,10 @@ app.get('/api/menus/:id/usage', async (req, res) => {
     }
     
     res.json(rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('GET /api/menus/:id/usage error:', err);
+    res.status(500).json({ error: 'Failed to load usage.' });
+  }
 });
 
 // ── Customer Subscription Management ──────────────────────────────────────────
