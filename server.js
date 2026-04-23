@@ -604,14 +604,17 @@ function requireRole(...roles) {
 }
 
 // ── Accept admin OR customer auth (shared menu-editor endpoints) ───────────────
-function requireAnyAuth(req, res, next) {
+async function requireAnyAuth(req, res, next) {
   const adminToken = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (isValidSession(adminToken)) {
     req.adminUser = getSessionUser(adminToken);
     return next();
   }
   const customerToken = req.headers['x-customer-token'] || req.cookies?.customerToken;
-  const session = isValidCustomerSession(customerToken);
+  let session = isValidCustomerSession(customerToken);
+  if (!session && customerToken) {
+    session = await lookupCustomerSessionFromDb(customerToken);
+  }
   if (session) {
     req.customer = session;
     req.isCustomer = true;
@@ -2592,9 +2595,35 @@ function isValidCustomerSession(token) {
   return session;
 }
 
-function requireCustomerAuth(req, res, next) {
+async async function lookupCustomerSessionFromDb(token) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT cs.token, cs.customer_id, cs.email, cs.created_at, cs.expires_at,
+              cs.staff_id, sm.name AS staff_name, sm.role AS staff_role
+       FROM customer_sessions cs
+       LEFT JOIN staff_members sm ON cs.staff_id = sm.id
+       WHERE cs.token = $1 AND cs.expires_at > $2`,
+      [token, Date.now()]
+    );
+    if (!rows.length) return null;
+    const row = rows[0];
+    const sess = row.staff_id
+      ? { customerId: row.customer_id, id: row.customer_id, email: row.email,
+          name: row.staff_name, staffId: row.staff_id, staffRole: row.staff_role,
+          isStaff: true, createdAt: parseInt(row.created_at) }
+      : { customerId: row.customer_id, id: row.customer_id,
+          email: row.email, createdAt: parseInt(row.created_at) };
+    customerSessions.set(token, sess);
+    return sess;
+  } catch (_) { return null; }
+}
+
+async function requireCustomerAuth(req, res, next) {
   const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
-  const session = isValidCustomerSession(token);
+  let session = isValidCustomerSession(token);
+  if (!session && token) {
+    session = await lookupCustomerSessionFromDb(token);
+  }
   if (!session) {
     return res.status(401).json({ error: 'Please log in to continue.' });
   }
@@ -3408,9 +3437,12 @@ app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
 });
 
 // GET /api/customers/check - Check customer session
-app.get('/api/customers/check', (req, res) => {
+app.get('/api/customers/check', async (req, res) => {
   const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
-  const session = isValidCustomerSession(token);
+  let session = isValidCustomerSession(token);
+  if (!session && token) {
+    session = await lookupCustomerSessionFromDb(token);
+  }
   res.json({
     authenticated: !!session,
     customer: session ? {
