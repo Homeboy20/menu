@@ -102,7 +102,8 @@
 <body class="bg-bg text-stone-900 min-h-screen flex">
 
 <!-- -- Login Overlay -------------------------------------------------------- -->
-<div id="login-overlay" class="fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
+<div id="login-overlay" class="hidden fixed inset-0 z-50 bg-stone-900/95 backdrop-blur flex items-center justify-center">
+<script>(function(){var t=localStorage.getItem('admin-token')||localStorage.getItem('adminToken')||localStorage.getItem('customerToken')||sessionStorage.getItem('customerToken');if(!t)document.getElementById('login-overlay').classList.remove('hidden');})();</script>
   <div class="bg-white border border-stone-200 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <!-- Single unified login form -->
     <div class="space-y-4">

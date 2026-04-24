@@ -48,7 +48,8 @@
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
 
 <!-- Login Overlay -->
-<div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+<div id="login-overlay" class="hidden fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
+<script>(function(){if(!(localStorage.getItem('admin-token')||localStorage.getItem('adminToken')))document.getElementById('login-overlay').classList.remove('hidden');})();</script>
   <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <div class="flex items-center gap-3">
       <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
@@ -366,7 +367,7 @@ function applyUserUI(user) {
 async function checkAuth() {
   try {
     const token = localStorage.getItem('admin-token');
-    if (!token) return;
+    if (!token) { var _ol=document.getElementById('login-overlay');_ol.classList.remove('hidden');_ol.style.display='flex'; return; }
     const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
     const data = await res.json();
     if (data.authenticated) {
