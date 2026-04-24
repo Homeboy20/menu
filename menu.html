@@ -898,6 +898,15 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
   <span class="cart-fab-total" id="cart-fab-total"></span>
 </button>
 
+<!-- Cart FAB pill (desktop ≥481px) -->
+<button id="cart-fab-desktop" onclick="openCart()">
+  <div class="cart-fab-left">
+    <div class="cart-fab-badge" id="cart-fab-desktop-count">0</div>
+    <span class="cart-fab-text">View Order</span>
+  </div>
+  <span class="cart-fab-total" id="cart-fab-desktop-total"></span>
+</button>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -1543,9 +1552,14 @@ function updateCartQty(idx,d){for(let i=0;i<cart.length;i++){if(cart[i]._idx===i
 function updateCartUI(){
   let ti=0,tp=0;cart.forEach(c=>{ti+=c.qty;tp+=(parseFloat(c.price)||0)*c.qty;});
   const fab=document.getElementById('cart-fab');
+  const fabD=document.getElementById('cart-fab-desktop');
   const badge=document.getElementById('bnav-cart-badge');
-  if(ti>0){fab.classList.add('visible');document.getElementById('cart-fab-count').textContent=ti;document.getElementById('cart-fab-total').textContent=fmtAmt(tp);badge.textContent=ti>9?'9+':ti;badge.classList.add('show');}
-  else{fab.classList.remove('visible');badge.classList.remove('show');}
+  if(ti>0){
+    fab.classList.add('visible');
+    if(fabD){fabD.classList.add('visible');document.getElementById('cart-fab-desktop-count').textContent=ti;document.getElementById('cart-fab-desktop-total').textContent=fmtAmt(tp);}
+    document.getElementById('cart-fab-count').textContent=ti;document.getElementById('cart-fab-total').textContent=fmtAmt(tp);
+    badge.textContent=ti>9?'9+':ti;badge.classList.add('show');
+  }else{fab.classList.remove('visible');if(fabD)fabD.classList.remove('visible');badge.classList.remove('show');}
   document.querySelectorAll('[id^="card-qty-"]').forEach(el=>{
     const idx=parseInt(el.id.replace('card-qty-',''));
     const ci=cart.find(c=>c._idx===idx);const q=ci?ci.qty:0;
