@@ -773,7 +773,7 @@ function onPaymentSuccess() {
       <p class="text-stone-500 text-xs mt-2">A receipt will be emailed to you shortly.</p>
       <a href="/dashboard" class="mt-5 inline-flex items-center justify-center w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition text-sm cursor-pointer">Go to Dashboard</a>
     </div>`;
-  setTimeout(() => { window.location.href = '/dashboard'; }, 6000);
+  setTimeout(() => { window.location.href = '/dashboard?upgraded=1'; }, 6000);
 }
 function onPaymentPending(msg) {
   hideMsg();

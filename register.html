@@ -558,9 +558,23 @@ function showSuccess(){
   el('s3-icon-ring').style.borderColor='var(--success)';
   el('s3-icon-ring').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   el('s3-label').textContent="You're In!";el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span> \ud83d\ude80';
-  el('s3-sub').textContent="Your workspace is ready. Here's what we've set up for you.";
-  el('btn-dashboard').classList.remove('hidden');
-  setTimeout(()=>window.location.href='/dashboard?onboard=1',1500);
+  // If user came from pricing, route to checkout to complete payment
+  const urlParams = new URLSearchParams(location.search);
+  const planSlug = urlParams.get('plan');
+  const billing = urlParams.get('billing');
+  if (planSlug && planSlug !== 'trial') {
+    const dest = '/checkout?plan=' + encodeURIComponent(planSlug) + (billing ? '&billing=' + encodeURIComponent(billing) : '');
+    el('s3-sub').textContent = "Account created! Proceeding to payment\u2026";
+    const dashBtn = el('btn-dashboard');
+    dashBtn.textContent = 'Continue to Payment';
+    dashBtn.onclick = () => { window.location.href = dest; };
+    dashBtn.classList.remove('hidden');
+    setTimeout(() => window.location.href = dest, 1500);
+  } else {
+    el('s3-sub').textContent = "Your workspace is ready. Here's what we've set up for you.";
+    el('btn-dashboard').classList.remove('hidden');
+    setTimeout(() => window.location.href = '/dashboard?onboard=1', 1500);
+  }
 }
 
 function showRegError(msg){

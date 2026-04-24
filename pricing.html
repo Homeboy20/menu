@@ -1358,6 +1358,11 @@
       var mnav=document.querySelector('.mobile-nav-actions');
       var micon='<svg class="material-symbols-outlined" style="font-size:18px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>';
       if(mnav){var ms=mnav.querySelector('a[href="/login"]'),mr=mnav.querySelector('a[href="/register"]');if(ms)ms.remove();if(mr){mr.insertAdjacentHTML('afterend','<a href="/dashboard" class="btn-nav" style="text-align:center;justify-content:center;">'+micon+label+'</a>');mr.remove();}}
+      // Logged-in users: repoint plan CTAs to /checkout (skip registration)
+      document.querySelectorAll('a.plan-cta.primary').forEach(function(a){
+        var href=a.getAttribute('href')||'';
+        if(href.startsWith('/register?plan='))a.setAttribute('href',href.replace('/register?plan=','/checkout?plan='));
+      });
     }).catch(function(){});
 })();
 </script>
