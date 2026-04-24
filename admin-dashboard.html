@@ -1570,9 +1570,9 @@ async function viewSubscription(id) {
     <div class="mt-6 p-4 bg-bg-dark/50 rounded-xl">
       <p class="text-xs text-slate-400 uppercase font-semibold mb-2">Plan Features</p>
       <ul class="grid grid-cols-2 gap-2 text-sm text-slate-300">
-        <li class="flex items-center gap-2"><span class="text-primary">?</span> ${sub.menu_limit === 999 ? 'Unlimited' : sub.menu_limit || 1} Menu(s)</li>
-        <li class="flex items-center gap-2"><span class="text-primary">?</span> ${sub.location_limit === 999 ? 'Unlimited' : sub.location_limit || 1} Location(s)</li>
-        ${(sub.features || []).slice(0, 6).map(f => `<li class="flex items-center gap-2"><span class="text-primary">?</span> ${escapeHtml(f)}</li>`).join('')}
+        <li class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[14px] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> ${sub.menu_limit === 999 ? 'Unlimited' : sub.menu_limit || 1} Menu(s)</li>
+        <li class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[14px] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> ${sub.location_limit === 999 ? 'Unlimited' : sub.location_limit || 1} Location(s)</li>
+        ${(sub.features || []).slice(0, 6).map(f => `<li class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[14px] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> ${escapeHtml(f)}</li>`).join('')}
       </ul>
     </div>
     <div class="mt-4 flex gap-3">
