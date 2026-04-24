@@ -562,13 +562,16 @@ async function renderGateways(gateways) {
   const container = document.getElementById('gateway-container');
   const hasFW = !!(gateways.flutterwave?.public_key);
   const hasPP = !!(gateways.paypal?.client_id);
+  const hasCP = !!(gateways.clickpesa?.merchant_id);
+  const hasBT = !!(gateways.bank_transfer?.bank_name || gateways.bank_transfer?.account_number);
+  const hasAny = hasFW || hasPP || hasCP || hasBT;
 
-  if (!hasFW && !hasPP) {
+  if (!hasAny) {
     container.innerHTML = `
       <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-        <p class="font-semibold mb-1">?? Manual Payment</p>
+        <p class="font-semibold mb-1">Manual Payment</p>
         <p>Our team will contact you within 24 hours with payment instructions after you confirm.</p>
-        <button onclick="doManualUpgrade()" class="mt-4 w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition">
+        <button onclick="doManualUpgrade()" class="mt-4 w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition cursor-pointer">
           Confirm Upgrade Request
         </button>
       </div>`;
@@ -576,9 +579,32 @@ async function renderGateways(gateways) {
   }
 
   let html = '<div class="space-y-3">';
-  if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#f5a623;color:#fff;">
+  if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition cursor-pointer" style="background:#f5a623;color:#fff;">
     <span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
-  if (hasPP) html += `<div id="paypal-btn-wrap" class="mt-2"></div>`;
+  if (hasPP) html += `<div id="paypal-btn-wrap" class="mt-2"></div><div id="paypal-error" class="hidden text-red-600 text-sm text-center py-2"></div>`;
+  if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer">
+    <span class="material-symbols-outlined text-[18px]">phone_iphone</span>Pay with ClickPesa (Mobile Money)</button>`;
+  if (hasBT) {
+    const bt = gateways.bank_transfer;
+    html += `<div class="border border-stone-200 rounded-xl overflow-hidden">
+      <button onclick="document.getElementById('bt-details').classList.toggle('hidden')" class="w-full flex items-center justify-between gap-2 px-4 py-3.5 text-sm font-semibold text-stone-700 hover:bg-stone-50 transition cursor-pointer">
+        <span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">account_balance</span>Bank Transfer</span>
+        <span class="material-symbols-outlined text-[18px] text-stone-400">expand_more</span>
+      </button>
+      <div id="bt-details" class="hidden p-4 border-t border-stone-100 bg-stone-50 text-sm space-y-1">
+        ${bt.bank_name ? `<p><span class="font-semibold">Bank:</span> ${escHtml(bt.bank_name)}</p>` : ''}
+        ${bt.account_name ? `<p><span class="font-semibold">Account Name:</span> ${escHtml(bt.account_name)}</p>` : ''}
+        ${bt.account_number ? `<p><span class="font-semibold">Account Number:</span> ${escHtml(bt.account_number)}</p>` : ''}
+        ${bt.swift_code ? `<p><span class="font-semibold">SWIFT/BIC:</span> ${escHtml(bt.swift_code)}</p>` : ''}
+        ${bt.routing_number ? `<p><span class="font-semibold">Routing:</span> ${escHtml(bt.routing_number)}</p>` : ''}
+        ${bt.instructions ? `<p class="text-stone-500 mt-2">${escHtml(bt.instructions)}</p>` : ''}
+        <p class="text-stone-500 text-xs mt-2">After transferring, click below to notify us. We'll activate your plan within 1 business day.</p>
+        <button onclick="doManualUpgrade()" class="mt-3 w-full py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition text-sm cursor-pointer">
+          I've Made the Transfer
+        </button>
+      </div>
+    </div>`;
+  }
   html += '</div>';
   container.innerHTML = html;
 
@@ -586,6 +612,11 @@ async function renderGateways(gateways) {
     await loadScript('https://checkout.flutterwave.com/v3.js').catch(() => {});
     document.getElementById('fw-pay-btn').onclick = () =>
       doFlutterwave(gateways.flutterwave.public_key);
+  }
+
+  if (hasCP) {
+    document.getElementById('cp-pay-btn').onclick = () =>
+      doClickPesa(gateways.clickpesa);
   }
 
   if (hasPP) {
@@ -602,7 +633,7 @@ async function renderGateways(gateways) {
         style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
         createOrder: async () => {
           const menuId = getTargetMenuId();
-          if (!menuId) throw new Error('No menu selected');
+          if (!menuId) throw new Error('No menu selected. Please refresh and try again.');
           const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
@@ -614,7 +645,7 @@ async function renderGateways(gateways) {
           return d.order_id;
         },
         onApprove: async (data) => {
-          showMsg('Processing payment…');
+          showMsg('Processing payment…', false, 0);
           const menuId = getTargetMenuId();
           const csrf = await getCsrf();
           const r = await fetch('/api/payments/paypal/capture-order', {
@@ -623,23 +654,29 @@ async function renderGateways(gateways) {
             body: JSON.stringify({ order_id: data.orderID, plan_id: selectedPlan.id, menu_id: menuId })
           });
           const d = await r.json();
+          hideMsg();
           if (d.success) onPaymentSuccess();
           else onPaymentFailure(d.error || 'Payment capture failed');
         },
-        onError: () => onPaymentFailure('PayPal error. Please try again.')
+        onError: (err) => { console.error('PayPal error:', err); onPaymentFailure('PayPal encountered an error. Please try again or use a different payment method.'); }
       }).render('#paypal-btn-wrap');
-    } catch(e) { /* paypal load failed silently */ }
+    } catch(e) {
+      console.error('PayPal SDK load error:', e);
+      const errEl = document.getElementById('paypal-error');
+      if (errEl) { errEl.textContent = 'PayPal is temporarily unavailable. Please use another payment method.'; errEl.classList.remove('hidden'); }
+    }
   }
 }
 
 function getTargetMenuId() {
   const sel = document.getElementById('menu-selector');
-  return sel ? sel.value : selectedMenuId;
+  const id = sel ? sel.value : selectedMenuId;
+  return id || null;
 }
 
 // -- Flutterwave --------------------------------------------------------------
 function doFlutterwave(publicKey) {
-  if (!window.FlutterwaveCheckout) { showMsg('Flutterwave SDK not loaded.', true); return; }
+  if (!window.FlutterwaveCheckout) { showMsg('Flutterwave SDK not loaded. Please refresh and try again.', true); return; }
   const menuId = getTargetMenuId();
   if (!menuId) { showMsg('No menu selected. Please go back to your dashboard first.', true); return; }
   const txRef = `${menuId}:${selectedPlan.id}:${Date.now()}`;
@@ -656,7 +693,7 @@ function doFlutterwave(publicKey) {
     customizations: { title: 'RestOrder', description: `${selectedPlan.display_name} Plan`, logo: '/icon-192.png' },
     callback: async (response) => {
       if (response.status === 'successful' || response.status === 'completed') {
-        showMsg('Verifying payment…');
+        showMsg('Verifying payment…', false, 0);
         const csrf = await getCsrf();
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
@@ -664,14 +701,45 @@ function doFlutterwave(publicKey) {
           body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: selectedPlan.id })
         });
         const d = await r.json();
+        hideMsg();
         if (d.success) onPaymentSuccess();
         else onPaymentFailure(d.error || 'Verification failed');
+      } else if (response.status === 'pending') {
+        onPaymentPending();
       } else {
-        onPaymentFailure('Payment was not completed.');
+        onPaymentFailure('Payment was not completed. Please try again.');
       }
     },
     onclose: () => {}
   });
+}
+
+// -- ClickPesa ----------------------------------------------------------------
+async function doClickPesa(cpConfig) {
+  const menuId = getTargetMenuId();
+  if (!menuId) { showMsg('No menu selected. Please go back to your dashboard first.', true); return; }
+  const btn = document.getElementById('cp-pay-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Initiating payment…'; }
+  try {
+    const email = localStorage.getItem('customerEmail') || sessionStorage.getItem('customerEmail') || '';
+    const name  = localStorage.getItem('customerBusiness') || sessionStorage.getItem('customerBusiness') || '';
+    const r = await fetch('/api/payments/clickpesa/create-order-public', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan_id: selectedPlan.id, email, name })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed to initiate ClickPesa payment');
+    if (d.redirect_url) {
+      window.location.href = d.redirect_url;
+    } else {
+      // Payment initiated via push — show pending confirmation
+      onPaymentPending('Your mobile money payment has been initiated. Check your phone to complete it. We\'ll activate your plan automatically once confirmed.');
+    }
+  } catch(err) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">phone_iphone</span>Pay with ClickPesa (Mobile Money)'; }
+    onPaymentFailure(err.message || 'ClickPesa payment failed. Please try again.');
+  }
 }
 
 // -- Manual upgrade -----------------------------------------------------------
@@ -693,16 +761,30 @@ async function doManualUpgrade() {
   } catch(err) { showMsg('Error: ' + err.message, true); }
 }
 
-// -- Payment success ----------------------------------------------------------
+// -- Payment success / pending / failure --------------------------------------
 function onPaymentSuccess() {
+  hideMsg();
+  const plan = escHtml(selectedPlan?.display_name || '');
   document.getElementById('gateway-container').innerHTML = `
     <div class="p-6 bg-green-50 border border-green-200 rounded-xl text-center">
       <span class="material-symbols-outlined text-green-600 text-[48px] block mb-3">check_circle</span>
       <p class="font-bold text-green-800 text-lg">Payment Successful!</p>
-      <p class="text-green-700 text-sm mt-1">Your ${escHtml(selectedPlan?.display_name || '')} subscription is now active.</p>
-      <p class="text-stone-500 text-xs mt-3">Redirecting to dashboard�</p>
+      <p class="text-green-700 text-sm mt-1">Your <strong>${plan}</strong> subscription is now active.</p>
+      <p class="text-stone-500 text-xs mt-2">A receipt will be emailed to you shortly.</p>
+      <a href="/dashboard" class="mt-5 inline-flex items-center justify-center w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition text-sm cursor-pointer">Go to Dashboard</a>
     </div>`;
-  setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
+  setTimeout(() => { window.location.href = '/dashboard'; }, 6000);
+}
+function onPaymentPending(msg) {
+  hideMsg();
+  const detail = escHtml(msg || "Your payment is being processed. We'll activate your plan and email you once confirmed.");
+  document.getElementById('gateway-container').innerHTML = `
+    <div class="p-6 bg-amber-50 border border-amber-200 rounded-xl text-center">
+      <span class="material-symbols-outlined text-amber-500 text-[48px] block mb-3">schedule</span>
+      <p class="font-bold text-amber-800 text-lg">Payment Pending</p>
+      <p class="text-amber-700 text-sm mt-1">${detail}</p>
+      <a href="/dashboard" class="mt-5 inline-flex items-center justify-center w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition text-sm cursor-pointer">Go to Dashboard</a>
+    </div>`;
 }
 function onPaymentFailure(errorMsg) {
   const planName = escHtml(selectedPlan?.display_name || '');
@@ -731,19 +813,22 @@ function onPaymentFailure(errorMsg) {
     </div>`;
 }
 // -- Toast / inline message ---------------------------------------------------
-function showMsg(msg, isErr = false) {
+function showMsg(msg, isErr = false, timeoutMs = 5000) {
   let el = document.getElementById('checkout-msg');
   if (!el) {
     el = document.createElement('div');
     el.id = 'checkout-msg';
-    el.className = 'fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold max-w-xs';
     document.body.appendChild(el);
   }
   el.textContent = msg;
-  el.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold max-w-xs ${isErr ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+  el.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold max-w-xs ${isErr ? 'bg-red-600 text-white' : 'bg-stone-800 text-white'}`;
   el.style.display = 'block';
   clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+  if (timeoutMs > 0) el._t = setTimeout(() => { el.style.display = 'none'; }, timeoutMs);
+}
+function hideMsg() {
+  const el = document.getElementById('checkout-msg');
+  if (el) { clearTimeout(el._t); el.style.display = 'none'; }
 }
 
 // -- Init ---------------------------------------------------------------------
