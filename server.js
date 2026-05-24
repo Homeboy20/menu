@@ -974,6 +974,15 @@ async function initDB() {
       );
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_tables_menu ON menu_tables (menu_id)`);
+// Rooms table for hotel/lodge QR
+await client.query(`CREATE TABLE IF NOT EXISTS menu_rooms (
+  id SERIAL PRIMARY KEY,
+  menu_id TEXT NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+  label TEXT NOT NULL DEFAULT '',
+  qr_code TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);`);
+await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (menu_id)`);
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS table_alerts (
@@ -5140,6 +5149,55 @@ app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('profes
   try {
     await pool.query('DELETE FROM menu_tables WHERE id = $1 AND menu_id = $2',
       [req.params.tableId, req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── Room Management ──────────────────────────────────────────────────────────
+
+// GET /api/menus/:id/rooms - List rooms for a menu
+app.get('/api/menus/:id/rooms', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+  try {
+    if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
+    const { rows } = await pool.query(
+      'SELECT * FROM menu_rooms WHERE menu_id = $1 ORDER BY id',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/menus/:id/rooms - Create a room + generate its QR
+app.post('/api/menus/:id/rooms', requireAnyAuth, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
+  try {
+    const menuId = req.params.id;
+    const label = sanitizeStr(req.body.label, 100) || 'Room';
+    const menu = await dbGetMenu(menuId);
+    if (!menu) return res.status(404).json({ error: 'Menu not found.' });
+    if (req.isCustomer && !await assertMenuOwnership(menuId, req.customer.id, res)) return;
+
+    const QRCode = require('qrcode');
+    const HOST = process.env.HOST || `http://localhost:${PORT}`;
+    const roomUrl = `${HOST}/menu.html?id=${menuId}&room=${encodeURIComponent(label)}`;
+    const qrCode = await QRCode.toDataURL(roomUrl, {
+      width: 512, margin: 2,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+
+    const { rows } = await pool.query(
+      `INSERT INTO menu_rooms (menu_id, label, qr_code, created_at)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [menuId, label, qrCode, new Date().toISOString()]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/menus/:id/rooms/:roomId - Delete a room
+app.delete('/api/menus/:id/rooms/:roomId', requireAnyAuth, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM menu_rooms WHERE id = $1 AND menu_id = $2',
+      [req.params.roomId, req.params.id]);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

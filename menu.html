@@ -1100,6 +1100,8 @@ function clearSearch(){
   const p=new URLSearchParams(location.search);
   const id=p.get('id');
   currentTableLabel=p.get('table')||'';
+  let roomLabel=p.get('room')||'';
+  if(roomLabel) currentTableLabel='Room '+roomLabel;
   if(!id){showError('No menu ID provided in the URL.');return;}
   showSkeleton();
   try{

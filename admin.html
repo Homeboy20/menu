@@ -166,6 +166,9 @@
       <span class="material-symbols-outlined text-[20px]">table_restaurant</span> Tables
       <span id="nav-tables-badge" class="nav-alert-badge ml-auto"></span>
     </a>
+    <a id="nav-rooms" href="#rooms" onclick="showSection('rooms')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
+      <span class="material-symbols-outlined text-[20px]">meeting_room</span> Rooms
+    </a>
     <a id="nav-settings" href="#settings" onclick="showSection('settings')" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors text-stone-600 hover:text-stone-900 hover:bg-stone-50">
       <span class="material-symbols-outlined text-[20px]">settings</span> Settings
     </a>
@@ -849,6 +852,42 @@
       </div>
     </section>
 
+    <!-- ------------------- ROOMS ------------------- -->
+    <section id="section-rooms" class="hidden max-w-2xl mx-auto space-y-6">
+      <div class="flex items-end justify-between">
+        <div>
+          <h2 class="text-2xl font-bold">Room Management</h2>
+          <p class="text-stone-600 text-sm mt-1">Add rooms, generate QR codes for Hotel/Lodge guests.</p>
+        </div>
+      </div>
+
+      <!-- Menu Selector -->
+      <div class="bg-white rounded-2xl border border-stone-200 p-5 space-y-4">
+        <label class="block text-sm font-medium text-stone-700 mb-1.5">Select Menu</label>
+        <select id="rooms-menu-select" onchange="loadRoomsForMenu(this.value)"
+                class="w-full bg-stone-50 border border-stone-300 rounded-xl px-4 py-3 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+          <option value="">— Choose a menu —</option>
+        </select>
+      </div>
+
+      <!-- Add room form -->
+      <div id="rooms-add-form" class="hidden bg-white rounded-2xl border border-stone-200 p-5 space-y-3">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-stone-600">Add Room</h3>
+        <div class="flex gap-3">
+          <input id="new-room-label" type="text" placeholder="e.g. Room 101, Suite 5"
+                 class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-500"/>
+          <button onclick="addRoom()"
+                  class="px-5 py-2.5 rounded-xl bg-primary text-bg-dark font-bold hover:brightness-110 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">add</span> Add
+          </button>
+        </div>
+        <p id="rooms-add-error" class="hidden text-xs text-red-400"></p>
+      </div>
+
+      <!-- Rooms list -->
+      <div id="rooms-list" class="hidden space-y-3"></div>
+    </section>
+
     <!-- ------------------- STEP 5 � SETTINGS ------------------- -->
     <section id="section-settings" class="hidden max-w-lg mx-auto space-y-6">
       <div>
@@ -1336,7 +1375,7 @@ function initCurrencySelect() {
 
 // -- Navigation ----------------------------------------------------------------
 const SECTIONS = ['upload', 'preview', 'publish', 'published', 'tables', 'settings'];
-const TITLES   = { upload: 'Upload Menu', preview: 'Preview & Edit', publish: 'QR & Publish', published: 'Published Menus', tables: 'Table Management', settings: 'Settings' };
+const TITLES   = { upload: 'Upload Menu', preview: 'Preview & Edit', publish: 'QR & Publish', published: 'Published Menus', tables: 'Table Management', rooms: 'Room Management', settings: 'Settings' };
 
 function showSection(name) {
   SECTIONS.forEach(s => {
@@ -3057,8 +3096,20 @@ async function loadTablesMenuList() {
       sel.appendChild(opt);
     });
     if (cur) { sel.value = cur; if (cur !== tablesMenuId) loadTablesForMenu(cur); }
+    const roomsSel = document.getElementById('rooms-menu-select');
+    const roomsCur = roomsSel.value;
+    roomsSel.innerHTML = '<option value="">— Choose a menu —</option>';
+    list.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.restaurantName + ' (' + m.itemCount + ' items)';
+      roomsSel.appendChild(opt);
+    });
+    if (roomsCur) { roomsSel.value = roomsCur; if (roomsCur !== roomsMenuId) loadRoomsForMenu(roomsCur); }
   } catch (_) {}
 }
+
+let roomsMenuId = null;
 
 async function loadTablesForMenu(menuId) {
   tablesMenuId = menuId || null;
@@ -3166,6 +3217,87 @@ async function deleteTable(tableId) {
       method: 'DELETE', headers: authHeaders(),
     });
     await renderTables();
+  } catch (err) { alert(err.message); }
+}
+
+async function loadRoomsForMenu(menuId) {
+  roomsMenuId = menuId || null;
+  const addForm  = document.getElementById('rooms-add-form');
+  const roomsList = document.getElementById('rooms-list');
+
+  if (!menuId) {
+    addForm.classList.add('hidden');
+    roomsList.classList.add('hidden');
+    return;
+  }
+
+  addForm.classList.remove('hidden');
+  roomsList.classList.remove('hidden');
+
+  await renderRooms();
+}
+
+async function renderRooms() {
+  if (!roomsMenuId) return;
+  const el = document.getElementById('rooms-list');
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading…</p>';
+  try {
+    const res  = await fetch('/api/menus/' + encodeURIComponent(roomsMenuId) + '/rooms', { headers: authHeaders() });
+    const rows = await res.json();
+    if (!rows.length) {
+      el.innerHTML = '<p class="text-stone-500 text-sm">No rooms yet. Add one above.</p>';
+      return;
+    }
+    el.innerHTML = rows.map(t => `
+      <div class="bg-white rounded-xl border border-stone-200 p-4 flex items-center gap-4">
+        <img src="${t.qr_code}" alt="QR" class="w-16 h-16 rounded-lg border border-stone-200"/>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-stone-800 truncate">${esc(t.label)}</p>
+          <p class="text-xs text-stone-500 mt-0.5">${new Date(t.created_at).toLocaleDateString()}</p>
+        </div>
+        <a href="${t.qr_code}" download="qr-${esc(t.label)}.png"
+           class="text-primary hover:underline text-xs flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">download</span> Download
+        </a>
+        <button onclick="deleteRoom(${t.id})"
+                class="text-stone-400 hover:text-red-400 hover:bg-red-400/10 rounded-md p-1 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      </div>`).join('');
+  } catch (err) {
+    el.innerHTML = '<p class="text-red-400 text-sm">' + err.message + '</p>';
+  }
+}
+
+async function addRoom() {
+  const label = document.getElementById('new-room-label').value.trim();
+  const errEl = document.getElementById('rooms-add-error');
+  errEl.classList.add('hidden');
+  if (!label) { errEl.textContent = 'Room label is required.'; errEl.classList.remove('hidden'); return; }
+  if (!roomsMenuId) return;
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(roomsMenuId) + '/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ label }),
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Failed');
+    document.getElementById('new-room-label').value = '';
+    await renderRooms();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function deleteRoom(roomId) {
+  if (!confirm('Delete this room?')) return;
+  try {
+    await fetch('/api/menus/' + encodeURIComponent(roomsMenuId) + '/rooms/' + roomId, {
+      method: 'DELETE', headers: authHeaders(),
+    });
+    await renderRooms();
   } catch (err) { alert(err.message); }
 }
 
