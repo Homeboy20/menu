@@ -829,6 +829,10 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script src="/js/geo.js"></script>
+  <script>
+    initCountryCustomization('pricing');
+  </script>
 </head>
 <body>
   <!-- Header -->
@@ -1268,8 +1272,7 @@
     function renderPricingCards() {
       const grid = document.getElementById('pricing-grid');
       grid.innerHTML = '';
-      
-      loadedPlans.forEach(plan => {
+            loadedPlans.forEach(plan => {
         const isPopular = plan.name === 'professional';
         const features = Array.isArray(plan.features) ? plan.features : (typeof plan.features === 'string' ? JSON.parse(plan.features || '[]') : []);
         const desc = planDescriptions[plan.name] || plan.description || 'Great for your business';
@@ -1279,8 +1282,11 @@
         const annualMonthly = hasAnnual ? Math.round(plan.annual_price / 12) : monthlyPrice;
         const displayPrice = isAnnual && hasAnnual ? annualMonthly : monthlyPrice;
         const annualTotal = hasAnnual ? plan.annual_price : 0;
-        const savingsPercent = hasAnnual ? Math.round((1 - plan.annual_price / (monthlyPrice * 12)) * 100) : 0;
         
+        const formatLocal = window.formatLocalPrice || function(usd) {
+          return usd === 0 ? 'FREE' : '$' + usd;
+        };
+
         let ctaHtml = '';
         if (plan.name === 'enterprise') {
           ctaHtml = `<a href="mailto:sales@restorder.online" class="plan-cta secondary">Contact Sales</a>`;
@@ -1295,21 +1301,21 @@
           priceNote = 'Free forever';
         } else if (isAnnual && hasAnnual) {
           const monthlySavings = (monthlyPrice * 12) - annualTotal;
-          priceNote = `Billed $${annualTotal}/year � Save $${monthlySavings}/year`;
+          priceNote = `Billed ${formatLocal(annualTotal)}/year · Save ${formatLocal(monthlySavings)}/year`;
         } else {
-          priceNote = origPrice ? `SAVE $${(origPrice - monthlyPrice) * 12}/year vs competitors` : '';
+          priceNote = origPrice ? `SAVE ${formatLocal((origPrice - monthlyPrice) * 12)}/year vs competitors` : '';
         }
         
         const card = document.createElement('div');
         card.className = 'pricing-card' + (isPopular ? ' popular' : '');
         card.innerHTML = `
-          ${isPopular ? '<div class="popular-badge">? MOST POPULAR</div>' : ''}
+          ${isPopular ? '<div class="popular-badge">🏆 MOST POPULAR</div>' : ''}
           <h3 class="plan-name">${plan.display_name}</h3>
           <p class="plan-description">${desc}</p>
           
           <div class="plan-price">
-            ${isAnnual && hasAnnual ? `<span class="old-price">$${monthlyPrice}</span>` : (origPrice && !isAnnual ? `<span class="old-price">$${origPrice}</span>` : '')}
-            <span class="current-price">$${displayPrice}</span>
+            ${isAnnual && hasAnnual ? `<span class="old-price">${formatLocal(monthlyPrice)}</span>` : (origPrice && !isAnnual ? `<span class="old-price">${formatLocal(origPrice)}</span>` : '')}
+            <span class="current-price">${formatLocal(displayPrice)}</span>
             <span class="price-period">/${plan.interval || 'month'}</span>
           </div>
           <p class="price-note">${priceNote}</p>

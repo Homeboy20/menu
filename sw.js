@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   '/js/icons.js',
   '/icons/sprite.svg',
   '/api/menus/demo',
+  '/public/js/geo.js',
   'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap'
 ];
 

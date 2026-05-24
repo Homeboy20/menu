@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2038,6 +2038,10 @@
       // $crisp.push(["set", "user:nickname", ["John Doe"]]);
     }
   </script>
+  <script src="/js/geo.js"></script>
+  <script>
+    initCountryCustomization('index');
+  </script>
 </head>
 <body>
 
@@ -3467,18 +3471,22 @@
           ctaHtml = `<a href="/register?plan=${plan.name}${billingParam}" class="plan-cta primary">Get Started</a>`;
         }
         
+        const formatLocal = window.formatLocalPrice || function(usd) {
+          return usd === 0 ? 'FREE' : '$' + usd;
+        };
+
         let origPriceHtml = '';
         if (isAnnualBilling && hasAnnual && monthlyPrice > 0) {
-          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">$${monthlyPrice}</span>`;
+          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">${formatLocal(monthlyPrice)}</span>`;
         } else if (!isAnnualBilling && origPrice) {
-          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">$${origPrice}</span>`;
+          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">${formatLocal(origPrice)}</span>`;
         }
         
         let subtitleText = '';
         if (plan.price === 0) {
           subtitleText = '7 days free · No card needed';
         } else if (isAnnualBilling && hasAnnual) {
-          subtitleText = `Billed $${plan.annual_price}/yr · save $${(monthlyPrice * 12 - plan.annual_price).toFixed(0)}`;
+          subtitleText = `Billed ${formatLocal(plan.annual_price)}/yr · save ${formatLocal(monthlyPrice * 12 - plan.annual_price)}`;
         }
         
         const card = document.createElement('div');
@@ -3493,7 +3501,7 @@
             ${origPriceHtml}
             ${plan.price === 0
               ? '<span class="price-amount" style="font-size:30px;color:#059669;">FREE</span>'
-              : `<span class="price-currency">$</span><span class="price-amount">${displayPrice}</span><span class="price-period">/mo</span>`}
+              : `<span class="price-amount">${formatLocal(displayPrice)}</span><span class="price-period">/mo</span>`}
           </div>
           ${subtitleText ? `<p class="plan-subtitle">${subtitleText}</p>` : '<div style="margin-bottom:14px;"></div>'}
           <ul class="plan-features">

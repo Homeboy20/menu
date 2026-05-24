@@ -179,6 +179,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .mobile-logo span{font-weight:700;font-size:.9rem;color:var(--text);}
 #recaptcha-container{position:fixed;bottom:0;left:0;z-index:-1;opacity:0;}
 </style>
+<script src="/js/geo.js"></script>
+<script>
+  initCountryCustomization('register');
+</script>
 </head>
 <body>
 
@@ -510,7 +514,10 @@ function getFullPhone() {
 // Detect country on load
 (async () => {
   let code = '';
-  try { const r = await fetch('/api/geo'); const d = await r.json(); code = d.country || ''; } catch(e) {}
+  try {
+    const geo = await getOrDetectCountry();
+    code = geo.code;
+  } catch(e) {}
   buildCountrySelect(code);
   onCountryChange();
 })();

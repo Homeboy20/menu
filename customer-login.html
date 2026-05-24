@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -87,6 +87,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
   .footer-row{flex-wrap:wrap;gap:.5rem;}
 }
 </style>
+<script src="/js/geo.js"></script>
+<script>
+  initCountryCustomization('login');
+</script>
 </head>
 <body>
 
@@ -307,8 +311,13 @@ window.addEventListener('load',async()=>{
   })();
 
   // Country detect
-  let code='';try{const r=await fetch('/api/geo');const d=await r.json();code=d.country||'';}catch(e){}
-  buildCountrySelect(code);onCountryChange();
+  let code='';
+  try {
+    const geo = await getOrDetectCountry();
+    code = geo.code;
+  } catch(e) {}
+  buildCountrySelect(code);
+  onCountryChange();
 
   // Firebase init
   try{const cfg=await fetch('/api/firebase-config').then(r=>r.json());if(cfg.enabled)await initFirebase(cfg);}catch(_){}
