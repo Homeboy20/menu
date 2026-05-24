@@ -96,6 +96,35 @@
 <h1 class="text-3xl font-bold tracking-tight">Overview</h1>
 <p class="text-base text-slate-500 dark:text-slate-400 mt-2">Quick stats for your restaurant menu.</p>
 </div>
+
+<!-- Revenue Stats Dashboard Widget -->
+<div id="revenue-widget-section" class="bg-white dark:bg-surface-dark border border-primary/10 rounded-xl shadow-sm p-6 space-y-6">
+  <div class="flex items-center justify-between border-b border-primary/5 pb-4">
+    <div>
+      <h3 class="text-xl font-bold">Revenue Overview</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Real-time SaaS billing and platform metrics.</p>
+    </div>
+    <span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full border border-primary/20">Active Billings</span>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="flex flex-col gap-1 rounded-xl p-4 bg-slate-50/50 dark:bg-background-dark/30 border border-primary/5">
+      <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Monthly Recurring (MRR)</span>
+      <p class="text-2xl font-extrabold text-slate-900 dark:text-slate-100" id="widget-mrr">$0.00</p>
+    </div>
+    <div class="flex flex-col gap-1 rounded-xl p-4 bg-slate-50/50 dark:bg-background-dark/30 border border-primary/5">
+      <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Revenue Collected</span>
+      <p class="text-2xl font-extrabold text-slate-900 dark:text-slate-100" id="widget-total-rev">$0.00</p>
+    </div>
+    <div class="flex flex-col gap-1 rounded-xl p-4 bg-slate-50/50 dark:bg-background-dark/30 border border-primary/5">
+      <span class="text-xs font-medium text-slate-500 dark:text-slate-400">New Sign-ups (Last 7 Days)</span>
+      <p class="text-2xl font-extrabold text-slate-900 dark:text-slate-100" id="widget-registrations">0</p>
+    </div>
+    <div class="flex flex-col gap-1 rounded-xl p-4 bg-slate-50/50 dark:bg-background-dark/30 border border-primary/5">
+      <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Pending Approvals</span>
+      <p class="text-2xl font-extrabold text-slate-900 dark:text-slate-100" id="widget-pending">0</p>
+    </div>
+  </div>
+</div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 <div class="flex flex-col gap-3 rounded-xl p-6 bg-white dark:bg-surface-dark border border-primary/10 shadow-sm">
 <div class="flex items-center justify-between">
@@ -227,4 +256,28 @@
 </div>
 </div>
 
+<script>
+  (async () => {
+    try {
+      const token = localStorage.getItem('admin-token');
+      const res = await fetch('/api/admin/revenue-stats', {
+        headers: { 'x-admin-token': token || '' }
+      });
+      if (res.ok) {
+        const stats = await res.json();
+        document.getElementById('widget-mrr').textContent = '$' + parseFloat(stats.mrr).toFixed(2);
+        document.getElementById('widget-total-rev').textContent = '$' + parseFloat(stats.total_revenue).toFixed(2);
+        document.getElementById('widget-registrations').textContent = stats.new_registrations_7d;
+        document.getElementById('widget-pending').textContent = stats.pending_payments_count;
+        if (stats.pending_payments_count > 0) {
+          document.getElementById('widget-pending').classList.add('text-yellow-500');
+        } else {
+          document.getElementById('widget-pending').classList.remove('text-yellow-500');
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load revenue stats:', e);
+    }
+  })();
+</script>
 </body></html>

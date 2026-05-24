@@ -129,11 +129,11 @@
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>
       <span class="text-sm font-medium">Dashboard</span>
     </a>
-    <a href="/customers" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
+    <a href="/customers" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-groups"/></svg>
       <span class="text-sm font-medium">Customers</span>
     </a>
-    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
+    <a href="/admin-menus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary/10 text-primary transition">
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restaurant_menu"/></svg>
       <span class="text-sm font-medium">All Menus</span>
     </a>
@@ -187,10 +187,10 @@
     <div class="flex items-center justify-between">
       <div>
         <div class="flex items-center gap-3 mb-2">
-          <h2 class="text-3xl font-bold">Customer Management</h2>
+          <h2 class="text-3xl font-bold">All Menus</h2>
           <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
         </div>
-        <p class="text-slate-400">View and manage all restaurant customers and their subscriptions</p>
+        <p class="text-slate-400">View and manage all menus across the platform</p>
       </div>
       <button onclick="exportCSV()" class="px-4 py-2.5 bg-surface border border-slate-700 text-slate-300 font-semibold rounded-xl hover:bg-bg-dark transition flex items-center gap-2">
         <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-download"/></svg>
@@ -277,17 +277,14 @@
     </div>
     <div class="overflow-x-auto">
       <table class="w-full">
-        <thead class="bg-bg-dark/50">
-          <tr>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Business</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Menus</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Scans</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Joined</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
+        <thead class="bg-surface border-b border-slate-700"><tr>
+              <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Restaurant / ID</th>
+              <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Owner / Email</th>
+              <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Total Scans</th>
+              <th class="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Subscription</th>
+              <th class="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+</tr></thead>
         <tbody id="customers-tbody" class="divide-y divide-slate-700">
           <tr>
             <td colspan="7" class="px-6 py-12 text-center text-slate-400">
@@ -534,7 +531,7 @@
 let isAuthenticated = false;
 let adminToken = null;
 let currentUser = null;
-let allCustomers = [];
+let allMenus = [];
 let displayedCustomers = [];
 
 // -- User UI -----------------------------------------------------------------
@@ -648,7 +645,7 @@ function showToast(msg, type) {
 async function loadCustomers() {
   const status = document.getElementById('filter-status').value;
   try {
-    const res = await fetch(`/api/admin/customers?status=${status}`, {
+    const res = await fetch(`/api/admin/menus?status=${status}`, {
       headers: { 'x-admin-token': adminToken }
     });
     if (!res.ok) throw new Error('Failed to load customers');
@@ -786,8 +783,8 @@ async function viewCustomer(customerId) {
 
   try {
     const [custRes, menusRes] = await Promise.all([
-      fetch(`/api/admin/customers/${customerId}`, { headers: { 'x-admin-token': adminToken } }),
-      fetch(`/api/admin/customers/${customerId}/menus`, { headers: { 'x-admin-token': adminToken } })
+      fetch(`/api/admin/menus/${customerId}`, { headers: { 'x-admin-token': adminToken } }),
+      fetch(`/api/admin/menus/${customerId}/menus`, { headers: { 'x-admin-token': adminToken } })
     ]);
 
     if (!custRes.ok) throw new Error('Customer not found');
@@ -952,7 +949,7 @@ async function toggleStatus(id, currentStatus) {
   if (!confirm(`Are you sure you want to ${action} this customer?`)) return;
 
   try {
-    const res = await fetch(`/api/admin/customers/${id}`, {
+    const res = await fetch(`/api/admin/menus/${id}`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ status: newStatus })
@@ -1010,7 +1007,7 @@ document.getElementById('edit-form').addEventListener('submit', async (e) => {
   };
 
   try {
-    const res = await fetch(`/api/admin/customers/${id}`, {
+    const res = await fetch(`/api/admin/menus/${id}`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify(body)
@@ -1061,7 +1058,7 @@ document.getElementById('reset-pw-form').addEventListener('submit', async (e) =>
   }
 
   try {
-    const res = await fetch(`/api/admin/customers/${id}/reset-password`, {
+    const res = await fetch(`/api/admin/menus/${id}/reset-password`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ newPassword: pw })
@@ -1081,7 +1078,7 @@ async function deleteCustomer(id, name) {
   if (!confirm(`Are you sure you want to permanently delete "${name}"?\n\nThis will also remove all their menus and data. This action cannot be undone.`)) return;
 
   try {
-    const res = await fetch(`/api/admin/customers/${id}`, {
+    const res = await fetch(`/api/admin/menus/${id}`, {
       method: 'DELETE',
       headers: { 'x-admin-token': adminToken }
     });
@@ -1210,7 +1207,7 @@ async function assignMenu(menuId) {
   errorEl.classList.add('hidden');
 
   try {
-    const res = await fetch(`/api/admin/customers/${customerId}/assign-menu`, {
+    const res = await fetch(`/api/admin/menus/${customerId}/assign-menu`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ menuId })
@@ -1311,7 +1308,7 @@ document.getElementById('assign-sub-form').addEventListener('submit', async (e) 
   btn.innerHTML = '<svg class="material-symbols-outlined text-[18px] spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Processing...';
 
   try {
-    const res = await fetch(`/api/admin/customers/${customerId}/assign-subscription`, {
+    const res = await fetch(`/api/admin/menus/${customerId}/assign-subscription`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(body),
@@ -1337,7 +1334,7 @@ async function unassignMenu(customerId, menuId, menuName) {
   if (!confirm(`Unassign "${menuName}" from this customer?\n\nThe menu will become unassigned and can be reassigned later.`)) return;
 
   try {
-    const res = await fetch(`/api/admin/customers/${customerId}/unassign-menu`, {
+    const res = await fetch(`/api/admin/menus/${customerId}/unassign-menu`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ menuId })

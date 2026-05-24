@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -562,8 +562,10 @@ async function renderGateways(gateways) {
   const container = document.getElementById('gateway-container');
   const hasFW = !!(gateways.flutterwave?.public_key);
   const hasPP = !!(gateways.paypal?.client_id);
+  const hasBT = !!(gateways.bank_transfer?.bank_name);
+  const hasCP = !!(gateways.clickpesa?.merchant_id);
 
-  if (!hasFW && !hasPP) {
+  if (!hasFW && !hasPP && !hasBT && !hasCP) {
     container.innerHTML = `
       <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
         <p class="font-semibold mb-1">?? Manual Payment</p>
@@ -579,6 +581,21 @@ async function renderGateways(gateways) {
   if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#f5a623;color:#fff;">
     <span class="material-symbols-outlined text-[18px]">bolt</span>Pay with Flutterwave</button>`;
   if (hasPP) html += `<div id="paypal-btn-wrap" class="mt-2"></div>`;
+  if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#3b82f6;color:#fff;">
+    <span class="material-symbols-outlined text-[18px]">payments</span>Pay $${billingPrice.toFixed(2)} with ClickPesa</button>`;
+  if (hasBT) {
+    const bt = gateways.bank_transfer;
+    let bankInfo = '';
+    if (bt.bank_name) bankInfo += `<div><strong>Bank:</strong> ${bt.bank_name}</div>`;
+    if (bt.account_name) bankInfo += `<div><strong>Account Name:</strong> ${bt.account_name}</div>`;
+    if (bt.account_number) bankInfo += `<div><strong>Account Number:</strong> ${bt.account_number}</div>`;
+    if (bt.swift_code) bankInfo += `<div><strong>SWIFT/BIC:</strong> ${bt.swift_code}</div>`;
+    if (bt.routing_number) bankInfo += `<div><strong>Routing Number:</strong> ${bt.routing_number}</div>`;
+    if (bt.instructions) bankInfo += `<div class="mt-2 italic">${bt.instructions}</div>`;
+    html += `<div class="mt-3 p-4 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-600 leading-relaxed">${bankInfo}<p class="mt-2 text-stone-400">Transfer the exact amount. Your subscription will be activated once payment is confirmed (usually within 24 hours).</p></div>`;
+    html += `<button id="bt-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold text-sm transition" style="background:#10b981;color:#fff;">
+      <span class="material-symbols-outlined text-[18px]">account_balance</span>I've Sent $${billingPrice.toFixed(2)} via Bank Transfer</button>`;
+  }
   html += '</div>';
   container.innerHTML = html;
 
@@ -607,7 +624,7 @@ async function renderGateways(gateways) {
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ plan_id: selectedPlan.id, menu_id: menuId })
+            body: JSON.stringify({ plan_id: selectedPlan.id, menu_id: menuId, billing_cycle: billingInterval })
           });
           const d = await r.json();
           if (!d.order_id) throw new Error(d.error || 'Failed to create order');
@@ -620,7 +637,7 @@ async function renderGateways(gateways) {
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ order_id: data.orderID, plan_id: selectedPlan.id, menu_id: menuId })
+            body: JSON.stringify({ order_id: data.orderID, plan_id: selectedPlan.id, menu_id: menuId, billing_cycle: billingInterval })
           });
           const d = await r.json();
           if (d.success) onPaymentSuccess();
@@ -629,6 +646,36 @@ async function renderGateways(gateways) {
         onError: () => onPaymentFailure('PayPal error. Please try again.')
       }).render('#paypal-btn-wrap');
     } catch(e) { /* paypal load failed silently */ }
+  }
+
+  if (hasBT) {
+    document.getElementById('bt-pay-btn').onclick = () => doManualUpgrade('bank_transfer');
+  }
+
+  if (hasCP) {
+    document.getElementById('cp-pay-btn').onclick = async () => {
+      const btn = document.getElementById('cp-pay-btn');
+      btn.disabled = true; btn.textContent = 'Processing…';
+      const menuId = getTargetMenuId();
+      try {
+        const r = await fetch('/api/payments/clickpesa/create-order-public', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan_id: selectedPlan.id,
+            menu_id: menuId,
+            billing_cycle: billingInterval,
+            email: localStorage.getItem('customerEmail') || sessionStorage.getItem('customerEmail') || '',
+            name: localStorage.getItem('customerBusiness') || sessionStorage.getItem('customerBusiness') || 'Customer'
+          })
+        });
+        const d = await r.json();
+        if (d.redirect_url) { window.location.href = d.redirect_url; }
+        else if (d.reference) { showMsg('Payment initiated (ref: ' + d.reference + '). Complete payment via ClickPesa.'); }
+        else { showMsg(d.error || 'Failed to initiate ClickPesa payment.', true); }
+      } catch(e) { showMsg('Failed to initiate payment.', true); }
+      finally { btn.disabled = false; btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">payments</span>Pay $${billingPrice.toFixed(2)} with ClickPesa`; }
+    };
   }
 }
 
@@ -661,7 +708,7 @@ function doFlutterwave(publicKey) {
         const r = await fetch('/api/payments/flutterwave/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-          body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: selectedPlan.id })
+          body: JSON.stringify({ transaction_id: response.transaction_id, menu_id: menuId, plan_id: selectedPlan.id, billing_cycle: billingInterval })
         });
         const d = await r.json();
         if (d.success) onPaymentSuccess();
@@ -675,7 +722,7 @@ function doFlutterwave(publicKey) {
 }
 
 // -- Manual upgrade -----------------------------------------------------------
-async function doManualUpgrade() {
+async function doManualUpgrade(method = 'manual') {
   const menuId = getTargetMenuId();
   if (!menuId) { showMsg('No menu selected.', true); return; }
   try {
@@ -683,7 +730,7 @@ async function doManualUpgrade() {
     const res = await fetch('/api/customers/subscription/change', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-      body: JSON.stringify({ menu_id: menuId, plan_id: selectedPlan.id, payment_method: 'manual' })
+      body: JSON.stringify({ menu_id: menuId, plan_id: selectedPlan.id, payment_method: method })
     });
     const d = await res.json();
     if (res.ok) {

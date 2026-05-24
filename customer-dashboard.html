@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -1067,7 +1067,7 @@ async function loadSubscription() {
 
         ${currentPlan?.price > 0 && currentSub?.subscription_id ? `
         <div class="mt-6 flex gap-3">
-          <button onclick="openCancelModal('${escapeHtml(currentPlan.display_name)}')"
+          <button onclick="openCancelModal('${escapeHtml(currentPlan.display_name).replace(/'/g, "\\\\'")}')"
             class="px-5 py-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-semibold rounded-xl text-sm transition">
             Cancel Subscription
           </button>
@@ -1112,7 +1112,7 @@ async function loadSubscription() {
                 ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
               </div>
               ${!isCurrent ? `
-                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name)}', ${plan.price})"
+                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name).replace(/'/g, "\\\\'")}', ${plan.price})"
                   class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
                   ${isUpgrade ? '? Upgrade' : '? Downgrade'} to ${escapeHtml(plan.display_name)}
                 </button>` : `
@@ -1268,7 +1268,7 @@ function handlePlanClick(planId, planName, planPrice) {
 }
 
 // Plan change modal
-async function openChangePlanModal(planId, planName, planPrice) {
+async function openChangePlanModal(planId, planName, planPrice, targetMenuId = null) {
   const modal = document.getElementById('plan-change-modal');
 
   document.getElementById('pcm-plan-name').textContent = planName;
@@ -1345,11 +1345,11 @@ async function openChangePlanModal(planId, planName, planPrice) {
         createOrder: async () => {
           const csrf = await getCsrf();
           const menus = window.customerMenus || [];
-          const firstMenuId = menus[0]?.id;
+          const resolvedMenuId = targetMenuId || menus[0]?.id;
           const r = await fetch('/api/payments/paypal/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ plan_id: planId, menu_id: firstMenuId })
+            body: JSON.stringify({ plan_id: planId, menu_id: resolvedMenuId })
           });
           const d = await r.json();
           if (!d.order_id) throw new Error(d.error || 'Failed to create order');
@@ -1359,18 +1359,18 @@ async function openChangePlanModal(planId, planName, planPrice) {
           showSubToast('Processing payment…');
           const csrf = await getCsrf();
           const menus = window.customerMenus || [];
-          const firstMenuId = menus[0]?.id;
+          const resolvedMenuId = targetMenuId || menus[0]?.id;
           const r = await fetch('/api/payments/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
-            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: firstMenuId })
+            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: resolvedMenuId })
           });
           const d = await r.json();
           if (d.success) {
-            showPaymentResult(true, planId, planName, planPrice, targetMenuId);
-          } else { showPaymentResult(false, planId, planName, planPrice, targetMenuId, d.error || 'Capture failed'); }
+            showPaymentResult(true, planId, planName, planPrice, resolvedMenuId);
+          } else { showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, d.error || 'Capture failed'); }
         },
-        onError: (err) => showPaymentResult(false, planId, planName, planPrice, targetMenuId, 'PayPal error. Please try again.')
+        onError: (err) => showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, 'PayPal error. Please try again.')
       }).render('#paypal-button-container');
     }
 
@@ -1385,9 +1385,11 @@ async function openChangePlanModal(planId, planName, planPrice) {
         const btn = document.getElementById('cp-pay-btn');
         btn.disabled = true; btn.textContent = 'Processing�';
         try {
+          const menus = window.customerMenus || [];
+          const resolvedMenuId = targetMenuId || menus[0]?.id;
           const r = await fetch('/api/payments/clickpesa/create-order-public', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan_id: planId, email: localStorage.getItem('customerEmail') || '', name: localStorage.getItem('customerBusiness') || '' })
+            body: JSON.stringify({ plan_id: planId, menu_id: resolvedMenuId, email: localStorage.getItem('customerEmail') || '', name: localStorage.getItem('customerBusiness') || '' })
           });
           const d = await r.json();
           if (d.redirect_url) { window.location.href = d.redirect_url; }
@@ -1424,11 +1426,11 @@ function showPaymentResult(success, planId, planName, planPrice, menuId, errorMs
         <p class="text-red-600 text-sm mt-1">${escapeHtml(errorMsg || 'Your payment could not be processed.')}</p>
       </div>
       <div class="space-y-2">
-        <button onclick="openChangePlanModal('${escapeHtml(planId)}','${escapeHtml(planName)}',${planPrice},'${escapeHtml(menuId)}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm transition">
+        <button onclick="openChangePlanModal('${escapeHtml(planId).replace(/'/g, "\\\\")}','${escapeHtml(planName).replace(/'/g, "\\\\'")}',${planPrice},'${escapeHtml(menuId).replace(/'/g, "\\\\'")}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm transition">
           <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-refresh"/></svg>
           Retry Payment
         </button>
-        <button onclick="openChangePlanModal('${escapeHtml(planId)}','${escapeHtml(planName)}',${planPrice},'${escapeHtml(menuId)}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-sm transition">
+        <button onclick="openChangePlanModal('${escapeHtml(planId).replace(/'/g, "\\\\")}','${escapeHtml(planName).replace(/'/g, "\\\\'")}',${planPrice},'${escapeHtml(menuId).replace(/'/g, "\\\\'")}')" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-sm transition">
           <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-swap_horiz"/></svg>
           Try Different Payment Method
         </button>
@@ -1694,7 +1696,7 @@ async function loadTeam() {
           <button onclick="toggleStaffStatus(${s.id},'${s.status === 'active' ? 'disabled' : 'active'}')" class="p-2 text-stone-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition" title="${s.status === 'active' ? 'Disable' : 'Enable'}">
             <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${s.status === 'active' ? 'block' : 'check_circle'}"/></svg>
           </button>
-          <button onclick="deleteStaff(${s.id},'${escapeHtml(s.name)}')" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove">
+          <button onclick="deleteStaff(${s.id},'${escapeHtml(s.name).replace(/'/g, "\\\\'")}')" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Remove">
             <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-delete"/></svg>
           </button>
         </div>

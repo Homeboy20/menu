@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -375,6 +375,13 @@ function formatCurrency(amount, currency) {
 
 // -- Auth + init ---------------------------------------------------------------
 async function init() {
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
+  } catch (err) {
+    console.warn('Failed to fetch CSRF token:', err);
+  }
   if (!customerToken) { window.location.href = '/login'; return; }
 
   try {
@@ -594,7 +601,11 @@ async function updateOrderStatus(orderId, newStatus) {
   try {
     const res = await fetch(`/api/orders/${orderId}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'x-customer-token': customerToken,
+        'x-csrf-token': window.csrfToken || ''
+      },
       body: JSON.stringify({ status: newStatus })
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
@@ -679,7 +690,11 @@ async function dismissAlert(alertId) {
   try {
     const res = await fetch(`/api/alerts/${alertId}/dismiss`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-customer-token': customerToken },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'x-customer-token': customerToken,
+        'x-csrf-token': window.csrfToken || ''
+      },
       body: JSON.stringify({})
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to dismiss');

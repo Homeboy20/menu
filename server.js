@@ -856,7 +856,7 @@ try {
 
 // Determine SSL configuration based on environment
 // Local PostgreSQL typically doesn't have SSL enabled
-const isLocalDB = _pgConnStr.includes('localhost') || _pgConnStr.includes('127.0.0.1');
+const isLocalDB = !_pgConnStr || _pgConnStr.includes('localhost') || _pgConnStr.includes('127.0.0.1');
 const sslConfig = isLocalDB ? false : { rejectUnauthorized: false };
 
 const pool = new Pool({
@@ -1145,6 +1145,7 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_plan ON subscriptions (plan_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_status ON subscriptions (status)`);
     await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS next_billing_date TEXT`);
+    await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS billing_cycle TEXT NOT NULL DEFAULT 'monthly'`).catch(() => {});
     // Per-business subscription: add customer_id column and migrate from menu_id
     await client.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_subs_customer ON subscriptions (customer_id)`);
@@ -1249,11 +1250,13 @@ async function initDB() {
         uses_count       INTEGER NOT NULL DEFAULT 0,
         expires_at       TEXT,
         is_active        INTEGER NOT NULL DEFAULT 1,
-        created_at       TEXT NOT NULL
+        created_at       TEXT NOT NULL,
+        discount_months  INTEGER NOT NULL DEFAULT 0
       );
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_promos_code ON promo_codes (code)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_promos_active ON promo_codes (is_active)`);
+    await client.query(`ALTER TABLE promo_codes ADD COLUMN IF NOT EXISTS discount_months INTEGER NOT NULL DEFAULT 0`).catch(() => {});
 
     // Admin users table
     await client.query(`
@@ -1771,7 +1774,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-  filename:    (_req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
+  filename:    (_req, file, cb) => cb(null, Date.now() + '-' + path.basename(file.originalname)),
 });
 
 const upload = multer({
@@ -2602,14 +2605,15 @@ function requireOwnerOrManager(req, res, next) {
 // POST /api/payments/paypal/create-order-public - Create PayPal order before registration (no auth)
 app.post('/api/payments/paypal/create-order-public', async (req, res) => {
   try {
-    const { plan_id, promo_code } = req.body || {};
+    const { plan_id, promo_code, billing_cycle } = req.body || {};
     if (!plan_id) return res.status(400).json({ error: 'plan_id required.' });
 
     const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1', [parseInt(plan_id)]);
     if (!planRows.length) return res.status(400).json({ error: 'Plan not found.' });
     const plan = planRows[0];
 
-    let effectivePrice = parseFloat(plan.price);
+    const isAnnual = billing_cycle === 'annual' && parseFloat(plan.annual_price) > 0;
+    let effectivePrice = isAnnual ? parseFloat(plan.annual_price) : parseFloat(plan.price);
     if (promo_code && effectivePrice > 0) {
       const { rows: promos } = await pool.query(`SELECT * FROM promo_codes WHERE UPPER(code)=UPPER($1) AND is_active=1`, [sanitizeStr(promo_code, 50)]);
       if (promos.length) {
@@ -2651,7 +2655,7 @@ app.post('/api/payments/paypal/create-order-public', async (req, res) => {
 // POST /api/customers/checkout-register - Paywall-first: verify payment, then create account
 app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtection, async (req, res) => {
   try {
-    const { email, password, businessName, contactName, phone, country, city, address, plan_id, payment_method, transaction_id, paypal_order_id, promo_code } = req.body || {};
+    const { email, password, businessName, contactName, phone, country, city, address, plan_id, payment_method, transaction_id, paypal_order_id, promo_code, billing_cycle } = req.body || {};
     if (!email || !password || !businessName || !plan_id) return res.status(400).json({ error: 'Email, password, business name, and plan are required.' });
 
     const cleanEmail = sanitizeEmail(email);
@@ -2670,11 +2674,11 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     if (!planRows.length) return res.status(400).json({ error: 'Invalid plan selected.' });
     const plan = planRows[0];
 
-    // Block trial plan for new registrations via checkout-register — trial is handled through /register
-    if (plan.name === 'trial') return res.status(400).json({ error: 'The trial plan is not available via this flow. Please register directly.' });
+    // Let trial plan proceed through checkout-register
 
     // Compute effective price (apply promo if valid)
-    let effectivePrice = parseFloat(plan.price);
+    const isAnnual = billing_cycle === 'annual' && parseFloat(plan.annual_price) > 0;
+    let effectivePrice = isAnnual ? parseFloat(plan.annual_price) : parseFloat(plan.price);
     let promoRecord = null;
     if (promo_code && effectivePrice > 0) {
       const { rows: promos } = await pool.query(`SELECT * FROM promo_codes WHERE UPPER(code)=UPPER($1) AND is_active=1`, [sanitizeStr(promo_code, 50)]);
@@ -2735,6 +2739,10 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         // Bank transfer — account created with pending payment; admin confirms later
         const btCfg = await getGatewayConfig('bank_transfer');
         if (!btCfg?.enabled) return res.status(400).json({ error: 'Bank Transfer not configured.' });
+      } else if (payment_method === 'clickpesa') {
+        // ClickPesa — account created with pending payment; redirect to clickpesa gateway on client side
+        const cpCfg = await getGatewayConfig('clickpesa');
+        if (!cpCfg?.enabled) return res.status(400).json({ error: 'ClickPesa not configured.' });
       } else {
         return res.status(400).json({ error: 'Payment required for this plan.' });
       }
@@ -2765,14 +2773,16 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
 
     // Create subscription (per-business: keyed on customer.id)
     if (effectivePrice > 0) {
-      if (payment_method === 'bank_transfer') {
-        // Bank transfer: create subscription as pending_payment, insert pending payment record
+      if (payment_method === 'bank_transfer' || payment_method === 'clickpesa') {
+        // Pending payments: create subscription as pending_payment, insert pending payment record
         const billing = new Date(); billing.setMonth(billing.getMonth() + 1);
         const { rows: subRows } = await pool.query(`INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, next_billing_date, created_at) VALUES ($1,$2,$3,'pending_payment',$4,$5,$4) ON CONFLICT (customer_id) DO UPDATE SET plan_id=$3, status='pending_payment', next_billing_date=$5 RETURNING id`, [menuId, customer.id, plan.id, now, billing.toISOString()]);
         const subId = subRows[0].id;
-        await pool.query(`INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, notes, created_at) VALUES ($1,$2,'USD','bank_transfer',$3,'pending',$4,$5)`, [subId, effectivePrice, `BT-${Date.now()}`, `${plan.display_name} - bank transfer pending confirmation`, now]);
+        const methodDisplay = payment_method === 'clickpesa' ? 'clickpesa' : 'bank_transfer';
+        const prefix = payment_method === 'clickpesa' ? 'CP' : 'BT';
+        await pool.query(`INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, notes, created_at) VALUES ($1,$2,'USD',$3,$4,'pending',$5,$6)`, [subId, effectivePrice, methodDisplay, `${prefix}-${Date.now()}`, `${plan.display_name} - ${methodDisplay} pending confirmation`, now]);
       } else {
-        await activateSubscriptionPayment(menuId, plan.id, effectivePrice, 'USD', payment_method, transaction_id || paypal_order_id || '', `${plan.display_name} - checkout registration`);
+        await activateSubscriptionPayment(menuId, plan.id, effectivePrice, 'USD', payment_method, transaction_id || paypal_order_id || '', `${plan.display_name} - checkout registration`, billing_cycle);
       }
       if (plan.name === 'trial') {
         const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -2871,22 +2881,32 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     const finalCleanPhone = cleanPhone || encryptField(sanitizeInput(phone || '', 50));
     const cleanPromoCode = promoCode ? sanitizeInput(promoCode, 50).toUpperCase() : null;
     
-    // Validate and apply promo code
+    // Validate and apply promo code dynamically from database
     let discountPercent = 0;
     let discountMonths = 0;
-    let promoDetails = null;
+    let promoRecord = null;
     
     if (cleanPromoCode) {
-      const validPromoCodes = {
-        'LAUNCH25': { discount: 25, months: 6, description: '25% off for 6 months' },
-        'ANNUAL20': { discount: 20, months: 12, description: '20% off annual plan' },
-        'EXIT50':   { discount: 50, months: 3, description: '50% off for 3 months' },
-      };
+      const { rows: promos } = await pool.query(
+        'SELECT * FROM promo_codes WHERE UPPER(code) = UPPER($1) AND is_active = 1',
+        [cleanPromoCode]
+      );
+      if (promos.length > 0) {
+        const promo = promos[0];
+        const notExpired = !promo.expires_at || new Date(promo.expires_at) > new Date();
+        const underLimit = promo.max_uses === 0 || promo.uses_count < promo.max_uses;
+        
+        if (notExpired && underLimit) {
+          if (promo.discount_type === 'percentage') {
+            discountPercent = Math.round(promo.discount_value);
+          }
+          discountMonths = promo.discount_months !== undefined ? parseInt(promo.discount_months) || 0 : 0;
+          promoRecord = promo;
+        }
+      }
       
-      if (validPromoCodes[cleanPromoCode]) {
-        promoDetails = validPromoCodes[cleanPromoCode];
-        discountPercent = promoDetails.discount;
-        discountMonths = promoDetails.months;
+      if (!promoRecord) {
+        return res.status(400).json({ error: 'Invalid or expired promo code.' });
       }
     }
     
@@ -2900,6 +2920,11 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, phoneHashVal, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
     
     const customer = rows[0];
+
+    // Increment promo usage
+    if (promoRecord) {
+      await pool.query('UPDATE promo_codes SET uses_count = uses_count + 1 WHERE id = $1', [promoRecord.id]);
+    }
 
     // Auto-create a default menu for new customers
     // Phone-only accounts get no trial subscription — they will subscribe later
@@ -3789,6 +3814,26 @@ app.get('/api/admin/customers/:id/menus', requireAuth, async (req, res) => {
   }
 });
 
+// Admin endpoint: GET /api/admin/menus - List all menus across all customers
+app.get('/api/admin/menus', requireRole('super_admin'), async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT m.id, m.restaurant_name, m.total_scans, m.created_at, m.updated_at,
+             c.business_name, c.email,
+             s.status as subscription_status, sp.display_name as plan_name
+      FROM menus m
+      LEFT JOIN customers c ON m.customer_id = c.id
+      LEFT JOIN subscriptions s ON s.menu_id = m.id
+      LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+      ORDER BY m.created_at DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error('Get all menus error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin endpoint: GET /api/admin/menus/unassigned - List menus not assigned to any customer
 app.get('/api/admin/menus/unassigned', requireRole('super_admin'), async (req, res) => {
   try {
@@ -3938,7 +3983,7 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // GET /api/debug/env  – debug environment configuration (safe for production)
-app.get('/api/debug/env', (_req, res) => {
+app.get('/api/debug/env', requireRole('super_admin'), (_req, res) => {
   res.json({
     nodeEnv: process.env.NODE_ENV,
     port: process.env.PORT,
@@ -4582,7 +4627,7 @@ app.post('/api/upload', requireAnyAuth, upload.single('menuFile'), async (req, r
 });
 
 // POST /api/menus  – save a reviewed set of items and get back a QR code
-app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, checkMenuLimit, async (req, res) => {
+app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtection, checkMenuLimit, async (req, res) => {
   try {
     const { restaurantName, items, currency } = req.body;
     if (!Array.isArray(items) || items.length === 0)
@@ -4857,7 +4902,7 @@ app.get('/api/menus/:id/export-csv', requireAnyAuth, requirePlan('professional')
 });
 
 // PUT /api/menus/:id  – update an existing menu (items + branding)
-app.put('/api/menus/:id', requireAnyAuth, async (req, res) => {
+app.put('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtection, async (req, res) => {
   try {
     const menu = await dbGetMenu(req.params.id);
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
@@ -4891,7 +4936,7 @@ app.put('/api/menus/:id', requireAnyAuth, async (req, res) => {
 });
 
 // DELETE /api/menus/:id
-app.delete('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, async (req, res) => {
+app.delete('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtection, async (req, res) => {
   const menu = await dbGetMenu(req.params.id);
   if (!menu) return res.status(404).json({ error: 'Menu not found.' });
   if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
@@ -4935,7 +4980,7 @@ app.get('/api/menus/:id/analytics', requireAnyAuth, async (req, res) => {
 });
 
 // POST /api/menus/:id/regenerate-qr - Regenerate QR code with new version
-app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, async (req, res) => {
+app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const menuId = req.params.id;
     const menu = await dbGetMenu(menuId);
@@ -4970,7 +5015,7 @@ app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, async (req, res) => {
 // ── QR Redirect (Link / Reprogram) ─────────────────────────────────────────
 
 // POST /api/qr-redirects - Create a redirect from a decoded QR menu ID to a target menu
-app.post('/api/qr-redirects', requireAnyAuth, async (req, res) => {
+app.post('/api/qr-redirects', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { sourceMenuId, targetMenuId, label } = req.body;
     if (!sourceMenuId || !targetMenuId) {
@@ -5028,7 +5073,7 @@ app.get('/api/qr-redirects', requireAnyAuth, async (req, res) => {
 });
 
 // DELETE /api/qr-redirects/:id - Remove a redirect
-app.delete('/api/qr-redirects/:id', requireAnyAuth, async (req, res) => {
+app.delete('/api/qr-redirects/:id', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
   try {
     if (req.isCustomer) {
       const { rows: ownerCheck } = await pool.query(
@@ -5065,7 +5110,7 @@ app.get('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), as
 });
 
 // POST /api/menus/:id/tables - Create a table + generate its QR
-app.post('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.post('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const menuId = req.params.id;
     const label = sanitizeStr(req.body.label, 100) || 'Table';
@@ -5091,7 +5136,7 @@ app.post('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), a
 });
 
 // DELETE /api/menus/:id/tables/:tableId - Delete a table
-app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     await pool.query('DELETE FROM menu_tables WHERE id = $1 AND menu_id = $2',
       [req.params.tableId, req.params.id]);
@@ -5407,7 +5452,7 @@ app.get('/api/admin/subscription-plans', requireAuth, async (_req, res) => {
 });
 
 // POST /api/admin/subscription-plans - Admin: Create plan
-app.post('/api/admin/subscription-plans', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/subscription-plans', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const name = sanitizeStr(req.body.name, 50);
     const displayName = sanitizeStr(req.body.display_name, 100);
@@ -5434,7 +5479,7 @@ app.post('/api/admin/subscription-plans', requireRole('super_admin'), async (req
 });
 
 // PUT /api/admin/subscription-plans/:id - Admin: Update plan
-app.put('/api/admin/subscription-plans/:id', requireRole('super_admin'), async (req, res) => {
+app.put('/api/admin/subscription-plans/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const updates = [];
     const values = [];
@@ -5462,7 +5507,7 @@ app.put('/api/admin/subscription-plans/:id', requireRole('super_admin'), async (
 });
 
 // DELETE /api/admin/subscription-plans/:id - Admin: Delete plan (only if unused)
-app.delete('/api/admin/subscription-plans/:id', requireRole('super_admin'), async (req, res) => {
+app.delete('/api/admin/subscription-plans/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { rows: usage } = await pool.query('SELECT COUNT(*) FROM subscriptions WHERE plan_id = $1', [req.params.id]);
     if (parseInt(usage[0].count) > 0) {
@@ -5484,7 +5529,7 @@ app.get('/api/admin/promo-codes', requireAuth, async (_req, res) => {
 });
 
 // POST /api/admin/promo-codes - Admin: create promo code
-app.post('/api/admin/promo-codes', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/promo-codes', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { code, description, discount_type, discount_value, applicable_plans, max_uses, expires_at, is_active } = req.body || {};
     if (!code || discount_value === undefined) return res.status(400).json({ error: 'code and discount_value required.' });
@@ -5511,7 +5556,7 @@ app.post('/api/admin/promo-codes', requireRole('super_admin'), async (req, res) 
 });
 
 // PUT /api/admin/promo-codes/:id - Admin: update promo code
-app.put('/api/admin/promo-codes/:id', requireRole('super_admin'), async (req, res) => {
+app.put('/api/admin/promo-codes/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const updates = []; const values = []; let p = 1;
     const { description, discount_type, discount_value, applicable_plans, max_uses, expires_at, is_active } = req.body || {};
@@ -5532,7 +5577,7 @@ app.put('/api/admin/promo-codes/:id', requireRole('super_admin'), async (req, re
 });
 
 // DELETE /api/admin/promo-codes/:id - Admin: delete promo code
-app.delete('/api/admin/promo-codes/:id', requireRole('super_admin'), async (req, res) => {
+app.delete('/api/admin/promo-codes/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     await pool.query('DELETE FROM promo_codes WHERE id = $1', [req.params.id]);
     res.json({ message: 'Promo code deleted.' });
@@ -6302,11 +6347,14 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
       const oldPlanId = existingSub[0].plan_id;
       const currentPlanName = sanitizeStr(existingSub[0].current_plan_name || '', 120);
 
-      await pool.query(`
-        UPDATE subscriptions
-        SET plan_id = $1, status = 'active', updated_at = $2
-        WHERE id = $3
-      `, [planId, now, subId]);
+      // Free/trial plan is activated immediately. Paid plan via manual/bank transfer requires admin approval.
+      if (newPlan.price === 0) {
+        await pool.query(`
+          UPDATE subscriptions
+          SET plan_id = $1, status = 'active', updated_at = $2
+          WHERE id = $3
+        `, [planId, now, subId]);
+      }
 
       // Log payment if upgrading to paid plan
       if (newPlan.price > 0) {
@@ -6381,10 +6429,12 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
       const { rows: firstMenu } = await pool.query('SELECT id FROM menus WHERE customer_id=$1 ORDER BY created_at ASC LIMIT 1', [customerId]);
       const legacyMenuId = firstMenu[0]?.id || null;
 
+      // Free/trial plan is activated immediately. Paid plan via manual/bank transfer is created with status 'pending'.
+      const subStatus = newPlan.price === 0 ? 'active' : 'pending';
       const { rows: newSub } = await pool.query(`
         INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, created_at)
-        VALUES ($1, $2, $3, 'active', $4, $4) RETURNING id
-      `, [legacyMenuId, customerId, planId, now]);
+        VALUES ($1, $2, $3, $4, $5, $5) RETURNING id
+      `, [legacyMenuId, customerId, planId, subStatus, now]);
 
       const subId = newSub[0].id;
 
@@ -7065,7 +7115,7 @@ function queuePaymentReceiptEmailForPayment(paymentId) {
 }
 
 // Helper: activate subscription after a confirmed payment
-async function activateSubscriptionPayment(menuId, planId, amount, currency, method, paymentRef, notes) {
+async function activateSubscriptionPayment(menuId, planId, amount, currency, method, paymentRef, notes, billingCycle = 'monthly') {
   const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
   if (!planRows.length) throw new Error('Plan not found');
   const plan = planRows[0];
@@ -7077,8 +7127,12 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
 
   const now = new Date();
   const billing = new Date(now);
-  if ((plan.interval || 'month') === 'year') billing.setFullYear(billing.getFullYear() + 1);
-  else billing.setMonth(billing.getMonth() + 1);
+  const cycle = String(billingCycle || '').toLowerCase();
+  if (cycle === 'yearly' || cycle === 'annual' || (plan.interval || 'month') === 'year') {
+    billing.setFullYear(billing.getFullYear() + 1);
+  } else {
+    billing.setMonth(billing.getMonth() + 1);
+  }
   const billingISO = billing.toISOString();
   const nowISO = now.toISOString();
 
@@ -7088,13 +7142,13 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   if (existing.length) {
     subId = existing[0].id;
     await pool.query(
-      `UPDATE subscriptions SET plan_id=$1, status='active', end_date=$2, next_billing_date=$2, updated_at=$3 WHERE id=$4`,
-      [planId, billingISO, nowISO, subId]
+      `UPDATE subscriptions SET plan_id=$1, status='active', end_date=$2, next_billing_date=$2, billing_cycle=$3, updated_at=$4 WHERE id=$5`,
+      [planId, billingISO, billingCycle || 'monthly', nowISO, subId]
     );
   } else {
     const ins = await pool.query(
-      `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, created_at, updated_at) VALUES ($1,$2,$3,'active',$4,$5,$5,$4,$4) RETURNING id`,
-      [menuId, customerId, planId, nowISO, billingISO]
+      `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, end_date, next_billing_date, billing_cycle, created_at, updated_at) VALUES ($1,$2,$3,'active',$4,$5,$5,$6,$4,$4) RETURNING id`,
+      [menuId, customerId, planId, nowISO, billingISO, billingCycle || 'monthly']
     );
     subId = ins.rows[0].id;
     await pool.query(
@@ -7115,6 +7169,99 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   }
   return subId;
 }
+
+// GET /api/promo/validate – Real-time promo code validation for registration/checkout UI
+const promoValidateLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many validation attempts.' } });
+app.get('/api/promo/validate', promoValidateLimiter, async (req, res) => {
+  try {
+    const code = (req.query.code || '').trim().toUpperCase();
+    const planId = parseInt(req.query.plan_id) || 0;
+    const billingCycle = req.query.billing_cycle || 'monthly';
+    if (!code) return res.json({ valid: false, reason: 'No promo code provided.' });
+
+    const { rows: promos } = await pool.query('SELECT * FROM promo_codes WHERE UPPER(code) = $1 AND is_active = 1', [code]);
+    if (!promos.length) return res.json({ valid: false, reason: 'Invalid promo code.' });
+
+    const promo = promos[0];
+    const notExpired = !promo.expires_at || new Date(promo.expires_at) > new Date();
+    if (!notExpired) return res.json({ valid: false, reason: 'This promo code has expired.' });
+    const underLimit = promo.max_uses === 0 || promo.uses_count < promo.max_uses;
+    if (!underLimit) return res.json({ valid: false, reason: 'This promo code has reached its usage limit.' });
+
+    // Check plan applicability
+    const applicablePlans = Array.isArray(promo.applicable_plans) ? promo.applicable_plans : [];
+    if (planId && applicablePlans.length > 0 && !applicablePlans.includes(planId)) {
+      return res.json({ valid: false, reason: 'This promo code is not valid for the selected plan.' });
+    }
+
+    // Calculate effective price if plan_id provided
+    let effectivePrice = null;
+    let originalPrice = null;
+    if (planId) {
+      const { rows: planRows } = await pool.query('SELECT price, annual_price FROM subscription_plans WHERE id = $1', [planId]);
+      if (planRows.length) {
+        originalPrice = billingCycle === 'annual' && planRows[0].annual_price > 0 ? parseFloat(planRows[0].annual_price) : parseFloat(planRows[0].price);
+        effectivePrice = promo.discount_type === 'percentage'
+          ? originalPrice * (1 - promo.discount_value / 100)
+          : Math.max(0, originalPrice - promo.discount_value);
+        effectivePrice = parseFloat(effectivePrice.toFixed(2));
+      }
+    }
+
+    res.json({
+      valid: true,
+      discount_type: promo.discount_type,
+      discount_value: parseFloat(promo.discount_value),
+      description: promo.description || '',
+      original_price: originalPrice,
+      effective_price: effectivePrice,
+    });
+  } catch (err) { res.status(500).json({ valid: false, reason: 'Validation failed.' }); }
+});
+
+// GET /api/admin/revenue-stats – Revenue analytics for admin dashboard
+app.get('/api/admin/revenue-stats', requireAuth, async (req, res) => {
+  try {
+    // MRR: sum of plan prices for all active subscriptions
+    const { rows: mrrRows } = await pool.query(`
+      SELECT COALESCE(SUM(sp.price), 0) as mrr
+      FROM subscriptions s
+      JOIN subscription_plans sp ON s.plan_id = sp.id
+      WHERE s.status = 'active'
+    `);
+    const mrr = parseFloat(mrrRows[0].mrr);
+
+    // Total revenue: sum of all completed payments
+    const { rows: revRows } = await pool.query("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed'");
+    const totalRevenue = parseFloat(revRows[0].total);
+
+    // New registrations in last 7 days
+    const { rows: regRows } = await pool.query("SELECT COUNT(*) as cnt FROM customers WHERE created_at >= NOW() - INTERVAL '7 days'");
+    const newRegistrations7d = parseInt(regRows[0].cnt);
+
+    // Pending payments count
+    const { rows: pendRows } = await pool.query("SELECT COUNT(*) as cnt FROM payments WHERE status = 'pending'");
+    const pendingPayments = parseInt(pendRows[0].cnt);
+
+    // Revenue by month (last 6 months)
+    const { rows: monthlyRows } = await pool.query(`
+      SELECT TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') as month,
+             COALESCE(SUM(amount), 0) as revenue
+      FROM payments
+      WHERE status = 'completed' AND created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month ASC
+    `);
+
+    res.json({
+      mrr,
+      total_revenue: totalRevenue,
+      new_registrations_7d: newRegistrations7d,
+      pending_payments_count: pendingPayments,
+      revenue_by_month: monthlyRows.map(r => ({ month: r.month, revenue: parseFloat(r.revenue) })),
+    });
+  } catch (err) { console.error('Revenue stats error:', err); res.status(500).json({ error: 'Failed to load revenue stats.' }); }
+});
 
 // GET /api/public/plans – All active subscription plans (no auth required)
 // If an authenticated customer token is passed, the trial plan is hidden for customers who already used it
@@ -7173,9 +7320,37 @@ app.get('/api/payments/gateways', async (req, res) => {  try {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Helper to check customer discount eligibility and handle expiration
+async function getCustomerDiscount(customerId) {
+  try {
+    const { rows } = await pool.query(
+      'SELECT discount_percent, discount_months, created_at FROM customers WHERE id = $1',
+      [customerId]
+    );
+    if (!rows.length) return 0;
+    const { discount_percent, discount_months, created_at } = rows[0];
+    const discountPercent = parseInt(discount_percent) || 0;
+    const discountMonths = parseInt(discount_months) || 0;
+    
+    if (discountPercent <= 0) return 0;
+    if (discountMonths <= 0) return discountPercent; // 0 means lifetime
+    
+    // Check if expired
+    const createdTime = new Date(created_at).getTime();
+    const monthsDiff = (Date.now() - createdTime) / (30.436875 * 24 * 60 * 60 * 1000); // average month duration
+    if (monthsDiff > discountMonths) {
+      return 0; // expired!
+    }
+    return discountPercent;
+  } catch (err) {
+    console.error('Error getting customer discount:', err);
+    return 0;
+  }
+}
+
 // POST /api/payments/flutterwave/verify – Verify a Flutterwave transaction + activate subscription
 app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
-  const { transaction_id, menu_id, plan_id } = req.body;
+  const { transaction_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!transaction_id || !menu_id || !plan_id)
     return res.status(400).json({ error: 'transaction_id, menu_id, plan_id required.' });
 
@@ -7191,6 +7366,20 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
     const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(transaction_id)]);
     if (dup.length) return res.status(409).json({ error: 'Transaction already processed.' });
 
+    // Validate pricing & amount
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
+    if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
+    const plan = planRows[0];
+
+    const discountPercent = await getCustomerDiscount(customerId);
+
+    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    let expectedPrice = isAnnual ? plan.annual_price : plan.price;
+    if (discountPercent > 0) {
+      expectedPrice = expectedPrice * (1 - discountPercent / 100);
+    }
+    expectedPrice = Math.max(0, parseFloat(expectedPrice.toFixed(2)));
+
     const verifyRes = await fetch(`https://api.flutterwave.com/v3/transactions/${encodeURIComponent(transaction_id)}/verify`, {
       headers: { Authorization: `Bearer ${cfg.secret_key}`, 'Content-Type': 'application/json' }
     });
@@ -7199,11 +7388,17 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
     if (vd.status !== 'success' || vd.data?.status !== 'successful')
       return res.status(400).json({ error: 'Payment not successful.', detail: vd.message });
 
+    // Verify amount paid matches expected price
+    if (vd.data.amount < expectedPrice * 0.99) {
+      return res.status(400).json({ error: `Payment amount insufficient. Expected $${expectedPrice}, got $${vd.data.amount}.` });
+    }
+
     const subId = await activateSubscriptionPayment(
       menu_id, parseInt(plan_id),
       vd.data.amount, vd.data.currency,
       'flutterwave', String(transaction_id),
-      `Flutterwave tx ${transaction_id}`
+      `Flutterwave tx ${transaction_id}`,
+      billing_cycle || 'monthly'
     );
     res.json({ success: true, subscription_id: subId });
   } catch (err) { console.error('Flutterwave verify error:', err); res.status(500).json({ error: 'Payment verification failed. Please contact support.' }); }
@@ -7211,7 +7406,7 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
 
 // POST /api/payments/paypal/create-order – Create a PayPal order for a plan
 app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
-  const { plan_id, menu_id } = req.body;
+  const { plan_id, menu_id, billing_cycle } = req.body;
   if (!plan_id || !menu_id) return res.status(400).json({ error: 'plan_id and menu_id required.' });
 
   const customerId = req.customer.id;
@@ -7225,6 +7420,19 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
     const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
     if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
     const plan = planRows[0];
+
+    // Determine the base price based on interval
+    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    let basePrice = isAnnual ? plan.annual_price : plan.price;
+
+    // Fetch customer's promo discount if registered
+    const discountPercent = await getCustomerDiscount(customerId);
+    
+    let price = basePrice;
+    if (discountPercent > 0) {
+      price = price * (1 - discountPercent / 100);
+    }
+    price = Math.max(0, parseFloat(price.toFixed(2)));
 
     const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 
@@ -7245,9 +7453,9 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
       body: JSON.stringify({
         intent: 'CAPTURE',
         purchase_units: [{
-          amount: { currency_code: 'USD', value: Number(plan.price).toFixed(2) },
-          description: `${plan.display_name} Plan – RestOrder`,
-          custom_id: `${menu_id}:${plan_id}`
+          amount: { currency_code: 'USD', value: Number(price).toFixed(2) },
+          description: `${plan.display_name} Plan (${billing_cycle || 'monthly'}) – RestOrder`,
+          custom_id: `${menu_id}:${plan_id}:${billing_cycle || 'monthly'}`
         }]
       })
     });
@@ -7260,7 +7468,7 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
 
 // POST /api/payments/paypal/capture-order – Capture approved PayPal order + activate subscription
 app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
-  const { order_id, menu_id, plan_id } = req.body;
+  const { order_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!order_id || !menu_id || !plan_id) return res.status(400).json({ error: 'order_id, menu_id, plan_id required.' });
 
   const customerId = req.customer.id;
@@ -7273,6 +7481,20 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfPr
 
     const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [order_id]);
     if (dup.length) return res.status(409).json({ error: 'Order already captured.' });
+
+    // Validate pricing & amount
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
+    if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
+    const plan = planRows[0];
+
+    const discountPercent = await getCustomerDiscount(customerId);
+
+    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    let expectedPrice = isAnnual ? plan.annual_price : plan.price;
+    if (discountPercent > 0) {
+      expectedPrice = expectedPrice * (1 - discountPercent / 100);
+    }
+    expectedPrice = Math.max(0, parseFloat(expectedPrice.toFixed(2)));
 
     const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 
@@ -7298,9 +7520,15 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfPr
     const amount   = parseFloat(capture?.amount?.value || '0');
     const currency = capture?.amount?.currency_code || 'USD';
 
+    // Verify amount matches expected price
+    if (amount < expectedPrice * 0.99) {
+      return res.status(400).json({ error: `Payment amount insufficient. Expected $${expectedPrice}, got $${amount}.` });
+    }
+
     const subId = await activateSubscriptionPayment(
       menu_id, parseInt(plan_id), amount, currency,
-      'paypal', order_id, `PayPal order ${order_id}`
+      'paypal', order_id, `PayPal order ${order_id}`,
+      billing_cycle || 'monthly'
     );
     res.json({ success: true, subscription_id: subId });
   } catch (err) { console.error('PayPal capture-order error:', err); res.status(500).json({ error: 'Payment capture failed. Please contact support.' }); }
@@ -7340,13 +7568,15 @@ app.post('/api/payments/clickpesa/create-order-public', express.json(), async (r
     const cfg = await getGatewayConfig('clickpesa');
     if (!cfg?.enabled || !cfg.api_key) return res.status(400).json({ error: 'ClickPesa not configured.' });
 
-    const { plan_id, promo_code, email, name } = req.body;
+    const { plan_id, menu_id, billing_cycle, promo_code, email, name } = req.body;
     if (!plan_id) return res.status(400).json({ error: 'plan_id required.' });
 
     // Resolve plan price
-    const { rows: planRows } = await pool.query('SELECT id, price, display_name FROM subscription_plans WHERE id=$1', [plan_id]);
+    const { rows: planRows } = await pool.query('SELECT id, price, annual_price, display_name FROM subscription_plans WHERE id=$1', [plan_id]);
     if (!planRows.length) return res.status(400).json({ error: 'Plan not found.' });
-    let amount = parseFloat(planRows[0].price);
+
+    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    let amount = isAnnual ? parseFloat(planRows[0].annual_price || 0) : parseFloat(planRows[0].price);
 
     // Apply promo if provided
     if (promo_code) {
@@ -7361,7 +7591,7 @@ app.post('/api/payments/clickpesa/create-order-public', express.json(), async (r
     }
     amount = Math.max(0, parseFloat(amount.toFixed(2)));
 
-    const reference = `${Date.now()}:${plan_id}:${Date.now()}`;
+    const reference = `${menu_id || 'no_menu'}:${plan_id}:${billing_cycle || 'monthly'}:${Date.now()}`;
     const cpBase = cfg.environment === 'sandbox' ? 'https://sandbox.clickpesa.com' : 'https://api.clickpesa.com';
 
     const cpRes = await fetch(`${cpBase}/v1/payment-requests`, {
@@ -7401,13 +7631,19 @@ app.post('/webhooks/clickpesa', express.json(), async (req, res) => {
 
     const { reference, status, amount, currency } = req.body || {};
     if (status === 'COMPLETED' && reference) {
-      // reference format: menuId:planId:timestamp
+      // reference format: menu_id:plan_id:billing_cycle:timestamp
       const parts = String(reference || '').split(':');
       if (parts.length >= 2) {
-        const [menu_id, plan_id] = parts;
+        const menu_id = parts[0];
+        const plan_id = parts[1];
+        const billing_cycle = parts[2] || 'monthly';
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(reference)]);
         if (!dup.length) {
-          await activateSubscriptionPayment(menu_id, parseInt(plan_id), parseFloat(amount) || 0, currency || 'USD', 'clickpesa', String(reference), `Webhook ClickPesa ref ${reference}`);
+          await activateSubscriptionPayment(
+            menu_id, parseInt(plan_id), parseFloat(amount) || 0, currency || 'USD',
+            'clickpesa', String(reference), `Webhook ClickPesa ref ${reference}`,
+            billing_cycle
+          );
         }
       }
     }
@@ -7531,7 +7767,7 @@ app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('pr
 });
 
 // POST /api/staff – Create a staff member (owner only)
-app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
+app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
 
@@ -7574,7 +7810,7 @@ app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('p
 });
 
 // PUT /api/staff/:id – Update a staff member (owner only)
-app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
+app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
     const { name, role, status, password } = req.body || {};
@@ -7623,7 +7859,7 @@ app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan
 });
 
 // DELETE /api/staff/:id – Remove a staff member (owner only)
-app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
+app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
 
@@ -7695,7 +7931,7 @@ app.get('/api/admin/settings', requireAuth, async (req, res) => {
 });
 
 // PUT /api/admin/settings – Update settings (super_admin only)
-app.put('/api/admin/settings', requireRole('super_admin'), async (req, res) => {
+app.put('/api/admin/settings', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const updates = req.body;
     if (!updates || typeof updates !== 'object') return res.status(400).json({ error: 'Invalid payload.' });
@@ -7721,7 +7957,7 @@ app.put('/api/admin/settings', requireRole('super_admin'), async (req, res) => {
 });
 
 // POST /api/admin/settings/email/test – Send a test email using integration_email config
-app.post('/api/admin/settings/email/test', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/settings/email/test', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const to = sanitizeEmail(req.body?.to || req.adminUser?.email || '');
     if (!to || !isValidEmail(to)) {

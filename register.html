@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -102,11 +102,11 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 /* Spin */
 .spin{animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-/* Checklist in step 3 */
-.s3-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;}
-.s3-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;}
-.s3-dot.done{background:var(--success);border-color:var(--success);}
-.s3-text{font-size:.875rem;color:var(--text-muted);}
+/* Checklist in step 5 (success) */
+.s5-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;}
+.s5-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;}
+.s5-dot.done{background:var(--success);border-color:var(--success);}
+.s5-text{font-size:.875rem;color:var(--text-muted);}
 /* Footer link */
 .footer-link{text-align:center;font-size:.8125rem;color:var(--text-dim);margin-top:1.5rem;}
 .footer-link a{color:var(--accent);font-weight:600;}
@@ -117,6 +117,43 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .trust-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:1.25rem;}
 .trust-chip{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--text-dim);}
 .trust-chip svg{width:13px;height:13px;}
+/* Billing toggle */
+.billing-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:1.25rem;}
+.billing-toggle button{flex:1;padding:.5rem;border:none;background:transparent;color:var(--text-dim);font-size:.8125rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;font-family:inherit;}
+.billing-toggle button.active{background:var(--accent);color:#fff;}
+.billing-toggle .save-tag{font-size:.65rem;background:var(--success);color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px;}
+/* Plan cards */
+.plan-cards{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;max-height:320px;overflow-y:auto;padding-right:4px;}
+.plan-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:1rem 1.1rem;cursor:pointer;transition:all .2s;position:relative;}
+.plan-card:hover{border-color:var(--text-dim);}
+.plan-card.selected{border-color:var(--accent);background:var(--accent-glow);}
+.plan-card .plan-header{display:flex;justify-content:space-between;align-items:center;}
+.plan-card .plan-name{font-weight:700;font-size:.95rem;}
+.plan-card .plan-price{font-weight:800;font-size:1.1rem;color:var(--accent);}
+.plan-card .plan-price .per{font-size:.75rem;font-weight:500;color:var(--text-dim);}
+.plan-card .plan-features{margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.35rem;}
+.plan-card .plan-feat{font-size:.7rem;color:var(--text-muted);background:var(--surface-2);padding:2px 8px;border-radius:6px;}
+.plan-card .plan-badge{position:absolute;top:-8px;right:12px;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;}
+.plan-card .plan-trial-tag{font-size:.7rem;color:var(--success);font-weight:600;}
+/* Promo code */
+.promo-row{display:flex;gap:.5rem;margin-bottom:1rem;}
+.promo-row .field-input{flex:1;}
+.promo-row .btn-apply{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:.5rem 1rem;color:var(--text);font-weight:600;font-size:.8rem;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;}
+.promo-row .btn-apply:hover{background:var(--accent-glow);border-color:var(--accent);}
+.promo-result{font-size:.8rem;margin-bottom:.75rem;padding:.5rem .75rem;border-radius:8px;}
+.promo-result.valid{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#86efac;}
+.promo-result.invalid{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5;}
+/* Payment section */
+.pay-gateway{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;cursor:pointer;display:flex;align-items:center;gap:.75rem;transition:all .2s;margin-bottom:.5rem;font-family:inherit;width:100%;font-size:.875rem;font-weight:600;color:var(--text);}
+.pay-gateway:hover{border-color:var(--accent);background:var(--accent-glow);}
+.pay-gateway svg{width:20px;height:20px;flex-shrink:0;}
+.pay-gateway.fw{border-color:#f5a623;}
+.pay-gateway.pp{border-color:#0070ba;}
+.pay-gateway.bt{border-color:#22c55e;}
+.order-summary{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem;}
+.order-summary .os-row{display:flex;justify-content:space-between;font-size:.8125rem;padding:.25rem 0;}
+.order-summary .os-row.total{font-weight:700;font-size:.9rem;border-top:1px solid var(--border);padding-top:.5rem;margin-top:.25rem;}
+.order-summary .os-discount{color:var(--success);}
 /* Responsive */
 @media(max-width:900px){
   .brand-sidebar{display:none;}
@@ -130,7 +167,8 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
   .phone-row{flex-direction:column;gap:.5rem;}
   .country-select-wrap{width:100%;}
   .step-dots{gap:0;}
-  .step-line{width:40px;}
+  .step-line{width:30px;}
+  .plan-cards{max-height:260px;}
 }
 /* Mobile header */
 .mobile-header{display:none;align-items:center;justify-content:space-between;padding:1rem;width:100%;max-width:480px;}
@@ -193,8 +231,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
     <div class="step-dot" id="dot-2">2</div>
     <div class="step-line" id="line-2"></div>
     <div class="step-dot" id="dot-3">3</div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-dot" id="dot-4">4</div>
   </div>
-  <div class="step-caption" id="step-caption">Step 1 of 3  Let's get you in</div>
+  <div class="step-caption" id="step-caption">Step 1 of 4 — Let’s get you in</div>
 
   <!-- FORM CARD -->
   <div class="form-card">
@@ -310,28 +350,89 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <button onclick="goBack(1)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">&#8592; Back</button>
     </div><!-- /step-2 -->
 
-    <!--  STEP 3  -->
+    <!--  STEP 3 — Choose Your Plan  -->
     <div id="step-3" class="step-panel hidden">
+      <div class="section-label">Choose Plan</div>
+      <h2 class="form-title">Pick your <span class="serif-accent">plan</span></h2>
+      <p class="form-subtitle">Start free or unlock premium features. Upgrade anytime.</p>
+
+      <!-- Billing toggle -->
+      <div class="billing-toggle" id="billing-toggle">
+        <button type="button" id="btn-monthly" class="active" onclick="setBilling('monthly')">Monthly</button>
+        <button type="button" id="btn-annual" onclick="setBilling('annual')">Annual <span class="save-tag">Save 20%</span></button>
+      </div>
+
+      <!-- Plan cards container -->
+      <div class="plan-cards" id="plan-cards">
+        <div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plans…</div>
+      </div>
+
+      <!-- Promo code -->
+      <div class="promo-row">
+        <input id="promo-input" type="text" placeholder="Promo code" class="field-input" style="text-transform:uppercase" oninput="clearPromoResult()" onkeydown="if(event.key==='Enter'){event.preventDefault();validatePromo();}">
+        <button type="button" class="btn-apply" id="btn-promo" onclick="validatePromo()">Apply</button>
+      </div>
+      <div id="promo-result" class="promo-result hidden"></div>
+
+      <p id="s3-error" class="err-msg hidden"></p>
+      <button onclick="s3Next()" id="btn-s3" class="btn-primary">
+        <span id="btn-s3-text">Continue</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button onclick="goBack(2)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">← Back</button>
+    </div><!-- /step-3 -->
+
+    <!--  STEP 4 — Payment (only for paid plans)  -->
+    <div id="step-4" class="step-panel hidden">
+      <div class="section-label">Payment</div>
+      <h2 class="form-title">Complete <span class="serif-accent">payment</span></h2>
+      <p class="form-subtitle" id="s4-subtitle">Secure checkout — your subscription starts immediately.</p>
+
+      <!-- Order Summary -->
+      <div class="order-summary" id="order-summary">
+        <div class="os-row"><span>Plan</span><span id="os-plan">-</span></div>
+        <div class="os-row"><span>Billing</span><span id="os-billing">Monthly</span></div>
+        <div class="os-row" id="os-discount-row" style="display:none"><span>Promo discount</span><span id="os-discount" class="os-discount">-</span></div>
+        <div class="os-row total"><span>Due today</span><span id="os-total">$0</span></div>
+      </div>
+
+      <!-- Gateway buttons -->
+      <div id="gateway-container">
+        <div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment options…</div>
+      </div>
+
+      <p id="s4-error" class="err-msg hidden"></p>
+      <button onclick="goBack(3)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">← Back to plans</button>
+
+      <div style="text-align:center;margin-top:1rem">
+        <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>SSL Encrypted</span>
+        <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>30-Day Refund</span>
+      </div>
+    </div><!-- /step-4 -->
+
+    <!--  STEP 5 — Success  -->
+    <div id="step-5" class="step-panel hidden">
       <div style="text-align:center">
-        <div id="s3-icon-ring" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
-          <svg id="s3-spinner" class="spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
+        <div id="s5-icon-ring" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+          <svg id="s5-spinner" class="spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
         </div>
-        <div class="section-label" id="s3-label" style="justify-content:center">Setting Up</div>
-        <h2 class="form-title" id="s3-title" style="text-align:center">Welcome to <span class="serif-accent">RestOrder</span></h2>
-        <p class="form-subtitle" id="s3-sub" style="text-align:center">Your workspace is being prepared</p>
+        <div class="section-label" id="s5-label" style="justify-content:center">Setting Up</div>
+        <h2 class="form-title" id="s5-title" style="text-align:center">Welcome to <span class="serif-accent">RestOrder</span></h2>
+        <p class="form-subtitle" id="s5-sub" style="text-align:center">Your workspace is being prepared</p>
       </div>
       <div style="margin:1rem 0 1.25rem">
-        <div class="s3-row" id="s3-c1"><div class="s3-dot"></div><span class="s3-text">Account created &amp; email verified</span></div>
-        <div class="s3-row" id="s3-c2"><div class="s3-dot"></div><span class="s3-text">Digital menu configured</span></div>
-        <div class="s3-row" id="s3-c3"><div class="s3-dot"></div><span class="s3-text">QR code generated &amp; ready to print</span></div>
+        <div class="s5-row" id="s5-c1"><div class="s5-dot"></div><span class="s5-text">Account created & verified</span></div>
+        <div class="s5-row" id="s5-c2"><div class="s5-dot"></div><span class="s5-text">Digital menu configured</span></div>
+        <div class="s5-row" id="s5-c3"><div class="s5-dot"></div><span class="s5-text">QR code generated & ready</span></div>
       </div>
-      <p id="s3-error" class="err-msg hidden"></p>
+      <p id="s5-error" class="err-msg hidden"></p>
       <button id="btn-retry" onclick="doRegister()" class="btn-primary hidden">Try Again</button>
+      <button id="btn-edit-details" onclick="goBack(1)" class="btn-back hidden" style="width:100%;text-align:center;margin-top:.75rem">← Edit Registration Details</button>
       <button id="btn-dashboard" onclick="window.location.href='/dashboard?onboard=1'" class="btn-primary hidden">
         <span>Open your dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
-    </div><!-- /step-3 -->
+    </div><!-- /step-5 -->
   </div><!-- /form-card -->
 
   <div class="trust-chips">
@@ -423,12 +524,21 @@ function showError(id,msg){const e=el(id);if(e){e.textContent=msg;e.classList.re
 function clearError(id){const e=el(id);if(e){e.textContent='';e.classList.add('hidden');}}
 
 //  Step navigation 
-const stepCaptions = ['Step 1 of 3 \u2014 Let\u2019s get you in','Step 2 of 3 \u2014 Name your restaurant','Step 3 of 3 \u2014 Going live'];
+const stepCaptions = [
+  'Step 1 of 4 — Let’s get you in',
+  'Step 2 of 4 — Name your restaurant',
+  'Step 3 of 4 — Select your plan',
+  'Step 4 of 4 — Complete payment'
+];
 function updateDots(n) {
-  for(let i=1;i<=3;i++){
+  for(let i=1;i<=4;i++){
     const dot=el('dot-'+i), line=el('line-'+(i-1));
+    if (!dot) continue;
     dot.className='step-dot';
-    if(i<n){dot.classList.add('done');dot.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';}
+    if(i<n){
+      dot.classList.add('done');
+      dot.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    }
     else if(i===n){dot.classList.add('active');dot.textContent=i;}
     else{dot.textContent=i;}
     if(line){line.className='step-line';if(i<n)line.classList.add('done');}
@@ -440,6 +550,9 @@ function goToStep(n){
   const to=el('step-'+n);to.classList.remove('hidden');to.classList.add('entering');
   requestAnimationFrame(()=>to.classList.remove('entering'));
   currentStep=n;updateDots(n);
+  if (n === 3 && plansData.length === 0) {
+    loadPlans();
+  }
   const first=to.querySelector('input');if(first)setTimeout(()=>first.focus(),50);
 }
 function goBack(n){goToStep(n);}
@@ -472,58 +585,711 @@ function s1Next(){
 function s2Next(){
   const biz=el('s2-biz').value.trim();clearError('s2-error');
   if(!biz||biz.length<2){showError('s2-error','Please enter your business name.');return;}
-  goToStep(3);
-  if(window._pendingFirebaseIdToken){doFirebaseRegister(window._pendingFirebaseIdToken,biz);}
-  else{doRegister();}
+  if(window._pendingFirebaseIdToken){
+    goToStep(5);
+    doFirebaseRegister(window._pendingFirebaseIdToken,biz);
+  } else {
+    goToStep(3);
+  }
 }
 
-//  Step 3: checklist animation 
-function resetChecklist(){['s3-c1','s3-c2','s3-c3'].forEach(id=>{const d=el(id).querySelector('.s3-dot');d.className='s3-dot';d.innerHTML='';});}
-function animateCheck(rowId,delay){
-  return new Promise(resolve=>{setTimeout(()=>{
-    const d=el(rowId).querySelector('.s3-dot');d.classList.add('done');
-    d.innerHTML='<svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    resolve();
-  },delay);});
+// Dynamic plan loading & selection
+let plansData = [];
+let currentBillingCycle = 'monthly';
+let selectedPlanId = null;
+
+// Parse plan and billing cycle from URL parameters on page load
+try {
+  const params = new URLSearchParams(window.location.search);
+  const planParam = params.get('plan');
+  const billingParam = params.get('billing');
+  
+  if (billingParam === 'annual') {
+    currentBillingCycle = 'annual';
+    const btnMonthly = document.getElementById('btn-monthly');
+    const btnAnnual = document.getElementById('btn-annual');
+    if (btnMonthly) btnMonthly.classList.remove('active');
+    if (btnAnnual) btnAnnual.classList.add('active');
+  }
+  
+  if (planParam) {
+    window._targetPlanName = planParam;
+  }
+} catch (e) {
+  console.warn('Error parsing URL search params:', e);
 }
 
-//  Registration (email path) 
-async function doRegister(){
-  clearError('s3-error');el('btn-retry').classList.add('hidden');el('btn-dashboard').classList.add('hidden');resetChecklist();
-  el('s3-spinner').style.display='';el('s3-spinner').classList.add('spin');
-  el('s3-icon-ring').style.borderColor='var(--accent)';
-  el('s3-label').textContent='Setting Up';el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span>';
-  el('s3-sub').textContent='Your workspace is being prepared\u2026';
-  const email=el('s1-email').value.trim(),pw=el('s1-pw').value,biz=el('s2-biz').value.trim();
-  await animateCheck('s3-c1',600);
-  try{
-    const csrfToken = await fetch('/api/csrf-token',{credentials:'include'}).then(r=>r.json()).then(d=>d.csrfToken||d.token||'').catch(()=>'');
-    const res=await fetch('/api/customers/register',{method:'POST',headers:{'Content-Type':'application/json','x-csrf-token':csrfToken},credentials:'include',body:JSON.stringify({email,password:pw,businessName:biz,registrationType:'email'})});
-    const data=await res.json();
-    if(!res.ok){showRegError(data.error||'Registration failed.');return;}
-    if(data.token)localStorage.setItem('customerToken',data.token);
-    if(data.customer&&data.customer.email)localStorage.setItem('customerEmail',data.customer.email);
-    if(data.customer&&data.customer.businessName)localStorage.setItem('customerBusiness',data.customer.businessName);
-    await animateCheck('s3-c2',500);await animateCheck('s3-c3',400);
-    showSuccess();
-  }catch(err){showRegError('Network error. Please check your connection and try again.');}
+async function loadPlans() {
+  const container = el('plan-cards');
+  container.innerHTML = '<div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plans…</div>';
+  try {
+    const res = await fetch('/api/public/plans');
+    plansData = await res.json();
+    
+    if (window._targetPlanName && plansData && plansData.length > 0) {
+      const matched = plansData.find(p => p.name.toLowerCase() === window._targetPlanName.toLowerCase());
+      if (matched) {
+        selectedPlanId = matched.id;
+        // If target plan is 'trial' (monthly-only) but billing cycle is 'annual', force cycle back to monthly
+        if (matched.name === 'trial' && currentBillingCycle === 'annual') {
+          currentBillingCycle = 'monthly';
+          const btnMonthly = el('btn-monthly');
+          const btnAnnual = el('btn-annual');
+          if (btnMonthly) btnMonthly.classList.add('active');
+          if (btnAnnual) btnAnnual.classList.remove('active');
+        }
+      }
+    }
+    
+    renderPlans();
+  } catch (err) {
+    container.innerHTML = '<p class="err-msg">Failed to load subscription plans. Please refresh or try again.</p>';
+  }
 }
 
-function showSuccess(){
-  el('s3-spinner').classList.remove('spin');el('s3-spinner').style.display='none';
-  el('s3-icon-ring').style.borderColor='var(--success)';
-  el('s3-icon-ring').innerHTML='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
-  el('s3-label').textContent="You're In!";el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span> \ud83d\ude80';
-  el('s3-sub').textContent="Your workspace is ready. Here's what we've set up for you.";
+function setBilling(cycle) {
+  currentBillingCycle = cycle;
+  el('btn-monthly').classList.toggle('active', cycle === 'monthly');
+  el('btn-annual').classList.toggle('active', cycle === 'annual');
+  
+  // If switching to annual and trial plan is selected, auto-select the next active plan
+  const selectedPlan = plansData.find(p => p.id === selectedPlanId);
+  if (cycle === 'annual' && selectedPlan && selectedPlan.name === 'trial') {
+    const defaultAnnualPlan = plansData.find(p => p.name !== 'trial');
+    if (defaultAnnualPlan) {
+      selectedPlanId = defaultAnnualPlan.id;
+    } else {
+      selectedPlanId = null;
+    }
+  }
+  
+  renderPlans();
+  if (selectedPlanId) {
+    updateOrderSummary();
+  }
+}
+
+function renderPlans() {
+  const container = el('plan-cards');
+  container.innerHTML = '';
+  if (!plansData || plansData.length === 0) {
+    container.innerHTML = '<p class="err-msg">No plans available.</p>';
+    return;
+  }
+  
+  plansData.forEach(p => {
+    if (currentBillingCycle === 'annual' && p.name === 'trial') return;
+
+    const isSelected = selectedPlanId === p.id;
+    let displayPrice = p.price;
+    let period = '/mo';
+    if (currentBillingCycle === 'annual') {
+      displayPrice = p.annual_price;
+      period = '/yr';
+    }
+    
+    let features = [];
+    try {
+      features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features;
+    } catch (e) {
+      features = [];
+    }
+    
+    const card = document.createElement('div');
+    card.className = `plan-card${isSelected ? ' selected' : ''}`;
+    card.style.position = 'relative';
+    card.onclick = () => selectPlan(p.id);
+    
+    let badgeHtml = '';
+    if (p.name === 'professional') {
+      badgeHtml = '<div class="plan-badge">Popular</div>';
+    } else if (p.name === 'trial') {
+      badgeHtml = '<div class="plan-trial-tag" style="margin-top:0.25rem">Free 7-Day Trial</div>';
+    }
+    
+    let featHtml = '';
+    if (Array.isArray(features)) {
+      featHtml = `<div class="plan-features">` + 
+        features.slice(0, 3).map(f => `<span class="plan-feat">${f}</span>`).join('') +
+        (features.length > 3 ? `<span class="plan-feat">+${features.length - 3} more</span>` : '') +
+        `</div>`;
+    }
+    
+    card.innerHTML = `
+      ${badgeHtml}
+      <div class="plan-header">
+        <div class="plan-name">${p.display_name}</div>
+        <div class="plan-price">$${displayPrice}<span class="per">${period}</span></div>
+      </div>
+      ${featHtml}
+    `;
+    container.appendChild(card);
+  });
+  
+  if (selectedPlanId) {
+    selectPlan(selectedPlanId);
+  } else if (plansData.length > 0) {
+    const defaultPlan = plansData.find(p => p.name === 'trial') || plansData.find(p => p.name === 'starter') || plansData[0];
+    if (defaultPlan) selectPlan(defaultPlan.id);
+  }
+}
+
+function selectPlan(planId) {
+  selectedPlanId = planId;
+  const cards = el('plan-cards').querySelectorAll('.plan-card');
+  const renderedPlans = plansData.filter(p => !(currentBillingCycle === 'annual' && p.name === 'trial'));
+  
+  cards.forEach((card, idx) => {
+    const plan = renderedPlans[idx];
+    if (plan && plan.id === planId) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  });
+
+  const plan = plansData.find(p => p.id === planId);
+  if (plan) {
+    if (plan.price === 0) {
+      el('btn-s3-text').textContent = 'Complete Registration';
+    } else {
+      el('btn-s3-text').textContent = 'Continue to Payment';
+    }
+  }
+  updateOrderSummary();
+}
+
+let appliedPromo = null;
+
+async function validatePromo() {
+  const input = el('promo-input');
+  const code = input.value.trim();
+  
+  if (!code) {
+    showPromoResult('Please enter a promo code.', 'error');
+    return;
+  }
+  if (!selectedPlanId) {
+    showPromoResult('Please select a plan first.', 'error');
+    return;
+  }
+  
+  const btn = el('btn-promo');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  
+  try {
+    const url = `/api/promo/validate?code=${encodeURIComponent(code)}&plan_id=${selectedPlanId}&billing_cycle=${currentBillingCycle}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.valid) {
+      appliedPromo = {
+        code: code.toUpperCase(),
+        discount_type: data.discount_type,
+        discount_value: data.discount_value,
+        description: data.description,
+        original_price: data.original_price,
+        effective_price: data.effective_price
+      };
+      
+      let discountText = '';
+      if (data.discount_type === 'percentage') {
+        discountText = `${data.discount_value}% off`;
+      } else {
+        discountText = `$${data.discount_value} off`;
+      }
+      
+      showPromoResult(`Promo code applied: ${discountText}! (${data.description})`, 'success');
+      updateOrderSummary();
+    } else {
+      appliedPromo = null;
+      showPromoResult(data.reason || 'Invalid promo code.', 'error');
+      updateOrderSummary();
+    }
+  } catch (err) {
+    appliedPromo = null;
+    showPromoResult('Failed to validate promo code. Try again.', 'error');
+    updateOrderSummary();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Apply';
+  }
+}
+
+function clearPromoResult() {
+  const resultDiv = el('promo-result');
+  resultDiv.className = 'promo-result hidden';
+  resultDiv.textContent = '';
+  if (!el('promo-input').value.trim()) {
+    appliedPromo = null;
+    updateOrderSummary();
+  }
+}
+
+function showPromoResult(msg, type) {
+  const resultDiv = el('promo-result');
+  resultDiv.textContent = msg;
+  resultDiv.className = `promo-result ${type}`;
+  resultDiv.classList.remove('hidden');
+}
+
+function updateOrderSummary() {
+  const plan = plansData.find(p => p.id === selectedPlanId);
+  if (!plan) return;
+  
+  el('os-plan').textContent = plan.display_name;
+  el('os-billing').textContent = currentBillingCycle === 'annual' ? 'Annual' : 'Monthly';
+  
+  let price = currentBillingCycle === 'annual' ? plan.annual_price : plan.price;
+  let total = price;
+  
+  if (appliedPromo) {
+    el('os-discount-row').style.display = '';
+    let discountAmt = 0;
+    if (appliedPromo.discount_type === 'percentage') {
+      discountAmt = price * (appliedPromo.discount_value / 100);
+    } else {
+      discountAmt = appliedPromo.discount_value;
+    }
+    discountAmt = Math.min(price, discountAmt);
+    total = Math.max(0, price - discountAmt);
+    
+    el('os-discount').textContent = `-$${discountAmt.toFixed(2)}`;
+  } else {
+    el('os-discount-row').style.display = 'none';
+  }
+  
+  el('os-total').textContent = `$${total.toFixed(2)}`;
+}
+
+// Step 3 Next action
+function s3Next() {
+  const plan = plansData.find(p => p.id === selectedPlanId);
+  if (!plan) {
+    showError('s3-error', 'Please select a plan.');
+    return;
+  }
+  
+  let originalPrice = currentBillingCycle === 'annual' && plan.annual_price > 0 ? plan.annual_price : plan.price;
+  let finalPrice = originalPrice;
+  if (appliedPromo) {
+    let discount = 0;
+    if (appliedPromo.discount_type === 'percentage') {
+      discount = originalPrice * (appliedPromo.discount_value / 100);
+    } else {
+      discount = appliedPromo.discount_value;
+    }
+    finalPrice = Math.max(0, originalPrice - discount);
+  }
+  
+  if (finalPrice === 0) {
+    goToStep(5);
+    doRegister();
+  } else {
+    goToStep(4);
+    loadGateways(finalPrice);
+  }
+}
+
+// Payment loading and handlers
+let gatewaysData = {};
+async function loadGateways(billingPrice) {
+  const container = el('gateway-container');
+  container.innerHTML = '<div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment options…</div>';
+  clearError('s4-error');
+  try {
+    const res = await fetch('/api/payments/gateways');
+    gatewaysData = await res.json();
+    renderGatewaysInRegister(gatewaysData, billingPrice);
+  } catch (err) {
+    container.innerHTML = '<p class="err-msg">Failed to load payment options. Please go back and try again.</p>';
+  }
+}
+
+async function renderGatewaysInRegister(gateways, billingPrice) {
+  const container = el('gateway-container');
+  const hasFW = !!(gateways.flutterwave?.public_key);
+  const hasPP = !!(gateways.paypal?.client_id);
+  const hasBT = !!(gateways.bank_transfer?.bank_name);
+  const hasCP = !!(gateways.clickpesa?.merchant_id);
+
+  if (!hasFW && !hasPP && !hasBT && !hasCP) {
+    container.innerHTML = `
+      <div style="background:rgba(234,88,12,0.05);border:1px solid rgba(234,88,12,0.2);border-radius:12px;padding:1.25rem;font-size:.875rem;color:var(--accent);">
+        <p style="font-weight:700;margin-bottom:.25rem">Manual Activation</p>
+        <p style="margin-bottom:1rem">Our support team will contact you within 24 hours with payment details.</p>
+        <button onclick="submitManualRegister('manual')" class="btn-primary" style="width:100%">Confirm &amp; Request Activation</button>
+      </div>`;
+    return;
+  }
+
+  let html = '<div style="display:flex;flex-direction:column;gap:.75rem">';
+  
+  if (hasFW) {
+    html += `<button id="fw-register-btn" class="btn-primary" style="background:#f5a623;border-color:#f5a623;color:#fff;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Pay with Flutterwave</button>`;
+  }
+  
+  if (hasPP) {
+    html += `<div id="paypal-register-btn-wrap" style="margin-top:.25rem"></div>`;
+  }
+  
+  if (hasCP) {
+    html += `<button id="cp-register-btn" class="btn-primary" style="background:#3b82f6;border-color:#3b82f6;color:#fff;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa</button>`;
+  }
+  
+  if (hasBT) {
+    const bt = gateways.bank_transfer;
+    let bankInfo = '';
+    if (bt.bank_name) bankInfo += `<div><strong>Bank:</strong> ${bt.bank_name}</div>`;
+    if (bt.account_name) bankInfo += `<div><strong>Account Name:</strong> ${bt.account_name}</div>`;
+    if (bt.account_number) bankInfo += `<div><strong>Account Number:</strong> ${bt.account_number}</div>`;
+    if (bt.swift_code) bankInfo += `<div><strong>SWIFT/BIC:</strong> ${bt.swift_code}</div>`;
+    if (bt.routing_number) bankInfo += `<div><strong>Routing Number:</strong> ${bt.routing_number}</div>`;
+    if (bt.instructions) bankInfo += `<div style="margin-top:.5rem;font-style:italic">${bt.instructions}</div>`;
+    
+    html += `<div style="margin-top:.75rem;padding:1rem;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;font-size:.75rem;color:var(--text-muted);line-height:1.5">${bankInfo}</div>`;
+    html += `<button id="bt-register-btn" class="btn-primary" style="background:#10b981;border-color:#10b981;color:#fff;margin-top:.5rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>I've Sent $${billingPrice.toFixed(2)} via Bank Transfer</button>`;
+  }
+  
+  html += '</div>';
+  container.innerHTML = html;
+
+  if (hasFW) {
+    await loadScript('https://checkout.flutterwave.com/v3.js').catch(() => {});
+    const btn = el('fw-register-btn');
+    if (btn) {
+      btn.onclick = () => doFlutterwaveRegister(gateways.flutterwave.public_key, billingPrice);
+    }
+  }
+
+  if (hasPP) {
+    await loadPayPalRegisterSDK(gateways.paypal.client_id, gateways.paypal.environment, billingPrice);
+  }
+
+  if (hasCP) {
+    const btn = el('cp-register-btn');
+    if (btn) {
+      btn.onclick = () => doClickPesaRegister(billingPrice);
+    }
+  }
+
+  if (hasBT) {
+    const btn = el('bt-register-btn');
+    if (btn) {
+      btn.onclick = () => submitManualRegister('bank_transfer');
+    }
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+let _paypalSDKPromise = null;
+function loadPayPalRegisterSDK(clientId, env, billingPrice) {
+  if (_paypalSDKPromise) return _paypalSDKPromise;
+  const base = env === 'sandbox' ? 'https://www.sandbox.paypal.com' : 'https://www.paypal.com';
+  _paypalSDKPromise = loadScript(`${base}/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`).then(() => {
+    window.paypal.Buttons({
+      style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+      createOrder: async () => {
+        clearError('s4-error');
+        try {
+          const promo = appliedPromo ? appliedPromo.code : '';
+          const res = await fetch('/api/payments/paypal/create-order-public', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: selectedPlanId, promo_code: promo, billing_cycle: currentBillingCycle })
+          });
+          const d = await res.json();
+          if (!d.order_id) throw new Error(d.error || 'Failed to create order');
+          return d.order_id;
+        } catch (err) {
+          showError('s4-error', err.message || 'PayPal initiation failed.');
+          throw err;
+        }
+      },
+      onApprove: async (data) => {
+        goToStep(5);
+        doRegister('paypal', { paypal_order_id: data.orderID });
+      },
+      onError: (err) => {
+        showError('s4-error', 'PayPal payment failed. Please try again.');
+      }
+    }).render('#paypal-register-btn-wrap');
+  });
+  return _paypalSDKPromise;
+}
+
+function doFlutterwaveRegister(publicKey, billingPrice) {
+  if (!window.FlutterwaveCheckout) {
+    showError('s4-error', 'Flutterwave SDK not loaded. Please try again.');
+    return;
+  }
+  
+  const email = el('s1-email').value.trim();
+  const name = el('s2-biz').value.trim();
+  const txRef = `reg:${selectedPlanId}:${Date.now()}`;
+  
+  FlutterwaveCheckout({
+    public_key: publicKey,
+    tx_ref: txRef,
+    amount: billingPrice,
+    currency: 'USD',
+    payment_options: 'card,mobilemoney,ussd,banktransfer',
+    customer: {
+      email: email,
+      name: name
+    },
+    customizations: {
+      title: 'RestOrder Subscription',
+      description: `${plansData.find(p => p.id === selectedPlanId)?.display_name || 'Premium'} Plan`,
+      logo: '/icon-192.png'
+    },
+    callback: async (response) => {
+      if (response.status === 'successful' || response.status === 'completed') {
+        goToStep(5);
+        doRegister('flutterwave', { transaction_id: response.transaction_id });
+      } else {
+        showError('s4-error', 'Flutterwave payment was not completed.');
+      }
+    },
+    onclose: () => {}
+  });
+}
+
+async function doClickPesaRegister(billingPrice) {
+  const btn = el('cp-register-btn');
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+  clearError('s4-error');
+  
+  try {
+    const email = el('s1-email').value.trim();
+    const password = el('s1-pw').value;
+    const businessName = el('s2-biz').value.trim();
+    const phone = getFullPhone();
+    const country = el('country-select').value;
+    const promo = appliedPromo ? appliedPromo.code : '';
+    
+    const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => d.csrfToken || d.token || '')
+      .catch(() => '');
+      
+    const regRes = await fetch('/api/customers/checkout-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      credentials: 'include',
+      body: JSON.stringify({
+        email,
+        password,
+        businessName,
+        phone,
+        country,
+        plan_id: selectedPlanId,
+        payment_method: 'clickpesa',
+        promo_code: promo,
+        billing_cycle: currentBillingCycle
+      })
+    });
+    
+    const regData = await regRes.json();
+    if (!regRes.ok) {
+      showError('s4-error', regData.error || 'Failed to initiate registration.');
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa`;
+      return;
+    }
+    
+    if (regData.token) localStorage.setItem('customerToken', regData.token);
+    if (regData.customer?.email) localStorage.setItem('customerEmail', regData.customer.email);
+    if (regData.customer?.businessName) localStorage.setItem('customerBusiness', regData.customer.businessName);
+    
+    const menuId = regData.defaultMenuId;
+    
+    const orderRes = await fetch('/api/payments/clickpesa/create-order-public', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan_id: selectedPlanId,
+        menu_id: menuId,
+        billing_cycle: currentBillingCycle,
+        promo_code: promo,
+        email: email,
+        name: businessName
+      })
+    });
+    
+    const orderData = await orderRes.json();
+    if (orderData.redirect_url) {
+      window.location.href = orderData.redirect_url;
+    } else if (orderData.reference) {
+      goToStep(5);
+      showPendingSuccess('clickpesa', orderData.reference);
+    } else {
+      showError('s4-error', orderData.error || 'Failed to initiate ClickPesa payment.');
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa`;
+    }
+  } catch (err) {
+    showError('s4-error', 'Network error during ClickPesa initiation. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa`;
+  }
+}
+
+async function submitManualRegister(method = 'bank_transfer') {
+  goToStep(5);
+  doRegister(method);
+}
+
+// Unified registration submit function (handles all payment methods and free registrations)
+async function doRegister(paymentMethod = null, paymentDetails = {}) {
+  clearError('s5-error');
+  el('btn-retry').classList.add('hidden');
+  el('btn-dashboard').classList.add('hidden');
+  if (el('btn-edit-details')) el('btn-edit-details').classList.add('hidden');
+  
+  ['s5-c1', 's5-c2', 's5-c3'].forEach(id => {
+    const d = el(id).querySelector('.s5-dot');
+    if (d) { d.className = 's5-dot'; d.innerHTML = ''; }
+  });
+  
+  el('s5-spinner').style.display = '';
+  el('s5-spinner').classList.add('spin');
+  el('s5-icon-ring').style.borderColor = 'var(--accent)';
+  el('s5-label').textContent = 'Setting Up';
+  el('s5-title').innerHTML = 'Welcome to <span class="serif-accent">RestOrder</span>';
+  el('s5-sub').textContent = 'Your workspace is being prepared…';
+  
+  const email = el('s1-email').value.trim();
+  const password = el('s1-pw').value;
+  const businessName = el('s2-biz').value.trim();
+  const phone = getFullPhone();
+  const country = el('country-select').value;
+  const promo = appliedPromo ? appliedPromo.code : '';
+  
+  await animateCheckRegister('s5-c1', 600);
+  
+  try {
+    const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => d.csrfToken || d.token || '')
+      .catch(() => '');
+      
+    const reqBody = {
+      email,
+      password,
+      businessName,
+      phone,
+      country,
+      plan_id: selectedPlanId,
+      promo_code: promo,
+      billing_cycle: currentBillingCycle,
+      ...paymentDetails
+    };
+    
+    if (paymentMethod) {
+      reqBody.payment_method = paymentMethod;
+    }
+    
+    const res = await fetch('/api/customers/checkout-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      credentials: 'include',
+      body: JSON.stringify(reqBody)
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      showRegisterError(data.error || 'Registration failed.');
+      return;
+    }
+    
+    if (data.token) localStorage.setItem('customerToken', data.token);
+    if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
+    if (data.customer?.businessName) localStorage.setItem('customerBusiness', data.customer.businessName);
+    
+    await animateCheckRegister('s5-c2', 500);
+    await animateCheckRegister('s5-c3', 400);
+    
+    if (paymentMethod === 'bank_transfer' || paymentMethod === 'manual') {
+      showPendingSuccess(paymentMethod);
+    } else {
+      showSuccessPanel();
+    }
+  } catch (err) {
+    showRegisterError('Network error. Please check your connection and try again.');
+  }
+}
+
+function animateCheckRegister(rowId, delay) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const d = el(rowId).querySelector('.s5-dot');
+      if (d) {
+        d.classList.add('done');
+        d.innerHTML = '<svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      resolve();
+    }, delay);
+  });
+}
+
+function showSuccessPanel() {
+  el('s5-spinner').classList.remove('spin');
+  el('s5-spinner').style.display = 'none';
+  el('s5-icon-ring').style.borderColor = 'var(--success)';
+  el('s5-icon-ring').innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  el('s5-label').textContent = "You're In!";
+  el('s5-title').innerHTML = 'Welcome to <span class="serif-accent">RestOrder</span> 🚀';
+  el('s5-sub').textContent = "Your workspace is ready. Here's what we've set up for you.";
   el('btn-dashboard').classList.remove('hidden');
-  setTimeout(()=>window.location.href='/dashboard?onboard=1',1500);
+  
+  setTimeout(() => {
+    window.location.href = '/dashboard?onboard=1';
+  }, 2000);
 }
 
-function showRegError(msg){
-  el('s3-error').textContent=msg;el('s3-error').classList.remove('hidden');
-  el('btn-retry').classList.remove('hidden');el('s3-spinner').style.display='none';
-  el('s3-label').textContent='Error';el('s3-title').textContent='Something went wrong';
-  el('s3-sub').textContent='Please check your details and try again.';
+function showPendingSuccess(method, reference = '') {
+  el('s5-spinner').classList.remove('spin');
+  el('s5-spinner').style.display = 'none';
+  el('s5-icon-ring').style.borderColor = 'var(--warning)';
+  el('s5-icon-ring').innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  
+  el('s5-label').textContent = "Pending Activation";
+  el('s5-title').innerHTML = 'Account <span class="serif-accent">Created</span>!';
+  
+  if (method === 'bank_transfer') {
+    el('s5-sub').textContent = "Your account is created. Once we verify your bank transfer, your subscription will be activated automatically (usually within 24 hours).";
+  } else if (method === 'clickpesa') {
+    el('s5-sub').textContent = `Your account is created. Complete payment via ClickPesa using reference ${reference}. We will activate your account once confirmed.`;
+  } else {
+    el('s5-sub').textContent = "Your account is created and is pending subscription activation. Our support team will contact you shortly.";
+  }
+  
+  el('btn-dashboard').classList.remove('hidden');
+}
+
+function showRegisterError(msg) {
+  el('s5-error').textContent = msg;
+  el('s5-error').classList.remove('hidden');
+  el('btn-retry').classList.remove('hidden');
+  if (el('btn-edit-details')) el('btn-edit-details').classList.remove('hidden');
+  el('s5-spinner').style.display = 'none';
+  el('s5-label').textContent = 'Error';
+  el('s5-title').textContent = 'Something went wrong';
+  el('s5-sub').textContent = 'Please check your details and try again.';
 }
 
 //  Tab switcher 
@@ -559,22 +1325,28 @@ async function handleFirebaseIdToken(idToken){
 }
 
 async function doFirebaseRegister(idToken,businessName){
-  clearError('s3-error');el('btn-retry').classList.add('hidden');el('btn-dashboard').classList.add('hidden');resetChecklist();
-  el('s3-spinner').style.display='';el('s3-spinner').classList.add('spin');
-  el('s3-icon-ring').style.borderColor='var(--accent)';
-  el('s3-label').textContent='Setting Up';el('s3-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span>';
-  el('s3-sub').textContent='Your workspace is being prepared\u2026';
-  await animateCheck('s3-c1',600);
+  clearError('s5-error');el('btn-retry').classList.add('hidden');el('btn-dashboard').classList.add('hidden');
+  if (el('btn-edit-details')) el('btn-edit-details').classList.add('hidden');
+  ['s5-c1', 's5-c2', 's5-c3'].forEach(id => {
+    const d = el(id).querySelector('.s5-dot');
+    if (d) { d.className = 's5-dot'; d.innerHTML = ''; }
+  });
+  el('s5-spinner').style.display='';el('s5-spinner').classList.add('spin');
+  el('s5-icon-ring').style.borderColor='var(--accent)';
+  el('s5-label').textContent='Setting Up';el('s5-title').innerHTML='Welcome to <span class="serif-accent">RestOrder</span>';
+  el('s5-sub').textContent='Your workspace is being prepared\u2026';
+  await animateCheckRegister('s5-c1',600);
   try{
     const res=await fetch('/api/customers/firebase-auth',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({idToken,businessName})});
     const data=await res.json();
-    if(!res.ok){showRegError(data.error||'Registration failed.');return;}
+    if(!res.ok){showRegisterError(data.error||'Registration failed.');return;}
     if(data.token)localStorage.setItem('customerToken',data.token);if(data.customer?.email)localStorage.setItem('customerEmail',data.customer.email);
     localStorage.setItem('customerBusiness',businessName);window._pendingFirebaseIdToken=null;
-    await animateCheck('s3-c2',500);await animateCheck('s3-c3',400);
-    showSuccess();
-  }catch(err){showRegError('Network error. Please check your connection and try again.');}
+    await animateCheckRegister('s5-c2',500);await animateCheckRegister('s5-c3',400);
+    showSuccessPanel();
+  }catch(err){showRegisterError('Network error. Please check your connection and try again.');}
 }
+
 
 //  Google sign-up 
 async function handleGoogle(){

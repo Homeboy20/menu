@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -1210,6 +1210,9 @@ function authHeaders(extra) {
   const base = isCustomerMode
     ? { 'x-customer-token': customerToken }
     : { 'X-Admin-Token': sessionToken };
+  if (window.csrfToken) {
+    base['x-csrf-token'] = window.csrfToken;
+  }
   return Object.assign({}, base, extra || {});
 }
 function authJsonHeaders() { return authHeaders({ 'Content-Type': 'application/json' }); }
@@ -1604,7 +1607,7 @@ function buildRow(item, i) {
   return tr;
 }
 
-function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function updateItem(i, key, val) { extractedItems[i][key] = val; updateChips(); }
 function deleteRow(i)   { extractedItems.splice(i, 1); renderTable(); }
@@ -2137,7 +2140,7 @@ async function loadPublished() {
                   class="text-xs text-green-400 hover:underline flex items-center gap-1">
             <span class="material-symbols-outlined text-[14px]">download</span> Export CSV
           </button>
-          <button onclick="showLinkQR('${m.id}', '${esc(m.restaurantName)}')" title="Link external QR code"
+          <button onclick="showLinkQR('${m.id}', '${esc(m.restaurantName).replace(/'/g, "\\\\'")}')" title="Link external QR code"
                   class="text-xs text-violet-400 hover:underline flex items-center gap-1">
             <span class="material-symbols-outlined text-[14px]">qr_code_scanner</span> Link QR
           </button>
@@ -2487,6 +2490,13 @@ function showStatusBadge(msg, color) {
 
 // -- Auth ---------------------------------------------------------------------
 async function initAuth() {
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
+  } catch (err) {
+    console.warn('Failed to fetch CSRF token:', err);
+  }
   // 1. Try admin token
   if (sessionToken) {
     try {

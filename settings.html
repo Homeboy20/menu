@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -100,6 +100,38 @@
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
 
 <!-- -- Login Overlay -------------------------------------------------------- -->
+<!-- Anti-flash script -->
+<script>
+  (function() {
+    const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
+    if (token) {
+      document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+      const origFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const res = await origFetch.apply(this, args);
+        try {
+          const clone = res.clone();
+          const contentType = clone.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await clone.json();
+            if (data && data.authenticated === false) {
+              const style = document.getElementById('anti-flash');
+              if (style) style.remove();
+              const overlay = document.getElementById('login-overlay');
+              if (overlay) overlay.classList.remove('hidden');
+              localStorage.removeItem('admin-token');
+              localStorage.removeItem('adminToken');
+            } else if (data && data.authenticated === true) {
+              const style = document.getElementById('anti-flash');
+              if (style) style.remove();
+            }
+          }
+        } catch(e) {}
+        return res;
+      };
+    }
+  })();
+</script>
 <div id="login-overlay" class="fixed inset-0 z-50 bg-bg-dark/95 backdrop-blur flex items-center justify-center">
   <div class="bg-surface border border-primary/20 rounded-2xl p-8 w-full max-w-sm shadow-2xl space-y-5">
     <div class="flex items-center gap-3">
@@ -124,17 +156,18 @@
   </div>
 </div>
 
-<!-- -- Sidebar -------------------------------------------------------------- -->
-<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col">
+<!-- Sidebar -->
+<aside class="w-64 bg-surface border-r border-slate-700 p-6 flex flex-col shrink-0 overflow-y-auto">
   <div class="flex items-center gap-3 mb-10">
-    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark">
+    <div class="size-10 rounded-xl bg-primary flex items-center justify-center text-bg-dark shrink-0">
       <svg class="material-symbols-outlined text-[22px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-admin_panel_settings"/></svg>
     </div>
     <div>
-      <h1 class="font-bold text-lg">RestOrder Admin</h1>
+      <h1 class="font-bold text-lg leading-tight">RestOrder Admin</h1>
       <p class="text-xs text-slate-400">Internal Management</p>
     </div>
   </div>
+
   <nav class="space-y-2 flex-1">
     <a href="/admin-dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-dashboard"/></svg>
@@ -164,12 +197,21 @@
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-settings"/></svg>
       <span class="text-sm font-medium">Settings</span>
     </a>
+    <button id="nav-cache-tools" onclick="if(window.openCacheTools) window.openCacheTools(); else window.location.href='/admin-dashboard'" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition w-full text-left">
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-build"/></svg>
+      <span class="text-sm font-medium">Cache Management</span>
+    </button>
     <a id="nav-admin-users" href="/admin-users" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition">
       <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-shield_person"/></svg>
       <span class="text-sm font-medium">Admin Users</span>
     </a>
+    <button id="nav-packages" onclick="if(window.showSection) window.showSection('packages'); else window.location.href='/admin-dashboard'" class="hidden items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-bg-dark transition w-full text-left">
+      <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-inventory_2"/></svg>
+      <span class="text-sm font-medium">Packages</span>
+    </button>
   </nav>
-  <div class="pt-4 border-t border-slate-700 space-y-2">
+
+  <div class="pt-4 border-t border-slate-700 space-y-2 mt-4">
     <div id="user-info" class="hidden px-4 py-2 rounded-xl bg-bg-dark/50">
       <p class="text-sm font-medium text-slate-200 truncate" id="user-name"></p>
       <p class="text-xs text-slate-400 truncate" id="user-role"></p>
@@ -917,9 +959,11 @@ function applyUserUI(user) {
   document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
   document.getElementById('user-info').classList.remove('hidden');
   document.getElementById('user-info').classList.add('flex','flex-col');
-  if (user.role === 'super_admin') {
-    document.getElementById('nav-admin-users').classList.remove('hidden');
-    document.getElementById('nav-admin-users').classList.add('flex');
+    if (user.role === 'super_admin') {
+    const adminUsers = document.getElementById('nav-admin-users');
+    const packages = document.getElementById('nav-packages');
+    if (adminUsers) { adminUsers.classList.remove('hidden'); adminUsers.classList.add('flex'); }
+    if (packages) { packages.classList.remove('hidden'); packages.classList.add('flex'); }
   }
   // Show lock notice for non-super_admins on integrations tab
   if (user.role !== 'super_admin') {
@@ -949,6 +993,13 @@ function applyUserUI(user) {
 
 async function checkAuth() {
   try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
+  } catch (err) {
+    console.warn('Failed to fetch CSRF token:', err);
+  }
+  try {
     const token = localStorage.getItem('admin-token');
     if (!token) return;
     const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
@@ -971,6 +1022,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   try {
     const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
     const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
@@ -1002,7 +1054,13 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 // -- Helpers ------------------------------------------------------------------
-function authHeaders() { return { 'x-admin-token': adminToken, 'Content-Type': 'application/json' }; }
+function authHeaders() { 
+  const headers = { 'x-admin-token': adminToken, 'Content-Type': 'application/json' };
+  if (window.csrfToken) {
+    headers['x-csrf-token'] = window.csrfToken;
+  }
+  return headers;
+}
 function isSuperAdmin() { return currentUser?.role === 'super_admin'; }
 function showToast(msg, type) {
   const t = document.createElement('div');
