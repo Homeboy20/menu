@@ -911,9 +911,12 @@ function renderPlans() {
     const isSelected = selectedPlanId === p.id;
     let displayPrice = p.price;
     let period = '/mo';
-    if (currentBillingCycle === 'annual') {
-      displayPrice = p.annual_price;
-      period = '/yr';
+    let billedText = '';
+
+    if (currentBillingCycle === 'annual' && p.annual_price > 0) {
+      displayPrice = Math.round(p.annual_price / 12);
+      period = '/mo';
+      billedText = `<div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">Billed $${p.annual_price} annually</div>`;
     }
     
     let features = [];
@@ -949,6 +952,7 @@ function renderPlans() {
         <div class="plan-name">${p.display_name}</div>
         <div class="plan-price">$${displayPrice}<span class="per">${period}</span></div>
       </div>
+      ${billedText}
       ${featHtml}
     `;
     container.appendChild(card);

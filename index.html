@@ -27,39 +27,90 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "RestOrder",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "Complete digital menu platform for restaurants, cafes, bars & eateries. QR codes, real-time updates, analytics, online ordering.",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "ratingCount": "1247"
-    }
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "RestOrder",
-    "url": "https://restorder.com",
-    "logo": "https://restorder.com/logo.png",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer support",
-      "email": "support@restorder.com"
-    },
-    "sameAs": [
-      "https://facebook.com/restorder",
-      "https://twitter.com/restorder",
-      "https://instagram.com/restorder"
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://restorder.com/#organization",
+        "name": "RestOrder",
+        "url": "https://restorder.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://restorder.com/logo.png"
+        },
+        "description": "RestOrder provides a complete digital menu and online ordering platform for restaurants, cafes, bars, and juice bars. Designed to boost sales, reduce costs, and delight customers with professional digital menus.",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "support@restorder.com",
+          "availableLanguage": ["English"]
+        },
+        "sameAs": [
+          "https://facebook.com/restorder",
+          "https://twitter.com/restorder",
+          "https://instagram.com/restorder"
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://restorder.com/#software",
+        "name": "RestOrder Digital Menu Platform",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, Mobile",
+        "url": "https://restorder.com",
+        "publisher": {"@id": "https://restorder.com/#organization"},
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "USD",
+          "lowPrice": "0",
+          "highPrice": "99",
+          "offerCount": "3",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Free Tier",
+              "price": "0",
+              "priceCurrency": "USD",
+              "description": "Basic digital menu features perfect for small cafes."
+            },
+            {
+              "@type": "Offer",
+              "name": "Pro Tier",
+              "price": "39",
+              "priceCurrency": "USD",
+              "description": "Advanced features including QR orders and WhatsApp integration."
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise Tier",
+              "price": "99",
+              "priceCurrency": "USD",
+              "description": "Full-suite solution including custom domains and POS integration."
+            }
+          ]
+        },
+        "featureList": [
+          "QR Code Menus",
+          "Real-time Updates",
+          "WhatsApp Ordering",
+          "Stripe & PayPal Payments Integration",
+          "Multi-language Support",
+          "Customer Analytics Dashboard"
+        ],
+        "description": "Complete digital menu platform for restaurants, cafes, bars & eateries. Generate QR codes, take orders via WhatsApp, receive payments online, and view powerful analytics.",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "1247"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://restorder.com/#webpage",
+        "url": "https://restorder.com",
+        "name": "RestOrder - Best Digital Menu Platform",
+        "isPartOf": {"@id": "https://restorder.com/#organization"},
+        "about": {"@id": "https://restorder.com/#software"}
+      }
     ]
   }
   </script>
@@ -2845,6 +2896,7 @@
           <p class="footer-description">
             The complete digital menu platform for modern restaurants. Boost sales, reduce costs, and delight customers with professional digital menus.
           </p>
+          <div id="footer-social-links" style="display:flex;gap:16px;margin-top:20px;"></div>
         </div>
         
         <div class="footer-links">
@@ -3415,6 +3467,35 @@
     // Scroll Reveal Animation with IntersectionObserver
     function initScrollReveal() {
       const revealElements = document.querySelectorAll('.reveal, .stagger-children');
+      
+      // Fetch Social Links
+  fetch('/api/public/branding').then(res => res.json()).then(data => {
+    const socialContainer = document.getElementById('footer-social-links');
+    if (!socialContainer) return;
+    const networks = [
+      { key: 'facebook', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>' },
+      { key: 'instagram', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>' },
+      { key: 'twitter', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.95 4.57a10 10 0 0 1-2.82.77 4.96 4.96 0 0 0 2.16-2.72c-.95.55-2 .95-3.12 1.17a4.92 4.92 0 0 0-8.39 4.48A14 14 0 0 1 1.67 3.15 4.92 4.92 0 0 0 3.2 9.72a4.9 4.9 0 0 1-2.23-.62v.06a4.93 4.93 0 0 0 3.95 4.83 4.86 4.86 0 0 1-2.22.08 4.93 4.93 0 0 0 4.6 3.42A9.87 9.87 0 0 1 0 19.54a13.94 13.94 0 0 0 7.55 2.21c9.06 0 14-7.5 14-14v-.64c.96-.7 1.8-1.56 2.4-2.54z"/></svg>' },
+      { key: 'linkedin', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.63-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43A2.06 2.06 0 1 1 7.4 5.37a2.06 2.06 0 0 1-2.06 2.06zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>' },
+      { key: 'youtube', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.18a3 3 0 0 0-2.1-2.12C19.53 3.5 12 3.5 12 3.5s-7.53 0-9.4.56A3 3 0 0 0 .5 6.18C0 8.07 0 12 0 12s0 3.93.5 5.82a3 3 0 0 0 2.1 2.12c1.87.56 9.4.56 9.4.56s7.53 0 9.4-.56a3 3 0 0 0 2.1-2.12c.5-1.89.5-5.82.5-5.82s0-3.93-.5-5.82zM9.54 15.57V8.43L15.82 12l-6.28 3.57z"/></svg>' },
+      { key: 'tiktok', icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53 0H16.1c.36 2.72 1.79 4.35 4.54 4.54v3.62a7.96 7.96 0 0 1-4.47-1.4v8.14c0 3.98-3.22 7.2-7.2 7.2-3.97 0-7.2-3.22-7.2-7.2 0-3.98 3.23-7.2 7.2-7.2 1.05 0 2.05.22 2.95.63v3.83A3.6 3.6 0 0 0 8.57 15c0 1.99 1.62 3.6 3.6 3.6 1.99 0 3.6-1.61 3.6-3.6V0z"/></svg>' }
+    ];
+    networks.forEach(n => {
+      const url = data[`social_${n.key}`];
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.innerHTML = n.icon;
+        a.style.color = '#cbd5e1';
+        a.style.transition = 'color 0.2s';
+        a.onmouseover = () => a.style.color = '#c2410c';
+        a.onmouseout = () => a.style.color = '#cbd5e1';
+        socialContainer.appendChild(a);
+      }
+    });
+  });
       
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {

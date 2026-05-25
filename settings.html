@@ -1636,8 +1636,47 @@ async function testFirebaseConfig() {
   }
 }
 
+// -- Social Settings -------------------------------------------------------------
+async function loadSocialSettings() {
+  try {
+    const res = await fetch('/api/public/branding');
+    if (!res.ok) throw new Error('Failed to load branding');
+    const data = await res.json();
+    ['facebook','instagram','twitter','linkedin','youtube','tiktok'].forEach(net => {
+      const el = document.getElementById(`social-${net}`);
+      if (el && data[`social_${net}`]) {
+        el.value = data[`social_${net}`];
+      }
+    });
+  } catch (e) { console.error('Error loading social settings:', e); }
+}
+
+async function saveSocialSettings() {
+  const btn = document.getElementById('save-social-btn');
+  const prevText = btn.textContent;
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const payload = {};
+    ['facebook','instagram','twitter','linkedin','youtube','tiktok'].forEach(net => {
+      const el = document.getElementById(`social-${net}`);
+      if (el) payload[`social_${net}`] = el.value.trim();
+    });
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT', headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    showToast('Social settings saved.');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.textContent = prevText; btn.disabled = false;
+  }
+}
+
 // -- Init ----------------------------------------------------------------------
 checkAuth();
+loadSocialSettings();
 </script>
 <script src="/js/icons.js"></script>
 </body>

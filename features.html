@@ -27,15 +27,56 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "RestOrder Features",
-    "description": "Comprehensive list of features provided by the RestOrder digital menu platform including QR codes, analytics, and multi-language support.",
-    "url": "https://restorder.com/features",
-    "publisher": {
-      "@type": "Organization",
-      "name": "RestOrder",
-      "logo": "https://restorder.com/logo.png"
-    }
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://restorder.com/features/#webpage",
+        "url": "https://restorder.com/features",
+        "name": "RestOrder Features",
+        "description": "Comprehensive list of features provided by the RestOrder digital menu platform including QR codes, analytics, and multi-language support.",
+        "isPartOf": {
+          "@type": "Organization",
+          "@id": "https://restorder.com/#organization",
+          "name": "RestOrder"
+        }
+      },
+      {
+        "@type": "ItemList",
+        "name": "RestOrder Key Features",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Dynamic QR Menus",
+            "description": "Instantly update your menu without reprinting QR codes."
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "WhatsApp Ordering",
+            "description": "Receive orders directly to your WhatsApp with full details."
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Payment Integrations",
+            "description": "Accept payments via Stripe, PayPal, and more directly from the menu."
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Multi-language Menus",
+            "description": "Automatically translate your menu to multiple languages for tourists."
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Advanced Analytics",
+            "description": "Track views, popular items, and revenue in a single dashboard."
+          }
+        ]
+      }
+    ]
   }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -2058,6 +2058,42 @@ app.get('/favicon.ico', async (req, res) => {
   res.send('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#c2410c"/><text x="16" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="#fff">R</text></svg>');
 });
 
+// GET /robots.txt
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+User-agent: GPTBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Omgilibot
+Allow: /
+User-agent: FacebookBot
+Allow: /
+Sitemap: https://${req.get('host')}/sitemap.xml`);
+});
+
+// GET /sitemap.xml
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  const host = `https://${req.get('host')}`;
+  const urls = ['/', '/features', '/pricing', '/register', '/login', '/about', '/contact', '/faq', '/privacy', '/terms'];
+  const urlNodes = urls.map(url => `
+  <url>
+    <loc>${host}${url}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>${url === '/' ? '1.0' : '0.8'}</priority>
+  </url>`).join('');
+  
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlNodes}
+</urlset>`);
+});
+
 // GET /  – serve landing page
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-cache, must-revalidate');
@@ -2739,7 +2775,7 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
     );
 
     // 7. Send the Email OTP
-    queueTransactionalEmail({
+    const emailResult = await sendTransactionalEmail({
       to: cleanEmail,
       subject: 'Verify your RestOrder account',
       text: `Your email verification code is: ${emailOtp}. It is valid for 15 minutes.`,
@@ -2753,7 +2789,17 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
           <p style="font-size: 12px; color: #64748b;">This code is valid for 15 minutes. If you did not request this code, please ignore this email.</p>
         </div>
       `
-    }, 'Email OTP');
+    });
+
+    if (!emailResult.sent) {
+      if (emailResult.reason === 'missing-email-settings') {
+        if (process.env.NODE_ENV === 'production') {
+           return res.status(500).json({ error: 'Server email not configured. Please contact support.' });
+        }
+      } else {
+        return res.status(500).json({ error: `Failed to send email OTP: ${emailResult.reason}` });
+      }
+    }
 
     // 8. Log Phone OTP to console (Simulate SMS)
     console.log(`\n======================================================`);
@@ -3404,7 +3450,8 @@ app.post('/api/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
       });
     }
 
-    return res.status(401).json({ error: 'Invalid email or password.' });
+    // If we reach here, neither customer nor staff exists with this email
+    return res.status(401).json({ error: 'Account with this email does not exist.' });
   } catch (err) {
     console.error('Unified login error:', err);
     res.status(500).json({ error: 'Login failed. Please try again.' });
@@ -3425,9 +3472,12 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
     if (email) {
       const cleanEmail = sanitizeEmail(email);
       if (!isValidEmail(cleanEmail)) {
-        return res.status(401).json({ error: 'Invalid credentials.' });
+        return res.status(401).json({ error: 'Invalid email format.' });
       }
       const { rows } = await pool.query('SELECT * FROM customers WHERE email = $1', [cleanEmail]);
+      if (rows.length === 0) {
+        return res.status(401).json({ error: 'Account with this email does not exist.' });
+      }
       customer = rows[0] || null;
     } else {
       // Phone login — use phone_hash for O(1) lookup, fall back to scan if no hash
@@ -3456,7 +3506,7 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
     }
     
     if (!customer) {
-      return res.status(401).json({ error: 'Invalid credentials.' });
+      return res.status(401).json({ error: 'Account not found with this phone number.' });
     }
 
     // Check account lockout
