@@ -1444,6 +1444,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
         ['integration_bank_transfer', JSON.stringify({ enabled: false, bank_name: '', account_name: '', account_number: '', swift_code: '', routing_number: '', instructions: '' })],
         ['integration_email',        JSON.stringify({ provider: 'smtp', host: '', port: '587', secure: false, user: '', pass: '', from_name: 'RestOrder', from_email: '' })],
         ['integration_webhooks',     JSON.stringify({ payment_notify_url: '', subscription_notify_url: '', secret: '' })],
+        ['integration_nextsms',      JSON.stringify({ enabled: false, username: '', pass: '', sender_id: '' })],
       ];
       for (const [key, value] of settingsDefaults) {
         await client.query(
@@ -1456,6 +1457,10 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     await client.query(
       'INSERT INTO app_settings (key, value, updated_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING',
       ['support_email', 'support@restorder.online', new Date().toISOString()]
+    );
+    await client.query(
+      'INSERT INTO app_settings (key, value, updated_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING',
+      ['integration_nextsms', JSON.stringify({ enabled: false, username: '', pass: '', sender_id: '' }), new Date().toISOString()]
     );
 
     // Persistent customer sessions (survives server restarts)
@@ -2807,6 +2812,38 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
     console.log(`To: ${phone}`);
     console.log(`Message: Your RestOrder phone verification code is: ${phoneOtp}`);
     console.log(`======================================================\n`);
+
+    // Send real SMS if NextSMS integration is enabled
+    try {
+      const { rows: smsSettingsRows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_nextsms'");
+      if (smsSettingsRows.length) {
+        const nextSmsConfig = JSON.parse(smsSettingsRows[0].value);
+        if (nextSmsConfig && nextSmsConfig.enabled && nextSmsConfig.username && nextSmsConfig.pass) {
+          const smsPhone = String(phone).replace(/\D/g, '');
+          const credentials = Buffer.from(`${nextSmsConfig.username}:${nextSmsConfig.pass}`).toString('base64');
+          const smsRes = await fetch('https://messaging-service.co.tz/api/sms/v1/text/single', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Basic ${credentials}`
+            },
+            body: JSON.stringify({
+              from: nextSmsConfig.sender_id || 'NEXTSMS',
+              to: smsPhone,
+              text: `Your RestOrder phone verification code is: ${phoneOtp}`
+            })
+          });
+          if (!smsRes.ok) {
+            const errBody = await smsRes.json().catch(() => ({}));
+            console.error('NextSMS send failed status:', smsRes.status, errBody);
+          } else {
+            console.log(`✓ NextSMS successfully sent to ${smsPhone}`);
+          }
+        }
+      }
+    } catch (smsErr) {
+      console.error('NextSMS integration error:', smsErr.message);
+    }
 
     // 9. Return success status (and OTPs in non-production environments for testing)
     const response = { success: true, message: 'Verification codes sent.' };
@@ -8484,6 +8521,43 @@ app.post('/api/admin/settings/email/test', requireRole('super_admin'), doubleCsr
   } catch (err) {
     console.error('Test email send failed:', err);
     res.status(500).json({ error: err.message || 'Failed to send test email.' });
+  }
+});
+
+// POST /api/admin/settings/sms/test – Test NextSMS credentials using test endpoint
+app.post('/api/admin/settings/sms/test', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
+  try {
+    const { username, pass } = req.body || {};
+    if (!username || !pass) {
+      return res.status(400).json({ error: 'Username and password are required.' });
+    }
+
+    const credentials = Buffer.from(`${username}:${pass}`).toString('base64');
+    const testRes = await fetch('https://messaging-service.co.tz/api/sms/v1/test/text/single', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`
+      },
+      body: JSON.stringify({
+        from: 'NEXTSMS',
+        to: '255700000000',
+        text: 'NextSMS connection test successful.'
+      })
+    });
+
+    if (testRes.status === 401) {
+      return res.status(400).json({ error: 'Authentication failed. Please verify username and password.' });
+    }
+
+    if (!testRes.ok) {
+      const errBody = await testRes.json().catch(() => ({}));
+      return res.status(400).json({ error: errBody.message || `NextSMS returned status ${testRes.status}` });
+    }
+
+    res.json({ success: true, message: 'Test connection successful!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

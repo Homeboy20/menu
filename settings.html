@@ -424,6 +424,7 @@
       <button id="stab-email-btn" onclick="showSubTab('email')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Email</button>
       <button id="stab-webhooks-btn" onclick="showSubTab('webhooks')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Webhooks</button>
       <button id="stab-firebase-btn" onclick="showSubTab('firebase')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Firebase</button>
+      <button id="stab-sms-btn" onclick="showSubTab('sms')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">SMS</button>
     </div>
 
     <!-- ------------------------------------------------------------------ -->
@@ -887,6 +888,53 @@
 
     </div><!-- /spanel-firebase -->
 
+    <!-- ------------------------------------------------------------------ -->
+    <!-- SMS SUB-PANEL                                                      -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="spanel-sms" class="space-y-6 hidden">
+      <div class="card">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <div class="provider-logo bg-sky-500/15 text-sky-400">
+              <svg class="material-symbols-outlined text-[26px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-chat"/></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-lg">NextSMS</h4>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 font-medium">Tanzania SMS Gateway</span>
+              </div>
+              <p class="text-sm text-slate-400">Send OTP verification codes via SMS using the NextSMS HTTP API.</p>
+            </div>
+          </div>
+          <button id="sms-toggle-btn" onclick="toggleSms()" class="toggle-off">Disabled</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="card-label">Username</label>
+            <input id="sms-username" type="text" class="input-field" placeholder="your_nextsms_username" />
+          </div>
+          <div>
+            <label class="card-label">Password</label>
+            <div class="pw-wrap">
+              <input id="sms-pass" type="password" class="input-field" placeholder="••••••••" style="padding-right:42px" />
+              <button class="pw-eye" onclick="togglePw('sms-pass')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
+            </div>
+          </div>
+          <div>
+            <label class="card-label">Sender ID <span class="text-slate-500 font-normal">(Sender name approved by NextSMS/TCRA)</span></label>
+            <input id="sms-sender-id" type="text" class="input-field" placeholder="NEXTSMS" />
+          </div>
+        </div>
+        <div id="sms-status-row" class="hidden p-3 rounded-xl text-sm flex items-center gap-2"></div>
+        <div class="flex items-center justify-between pt-4 border-t border-slate-700">
+          <button onclick="testSmsConfig()" class="btn-secondary">
+            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>Test Connection
+          </button>
+          <button id="save-sms-btn" onclick="saveSmsSettings()" class="save-btn">Save SMS Settings</button>
+        </div>
+      </div>
+    </div><!-- /spanel-sms -->
+
   </div><!-- /panel-integrations -->
 
 </main>
@@ -1116,7 +1164,7 @@ function showTab(name) {
 }
 
 function showSubTab(name) {
-  const subpanels = ['payment', 'email', 'webhooks', 'firebase'];
+  const subpanels = ['payment', 'email', 'webhooks', 'firebase', 'sms'];
   subpanels.forEach(sp => {
     const el = document.getElementById(`spanel-${sp}`);
     const btn = document.getElementById(`stab-${sp}-btn`);
@@ -1229,6 +1277,14 @@ async function loadSettings() {
     document.getElementById('fb-measurement-id').value = fb.measurement_id || '';
     document.getElementById('fb-client-email').value = fb.client_email || '';
     document.getElementById('fb-private-key').value = fb.private_key || '';
+
+    // SMS Settings
+    const sms = data.integration_nextsms || {};
+    smsEnabled = sms.enabled === true || sms.enabled === 'true';
+    updateSmsToggle();
+    document.getElementById('sms-username').value = sms.username || '';
+    document.getElementById('sms-pass').value = sms.pass ? '••••••••' : '';
+    document.getElementById('sms-sender-id').value = sms.sender_id || '';
 
   } catch(e) {
     showToast('Failed to load settings: ' + e.message, 'error');
@@ -1743,6 +1799,98 @@ async function testFirebaseConfig() {
     } else {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400';
       statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-warning"/></svg> Firebase not enabled or not configured yet.';
+    }
+  } catch(e) {
+    statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
+    statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg> Test failed: ${e.message}`;
+  }
+}
+
+
+// -- SMS Settings -------------------------------------------------------------
+let smsEnabled = false;
+
+function updateSmsToggle() {
+  const btn = document.getElementById('sms-toggle-btn');
+  if (!btn) return;
+  if (smsEnabled) {
+    btn.className = 'toggle-on';
+    btn.textContent = 'Enabled';
+  } else {
+    btn.className = 'toggle-off';
+    btn.textContent = 'Disabled';
+  }
+}
+
+function toggleSms() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
+  smsEnabled = !smsEnabled;
+  updateSmsToggle();
+}
+
+async function saveSmsSettings() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
+  const btn = document.getElementById('save-sms-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+
+  const username = document.getElementById('sms-username').value.trim();
+  const pass = document.getElementById('sms-pass').value;
+  const senderId = document.getElementById('sms-sender-id').value.trim();
+
+  const config = {
+    enabled: smsEnabled,
+    username: username,
+    pass: pass === '••••••••' ? (serverSettings.integration_nextsms?.pass || '') : pass,
+    sender_id: senderId
+  };
+
+  if (config.enabled && (!config.username || !config.pass)) {
+    showToast('Username and Password are required to enable SMS Gateway.', 'error');
+    btn.textContent = 'Save SMS Settings'; btn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT', headers: authHeaders(),
+      body: JSON.stringify({ integration_nextsms: config })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    serverSettings.integration_nextsms = config;
+    showToast('SMS settings saved.');
+  } catch(e) { showToast(e.message, 'error'); }
+  finally { btn.textContent = 'Save SMS Settings'; btn.disabled = false; }
+}
+
+async function testSmsConfig() {
+  const statusRow = document.getElementById('sms-status-row');
+  statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300';
+  statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px] animate-spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Testing NextSMS connection...';
+  statusRow.classList.remove('hidden');
+
+  const username = document.getElementById('sms-username').value.trim();
+  const passInput = document.getElementById('sms-pass').value;
+  const pass = passInput === '••••••••' ? (serverSettings.integration_nextsms?.pass || '') : passInput;
+
+  if (!username || !pass) {
+    statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
+    statusRow.innerHTML = 'Username and Password are required to test connection.';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/settings/sms/test', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ username, pass })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
+      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Connection test successful! NextSMS credentials verified.`;
+    } else {
+      statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
+      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg> Connection failed: ${data.error || 'Invalid credentials'}`;
     }
   } catch(e) {
     statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
