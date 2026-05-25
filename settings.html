@@ -96,6 +96,24 @@
   .pw-eye:hover { color: #94a3b8; }
   .provider-logo { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 </style>
+
+<!-- Layout fixes: ensure settings page content stays centered and responsive -->
+<style>
+  main { max-width: 1200px; margin: 0 auto; min-width: 0; }
+  .card { box-sizing: border-box; min-width: 0; overflow: visible; }
+  .input-field { box-sizing: border-box; }
+  aside { flex: 0 0 16rem; min-width: 16rem; }
+  .save-btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; }
+  .section-header h3 { margin: 0; }
+  /* Prevent accidental full-height colored panels caused by layout quirks */
+  .bg-primary, .bg-primary\/10, .bg-primary\/20 { background-repeat: no-repeat; }
+
+  @media (max-width: 1024px) {
+    aside { min-width: 12rem; flex: 0 0 12rem; }
+    main { padding: 1rem; }
+    .grid { grid-template-columns: 1fr !important; }
+  }
+</style>
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
 
