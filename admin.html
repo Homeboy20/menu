@@ -1146,14 +1146,23 @@
         #section-settings .bg-primary, #section-settings [class*="bg-primary/"] {
           background-repeat: no-repeat !important;
           background-size: auto !important;
-        }
-        /* Ensure buttons and small badges don't grow full-height */
-        #section-settings button, #section-settings .save-btn {
           height: auto !important;
           min-height: 0 !important;
         }
+        /* Ensure buttons and small badges don't grow full-height */
+        #section-settings button, #section-settings .save-btn, #section-settings .badge {
+          height: auto !important;
+          min-height: 0 !important;
+        }
+        /* Prevent wide panels from stretching the whole viewport */
+        #section-settings .rounded-2xl, #section-settings .card, #section-settings .bg-white {
+          align-self: flex-start !important;
+          min-width: 0 !important;
+        }
         /* Keep images constrained */
         #section-settings img { max-width: 100%; height: auto; display: block; }
+        /* Global safety for menu-editor: prevent accidental full-height colored columns */
+        main, #section-settings, .bg-primary, .bg-primary\/10, .bg-primary\/20 { min-height: 0 !important; }
       </style>
 
       <div class="bg-white rounded-2xl border border-stone-200 p-6 space-y-5">
