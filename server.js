@@ -58,6 +58,9 @@ async function reinitFirebaseAdmin() {
 }
 
 const app  = express();
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 const PORT = parseInt(process.env.PORT || '3000', 10);
 // Auto-detect HTTPS in production, default to HTTP in development
 const DEFAULT_HOST = process.env.NODE_ENV === 'production' 
@@ -302,13 +305,31 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
 
 // ── Security middleware ────────────────────────────────────────────────────────
 
-// Force HTTPS in production (Coolify/Docker deployments)
+// Force HTTPS in production when the request is behind a proxy that sets x-forwarded-proto.
 app.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+  const isProd = process.env.NODE_ENV === 'production';
+  const forwardedProtoRaw = req.headers['x-forwarded-proto'];
+  const forwardedProto = Array.isArray(forwardedProtoRaw)
+    ? forwardedProtoRaw[0]
+    : forwardedProtoRaw;
+  const normalizedProto = typeof forwardedProto === 'string'
+    ? forwardedProto.split(',')[0].trim().toLowerCase()
+    : undefined;
+  const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
+
+  console.log('HTTPS enforcement check:', req.method, req.originalUrl,
+    'NODE_ENV=', process.env.NODE_ENV,
+    'forwardedProto=', normalizedProto,
+    'host=', req.headers.host,
+    'hostname=', req.hostname,
+    'isLocalHost=', isLocalHost);
+
+  if (isProd && !isLocalHost && normalizedProto && normalizedProto !== 'https') {
     const httpsUrl = `https://${req.headers.host}${req.url}`;
     console.log(`🔒 Redirecting HTTP to HTTPS: ${httpsUrl}`);
     return res.redirect(301, httpsUrl);
   }
+
   next();
 });
 
@@ -1956,6 +1977,53 @@ app.get('/api/geo', (req, res) => {
   res.json({ country: country && country !== 'XX' && country !== 'T1' ? country : '' });
 });
 
+async function loadFirebaseConfig() {
+  const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_firebase'");
+  const rawConfig = rows[0]?.value;
+  if (!rawConfig) {
+    return { enabled: false };
+  }
+
+  const firebaseConfig = JSON.parse(rawConfig || '{}');
+  const enabled = firebaseConfig.enabled === true || firebaseConfig.enabled === 'true';
+  if (!enabled) {
+    return { enabled: false };
+  }
+
+  const publicConfig = {
+    enabled: true,
+    apiKey: firebaseConfig.api_key || '',
+    authDomain: firebaseConfig.auth_domain || '',
+    projectId: firebaseConfig.project_id || '',
+    appId: firebaseConfig.app_id || '',
+    storageBucket: firebaseConfig.storage_bucket || '',
+    messagingSenderId: firebaseConfig.messaging_sender_id || '',
+    measurementId: firebaseConfig.measurement_id || ''
+  };
+
+  if (!publicConfig.apiKey || !publicConfig.authDomain || !publicConfig.projectId || !publicConfig.appId) {
+    return { enabled: false };
+  }
+
+  return publicConfig;
+}
+
+async function handleFirebaseConfigRequest(req, res) {
+  console.log('handleFirebaseConfigRequest called for', req.method, req.originalUrl, req.path, req.baseUrl);
+  try {
+    const config = await loadFirebaseConfig();
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.json(config);
+  } catch (err) {
+    console.error('Firebase config load error:', err);
+    res.status(500).json({ enabled: false, error: err.message || 'Failed to load Firebase config.' });
+  }
+}
+
+// GET /api/firebase-config – public Firebase SDK config for registration/login pages
+app.get('/api/firebase-config', handleFirebaseConfigRequest);
+app.get('/firebase-config', handleFirebaseConfigRequest);
+console.log('REGISTERED /api/firebase-config and /firebase-config routes');
 
 
 // GET /api/public/branding – public site identity (no auth required)
