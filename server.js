@@ -20,6 +20,42 @@ const validator    = require('validator');
 const xss          = require('xss');
 const nodemailer   = require('nodemailer');
 const dns          = require('dns');
+const firebaseAdminModule = require('firebase-admin');
+
+let firebaseAdmin = null;
+async function reinitFirebaseAdmin() {
+  try {
+    const projectId = process.env.FIREBASE_PROJECT_ID?.trim();
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+    if (privateKey) privateKey = privateKey.replace(/\\n/g, '\n');
+
+    if (!projectId || !clientEmail || !privateKey) {
+      console.warn('Firebase Admin SDK not configured. Skipping Firebase initialization.');
+      firebaseAdmin = null;
+      return;
+    }
+
+    if (firebaseAdminModule.apps && firebaseAdminModule.apps.length) {
+      for (const appInstance of firebaseAdminModule.apps) {
+        try { await appInstance.delete(); } catch (ignore) {}
+      }
+    }
+
+    firebaseAdmin = firebaseAdminModule.initializeApp({
+      credential: firebaseAdminModule.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
+
+    console.log('Firebase Admin SDK initialized.');
+  } catch (err) {
+    console.warn('Firebase Admin initialization failed:', err?.message || err);
+    firebaseAdmin = null;
+  }
+}
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -125,6 +161,26 @@ function computePhoneHash(phone) {
   if (!normalized) return null;
   const secret = process.env.PHONE_HASH_SECRET || FIELD_ENC_KEY_HEX || 'phone-hash-fallback-key';
   return crypto.createHmac('sha256', secret).update(normalized).digest('hex');
+}
+
+function normalizeTanzanianPhone(phone) {
+  if (!phone) return null;
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) return null;
+
+  // Supported Tanzanian formats:
+  // +2557XXXXXXXX, 2557XXXXXXXX, 07XXXXXXXX, 7XXXXXXXX
+  if (digits.startsWith('255') && digits.length === 12) {
+    return digits;
+  }
+  if (digits.length === 10 && digits.startsWith('0')) {
+    return '255' + digits.slice(1);
+  }
+  if (digits.length === 9 && digits.startsWith('7')) {
+    return '255' + digits;
+  }
+
+  return null;
 }
 
 // Validate and sanitize email
@@ -491,32 +547,6 @@ app.get('/menu', async (req, res, next) => {
   }
   
   res.sendFile(path.join(__dirname, 'menu.html'));
-});
-
-  const proxyPath = '/__/auth' + req.url;
-  const options = {
-    hostname: target,
-    port: 443,
-    path: proxyPath,
-    method: req.method,
-    headers: {
-      ...req.headers,
-      host: target,
-    },
-  };
-  const proxyReq = https.request(options, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
-    proxyRes.pipe(res, { end: true });
-  });
-  proxyReq.on('error', (err) => {
-    console.error('Firebase auth proxy error:', err.message);
-    res.status(502).send('Firebase auth proxy error');
-  });
-  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-    req.pipe(proxyReq, { end: true });
-  } else {
-    proxyReq.end();
-  }
 });
 
 // Static file caching and optimization
@@ -2647,6 +2677,9 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
       return res.status(400).json({ error: 'Please enter a valid phone number.' });
     }
 
+    const tanzaniaPhone = normalizeTanzanianPhone(phone);
+    const isTanzanian = Boolean(tanzaniaPhone);
+
     // 3. Check if email already registered
     const { rows: emailExists } = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
     if (emailExists.length > 0) {
@@ -2662,7 +2695,6 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
 
     // 5. Generate 6-digit OTPs
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const isTanzanian = rawPhone.startsWith('255');
     const phoneOtp = isTanzanian ? Math.floor(100000 + Math.random() * 900000).toString() : 'SKIPPED';
     const initialPhoneVerified = isTanzanian ? 0 : 1;
 
@@ -2726,7 +2758,7 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
         if (smsSettingsRows.length) {
           const nextSmsConfig = JSON.parse(smsSettingsRows[0].value);
           if (nextSmsConfig && nextSmsConfig.enabled && nextSmsConfig.username && nextSmsConfig.pass) {
-            const smsPhone = String(phone).replace(/\D/g, '');
+            const smsPhone = tanzaniaPhone;
             const credentials = Buffer.from(`${nextSmsConfig.username}:${nextSmsConfig.pass}`).toString('base64');
             const smsRes = await fetch('https://messaging-service.co.tz/api/sms/v1/text/single', {
               method: 'POST',
@@ -2791,6 +2823,11 @@ app.post('/api/customers/verify-otp', verificationLimiter, doubleCsrfProtection,
     const verification = rows[0];
     if (new Date(verification.expires_at) < new Date()) {
       return res.status(400).json({ error: 'Verification code has expired. Please request a new one.' });
+    }
+
+    const isTanzanian = Boolean(normalizeTanzanianPhone(verification.phone));
+    if (type === 'phone' && !isTanzanian) {
+      return res.status(400).json({ error: 'Phone verification is only required for Tanzanian numbers.' });
     }
 
     const targetCode = type === 'email' ? verification.email_otp : verification.phone_otp;
