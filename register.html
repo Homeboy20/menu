@@ -267,18 +267,25 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <div id="firebase-divider" class="divider"><span>or sign up with</span></div>
 
       <!-- Tab switcher -->
-      <div class="tab-bar">
-        <button id="tab-email" onclick="switchTab('email')" type="button" class="tab-btn active">Email</button>
-        <button id="tab-phone" onclick="switchTab('phone')" type="button" class="tab-btn">Phone</button>
-      </div>
-
-      <!-- EMAIL TAB -->
-      <div id="tab-email-panel">
+      <!-- UNIFIED CREDENTIALS FORM -->
+      <div id="credentials-panel">
         <div style="margin-bottom:1rem">
           <label class="field-label" for="s1-email">Work email</label>
           <input id="s1-email" type="email" autocomplete="email" placeholder="you@restaurant.com" class="field-input"
             oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
         </div>
+
+        <div style="margin-bottom:1rem">
+          <label class="field-label" for="auth-phone">Phone number</label>
+          <div class="phone-row">
+            <div class="country-select-wrap">
+              <select id="country-select" class="field-input" onchange="onCountryChange()"></select>
+            </div>
+            <input id="auth-phone" type="tel" autocomplete="tel" placeholder="07** *** ***" class="field-input phone-num"
+              oninput="clearError('s1-error')" onkeydown="if(event.key==='Enter')s1Next()"/>
+          </div>
+        </div>
+
         <div style="margin-bottom:.25rem">
           <label class="field-label" for="s1-pw">Password</label>
           <div style="position:relative">
@@ -292,44 +299,55 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
           <div class="pw-bars"><div class="bar" id="ps-1"></div><div class="bar" id="ps-2"></div><div class="bar" id="ps-3"></div><div class="bar" id="ps-4"></div></div>
           <p id="pw-hint" class="pw-hint">Enter a password to check strength</p>
         </div>
-        <p id="s1-error" class="err-msg hidden"></p>
+        <p id="s1-error" class="err-msg hidden" style="margin-top:0.75rem"></p>
         <button onclick="s1Next()" id="btn-s1" class="btn-primary" style="margin-top:1rem">
           <span>Continue</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
 
-      <!-- PHONE TAB -->
-      <div id="tab-phone-panel" class="hidden">
-        <div id="phone-entry">
-          <label class="field-label" for="auth-phone">Phone number</label>
-          <div class="phone-row" style="margin-bottom:.5rem">
-            <div class="country-select-wrap">
-              <select id="country-select" class="field-input" onchange="onCountryChange()"></select>
-            </div>
-            <input id="auth-phone" type="tel" autocomplete="tel" placeholder="555 123 4567" class="field-input phone-num"
-              oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')sendPhoneOTP()"/>
-          </div>
-          <button type="button" id="btn-send-otp" onclick="sendPhoneOTP()" class="btn-primary" style="margin-top:.75rem">
-            <span id="otp-send-text">Send code</span>
-            <svg id="otp-send-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
-          </button>
+      <!-- VERIFICATION SUB-PANEL (Initially Hidden) -->
+      <div id="verification-panel" class="hidden" style="margin-top:1rem">
+        <div class="section-label" style="margin-bottom:0.5rem">Verification Required</div>
+        <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:0.25rem">Verify your email & phone</h3>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:1.25rem">We have sent a verification code to your email and phone number.</p>
+
+        <!-- Dev Mode OTP Helper Alert (Only visible on localhost) -->
+        <div id="dev-otp-helper" class="hidden" style="background:rgba(234,88,12,0.1);border:1px solid rgba(234,88,12,0.25);border-radius:10px;padding:0.75rem 1rem;font-size:0.8125rem;color:#fdba74;margin-bottom:1rem;line-height:1.4">
+          <div style="font-weight:bold;margin-bottom:0.25rem">🛠️ Dev Mode: Autodetected Codes</div>
+          <div>Email Code: <strong id="dev-email-code" style="letter-spacing:1px">-</strong></div>
+          <div>Phone Code: <strong id="dev-phone-code" style="letter-spacing:1px">-</strong></div>
         </div>
-        <div id="otp-entry" class="hidden" style="margin-top:.5rem">
-          <label class="field-label" for="auth-otp">Verification code</label>
-          <input id="auth-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code"
-            class="field-input otp-input" oninput="clearError('phone-error')" onkeydown="if(event.key==='Enter')verifyPhoneOTP()"/>
-          <div style="display:flex;justify-content:space-between;margin-top:.5rem;margin-bottom:.75rem">
-            <button type="button" onclick="resetPhoneFlow()" class="btn-back" style="font-size:.8rem">&#8592; Change number</button>
-            <button type="button" onclick="sendPhoneOTP()" style="background:none;border:none;color:var(--accent);font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;">Resend code</button>
+
+        <div style="margin-bottom:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+            <label class="field-label" for="verif-email-code" style="margin-bottom:0">Email Verification Code</label>
+            <span id="verif-email-status" style="font-size:0.75rem;font-weight:600;color:var(--text-dim)">Awaiting code</span>
           </div>
-          <button type="button" onclick="verifyPhoneOTP()" id="btn-verify-otp" class="btn-primary">
-            <span id="otp-verify-text">Verify &amp; Continue</span>
-            <svg id="otp-verify-spin" class="spin hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>
-          </button>
+          <input id="verif-email-code" type="text" maxlength="6" placeholder="000000" class="field-input"
+            oninput="onVerifCodeInput('email')" style="text-align:center;font-family:monospace;letter-spacing:4px"/>
         </div>
-        <p id="phone-error" class="err-msg hidden" style="margin-top:.75rem"></p>
-        <div id="recaptcha-container"></div>
+
+        <div style="margin-bottom:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+            <label class="field-label" for="verif-phone-code" style="margin-bottom:0">Phone Verification Code</label>
+            <span id="verif-phone-status" style="font-size:0.75rem;font-weight:600;color:var(--text-dim)">Awaiting code</span>
+          </div>
+          <input id="verif-phone-code" type="text" maxlength="6" placeholder="000000" class="field-input"
+            oninput="onVerifCodeInput('phone')" style="text-align:center;font-family:monospace;letter-spacing:4px"/>
+        </div>
+
+        <p id="verif-error" class="err-msg hidden" style="margin-top:0.75rem"></p>
+
+        <button onclick="verifProceed()" id="btn-verif-proceed" class="btn-primary" style="margin-top:1rem" disabled>
+          <span>Verify &amp; Continue</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <div style="display:flex;justify-content:space-between;margin-top:1rem">
+          <button type="button" onclick="backToCredentials()" class="btn-back" style="font-size:0.8rem">← Edit credentials</button>
+          <button type="button" onclick="resendVerificationCodes()" id="btn-resend-codes" style="background:none;border:none;color:var(--accent);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;">Resend codes</button>
+        </div>
       </div>
 
       <p class="terms">By continuing you agree to our <a href="/terms">Terms</a> &amp; <a href="/privacy">Privacy Policy</a>.</p>
@@ -499,14 +517,15 @@ function buildCountrySelect(detectedCode) {
 }
 
 function onCountryChange() {
-  // just update placeholder hint
-  const c = COUNTRIES.find(x => x.c === el('country-select').value);
-  if (c) el('auth-phone').placeholder = c.d + ' ...';
+  // no longer update placeholder with country code
 }
 
 function getFullPhone() {
   const c = COUNTRIES.find(x => x.c === el('country-select').value);
-  const num = el('auth-phone').value.trim().replace(/^0+/,'');
+  let num = el('auth-phone').value.trim().replace(/[\s\-().]/g,'');
+  if (num.startsWith('+255')) num = num.substring(4);
+  else if (num.startsWith('255') && num.length > 9) num = num.substring(3);
+  if (num.startsWith('0')) num = num.substring(1);
   if (c && num && !num.startsWith('+')) return c.d + num;
   return num;
 }
@@ -579,13 +598,215 @@ function updatePwStrength(){
   hint.textContent=labels[s-1]||'';hint.style.color=colors[s-1]||'var(--text-dim)';
 }
 
-//  Step 1 next (email path) 
-function s1Next(){
-  const email=el('s1-email').value.trim(),pw=el('s1-pw').value;clearError('s1-error');
-  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError('s1-error','Please enter a valid email address.');return;}
-  if(pw.length<8){showError('s1-error','Password must be at least 8 characters.');return;}
-  if(!/[0-9]/.test(pw)){showError('s1-error','Password must contain at least 1 number.');return;}
-  goToStep(2);
+// New state variables for OTP verification
+let _verifiedEmail = false;
+let _verifiedPhone = false;
+
+// Custom s1Next implementation
+async function s1Next() {
+  const email = el('s1-email').value.trim();
+  const phone = getFullPhone();
+  const pw = el('s1-pw').value;
+  clearError('s1-error');
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showError('s1-error', 'Please enter a valid email address.');
+    return;
+  }
+  
+  const rawPhone = phone.replace(/\D/g, '');
+  if (!rawPhone || rawPhone.length < 7) {
+    showError('s1-error', 'Please enter a valid phone number.');
+    return;
+  }
+
+  if (pw.length < 8) {
+    showError('s1-error', 'Password must be at least 8 characters.');
+    return;
+  }
+  if (!/[0-9]/.test(pw)) {
+    showError('s1-error', 'Password must contain at least 1 number.');
+    return;
+  }
+
+  const btn = el('btn-s1');
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = 'Sending codes... <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>';
+
+  try {
+    const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => d.csrfToken || d.token || '')
+      .catch(() => '');
+
+    const res = await fetch('/api/customers/send-verification-otps', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken
+      },
+      credentials: 'include',
+      body: JSON.stringify({ email, phone })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showError('s1-error', data.error || 'Failed to send verification codes.');
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+      return;
+    }
+
+    // Switch panels
+    el('credentials-panel').classList.add('hidden');
+    el('verification-panel').classList.remove('hidden');
+
+    // Show dev mode helper
+    if (data.dev_email_otp && data.dev_phone_otp) {
+      el('dev-otp-helper').classList.remove('hidden');
+      el('dev-email-code').textContent = data.dev_email_otp;
+      el('dev-phone-code').textContent = data.dev_phone_otp;
+    } else {
+      el('dev-otp-helper').classList.add('hidden');
+    }
+
+    // Reset status
+    _verifiedEmail = false;
+    _verifiedPhone = false;
+    el('verif-email-code').value = '';
+    el('verif-phone-code').value = '';
+    el('verif-email-code').disabled = false;
+    el('verif-phone-code').disabled = false;
+    el('verif-email-status').textContent = 'Awaiting code';
+    el('verif-email-status').style.color = 'var(--text-dim)';
+    el('verif-phone-status').textContent = 'Awaiting code';
+    el('verif-phone-status').style.color = 'var(--text-dim)';
+    el('btn-verif-proceed').disabled = true;
+    clearError('verif-error');
+
+  } catch (err) {
+    showError('s1-error', 'Network error. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
+}
+
+// Resend codes
+async function resendVerificationCodes() {
+  const email = el('s1-email').value.trim();
+  const phone = getFullPhone();
+  const resendBtn = el('btn-resend-codes');
+  resendBtn.disabled = true;
+  resendBtn.textContent = 'Resending...';
+  clearError('verif-error');
+
+  try {
+    const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => d.csrfToken || d.token || '')
+      .catch(() => '');
+
+    const res = await fetch('/api/customers/send-verification-otps', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-csrf-token': csrfToken
+      },
+      credentials: 'include',
+      body: JSON.stringify({ email, phone })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showError('verif-error', data.error || 'Failed to resend verification codes.');
+      return;
+    }
+
+    showError('verif-error', 'Verification codes resent.');
+    el('verif-error').style.color = 'var(--success)';
+    el('verif-error').style.background = 'rgba(34, 197, 94, 0.1)';
+    el('verif-error').style.borderColor = 'rgba(34, 197, 94, 0.25)';
+
+    if (data.dev_email_otp && data.dev_phone_otp) {
+      el('dev-otp-helper').classList.remove('hidden');
+      el('dev-email-code').textContent = data.dev_email_otp;
+      el('dev-phone-code').textContent = data.dev_phone_otp;
+    }
+  } catch (err) {
+    showError('verif-error', 'Failed to resend. Please check connection.');
+  } finally {
+    resendBtn.disabled = false;
+    resendBtn.textContent = 'Resend codes';
+  }
+}
+
+// Handle code typing
+async function onVerifCodeInput(type) {
+  const email = el('s1-email').value.trim();
+  const inputEl = el(`verif-${type}-code`);
+  const statusEl = el(`verif-${type}-status`);
+  const code = inputEl.value.trim();
+  clearError('verif-error');
+
+  if (code.length === 6 && /^\d{6}$/.test(code)) {
+    statusEl.textContent = 'Verifying...';
+    statusEl.style.color = 'var(--accent)';
+    
+    try {
+      const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+        .then(r => r.json())
+        .then(d => d.csrfToken || d.token || '')
+        .catch(() => '');
+
+      const res = await fetch('/api/customers/verify-otp', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email, type, code })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        statusEl.textContent = '✓ Verified';
+        statusEl.style.color = 'var(--success)';
+        inputEl.disabled = true;
+        if (type === 'email') _verifiedEmail = true;
+        if (type === 'phone') _verifiedPhone = true;
+
+        if (_verifiedEmail && _verifiedPhone) {
+          el('btn-verif-proceed').disabled = false;
+        }
+      } else {
+        statusEl.textContent = '✗ Invalid';
+        statusEl.style.color = 'var(--error)';
+        showError('verif-error', data.error || 'Verification code is incorrect.');
+      }
+    } catch (err) {
+      statusEl.textContent = 'Error';
+      statusEl.style.color = 'var(--error)';
+      showError('verif-error', 'Network error during verification.');
+    }
+  }
+}
+
+// Proceed to Step 2
+function verifProceed() {
+  if (_verifiedEmail && _verifiedPhone) {
+    goToStep(2);
+  }
+}
+
+// Back to edit email/phone
+function backToCredentials() {
+  el('verification-panel').classList.add('hidden');
+  el('credentials-panel').classList.remove('hidden');
+  el('verif-email-code').disabled = false;
+  el('verif-phone-code').disabled = false;
 }
 
 //  Step 2 next 
@@ -1299,15 +1520,6 @@ function showRegisterError(msg) {
   el('s5-sub').textContent = 'Please check your details and try again.';
 }
 
-//  Tab switcher 
-function switchTab(tab){
-  const isEmail=tab==='email';
-  el('tab-email').classList.toggle('active',isEmail);el('tab-phone').classList.toggle('active',!isEmail);
-  el('tab-email-panel').classList.toggle('hidden',!isEmail);el('tab-phone-panel').classList.toggle('hidden',isEmail);
-  clearError('s1-error');clearError('phone-error');
-  if(!isEmail)setTimeout(()=>{const p=el('auth-phone');if(p)p.focus();},40);
-}
-
 //  Firebase helpers 
 let _fbAuth=null,_fbPhoneConfirm=null;
 
@@ -1365,38 +1577,6 @@ async function handleGoogle(){
   finally{el('google-reg-text').textContent='Continue with Google';el('google-reg-spin').classList.add('hidden');el('btn-google').disabled=false;}
 }
 
-//  Phone OTP 
-async function sendPhoneOTP(){
-  if(!_fbAuth){showFbError('Firebase is not configured on this server.');return;}
-  const phone=getFullPhone();clearError('phone-error');
-  if(!phone){showError('phone-error','Please enter your phone number.');return;}
-  el('otp-send-text').textContent='Sending\u2026';el('otp-send-spin').classList.remove('hidden');el('btn-send-otp').disabled=true;
-  try{
-    if(!window._rcVerifier){window._rcVerifier=new _fbAuth._rv(_fbAuth,'recaptcha-container',{size:'invisible'});}
-    _fbPhoneConfirm=await _fbAuth._swpn(_fbAuth,phone,window._rcVerifier);
-    el('phone-entry').classList.add('hidden');el('otp-entry').classList.remove('hidden');setTimeout(()=>el('auth-otp').focus(),50);
-  }catch(err){
-    showError('phone-error',err.message||'Could not send code. Check the number and try again.');
-    el('otp-send-text').textContent='Send code';el('otp-send-spin').classList.add('hidden');el('btn-send-otp').disabled=false;
-  }
-}
-
-async function verifyPhoneOTP(){
-  if(!_fbPhoneConfirm)return;const code=el('auth-otp').value.trim();clearError('phone-error');
-  if(!/^\d{6}$/.test(code)){showError('phone-error','Enter the 6-digit verification code.');return;}
-  el('otp-verify-text').textContent='Verifying\u2026';el('otp-verify-spin').classList.remove('hidden');el('btn-verify-otp').disabled=true;
-  try{const result=await _fbPhoneConfirm.confirm(code);const idToken=await result.user.getIdToken();await handleFirebaseIdToken(idToken);}
-  catch(err){showError('phone-error',err.message||'Invalid code. Please try again.');el('otp-verify-text').textContent='Verify & Continue';el('otp-verify-spin').classList.add('hidden');el('btn-verify-otp').disabled=false;}
-}
-
-function resetPhoneFlow(){
-  _fbPhoneConfirm=null;window._rcVerifier=null;
-  el('phone-entry').classList.remove('hidden');el('otp-entry').classList.add('hidden');
-  el('auth-otp').value='';el('auth-phone').value='';
-  el('otp-send-text').textContent='Send code';el('otp-send-spin').classList.add('hidden');el('btn-send-otp').disabled=false;
-  clearError('phone-error');setTimeout(()=>el('auth-phone').focus(),40);
-}
-
 //  Firebase init on load 
 (async()=>{
   try{
@@ -1404,13 +1584,9 @@ function resetPhoneFlow(){
     if(cfg&&cfg.enabled){
       await initFirebaseReg(cfg);
     } else {
-      // Firebase not configured — hide Google button, divider, and Phone tab
-      const hideIds=['btn-google','firebase-divider','tab-phone','tab-phone-panel'];
+      // Firebase not configured — hide Google button and divider
+      const hideIds=['btn-google','firebase-divider'];
       hideIds.forEach(id=>{const e=el(id);if(e)e.style.display='none';});
-      // Make Email the only option and remove the tab bar styling
-      const tabEmail=el('tab-email');if(tabEmail)tabEmail.style.display='none';
-      const tabBar=document.querySelector('.tab-bar');if(tabBar)tabBar.style.display='none';
-      el('tab-email-panel')?.classList.remove('hidden');
     }
   }catch(e){console.warn('Firebase config:',e);}
 })();

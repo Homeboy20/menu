@@ -158,7 +158,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <div class="country-select-wrap">
         <select id="country-select" class="field-input" onchange="onCountryChange()"></select>
       </div>
-      <input id="phone-input" type="tel" placeholder="555 123 4567" autocomplete="tel" class="field-input phone-num"/>
+      <input id="phone-input" type="tel" placeholder="07** *** ***" autocomplete="tel" class="field-input phone-num"/>
     </div>
     <button onclick="sendPhoneOTP()" id="send-otp-btn" class="btn-primary" style="margin-top:.5rem">
       <span id="send-otp-text">Send OTP</span>
@@ -231,14 +231,17 @@ function buildCountrySelect(detectedCode){
   const match=detectedCode&&COUNTRIES.find(c=>c.c===detectedCode.toUpperCase());
   sel.value=match?match.c:'US';
 }
-function onCountryChange(){
-  const c=COUNTRIES.find(x=>x.c===document.getElementById('country-select').value);
-  if(c)document.getElementById('phone-input').placeholder=c.d+' ...';
+function onCountryChange() {
+  // no longer update placeholder with country code
 }
-function getFullPhone(){
-  const c=COUNTRIES.find(x=>x.c===document.getElementById('country-select').value);
-  const num=document.getElementById('phone-input').value.trim().replace(/^0+/,'');
-  if(c&&num&&!num.startsWith('+'))return c.d+num;return num;
+function getFullPhone() {
+  const c = COUNTRIES.find(x => x.c === document.getElementById('country-select').value);
+  let num = document.getElementById('phone-input').value.trim().replace(/[\s\-().]/g,'');
+  if (num.startsWith('+255')) num = num.substring(4);
+  else if (num.startsWith('255') && num.length > 9) num = num.substring(3);
+  if (num.startsWith('0')) num = num.substring(1);
+  if (c && num && !num.startsWith('+')) return c.d + num;
+  return num;
 }
 
 function togglePw(){const p=document.getElementById('password');p.type=p.type==='password'?'text':'password';}

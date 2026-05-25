@@ -911,6 +911,26 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
   <p id="error-msg" style="font-size:13px;color:var(--text);line-height:1.7;max-width:280px"></p>
 </div>
 
+<!-- Draft Preview Watermark (free / starter plan) -->
+<div id="draft-watermark" style="display:none;position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden;">
+  <!-- Repeating diagonal stamp -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+    <div style="transform:rotate(-32deg);text-align:center;user-select:none;opacity:0.10;">
+      <div style="font-size:clamp(40px,12vw,88px);font-weight:900;letter-spacing:-.04em;color:#c2410c;white-space:nowrap;text-transform:uppercase;line-height:1.2;">DRAFT PREVIEW</div>
+      <div style="font-size:clamp(40px,12vw,88px);font-weight:900;letter-spacing:-.04em;color:#c2410c;white-space:nowrap;text-transform:uppercase;line-height:1.2;">DRAFT PREVIEW</div>
+      <div style="font-size:clamp(40px,12vw,88px);font-weight:900;letter-spacing:-.04em;color:#c2410c;white-space:nowrap;text-transform:uppercase;line-height:1.2;">DRAFT PREVIEW</div>
+    </div>
+  </div>
+  <!-- Bottom upgrade strip (pointer events enabled) -->
+  <div id="draft-banner" style="pointer-events:auto;position:fixed;bottom:0;left:0;right:0;background:rgba(194,65,12,0.94);backdrop-filter:blur(6px);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;z-index:81;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span style="color:white;font-size:13px;font-weight:600;">This is a draft preview — not yet public. Upgrade to go live.</span>
+    </div>
+    <a href="/pricing" style="flex-shrink:0;background:white;color:#c2410c;font-size:12px;font-weight:700;padding:8px 18px;border-radius:10px;text-decoration:none;">Go Live &rarr;</a>
+  </div>
+</div>
+
 <!-- Category sheet -->
 <div id="cat-sheet-overlay" class="sheet-overlay" onclick="closeCatSheet();updateNavActive('menu')"></div>
 <div id="cat-sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Categories">
@@ -974,7 +994,7 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     <div id="cart-customer-fields">
       <input id="cart-cust-name" class="cust-field" type="text" placeholder="Your name *" autocomplete="name"/>
       <div class="phone-wrap">
-        <input id="cart-cust-phone" class="cust-field" type="tel" placeholder="Phone number *" autocomplete="tel"/>
+        <input id="cart-cust-phone" class="cust-field" type="tel" placeholder="07** *** ***" autocomplete="tel"/>
         <span id="cart-phone-status"></span>
       </div>
       <span id="cart-phone-error"></span>
@@ -1117,8 +1137,19 @@ function clearSearch(){
       document.getElementById('table-banner-label').textContent='\uD83D\uDCCD '+currentTableLabel;
       document.getElementById('table-banner').classList.add('visible');
     }
+    // Show draft watermark if owner is on free/starter plan
+    if(d.draftMode){showDraftWatermark();}
   }catch(e){showError(e.message);}
 })();
+
+/* -- DRAFT WATERMARK -- */
+function showDraftWatermark(){
+  const el=document.getElementById('draft-watermark');
+  if(el){el.style.display='block';}
+  // Push up the bottom-nav to make room for the upgrade strip
+  const bn=document.getElementById('bottom-nav');
+  if(bn){bn.style.paddingBottom='56px';}
+}
 
 /* -- GEO CURRENCY CONVERSION -- */
 function showCurrencyNotice(){
@@ -1574,8 +1605,11 @@ function placeOrder(){
   const ps=document.getElementById('cart-phone-status');
   const nf=document.getElementById('cart-cust-name');
   if(!cn){nf.classList.add('err');nf.focus();return;}nf.classList.remove('err');
-  const pd=cp.replace(/[\s\-().]/g,'');
-  const ok=/^\+?\d{7,15}$/.test(pd);
+  let pd=cp.replace(/[\s\-().]/g,'');
+  if(pd.startsWith('+255')) pd='0'+pd.substring(4);
+  else if(pd.startsWith('255') && pd.length>9) pd='0'+pd.substring(3);
+  else if(pd.startsWith('7')) pd='0'+pd;
+  const ok=/^07\d{8}$/.test(pd) || /^\+?\d{7,15}$/.test(pd);
   if(!cp||!ok){document.getElementById('cart-cust-phone').classList.add('err');pe.textContent=!cp?'Phone number is required':'Enter a valid phone number';pe.style.display='block';ps.textContent='\u2717';ps.style.color='#ef4444';ps.style.display='inline';document.getElementById('cart-cust-phone').focus();return;}
   document.getElementById('cart-cust-phone').classList.remove('err');pe.style.display='none';ps.textContent='\u2713';ps.style.color='#22c55e';ps.style.display='inline';
   const lines=cart.map(c=>`${c.name} \u00d7${c.qty} \u2014 ${fmtAmt((parseFloat(c.price)||0)*c.qty)}`);
