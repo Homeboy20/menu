@@ -3393,8 +3393,9 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
 
   // DEV utility: create a test customer (development only)
   if (process.env.NODE_ENV !== 'production') {
-    app.post('/dev/create-test-customer', async (req, res) => {
+  app.post('/dev/create-test-customer', async (req, res) => {
       try {
+      console.log('DEV POST /dev/create-test-customer hit', { bodySample: JSON.stringify(req.body || {}).substring(0,200) });
         const { email = 'test+local@localhost', password = 'Password1', businessName = 'Local Test Bistro' } = req.body || {};
         // avoid duplicate
         const cleanedEmail = sanitizeEmail(String(email));
@@ -3412,6 +3413,30 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
         res.json({ ok: true, customer, token, defaultMenuId: menuId });
       } catch (err) {
         console.error('Dev create test customer error:', err);
+        res.status(500).json({ error: err.message });
+      }
+    });
+    // Convenience GET endpoint for quick testing from browser/curl
+    app.get('/dev/create-test-customer', async (req, res) => {
+      try {
+        console.log('DEV GET /dev/create-test-customer hit', { query: req.query });
+        const email = String(req.query.email || 'test+local@localhost');
+        const password = String(req.query.password || 'Password1');
+        const businessName = String(req.query.businessName || 'Local Test Bistro');
+        const cleanedEmail = sanitizeEmail(String(email));
+        const { rows: exists } = await pool.query('SELECT id FROM customers WHERE email = $1 LIMIT 1', [cleanedEmail]);
+        if (exists.length) return res.status(409).json({ error: 'Test account already exists' });
+        const passwordHash = await bcrypt.hash(password, 12);
+        const now = new Date().toISOString();
+        const { rows } = await pool.query('INSERT INTO customers (email, password_hash, business_name, status, created_at) VALUES ($1,$2,$3,\'active\',$4) RETURNING id,email', [cleanedEmail, passwordHash, sanitizeInput(businessName, 200), now]);
+        const customer = rows[0];
+        const menuId = crypto.randomUUID();
+        const qr = await generateQRCode(menuId, 1).catch(() => '');
+        await pool.query(`INSERT INTO menus (id, restaurant_name, currency, brand_color, customer_id, created_at, updated_at, qr_version, qr_code) VALUES ($1,$2,'USD','#c2410c',$3,$4,$4,1,$5)`, [menuId, sanitizeInput(businessName, 200), customer.id, now, qr]);
+        const token = await createCustomerSession(customer.id, customer.email);
+        res.json({ ok: true, customer, token, defaultMenuId: menuId });
+      } catch (err) {
+        console.error('Dev create test customer (GET) error:', err);
         res.status(500).json({ error: err.message });
       }
     });
