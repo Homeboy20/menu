@@ -549,8 +549,8 @@ if (window.innerWidth >= 900) { const d = el('desktop-signin'); if(d) d.style.di
 else { const m = el('mobile-signin'); if(m) m.style.display=''; }
 
 //  Error helpers 
-function showError(id,msg){const e=el(id);if(e){e.textContent=msg;e.classList.remove('hidden');}}
-function clearError(id){const e=el(id);if(e){e.textContent='';e.classList.add('hidden');}}
+function showError(id,msg){const e=el(id);if(e){e.textContent=msg;e.classList.remove('hidden');e.style.color='';e.style.background='';e.style.borderColor='';}}
+function clearError(id){const e=el(id);if(e){e.textContent='';e.classList.add('hidden');e.style.color='';e.style.background='';e.style.borderColor='';}}
 
 //  Step navigation 
 const stepCaptions = [
@@ -639,15 +639,14 @@ async function s1Next() {
 
   try {
     // 1. Send SMS via Firebase if configured
+    let fallbackNotice = '';
     if (_fbAuth) {
       try {
         _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
       } catch (fbErr) {
-        console.error('Firebase Phone Auth error:', fbErr);
-        showError('s1-error', 'SMS delivery failed: ' + (fbErr.message || fbErr));
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-        return;
+        console.warn('Firebase Phone Auth error, falling back to simulated OTP:', fbErr);
+        _fbPhoneConfirmResult = null;
+        fallbackNotice = 'Direct SMS delivery failed. Falling back to simulated verification code.';
       }
     }
 
@@ -683,7 +682,7 @@ async function s1Next() {
     if (data.dev_email_otp && data.dev_phone_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = _fbAuth ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
     } else {
       el('dev-otp-helper').classList.add('hidden');
     }
@@ -701,6 +700,10 @@ async function s1Next() {
     el('verif-phone-status').style.color = 'var(--text-dim)';
     el('btn-verif-proceed').disabled = true;
     clearError('verif-error');
+
+    if (fallbackNotice) {
+      showError('verif-error', fallbackNotice);
+    }
 
   } catch (err) {
     showError('s1-error', 'Network error. Please try again.');
@@ -720,12 +723,14 @@ async function resendVerificationCodes() {
   clearError('verif-error');
 
   try {
+    let fallbackNotice = '';
     if (_fbAuth) {
       try {
         _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
       } catch (fbErr) {
-        showError('verif-error', 'Failed to resend SMS: ' + (fbErr.message || fbErr));
-        return;
+        console.warn('Firebase Phone Auth failed to resend, falling back to simulated OTP:', fbErr);
+        _fbPhoneConfirmResult = null;
+        fallbackNotice = 'Direct SMS delivery failed. Falling back to simulated verification code.';
       }
     }
 
@@ -750,15 +755,19 @@ async function resendVerificationCodes() {
       return;
     }
 
-    showError('verif-error', 'Verification codes resent.');
-    el('verif-error').style.color = 'var(--success)';
-    el('verif-error').style.background = 'rgba(34, 197, 94, 0.1)';
-    el('verif-error').style.borderColor = 'rgba(34, 197, 94, 0.25)';
+    if (fallbackNotice) {
+      showError('verif-error', fallbackNotice);
+    } else {
+      showError('verif-error', 'Verification codes resent.');
+      el('verif-error').style.color = 'var(--success)';
+      el('verif-error').style.background = 'rgba(34, 197, 94, 0.1)';
+      el('verif-error').style.borderColor = 'rgba(34, 197, 94, 0.25)';
+    }
 
     if (data.dev_email_otp && data.dev_phone_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = _fbAuth ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
     }
   } catch (err) {
     showError('verif-error', 'Failed to resend. Please check connection.');
