@@ -956,7 +956,7 @@
         </a>
       </div>
       
-      <button class="mobile-menu-btn" id="mobile-menu-btn">?</button>
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
     </nav>
   </header>
 
@@ -968,7 +968,7 @@
           <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
           <span>RestOrder</span>
         </a>
-        <button class="mobile-menu-close" id="mobile-menu-close">�</button>
+        <button class="mobile-menu-close" id="mobile-menu-close">×</button>
       </div>
       
       <ul class="mobile-nav-links">
@@ -997,7 +997,7 @@
       
       <div class="billing-toggle">
         <button class="active" id="monthlyBtn">Monthly</button>
-        <button id="annualBtn">Annual <span class="savings-badge">Save 20%</span></button>
+        <button id="annualBtn">Annual <span class="savings-badge">Save 20%</span>×</button>
       </div>
     </div>
   </section>
@@ -1180,7 +1180,7 @@
   <section class="guarantee-section">
     <div class="container">
       <div class="guarantee-content">
-        <div class="guarantee-icon">?</div>
+        <div class="guarantee-icon">🛡️</div>
         <h2>30-Day Money-Back Guarantee</h2>
         <p>Not happy? Get a full refund within 30 days, no questions asked. We're confident you'll love RestOrder, but if it's not the right fit, we'll refund every penny.</p>
       </div>
@@ -1234,7 +1234,7 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span style="font-size: 32px;">???</span>
+            <span style="font-size: 32px;">🍽️</span>
             <span>RestOrder</span>
           </div>
           <p class="footer-description">
@@ -1272,7 +1272,7 @@
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; 2026 RestOrder. All rights reserved. Built with ?? for restaurants worldwide.</p>
+        <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
       </div>
     </div>
   </footer>
@@ -1373,7 +1373,7 @@
     function renderPricingCards() {
       const grid = document.getElementById('pricing-grid');
       grid.innerHTML = '';
-            loadedPlans.forEach(plan => {
+      loadedPlans.forEach(plan => {
         const isPopular = plan.name === 'professional';
         const features = Array.isArray(plan.features) ? plan.features : (typeof plan.features === 'string' ? JSON.parse(plan.features || '[]') : []);
         const desc = planDescriptions[plan.name] || plan.description || 'Great for your business';

@@ -359,146 +359,7 @@
                 <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
               </button>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 64�64px, max 3 MB</p>
-</aside>
-
-<!-- -- Main Content --------------------------------------------------------- -->
-<main class="flex-1 p-8 overflow-auto">
-
-  <!-- Header -->
-  <div class="mb-8">
-    <div class="flex items-center gap-3 mb-2">
-      <h2 class="text-3xl font-bold">Settings</h2>
-      <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30">ADMIN</span>
-    </div>
-    <p class="text-slate-400">Configure site settings, integrations, and payment gateways</p>
-  </div>
-
-  <!-- Top Tabs -->
-  <div class="border-b border-slate-700 mb-8 flex gap-1">
-    <button id="tab-general-btn" onclick="showTab('general')" class="px-6 py-3 text-sm tab-active transition">General</button>
-    <button id="tab-integrations-btn" onclick="showTab('integrations')" class="px-6 py-3 text-sm tab-inactive transition">Integrations</button>
-  </div>
-
-  <!-- ---------------------------------------------------------------------- -->
-  <!-- GENERAL PANEL                                                          -->
-  <!-- ---------------------------------------------------------------------- -->
-  <div id="panel-general">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-      <!-- Site Settings --------------------------------------------------- -->
-      <div class="card space-y-4">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-language"/></svg>
-          <h3 class="text-lg font-bold">Site Settings</h3>
-        </div>
-        <div>
-          <label class="card-label">Site Name</label>
-          <input id="g-site-name" type="text" class="input-field" placeholder="RestOrder"/>
-        </div>
-        <div>
-          <label class="card-label">Description</label>
-          <textarea id="g-site-desc" rows="2" class="input-field" placeholder="Digital Menu & QR Code Platform..."></textarea>
-        </div>
-        <div>
-          <label class="card-label">Support Email</label>
-          <input id="g-support-email" type="email" class="input-field" placeholder="support@restorder.online"/>
-        </div>
-        <div>
-          <label class="card-label">Timezone</label>
-          <select id="g-timezone" class="input-field"></select>
-        </div>
-        <div class="flex justify-end pt-2">
-          <button id="save-general-btn" onclick="saveGeneralSettings()" class="save-btn">Save Site Settings</button>
-        </div>
-      </div>
-
-      <!-- Currency & Region ----------------------------------------------- -->
-      <div class="card space-y-4">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-amber-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-monetization_on"/></svg>
-          <h3 class="text-lg font-bold">Currency & Region</h3>
-        </div>
-        <div>
-          <label class="card-label">Default Currency</label>
-          <select id="g-currency" class="input-field"></select>
-        </div>
-        <div class="bg-bg-dark border border-slate-700 rounded-xl p-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium">Auto-detect by Geolocation</p>
-              <p class="text-xs text-slate-400 mt-0.5">Customer-facing pages suggest local currency based on visitor IP</p>
-            </div>
-            <button id="geo-toggle-btn" onclick="toggleGeoDetect()" class="toggle-off">OFF</button>
-          </div>
-          <div class="border-t border-slate-700 pt-3">
-            <p class="text-xs text-slate-400 mb-2">Test geolocation for your current IP:</p>
-            <div class="flex items-center gap-2">
-              <button onclick="detectCurrency()" class="btn-secondary">
-                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-my_location"/></svg>
-                Detect My Currency
-              </button>
-              <div id="geo-status" class="hidden text-sm font-medium px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20"></div>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end pt-2">
-          <button id="save-currency-btn" onclick="saveCurrencySettings()" class="save-btn">Save Currency Settings</button>
-        </div>
-      </div>
-
-      <!-- Brand Identity ---------------------------------------------------- -->
-      <div class="card space-y-5 lg:col-span-2">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-style"/></svg>
-          <h3 class="text-lg font-bold">Brand Identity</h3>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="card-label">Site Name</label>
-            <input id="br-site-name" type="text" class="input-field" placeholder="RestOrder"/>
-          </div>
-          <div>
-            <label class="card-label">Tagline</label>
-            <input id="br-tagline" type="text" class="input-field" placeholder="Digital Menu & QR Code Platform"/>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Logo -->
-          <div>
-            <label class="card-label">Site Logo</label>
-            <div class="flex gap-2">
-              <input id="br-logo-url" type="url" class="input-field flex-1" placeholder="https://... or upload ?" oninput="updateBrandingPreview('logo')"/>
-              <label class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl cursor-pointer text-sm flex items-center gap-1 transition whitespace-nowrap" title="Upload logo image">
-                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-upload"/></svg> Upload
-                <input type="file" accept="image/*" class="hidden" onchange="uploadBrandingImage(this,'logo')"/>
-              </label>
-            </div>
-            <div id="br-logo-preview" class="mt-2 hidden p-2 bg-slate-800 border border-slate-700 rounded-xl inline-flex items-center gap-2">
-              <img id="br-logo-img" src="" alt="Logo preview" class="h-10 max-w-[160px] object-contain rounded"/>
-              <button onclick="clearBrandingField('logo')" class="text-slate-400 hover:text-red-400 transition" title="Remove">
-                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
-              </button>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG, transparent background, max 3 MB</p>
-          </div>
-          <!-- Favicon -->
-          <div>
-            <label class="card-label">Favicon</label>
-            <div class="flex gap-2">
-              <input id="br-favicon-url" type="url" class="input-field flex-1" placeholder="https://... or upload ?" oninput="updateBrandingPreview('favicon')"/>
-              <label class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl cursor-pointer text-sm flex items-center gap-1 transition whitespace-nowrap" title="Upload favicon image">
-                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-upload"/></svg> Upload
-                <input type="file" accept="image/*" class="hidden" onchange="uploadBrandingImage(this,'favicon')"/>
-              </label>
-            </div>
-            <div id="br-favicon-preview" class="mt-2 hidden p-2 bg-slate-800 border border-slate-700 rounded-xl inline-flex items-center gap-2">
-              <img id="br-favicon-img" src="" alt="Favicon preview" class="h-8 w-8 object-contain rounded"/>
-              <button onclick="clearBrandingField('favicon')" class="text-slate-400 hover:text-red-400 transition" title="Remove">
-                <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
-              </button>
-            </div>
-            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 6464px, max 3 MB</p>
+            <p class="text-xs text-slate-500 mt-1">Recommended: PNG/SVG 64x64px, max 3 MB</p>
           </div>
         </div>
         <div class="flex justify-end pt-2">
@@ -582,7 +443,7 @@
                 <h4 class="font-bold text-lg">ClickPesa</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-medium">Tanzania</span>
               </div>
-              <p class="text-sm text-slate-400">M-Pesa  Tigo Pesa  Airtel Money  Halotel</p>
+              <p class="text-sm text-slate-400">M-Pesa &middot; Tigo Pesa &middot; Airtel Money &middot; Halotel</p>
             </div>
           </div>
           <button id="cp-toggle-btn" onclick="toggleProvider('clickpesa')" class="toggle-off">Disabled</button>
@@ -611,7 +472,7 @@
             </div>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Callback URL <span class="text-slate-500 font-normal">(auto-generated  copy this into your ClickPesa dashboard)</span></label>
+            <label class="card-label">Callback URL <span class="text-slate-500 font-normal">(auto-generated &middot; copy this into your ClickPesa dashboard)</span></label>
             <div class="flex gap-2">
               <input id="cp-callback-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
               <button onclick="copyWebhookUrl('cp-callback-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_copy"/></svg>Copy</button>
@@ -638,7 +499,7 @@
                 <h4 class="font-bold text-lg">Flutterwave</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-medium">Pan-Africa</span>
               </div>
-              <p class="text-sm text-slate-400">NG  GH  KE  ZA  TZ  UG  RW  EG & 30+ countries</p>
+              <p class="text-sm text-slate-400">NG &middot; GH &middot; KE &middot; ZA &middot; TZ &middot; UG &middot; RW &middot; EG & 30+ countries</p>
             </div>
           </div>
           <button id="fw-toggle-btn" onclick="toggleProvider('flutterwave')" class="toggle-off">Disabled</button>
@@ -697,7 +558,7 @@
                 <h4 class="font-bold text-lg">PayPal</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-medium">Global</span>
               </div>
-              <p class="text-sm text-slate-400">Credit cards  Debit cards  PayPal balance  200+ countries</p>
+              <p class="text-sm text-slate-400">Credit cards &middot; Debit cards &middot; PayPal balance &middot; 200+ countries</p>
             </div>
           </div>
           <button id="pp-toggle-btn" onclick="toggleProvider('paypal')" class="toggle-off">Disabled</button>
@@ -711,7 +572,7 @@
             </select>
           </div>
           <div>
-            <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated  register this in PayPal Developer)</span></label>
+            <label class="card-label">Webhook URL <span class="text-slate-500 font-normal">(auto-generated &middot; register this in PayPal Developer)</span></label>
             <div class="flex gap-2">
               <input id="pp-webhook-url" type="url" class="input-field flex-1 bg-slate-800/60 text-slate-300" readonly/>
               <button onclick="copyWebhookUrl('pp-webhook-url')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-xs font-medium transition flex items-center gap-1" type="button"><svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_copy"/></svg>Copy</button>
@@ -753,7 +614,7 @@
                 <h4 class="font-bold text-lg">Bank Transfer</h4>
                 <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">Global</span>
               </div>
-              <p class="text-sm text-slate-400">Direct bank transfer  Manual confirmation required</p>
+              <p class="text-sm text-slate-400">Direct bank transfer &middot; Manual confirmation required</p>
             </div>
           </div>
           <button id="bt-toggle-btn" onclick="toggleProvider('bank_transfer')" class="toggle-off">Disabled</button>
@@ -868,7 +729,7 @@
           </div>
         </div>
         <div class="bg-bg-dark border border-slate-700 rounded-xl p-4 text-sm text-slate-400 space-y-1">
-          <p><span class="text-primary font-semibold">PayPal / Flutterwave / ClickPesa</span>  use their own callback URLs set in the Payment tab above.</p>
+          <p><span class="text-primary font-semibold">PayPal / Flutterwave / ClickPesa</span> use their own callback URLs set in the Payment tab above.</p>
           <p>The URLs below are for your own internal systems (accounting, CRM, etc.).</p>
         </div>
         <div class="space-y-4">
@@ -925,13 +786,13 @@
         <div class="section-header">
           <svg class="material-symbols-outlined text-sky-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_paste"/></svg>
           <div>
-            <h3 class="text-lg font-bold">Quick Setup  Paste Firebase Config</h3>
+            <h3 class="text-lg font-bold">Quick Setup &mdash; Paste Firebase Config</h3>
             <p class="text-sm text-slate-400 mt-0.5">Copy the config snippet from Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; SDK setup &rarr; Config, then paste it below</p>
           </div>
         </div>
         <div class="bg-sky-500/8 border border-sky-500/20 rounded-xl p-4 text-sm text-sky-300 flex gap-3">
           <svg class="material-symbols-outlined shrink-0 text-[18px] mt-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-info"/></svg>
-          <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = {  }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
+          <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = { ... }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
         </div>
         <div>
           <label class="card-label">Firebase Config Script</label>
@@ -971,19 +832,19 @@
             <input id="fb-auth-domain" type="text" class="input-field" placeholder="my-project-12345.firebaseapp.com"/>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">App ID <span class="text-slate-500 font-normal">(Firebase Console ? Project Settings ? Your apps ? App ID)</span></label>
+            <label class="card-label">App ID <span class="text-slate-500 font-normal">(Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; App ID)</span></label>
             <input id="fb-app-id" type="text" class="input-field" placeholder="1:123456789:web:abcdef01234567890"/>
           </div>
           <div>
-            <label class="card-label">Storage Bucket <span class="text-slate-500 font-normal">(optional  for file storage)</span></label>
+            <label class="card-label">Storage Bucket <span class="text-slate-500 font-normal">(optional &middot; for file storage)</span></label>
             <input id="fb-storage-bucket" type="text" class="input-field" placeholder="my-project-12345.appspot.com"/>
           </div>
           <div>
-            <label class="card-label">Messaging Sender ID <span class="text-slate-500 font-normal">(optional  for push notifications)</span></label>
+            <label class="card-label">Messaging Sender ID <span class="text-slate-500 font-normal">(optional &middot; for push notifications)</span></label>
             <input id="fb-messaging-sender-id" type="text" class="input-field" placeholder="123456789012"/>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Measurement ID <span class="text-slate-500 font-normal">(optional  for Google Analytics)</span></label>
+            <label class="card-label">Measurement ID <span class="text-slate-500 font-normal">(optional &middot; for Google Analytics)</span></label>
             <input id="fb-measurement-id" type="text" class="input-field" placeholder="G-XXXXXXXXXX"/>
           </div>
         </div>
@@ -995,7 +856,7 @@
           <svg class="material-symbols-outlined text-red-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-admin_panel_settings"/></svg>
           <div>
             <h3 class="text-lg font-bold">Server-Side Admin SDK</h3>
-            <p class="text-sm text-slate-400 mt-0.5">Used by the server to verify Firebase ID tokens. Download from Firebase Console ? Project Settings ? Service Accounts</p>
+            <p class="text-sm text-slate-400 mt-0.5">Used by the server to verify Firebase ID tokens. Download from Firebase Console &rarr; Project Settings &rarr; Service Accounts</p>
           </div>
         </div>
         <div class="bg-amber-500/8 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300 flex gap-3">
@@ -1008,11 +869,9 @@
             <input id="fb-client-email" type="email" class="input-field" placeholder="firebase-adminsdk-xxxxx@my-project.iam.gserviceaccount.com"/>
           </div>
           <div class="md:col-span-2">
-            <label class="card-label">Private Key <span class="text-slate-500 font-normal">(full PEM  paste from the JSON file)</span></label>
+            <label class="card-label">Private Key <span class="text-slate-500 font-normal">(full PEM paste from the JSON file)</span></label>
             <div class="pw-wrap">
-              <textarea id="fb-private-key" rows="4" class="input-field font-mono text-xs" placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIB&#10;-----END PRIVATE KEY-----
-"
-                style="padding-right:42px;resize:vertical"></textarea>
+              <textarea id="fb-private-key" rows="4" class="input-field font-mono text-xs" placeholder="-----BEGIN PRIVATE KEY-----&#10;MIIEvgIB&#10;-----END PRIVATE KEY-----&#10;" style="padding-right:42px;resize:vertical"></textarea>
               <button class="pw-eye" style="top:10px" onclick="toggleFbKey()" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
             </div>
           </div>
@@ -1036,14 +895,14 @@
 // -- Constants --------------------------------------------------------------
 const CURRENCIES = [
   { code:'USD', name:'US Dollar',              symbol:'$'    },
-  { code:'EUR', name:'Euro',                   symbol:''    },
-  { code:'GBP', name:'British Pound',          symbol:''    },
+  { code:'EUR', name:'Euro',                   symbol:'€'    },
+  { code:'GBP', name:'British Pound',          symbol:'£'    },
   { code:'CAD', name:'Canadian Dollar',        symbol:'C$'   },
   { code:'AUD', name:'Australian Dollar',      symbol:'A$'   },
   { code:'CHF', name:'Swiss Franc',            symbol:'CHF'  },
-  { code:'JPY', name:'Japanese Yen',           symbol:''    },
-  { code:'CNY', name:'Chinese Yuan',           symbol:''    },
-  { code:'INR', name:'Indian Rupee',           symbol:'?'    },
+  { code:'JPY', name:'Japanese Yen',           symbol:'¥'    },
+  { code:'CNY', name:'Chinese Yuan',           symbol:'¥'    },
+  { code:'INR', name:'Indian Rupee',           symbol:'₹'    },
   { code:'SGD', name:'Singapore Dollar',       symbol:'S$'   },
   { code:'HKD', name:'Hong Kong Dollar',       symbol:'HK$'  },
   { code:'AED', name:'UAE Dirham',             symbol:'AED'  },
@@ -1052,18 +911,18 @@ const CURRENCIES = [
   { code:'SEK', name:'Swedish Krona',          symbol:'kr'   },
   { code:'NOK', name:'Norwegian Krone',        symbol:'kr'   },
   { code:'DKK', name:'Danish Krone',           symbol:'kr'   },
-  { code:'PLN', name:'Polish Zloty',           symbol:'zl'   },
+  { code:'PLN', name:'Polish Zloty',           symbol:'zł'   },
   { code:'TZS', name:'Tanzanian Shilling',     symbol:'TSh'  },
   { code:'KES', name:'Kenyan Shilling',        symbol:'KSh'  },
-  { code:'NGN', name:'Nigerian Naira',         symbol:'?'    },
-  { code:'GHS', name:'Ghanaian Cedi',          symbol:'GH?'  },
+  { code:'NGN', name:'Nigerian Naira',         symbol:'₦'    },
+  { code:'GHS', name:'Ghanaian Cedi',          symbol:'GH₵'  },
   { code:'ZAR', name:'South African Rand',     symbol:'R'    },
   { code:'UGX', name:'Ugandan Shilling',       symbol:'USh'  },
   { code:'RWF', name:'Rwandan Franc',          symbol:'FRw'  },
   { code:'ETB', name:'Ethiopian Birr',         symbol:'Br'   },
   { code:'XOF', name:'W. African CFA Franc',   symbol:'CFA'  },
   { code:'XAF', name:'C. African CFA Franc',   symbol:'CFA'  },
-  { code:'EGP', name:'Egyptian Pound',         symbol:'E'   },
+  { code:'EGP', name:'Egyptian Pound',         symbol:'E£'   },
   { code:'MAD', name:'Moroccan Dirham',        symbol:'MAD'  },
   { code:'ZMW', name:'Zambian Kwacha',         symbol:'ZK'   },
   { code:'MZN', name:'Mozambican Metical',     symbol:'MT'   },
@@ -1114,7 +973,7 @@ let geoDetectEnabled = false;
   CURRENCIES.forEach(c => {
     const o = document.createElement('option');
     o.value = c.code;
-    o.textContent = `${c.code}  ${c.name} (${c.symbol})`;
+    o.textContent = `${c.code} — ${c.name} (${c.symbol})`;
     cSel.appendChild(o);
   });
   const tSel = document.getElementById('g-timezone');
@@ -1127,6 +986,31 @@ let geoDetectEnabled = false;
 })();
 
 // -- Auth --------------------------------------------------------------------
+async function checkAuth() {
+  try {
+    const csrfRes = await fetch('/api/csrf-token');
+    const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
+  } catch (err) {
+    console.warn('Failed to fetch CSRF token:', err);
+  }
+  try {
+    const token = localStorage.getItem('admin-token');
+    if (!token) return;
+    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const data = await res.json();
+    if (data.authenticated) {
+      isAuthenticated = true;
+      adminToken = token;
+      document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
+      await loadSettings();
+    }
+  } catch (err) {
+    console.error('Auth check failed:', err);
+  }
+}
+
 function applyUserUI(user) {
   currentUser = user;
   if (!user) return;
@@ -1135,12 +1019,242 @@ function applyUserUI(user) {
   document.getElementById('user-role').textContent = roleLabels[user.role] || user.role;
   document.getElementById('user-info').classList.remove('hidden');
   document.getElementById('user-info').classList.add('flex','flex-col');
-    if (user.role === 'super_admin') {
+  if (user.role === 'super_admin') {
     const adminUsers = document.getElementById('nav-admin-users');
     const packages = document.getElementById('nav-packages');
     if (adminUsers) { adminUsers.classList.remove('hidden'); adminUsers.classList.add('flex'); }
     if (packages) { packages.classList.remove('hidden'); packages.classList.add('flex'); }
-    if (nameEl) nameEl.value = document.getElementById('g-site-name').value.trim();
+  } else {
+    // Show integration lock notice for non-super admins
+    const lockNotice = document.getElementById('integration-lock');
+    if (lockNotice) lockNotice.classList.remove('hidden');
+  }
+}
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.classList.add('hidden');
+  try {
+    const csrfRes = await fetch('/api/csrf-token', { credentials: 'include' });
+    const { csrfToken } = await csrfRes.json();
+    window.csrfToken = csrfToken;
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      isAuthenticated = true;
+      adminToken = data.token;
+      localStorage.setItem('admin-token', adminToken);
+      document.getElementById('login-overlay').classList.add('hidden');
+      applyUserUI(data.user);
+      await loadSettings();
+    } else {
+      errorEl.textContent = data.error || 'Invalid email or password.';
+      errorEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    errorEl.textContent = 'Login failed. Please try again.';
+    errorEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('login-email').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
+});
+document.getElementById('login-password').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  localStorage.removeItem('admin-token');
+  location.reload();
+});
+
+// -- API Helpers -------------------------------------------------------------
+function authHeaders(extra) {
+  const headers = { 'x-admin-token': adminToken, 'Content-Type': 'application/json' };
+  if (window.csrfToken) {
+    headers['x-csrf-token'] = window.csrfToken;
+  }
+  return Object.assign(headers, extra || {});
+}
+
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  const bgColor = type === 'error' ? 'bg-red-500/90' : 'bg-primary/90';
+  toast.className = `fixed bottom-6 right-6 z-50 ${bgColor} text-white px-6 py-3 rounded-xl shadow-lg font-medium text-sm`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+function isSuperAdmin() {
+  return currentUser && currentUser.role === 'super_admin';
+}
+
+// -- Navigation Tabs --------------------------------------------------------
+function showTab(name) {
+  const panels = ['general', 'integrations'];
+  panels.forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    const btn = document.getElementById(`tab-${p}-btn`);
+    if (p === name) {
+      el.classList.remove('hidden');
+      btn.className = 'px-6 py-3 text-sm tab-active transition';
+    } else {
+      el.classList.add('hidden');
+      btn.className = 'px-6 py-3 text-sm tab-inactive transition';
+    }
+  });
+}
+
+function showSubTab(name) {
+  const subpanels = ['payment', 'email', 'webhooks', 'firebase'];
+  subpanels.forEach(sp => {
+    const el = document.getElementById(`spanel-${sp}`);
+    const btn = document.getElementById(`stab-${sp}-btn`);
+    if (sp === name) {
+      el.classList.remove('hidden');
+      btn.className = 'stab-active px-5 py-2 rounded-lg text-sm transition';
+    } else {
+      el.classList.add('hidden');
+      btn.className = 'stab-inactive px-5 py-2 rounded-lg text-sm transition';
+    }
+  });
+}
+
+// -- Load Settings -----------------------------------------------------------
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/admin/settings', { headers: { 'x-admin-token': adminToken } });
+    if (!res.ok) throw new Error('Failed to load settings');
+    const data = await res.json();
+    serverSettings = data;
+
+    // General settings
+    document.getElementById('g-site-name').value = data.site_name || '';
+    document.getElementById('g-site-desc').value = data.site_description || data.site_desc || '';
+    document.getElementById('g-support-email').value = data.support_email || '';
+    document.getElementById('g-timezone').value = data.timezone || 'UTC'; // touched
+
+    // Branding settings
+    document.getElementById('br-site-name').value = data.site_name || '';
+    document.getElementById('br-tagline').value = data.site_tagline || '';
+    document.getElementById('br-logo-url').value = data.site_logo_url || '';
+    document.getElementById('br-favicon-url').value = data.site_favicon_url || '';
+    updateBrandingPreview('logo');
+    updateBrandingPreview('favicon');
+
+    // Currency settings
+    document.getElementById('g-currency').value = data.default_currency || 'USD';
+    geoDetectEnabled = data.currency_geo_detect === 'true' || data.currency_geo_detect === true;
+    updateGeoToggle();
+
+    // Outbound webhooks
+    const wh = data.integration_webhooks || {};
+    document.getElementById('wh-payment-url').value = wh.payment_notify_url || '';
+    document.getElementById('wh-sub-url').value = wh.subscription_notify_url || '';
+    document.getElementById('wh-secret').value = wh.secret || '';
+
+    // ClickPesa
+    const cp = data.integration_clickpesa || {};
+    providerEnabled.clickpesa = cp.enabled === true || cp.enabled === 'true';
+    updateProviderToggle('clickpesa');
+    document.getElementById('cp-env').value = cp.environment || 'sandbox';
+    document.getElementById('cp-merchant-id').value = cp.merchant_id || '';
+    document.getElementById('cp-api-key').value = cp.api_key || '';
+    document.getElementById('cp-api-secret').value = cp.api_secret || '';
+    document.getElementById('cp-callback-url').value = window.location.origin + '/webhooks/clickpesa';
+
+    // Flutterwave
+    const fw = data.integration_flutterwave || {};
+    providerEnabled.flutterwave = fw.enabled === true || fw.enabled === 'true';
+    updateProviderToggle('flutterwave');
+    document.getElementById('fw-env').value = fw.environment || 'sandbox';
+    document.getElementById('fw-pub-key').value = fw.public_key || '';
+    document.getElementById('fw-sec-key').value = fw.secret_key || '';
+    document.getElementById('fw-enc-key').value = fw.encryption_key || '';
+    document.getElementById('fw-webhook-url').value = window.location.origin + '/webhooks/flutterwave';
+
+    // PayPal
+    const pp = data.integration_paypal || {};
+    providerEnabled.paypal = pp.enabled === true || pp.enabled === 'true';
+    updateProviderToggle('paypal');
+    document.getElementById('pp-env').value = pp.environment || 'sandbox';
+    document.getElementById('pp-client-id').value = pp.client_id || '';
+    document.getElementById('pp-client-secret').value = pp.client_secret || '';
+    document.getElementById('pp-webhook-id').value = pp.webhook_id || '';
+    document.getElementById('pp-webhook-url').value = window.location.origin + '/webhooks/paypal';
+
+    // Bank Transfer
+    const bt = data.integration_bank_transfer || {};
+    providerEnabled.bank_transfer = bt.enabled === true || bt.enabled === 'true';
+    updateProviderToggle('bank_transfer');
+    document.getElementById('bt-bank-name').value = bt.bank_name || '';
+    document.getElementById('bt-account-name').value = bt.account_name || '';
+    document.getElementById('bt-account-number').value = bt.account_number || '';
+    document.getElementById('bt-swift-code').value = bt.swift_code || '';
+    document.getElementById('bt-routing-number').value = bt.routing_number || '';
+    document.getElementById('bt-instructions').value = bt.instructions || '';
+
+    // Email Settings
+    const em = data.integration_email || {};
+    document.getElementById('em-provider').value = em.provider || 'smtp';
+    document.getElementById('em-host').value = em.host || '';
+    document.getElementById('em-port').value = em.port || '';
+    document.getElementById('em-secure').checked = em.secure === true || em.secure === 'true';
+    document.getElementById('em-user').value = em.user || '';
+    document.getElementById('em-pass').value = em.pass || '';
+    document.getElementById('em-from-name').value = em.from_name || '';
+    document.getElementById('em-from-email').value = em.from_email || '';
+    onEmailProviderChange();
+
+    // Firebase Settings
+    const fb = data.integration_firebase || {};
+    firebaseEnabled = fb.enabled === true || fb.enabled === 'true';
+    updateFirebaseToggle();
+    document.getElementById('fb-project-id').value = fb.project_id || '';
+    document.getElementById('fb-api-key').value = fb.api_key || '';
+    document.getElementById('fb-auth-domain').value = fb.auth_domain || '';
+    document.getElementById('fb-app-id').value = fb.app_id || '';
+    document.getElementById('fb-storage-bucket').value = fb.storage_bucket || '';
+    document.getElementById('fb-messaging-sender-id').value = fb.messaging_sender_id || '';
+    document.getElementById('fb-measurement-id').value = fb.measurement_id || '';
+    document.getElementById('fb-client-email').value = fb.client_email || '';
+    document.getElementById('fb-private-key').value = fb.private_key || '';
+
+  } catch(e) {
+    showToast('Failed to load settings: ' + e.message, 'error');
+  }
+}
+
+// -- Save General Settings ----------------------------------------------------
+async function saveGeneralSettings() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
+  const btn = document.getElementById('save-general-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const siteName = document.getElementById('g-site-name').value.trim();
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT', headers: authHeaders(),
+      body: JSON.stringify({
+        site_name:        siteName,
+        site_description: document.getElementById('g-site-desc').value.trim(),
+        support_email:    document.getElementById('g-support-email').value.trim(),
+        timezone:         document.getElementById('g-timezone').value,
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    // Sync branding site name
+    const brName = document.getElementById('br-site-name');
+    if (brName) brName.value = siteName;
     showToast('Site settings saved.');
   } catch(e) { showToast(e.message, 'error'); }
   finally { btn.textContent = 'Save Site Settings'; btn.disabled = false; }
@@ -1148,6 +1262,7 @@ function applyUserUI(user) {
 
 // -- Save Branding -------------------------------------------------------------
 async function saveBrandingSettings() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-branding-btn');
   btn.textContent = 'Saving...'; btn.disabled = true;
   try {
@@ -1176,7 +1291,7 @@ async function uploadBrandingImage(input, type) {
   const urlFieldId     = type === 'logo' ? 'br-logo-url'     : 'br-favicon-url';
   const btn            = document.getElementById('save-branding-btn');
   const originalText   = btn.textContent;
-  btn.textContent = 'Uploading�'; btn.disabled = true;
+  btn.textContent = 'Uploading...'; btn.disabled = true;
   try {
     const formData = new FormData();
     formData.append('image', input.files[0]);
@@ -1222,6 +1337,7 @@ function clearBrandingField(type) {
 
 // -- Save Currency ------------------------------------------------------------
 async function saveCurrencySettings() {
+  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
   const btn = document.getElementById('save-currency-btn');
   btn.textContent = 'Saving...'; btn.disabled = true;
   try {
@@ -1248,12 +1364,12 @@ function updateGeoToggle() {
   if (geoDetectEnabled) { btn.className = 'toggle-on'; btn.textContent = 'ON'; }
   else { btn.className = 'toggle-off'; btn.textContent = 'OFF'; }
 }
+
 async function detectCurrency() {
   const statusEl = document.getElementById('geo-status');
-  statusEl.textContent = 'Detecting�';
+  statusEl.textContent = 'Detecting...';
   statusEl.classList.remove('hidden');
   try {
-    // Client-side IP geolocation � no SSRF risk (browser makes the request)
     const res = await fetch('https://ipapi.co/json/');
     if (!res.ok) throw new Error('Geo API unavailable');
     const data = await res.json();
@@ -1261,18 +1377,17 @@ async function detectCurrency() {
     const currency = COUNTRY_CURRENCY[country] || null;
     const currencyName = CURRENCIES.find(c => c.code === currency)?.name || currency;
     if (currency) {
-      statusEl.textContent = `${data.country_name} ? ${currency} (${currencyName})`;
-      // Offer to apply
-      const apply = confirm(`Detected: ${data.country_name} ? ${currency} (${currencyName})\n\nSet this as the default currency?`);
+      statusEl.textContent = `${data.country_name} → ${currency} (${currencyName})`;
+      const apply = confirm(`Detected: ${data.country_name} → ${currency} (${currencyName})\n\nSet this as the default currency?`);
       if (apply) {
         document.getElementById('g-currency').value = currency;
         showToast(`Default currency set to ${currency}. Click "Save Currency Settings" to persist.`);
       }
     } else {
-      statusEl.textContent = `${data.country_name} � no mapped currency`;
+      statusEl.textContent = `${data.country_name} — no mapped currency`;
     }
   } catch(e) {
-    statusEl.textContent = 'Detection failed � geo service unavailable';
+    statusEl.textContent = 'Detection failed — geo service unavailable';
     statusEl.className = 'text-sm font-medium px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20';
   }
 }
@@ -1350,7 +1465,7 @@ async function saveProvider(name) {
     showToast(`${name} settings saved.`);
   } catch(e) { showToast(e.message, 'error'); }
   finally {
-    const labels = { clickpesa: 'Save ClickPesa', flutterwave: 'Save Flutterwave', paypal: 'Save PayPal' };
+    const labels = { clickpesa: 'Save ClickPesa', flutterwave: 'Save Flutterwave', paypal: 'Save PayPal', bank_transfer: 'Save Bank Transfer' };
     btn.textContent = labels[name]; btn.disabled = false;
   }
 }
@@ -1489,10 +1604,7 @@ function parseFbConfigScript() {
     return;
   }
 
-  // Extract the object literal � handles both:
-  //   const firebaseConfig = { ... };
-  //   initializeApp({ ... });
-  //   or a bare { ... } paste
+  // Extract the object literal
   let objStr = raw;
   const assignMatch = raw.match(/=\s*(\{[\s\S]*?\})\s*;?\s*$/);
   const callMatch   = raw.match(/initializeApp\s*\(\s*(\{[\s\S]*?\})\s*\)/);
@@ -1500,7 +1612,7 @@ function parseFbConfigScript() {
   else if (callMatch) objStr = callMatch[1];
   else { const bare = raw.match(/^\s*(\{[\s\S]*\})\s*;?\s*$/); if (bare) objStr = bare[1]; }
 
-  // Parse key:value pairs supporting both quoted and unquoted keys
+  // Parse key:value pairs
   const map = {};
   const kvRe = /["']?([\w]+)["']?\s*:\s*["']([^"']*)["']/g;
   let m;
@@ -1518,16 +1630,18 @@ function parseFbConfigScript() {
 
   let filled = 0;
   for (const [key, elId] of Object.entries(fieldMap)) {
-    if (map[key]) { setVal(elId, map[key]); filled++; }
+    if (map[key]) {
+      const el = document.getElementById(elId);
+      if (el) { el.value = map[key]; filled++; }
+    }
   }
 
   if (filled > 0) {
-    msg.textContent = `? ${filled} field${filled > 1 ? 's' : ''} populated. Review below and save.`;
+    msg.textContent = `✓ ${filled} field${filled > 1 ? 's' : ''} populated. Review below and save.`;
     msg.className = 'text-sm text-emerald-400';
-    // Scroll to public SDK card
     document.getElementById('fb-paste-card').nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    msg.textContent = 'No recognizable fields found � check the pasted text.';
+    msg.textContent = 'No recognizable fields found — check the pasted text.';
     msg.className = 'text-sm text-red-400';
   }
   msg.classList.remove('hidden');
@@ -1618,14 +1732,14 @@ async function saveFirebaseSettings() {
 async function testFirebaseConfig() {
   const statusRow = document.getElementById('fb-status-row');
   statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300';
-  statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px] animate-spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Testing Firebase connection�';
+  statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px] animate-spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Testing Firebase connection...';
   statusRow.classList.remove('hidden');
   try {
     const res = await fetch('/api/firebase-config');
     const data = await res.json();
     if (data.enabled && data.projectId) {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Public SDK active � Project: <strong>${data.projectId}</strong>`;
+      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Public SDK active — Project: <strong>${data.projectId}</strong>`;
     } else {
       statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400';
       statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-warning"/></svg> Firebase not enabled or not configured yet.';
