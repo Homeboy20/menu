@@ -306,6 +306,9 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
         </button>
       </div>
 
+      <!-- Hidden reCAPTCHA container for Firebase Phone Auth -->
+      <div id="recaptcha-container"></div>
+
       <!-- VERIFICATION SUB-PANEL (Initially Hidden) -->
       <div id="verification-panel" class="hidden" style="margin-top:1rem">
         <div class="section-label" style="margin-bottom:0.5rem">Verification Required</div>
@@ -635,6 +638,20 @@ async function s1Next() {
   btn.innerHTML = 'Sending codes... <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>';
 
   try {
+    // 1. Send SMS via Firebase if configured
+    if (_fbAuth) {
+      try {
+        _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
+      } catch (fbErr) {
+        console.error('Firebase Phone Auth error:', fbErr);
+        showError('s1-error', 'SMS delivery failed: ' + (fbErr.message || fbErr));
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        return;
+      }
+    }
+
+    // 2. Call server to send email OTP
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
       .then(d => d.csrfToken || d.token || '')
@@ -666,7 +683,7 @@ async function s1Next() {
     if (data.dev_email_otp && data.dev_phone_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = data.dev_phone_otp;
+      el('dev-phone-code').textContent = _fbAuth ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
     } else {
       el('dev-otp-helper').classList.add('hidden');
     }
@@ -703,6 +720,15 @@ async function resendVerificationCodes() {
   clearError('verif-error');
 
   try {
+    if (_fbAuth) {
+      try {
+        _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
+      } catch (fbErr) {
+        showError('verif-error', 'Failed to resend SMS: ' + (fbErr.message || fbErr));
+        return;
+      }
+    }
+
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
       .then(d => d.csrfToken || d.token || '')
@@ -732,7 +758,7 @@ async function resendVerificationCodes() {
     if (data.dev_email_otp && data.dev_phone_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = data.dev_phone_otp;
+      el('dev-phone-code').textContent = _fbAuth ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
     }
   } catch (err) {
     showError('verif-error', 'Failed to resend. Please check connection.');
@@ -743,6 +769,9 @@ async function resendVerificationCodes() {
 }
 
 // Handle code typing
+// Phone OTP confirmation result from Firebase
+let _fbPhoneConfirmResult = null;
+
 async function onVerifCodeInput(type) {
   const email = el('s1-email').value.trim();
   const inputEl = el(`verif-${type}-code`);
@@ -753,7 +782,47 @@ async function onVerifCodeInput(type) {
   if (code.length === 6 && /^\d{6}$/.test(code)) {
     statusEl.textContent = 'Verifying...';
     statusEl.style.color = 'var(--accent)';
-    
+
+    // Phone: if Firebase confirmation result is available, use it
+    if (type === 'phone' && _fbPhoneConfirmResult) {
+      try {
+        const credential = await _fbPhoneConfirmResult.confirm(code);
+        const idToken = await credential.user.getIdToken();
+
+        // Tell server to mark phone_verified
+        const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
+          .then(r => r.json()).then(d => d.csrfToken || d.token || '').catch(() => '');
+
+        const res = await fetch('/api/customers/verify-phone-firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+          credentials: 'include',
+          body: JSON.stringify({ email, idToken })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          statusEl.textContent = '✓ Verified';
+          statusEl.style.color = 'var(--success)';
+          inputEl.disabled = true;
+          _verifiedPhone = true;
+          if (_verifiedEmail && _verifiedPhone) el('btn-verif-proceed').disabled = false;
+        } else {
+          statusEl.textContent = '✗ Invalid';
+          statusEl.style.color = 'var(--error)';
+          showError('verif-error', data.error || 'Phone verification failed.');
+        }
+      } catch (fbErr) {
+        statusEl.textContent = '✗ Invalid';
+        statusEl.style.color = 'var(--error)';
+        const msg = fbErr.code === 'auth/invalid-verification-code'
+          ? 'Incorrect SMS code. Please check and try again.'
+          : (fbErr.message || 'Phone verification failed.');
+        showError('verif-error', msg);
+      }
+      return;
+    }
+
+    // Fallback: server-side OTP (dev/no Firebase)
     try {
       const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
         .then(r => r.json())
@@ -1532,7 +1601,19 @@ async function initFirebaseReg(cfg){
     const{initializeApp,getApps}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
     const{getAuth,GoogleAuthProvider,signInWithPopup,signInWithPhoneNumber,RecaptchaVerifier}=await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
     const app=getApps().length?getApps()[0]:initializeApp(cfg);
-    _fbAuth=getAuth(app);_fbAuth._gp=new GoogleAuthProvider();_fbAuth._rv=RecaptchaVerifier;_fbAuth._swp=signInWithPopup;_fbAuth._swpn=signInWithPhoneNumber;
+    const auth=getAuth(app);
+    _fbAuth=auth;
+    _fbAuth._gp=new GoogleAuthProvider();
+    _fbAuth._rv=RecaptchaVerifier;
+    _fbAuth._swp=signInWithPopup;
+    _fbAuth._swpn=signInWithPhoneNumber;
+
+    // Set up invisible reCAPTCHA for phone auth
+    _fbAuth._recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      size: 'invisible',
+      callback: () => {}
+    });
+
     el('btn-google').style.display='';
   }catch(e){console.warn('Firebase load error:',e);}
 }

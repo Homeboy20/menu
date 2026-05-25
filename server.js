@@ -2876,6 +2876,68 @@ app.post('/api/customers/verify-otp', verificationLimiter, doubleCsrfProtection,
   }
 });
 
+// POST /api/customers/verify-phone-firebase
+// Verify a Firebase phone auth idToken and mark phone_verified in registration_verifications.
+// This is used when Firebase Phone Auth delivers the real SMS OTP instead of our simulated one.
+app.post('/api/customers/verify-phone-firebase', verificationLimiter, doubleCsrfProtection, async (req, res) => {
+  if (!firebaseAdmin) {
+    return res.status(503).json({ error: 'Firebase is not configured. Please contact support.' });
+  }
+  try {
+    const { email, idToken } = req.body || {};
+    if (!email || !idToken) {
+      return res.status(400).json({ error: 'email and idToken are required.' });
+    }
+
+    // Verify the Firebase ID token
+    let decoded;
+    try {
+      decoded = await firebaseAdmin.auth().verifyIdToken(String(idToken).trim());
+    } catch (firebaseErr) {
+      const code = firebaseErr.code || '';
+      if (code === 'auth/id-token-expired') return res.status(401).json({ error: 'Token expired. Please try again.' });
+      return res.status(401).json({ error: 'Could not verify Firebase token. Please try again.' });
+    }
+
+    // Token must have a phone_number claim (phone auth)
+    if (!decoded.phone_number) {
+      return res.status(400).json({ error: 'This token does not contain a verified phone number.' });
+    }
+
+    const cleanEmail = sanitizeEmail(email);
+    const { rows } = await pool.query(
+      'SELECT * FROM registration_verifications WHERE email = $1 LIMIT 1',
+      [cleanEmail]
+    );
+
+    if (!rows.length) {
+      return res.status(400).json({ error: 'No pending registration found. Please start over.' });
+    }
+
+    if (new Date(rows[0].expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Registration session expired. Please start over.' });
+    }
+
+    // Mark phone_verified
+    const updateRes = await pool.query(
+      'UPDATE registration_verifications SET phone_verified = 1 WHERE email = $1 RETURNING email_verified, phone_verified',
+      [cleanEmail]
+    );
+
+    const status = updateRes.rows[0];
+    res.json({
+      success: true,
+      message: 'Phone number verified successfully.',
+      email_verified: status.email_verified === 1,
+      phone_verified: status.phone_verified === 1
+    });
+  } catch (err) {
+    console.error('Firebase phone verify error:', err);
+    res.status(500).json({ error: 'Phone verification failed. Please try again.' });
+  }
+});
+
+
 // POST /api/payments/paypal/create-order-public - Create PayPal order before registration (no auth)
 app.post('/api/payments/paypal/create-order-public', async (req, res) => {
   try {
