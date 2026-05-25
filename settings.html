@@ -423,7 +423,7 @@
       <button id="stab-payment-btn" onclick="showSubTab('payment')" class="stab-active px-5 py-2 rounded-lg text-sm transition">Payment</button>
       <button id="stab-email-btn" onclick="showSubTab('email')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Email</button>
       <button id="stab-webhooks-btn" onclick="showSubTab('webhooks')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Webhooks</button>
-      <button id="stab-firebase-btn" onclick="showSubTab('firebase')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">Firebase</button>
+
       <button id="stab-sms-btn" onclick="showSubTab('sms')" class="stab-inactive px-5 py-2 rounded-lg text-sm transition">SMS</button>
     </div>
 
@@ -779,93 +779,6 @@
             </div>
           </div>
           <button id="fb-toggle-btn" onclick="toggleFirebase()" class="toggle-off">Disabled</button>
-        </div>
-      </div>
-
-      <!-- Quick Paste Config -->
-      <div class="card space-y-4 mb-6" id="fb-paste-card">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-sky-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-content_paste"/></svg>
-          <div>
-            <h3 class="text-lg font-bold">Quick Setup &mdash; Paste Firebase Config</h3>
-            <p class="text-sm text-slate-400 mt-0.5">Copy the config snippet from Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; SDK setup &rarr; Config, then paste it below</p>
-          </div>
-        </div>
-        <div class="bg-sky-500/8 border border-sky-500/20 rounded-xl p-4 text-sm text-sky-300 flex gap-3">
-          <svg class="material-symbols-outlined shrink-0 text-[18px] mt-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-info"/></svg>
-          <span>Paste the full <code class="font-mono bg-slate-800 px-1 rounded">const firebaseConfig = { ... }</code> block or just the object literal. All matching fields will be auto-populated below.</span>
-        </div>
-        <div>
-          <label class="card-label">Firebase Config Script</label>
-          <textarea id="fb-paste-input" rows="7" class="input-field font-mono text-xs" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;AIzaSy...&quot;,&#10;  authDomain: &quot;my-project.firebaseapp.com&quot;,&#10;  projectId: &quot;my-project&quot;,&#10;  storageBucket: &quot;my-project.appspot.com&quot;,&#10;  messagingSenderId: &quot;123456789&quot;,&#10;  appId: &quot;1:123:web:abc&quot;,&#10;  measurementId: &quot;G-XXXXXX&quot;&#10;};"></textarea>
-        </div>
-        <div class="flex items-center gap-3">
-          <button onclick="parseFbConfigScript()" class="save-btn">
-            <svg class="material-symbols-outlined text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-auto_fix_high"/></svg>Parse &amp; Fill Fields
-          </button>
-          <span id="fb-parse-msg" class="text-sm hidden"></span>
-        </div>
-      </div>
-
-      <!-- Public SDK Config -->
-      <div class="card space-y-5 mb-6">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-amber-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-public"/></svg>
-          <div>
-            <h3 class="text-lg font-bold">Public SDK Config</h3>
-            <p class="text-sm text-slate-400 mt-0.5">Used by the browser. Safe to expose &mdash; these are your Firebase web app credentials</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="card-label">Project ID</label>
-            <input id="fb-project-id" type="text" class="input-field" placeholder="my-project-12345"/>
-          </div>
-          <div>
-            <label class="card-label">Web API Key</label>
-            <div class="pw-wrap">
-              <input id="fb-api-key" type="password" class="input-field" placeholder="AIzaSy"/>
-              <button class="pw-eye" onclick="togglePw('fb-api-key')" type="button"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg></button>
-            </div>
-          </div>
-          <div class="md:col-span-2">
-            <label class="card-label">Auth Domain <span class="text-slate-500 font-normal">(leave blank to auto-fill: project-id.firebaseapp.com)</span></label>
-            <input id="fb-auth-domain" type="text" class="input-field" placeholder="my-project-12345.firebaseapp.com"/>
-          </div>
-          <div class="md:col-span-2">
-            <label class="card-label">App ID <span class="text-slate-500 font-normal">(Firebase Console &rarr; Project Settings &rarr; Your apps &rarr; App ID)</span></label>
-            <input id="fb-app-id" type="text" class="input-field" placeholder="1:123456789:web:abcdef01234567890"/>
-          </div>
-          <div>
-            <label class="card-label">Storage Bucket <span class="text-slate-500 font-normal">(optional &middot; for file storage)</span></label>
-            <input id="fb-storage-bucket" type="text" class="input-field" placeholder="my-project-12345.appspot.com"/>
-          </div>
-          <div>
-            <label class="card-label">Messaging Sender ID <span class="text-slate-500 font-normal">(optional &middot; for push notifications)</span></label>
-            <input id="fb-messaging-sender-id" type="text" class="input-field" placeholder="123456789012"/>
-          </div>
-          <div class="md:col-span-2">
-            <label class="card-label">Measurement ID <span class="text-slate-500 font-normal">(optional &middot; for Google Analytics)</span></label>
-            <input id="fb-measurement-id" type="text" class="input-field" placeholder="G-XXXXXXXXXX"/>
-          </div>
-        </div>
-      </div>
-
-      <!-- Admin / Server SDK Config -->
-      <div class="card space-y-5">
-        <div class="section-header">
-          <svg class="material-symbols-outlined text-red-400" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-admin_panel_settings"/></svg>
-          <div>
-            <h3 class="text-lg font-bold">Server-Side Admin SDK</h3>
-            <p class="text-sm text-slate-400 mt-0.5">Used by the server to verify Firebase ID tokens. Download from Firebase Console &rarr; Project Settings &rarr; Service Accounts</p>
-          </div>
-        </div>
-        <div class="bg-amber-500/8 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300 flex gap-3">
-          <svg class="material-symbols-outlined shrink-0 text-[18px] mt-0.5" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-restart_alt"/></svg>
-          <span>Changes to Admin SDK credentials require a server restart to take effect. Public SDK config updates are instant.</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="md:col-span-2">
             <label class="card-label">Service Account Email</label>
             <input id="fb-client-email" type="email" class="input-field" placeholder="firebase-adminsdk-xxxxx@my-project.iam.gserviceaccount.com"/>
           </div>
@@ -1164,7 +1077,7 @@ function showTab(name) {
 }
 
 function showSubTab(name) {
-  const subpanels = ['payment', 'email', 'webhooks', 'firebase', 'sms'];
+  const subpanels = ['payment', 'email', 'webhooks', 'sms'];
   subpanels.forEach(sp => {
     const el = document.getElementById(`spanel-${sp}`);
     const btn = document.getElementById(`stab-${sp}-btn`);
@@ -1264,10 +1177,7 @@ async function loadSettings() {
     document.getElementById('em-from-email').value = em.from_email || '';
     onEmailProviderChange();
 
-    // Firebase Settings
-    const fb = data.integration_firebase || {};
-    firebaseEnabled = fb.enabled === true || fb.enabled === 'true';
-    updateFirebaseToggle();
+
     document.getElementById('fb-project-id').value = fb.project_id || '';
     document.getElementById('fb-api-key').value = fb.api_key || '';
     document.getElementById('fb-auth-domain').value = fb.auth_domain || '';
@@ -1647,164 +1557,7 @@ async function saveWebhookSettings() {
   finally { btn.textContent = 'Save Webhook Settings'; btn.disabled = false; }
 }
 
-// -- Firebase Settings ---------------------------------------------------------
-let firebaseEnabled = false;
 
-function parseFbConfigScript() {
-  const raw = document.getElementById('fb-paste-input').value.trim();
-  const msg = document.getElementById('fb-parse-msg');
-  if (!raw) {
-    msg.textContent = 'Paste the Firebase config snippet first.';
-    msg.className = 'text-sm text-amber-400';
-    msg.classList.remove('hidden');
-    return;
-  }
-
-  // Extract the object literal
-  let objStr = raw;
-  const assignMatch = raw.match(/=\s*(\{[\s\S]*?\})\s*;?\s*$/);
-  const callMatch   = raw.match(/initializeApp\s*\(\s*(\{[\s\S]*?\})\s*\)/);
-  if (assignMatch)  objStr = assignMatch[1];
-  else if (callMatch) objStr = callMatch[1];
-  else { const bare = raw.match(/^\s*(\{[\s\S]*\})\s*;?\s*$/); if (bare) objStr = bare[1]; }
-
-  // Parse key:value pairs
-  const map = {};
-  const kvRe = /["']?([\w]+)["']?\s*:\s*["']([^"']*)["']/g;
-  let m;
-  while ((m = kvRe.exec(objStr)) !== null) map[m[1]] = m[2];
-
-  const fieldMap = {
-    apiKey:            'fb-api-key',
-    authDomain:        'fb-auth-domain',
-    projectId:         'fb-project-id',
-    storageBucket:     'fb-storage-bucket',
-    messagingSenderId: 'fb-messaging-sender-id',
-    appId:             'fb-app-id',
-    measurementId:     'fb-measurement-id',
-  };
-
-  let filled = 0;
-  for (const [key, elId] of Object.entries(fieldMap)) {
-    if (map[key]) {
-      const el = document.getElementById(elId);
-      if (el) { el.value = map[key]; filled++; }
-    }
-  }
-
-  if (filled > 0) {
-    msg.textContent = `✓ ${filled} field${filled > 1 ? 's' : ''} populated. Review below and save.`;
-    msg.className = 'text-sm text-emerald-400';
-    document.getElementById('fb-paste-card').nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    msg.textContent = 'No recognizable fields found — check the pasted text.';
-    msg.className = 'text-sm text-red-400';
-  }
-  msg.classList.remove('hidden');
-}
-
-function toggleFirebase() {
-  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
-  firebaseEnabled = !firebaseEnabled;
-  updateFirebaseToggle();
-}
-function updateFirebaseToggle() {
-  const btn = document.getElementById('fb-toggle-btn');
-  if (!btn) return;
-  if (firebaseEnabled) { btn.className = 'toggle-on'; btn.textContent = 'Enabled'; }
-  else { btn.className = 'toggle-off'; btn.textContent = 'Disabled'; }
-}
-function toggleFbKey() {
-  const el = document.getElementById('fb-private-key');
-  const btn = el.nextElementSibling?.querySelector?.('.material-symbols-outlined') || el.parentElement.querySelector('.material-symbols-outlined');
-  const isHidden = el.style.webkitTextSecurity === 'disc' || el.getAttribute('data-masked') === '1';
-  if (isHidden) {
-    el.style.webkitTextSecurity = '';
-    el.style.textSecurity = '';
-    el.setAttribute('data-masked', '0');
-    if (btn) btn.textContent = 'visibility_off';
-  } else {
-    el.style.webkitTextSecurity = 'disc';
-    el.style.textSecurity = 'disc';
-    el.setAttribute('data-masked', '1');
-    if (btn) btn.textContent = 'visibility';
-  }
-}
-async function saveFirebaseSettings() {
-  if (!isSuperAdmin()) { showToast('Super Admin only.', 'error'); return; }
-  const btn = document.getElementById('save-fb-btn');
-  btn.textContent = 'Saving...'; btn.disabled = true;
-
-  const existing = serverSettings.integration_firebase || {};
-  const privateKeyRaw        = document.getElementById('fb-private-key').value.trim();
-  const apiKeyRaw            = document.getElementById('fb-api-key').value.trim();
-  const projectId            = document.getElementById('fb-project-id').value.trim();
-  const authDomain           = document.getElementById('fb-auth-domain').value.trim();
-  const appId                = document.getElementById('fb-app-id').value.trim();
-  const storageBucket        = document.getElementById('fb-storage-bucket').value.trim();
-  const messagingSenderId    = document.getElementById('fb-messaging-sender-id').value.trim();
-  const measurementId        = document.getElementById('fb-measurement-id').value.trim();
-  const clientEmail          = document.getElementById('fb-client-email').value.trim();
-
-  const config = {
-    enabled:              firebaseEnabled,
-    project_id:           projectId,
-    api_key:              apiKeyRaw         || existing.api_key             || '',
-    auth_domain:          authDomain        || (projectId ? `${projectId}.firebaseapp.com` : existing.auth_domain || ''),
-    app_id:               appId             || existing.app_id              || '',
-    storage_bucket:       storageBucket     || existing.storage_bucket      || '',
-    messaging_sender_id:  messagingSenderId || existing.messaging_sender_id || '',
-    measurement_id:       measurementId     || existing.measurement_id      || '',
-    client_email:         clientEmail       || existing.client_email        || '',
-    private_key:          privateKeyRaw     || existing.private_key         || '',
-  };
-
-  if (config.enabled && (!config.project_id || !config.api_key)) {
-    showToast('Project ID and Web API Key are required to enable Firebase.', 'error');
-    btn.textContent = 'Save Firebase Settings'; btn.disabled = false;
-    return;
-  }
-  if (config.enabled && (!config.client_email || !config.private_key)) {
-    showToast('Service Account Email and Private Key are required for Google/Phone sign-in to work.', 'error');
-    btn.textContent = 'Save Firebase Settings'; btn.disabled = false;
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/admin/settings', {
-      method: 'PUT', headers: authHeaders(),
-      body: JSON.stringify({ integration_firebase: config })
-    });
-    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
-    serverSettings.integration_firebase = config;
-    const row = document.getElementById('fb-status-row');
-    row.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-    row.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Settings saved. Restart the server for Admin SDK changes to take effect.';
-    row.classList.remove('hidden');
-    showToast('Firebase settings saved.');
-  } catch(e) { showToast(e.message, 'error'); }
-  finally { btn.textContent = 'Save Firebase Settings'; btn.disabled = false; }
-}
-async function testFirebaseConfig() {
-  const statusRow = document.getElementById('fb-status-row');
-  statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300';
-  statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px] animate-spin" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg> Testing Firebase connection...';
-  statusRow.classList.remove('hidden');
-  try {
-    const res = await fetch('/api/firebase-config');
-    const data = await res.json();
-    if (data.enabled && data.projectId) {
-      statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400';
-      statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Public SDK active — Project: <strong>${data.projectId}</strong>`;
-    } else {
-      statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400';
-      statusRow.innerHTML = '<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-warning"/></svg> Firebase not enabled or not configured yet.';
-    }
-  } catch(e) {
-    statusRow.className = 'p-3 rounded-xl text-sm flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400';
-    statusRow.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-error"/></svg> Test failed: ${e.message}`;
-  }
-}
 
 
 // -- SMS Settings -------------------------------------------------------------

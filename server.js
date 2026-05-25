@@ -21,55 +21,6 @@ const xss          = require('xss');
 const nodemailer   = require('nodemailer');
 const dns          = require('dns');
 
-// ── Firebase Admin SDK (optional – set FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY) ──
-let firebaseAdmin = null;
-try {
-  const fa = require('firebase-admin');
-  if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-    fa.initializeApp({
-      credential: fa.credential.cert({
-        projectId:   process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey:  process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      }),
-    });
-    firebaseAdmin = fa;
-    console.log('✓ Firebase Admin SDK initialized');
-  } else {
-    console.warn('  ⚠  Firebase Admin not configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY in .env');
-  }
-} catch (e) {
-  console.warn('  ⚠  firebase-admin package not available:', e.message);
-}
-
-// Re-initialize Firebase Admin SDK from DB settings (called after settings update)
-async function reinitFirebaseAdmin() {
-  try {
-    const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_firebase'");
-    if (!rows.length) { console.warn('  ⚠  Firebase: no integration_firebase row in app_settings'); return; }
-    let cfg; try { cfg = JSON.parse(rows[0].value); } catch(e) { console.warn('  ⚠  Firebase: could not parse integration_firebase JSON'); return; }
-    if (!cfg || !cfg.enabled) { console.warn('  ⚠  Firebase: integration not enabled in settings'); return; }
-    if (!cfg.project_id)   { console.warn('  ⚠  Firebase Admin: missing project_id in settings'); return; }
-    if (!cfg.client_email)  { console.warn('  ⚠  Firebase Admin: missing client_email (Service Account Email) in settings'); return; }
-    if (!cfg.private_key)   { console.warn('  ⚠  Firebase Admin: missing private_key (Service Account Key) in settings'); return; }
-    const fa = require('firebase-admin');
-    // Delete existing default app if present
-    try { await fa.app().delete(); } catch(e) { /* no existing app */ }
-    fa.initializeApp({
-      credential: fa.credential.cert({
-        projectId:   cfg.project_id,
-        clientEmail: cfg.client_email,
-        privateKey:  cfg.private_key.replace(/\\n/g, '\n'),
-      }),
-    });
-    firebaseAdmin = fa;
-    console.log('✓ Firebase Admin SDK initialized from DB settings');
-  } catch(e) {
-    console.warn('  ⚠  Firebase Admin init failed:', e.message);
-  }
-}
-
-
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 // Auto-detect HTTPS in production, default to HTTP in development
@@ -542,12 +493,6 @@ app.get('/menu', async (req, res, next) => {
   res.sendFile(path.join(__dirname, 'menu.html'));
 });
 
-// ── Firebase Auth Handler Proxy ──────────────────────────────────────────────
-// When authDomain is set to the custom domain (restorder.online), Firebase SDK
-// opens /__/auth/handler on this origin. Proxy those requests to Firebase Hosting.
-app.use('/__/auth', (req, res) => {
-  const firebaseProject = process.env.FIREBASE_PROJECT_ID || 'restorder-d70f5';
-  const target = `${firebaseProject}.firebaseapp.com`;
   const proxyPath = '/__/auth' + req.url;
   const options = {
     hostname: target,
@@ -1981,48 +1926,7 @@ app.get('/api/geo', (req, res) => {
   res.json({ country: country && country !== 'XX' && country !== 'T1' ? country : '' });
 });
 
-// GET /api/firebase-config – return public Firebase config for frontend SDK
-app.get('/api/firebase-config', async (req, res) => {
-  // Check DB-stored settings first (admin UI overrides env vars)
-  try {
-    const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_firebase'");
-    if (rows.length) {
-      let cfg;
-      try { cfg = JSON.parse(rows[0].value); } catch(e) { cfg = null; }
-      if (cfg && cfg.enabled && cfg.project_id && cfg.api_key) {
-        const out = {
-          enabled:    true,
-          apiKey:     cfg.api_key,
-          authDomain: cfg.auth_domain || `${cfg.project_id}.firebaseapp.com`,
-          projectId:  cfg.project_id,
-        };
-        if (cfg.app_id)               out.appId             = cfg.app_id;
-        if (cfg.storage_bucket)       out.storageBucket     = cfg.storage_bucket;
-        if (cfg.messaging_sender_id)  out.messagingSenderId = cfg.messaging_sender_id;
-        if (cfg.measurement_id)       out.measurementId     = cfg.measurement_id;
-        return res.json(out);
-      } else if (cfg && cfg.enabled === false) {
-        return res.json({ enabled: false });
-      }
-    }
-  } catch(e) { /* fall through to env vars */ }
 
-  // Fallback: env vars
-  if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_API_KEY) {
-    return res.json({ enabled: false });
-  }
-  const out = {
-    enabled:    true,
-    apiKey:     process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN || `${process.env.FIREBASE_PROJECT_ID}.firebaseapp.com`,
-    projectId:  process.env.FIREBASE_PROJECT_ID,
-  };
-  if (process.env.FIREBASE_APP_ID)              out.appId             = process.env.FIREBASE_APP_ID;
-  if (process.env.FIREBASE_STORAGE_BUCKET)      out.storageBucket     = process.env.FIREBASE_STORAGE_BUCKET;
-  if (process.env.FIREBASE_MESSAGING_SENDER_ID) out.messagingSenderId = process.env.FIREBASE_MESSAGING_SENDER_ID;
-  if (process.env.FIREBASE_MEASUREMENT_ID)      out.measurementId     = process.env.FIREBASE_MEASUREMENT_ID;
-  res.json(out);
-});
 
 // GET /api/public/branding – public site identity (no auth required)
 app.get('/api/public/branding', async (req, res) => {
@@ -2917,66 +2821,7 @@ app.post('/api/customers/verify-otp', verificationLimiter, doubleCsrfProtection,
   }
 });
 
-// POST /api/customers/verify-phone-firebase
-// Verify a Firebase phone auth idToken and mark phone_verified in registration_verifications.
-// This is used when Firebase Phone Auth delivers the real SMS OTP instead of our simulated one.
-app.post('/api/customers/verify-phone-firebase', verificationLimiter, doubleCsrfProtection, async (req, res) => {
-  if (!firebaseAdmin) {
-    return res.status(503).json({ error: 'Firebase is not configured. Please contact support.' });
-  }
-  try {
-    const { email, idToken } = req.body || {};
-    if (!email || !idToken) {
-      return res.status(400).json({ error: 'email and idToken are required.' });
-    }
 
-    // Verify the Firebase ID token
-    let decoded;
-    try {
-      decoded = await firebaseAdmin.auth().verifyIdToken(String(idToken).trim());
-    } catch (firebaseErr) {
-      const code = firebaseErr.code || '';
-      if (code === 'auth/id-token-expired') return res.status(401).json({ error: 'Token expired. Please try again.' });
-      return res.status(401).json({ error: 'Could not verify Firebase token. Please try again.' });
-    }
-
-    // Token must have a phone_number claim (phone auth)
-    if (!decoded.phone_number) {
-      return res.status(400).json({ error: 'This token does not contain a verified phone number.' });
-    }
-
-    const cleanEmail = sanitizeEmail(email);
-    const { rows } = await pool.query(
-      'SELECT * FROM registration_verifications WHERE email = $1 LIMIT 1',
-      [cleanEmail]
-    );
-
-    if (!rows.length) {
-      return res.status(400).json({ error: 'No pending registration found. Please start over.' });
-    }
-
-    if (new Date(rows[0].expires_at) < new Date()) {
-      return res.status(400).json({ error: 'Registration session expired. Please start over.' });
-    }
-
-    // Mark phone_verified
-    const updateRes = await pool.query(
-      'UPDATE registration_verifications SET phone_verified = 1 WHERE email = $1 RETURNING email_verified, phone_verified',
-      [cleanEmail]
-    );
-
-    const status = updateRes.rows[0];
-    res.json({
-      success: true,
-      message: 'Phone number verified successfully.',
-      email_verified: status.email_verified === 1,
-      phone_verified: status.phone_verified === 1
-    });
-  } catch (err) {
-    console.error('Firebase phone verify error:', err);
-    res.status(500).json({ error: 'Phone verification failed. Please try again.' });
-  }
-});
 
 
 // POST /api/payments/paypal/create-order-public - Create PayPal order before registration (no auth)
@@ -3692,147 +3537,7 @@ app.post('/api/customers/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-// POST /api/customers/firebase-auth – Verify Firebase ID token, upsert customer, return session
-app.post('/api/customers/firebase-auth', loginLimiter, async (req, res) => {
-  if (!firebaseAdmin) return res.status(503).json({ error: 'Firebase authentication is not configured on this server.' });
-  try {
-    const { idToken, businessName } = req.body || {};
-    if (!idToken || typeof idToken !== 'string') return res.status(400).json({ error: 'idToken is required.' });
 
-    // Verify token with Firebase Admin – this also checks expiry + signature
-    let decoded;
-    try {
-      decoded = await firebaseAdmin.auth().verifyIdToken(String(idToken).trim());
-    } catch (firebaseErr) {
-      const code = firebaseErr.code || '';
-      if (code === 'auth/id-token-expired') return res.status(401).json({ error: 'Session expired. Please sign in again.' });
-      return res.status(401).json({ error: 'Invalid auth token. Please sign in again.' });
-    }
-
-    const { uid, email, phone_number: phone, name: displayName, picture } = decoded;
-    if (!uid) return res.status(401).json({ error: 'Invalid token payload.' });
-
-    const now = new Date().toISOString();
-    let welcomeEmailContext = null;
-
-    // Look up existing customer: firebase_uid → email → phone
-    let customer = null;
-    {
-      const byUid = await pool.query('SELECT * FROM customers WHERE firebase_uid = $1 LIMIT 1', [uid]);
-      if (byUid.rows.length) { customer = byUid.rows[0]; }
-    }
-    if (!customer && email) {
-      const byEmail = await pool.query('SELECT * FROM customers WHERE email = $1 LIMIT 1', [sanitizeEmail(email)]);
-      if (byEmail.rows.length) { customer = byEmail.rows[0]; }
-    }
-    if (!customer && phone) {
-      const byPhone = await pool.query('SELECT * FROM customers WHERE phone = $1 LIMIT 1', [phone]);
-      if (byPhone.rows.length) { customer = byPhone.rows[0]; }
-    }
-
-    if (customer) {
-      // Account found — link firebase_uid and mark verifications
-      const updates = [];
-      const vals = [];
-      let p = 1;
-      if (!customer.firebase_uid) { updates.push(`firebase_uid=$${p++}`); vals.push(uid); }
-      if (email && !customer.email_verified) { updates.push(`email_verified=$${p++}`); vals.push(1); }
-      if (phone && !customer.phone_verified) { updates.push(`phone_verified=$${p++},phone=$${p++}`); vals.push(1, phone); }
-      updates.push(`last_login=$${p++}`, `login_attempts=$${p++}`, `lockout_until=$${p++}`);
-      vals.push(now, 0, null);
-      vals.push(customer.id);
-      await pool.query(`UPDATE customers SET ${updates.join(',')} WHERE id=$${p}`, vals);
-    } else {
-      // New customer via Firebase — require businessName
-      if (!businessName || !String(businessName).trim()) {
-        return res.status(422).json({ error: 'Business name is required to create a new account.', requiresRegistration: true });
-      }
-      if (!email && !phone) return res.status(400).json({ error: 'No email or phone number in Firebase token.' });
-
-      const cleanEmail = email ? sanitizeEmail(email) : `phone.${uid}@restorder.local`;
-      const cleanBusinessName = sanitizeInput(String(businessName).trim(), 200);
-      const cleanDisplayName = displayName ? sanitizeInput(String(displayName), 200) : '';
-      const randomPwd  = crypto.randomBytes(32).toString('hex');
-      const passwordHash = await bcrypt.hash(randomPwd, 12);
-
-      const ins = await pool.query(
-        `INSERT INTO customers (email, password_hash, business_name, contact_name, phone,
-           email_verified, phone_verified, firebase_uid, status, created_at, updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'active',$9,$9) RETURNING *`,
-        [
-          cleanEmail, passwordHash,
-          cleanBusinessName,
-          cleanDisplayName,
-          phone || '',
-          email ? 1 : 0,
-          phone ? 1 : 0,
-          uid, now
-        ]
-      );
-      customer = ins.rows[0];
-      welcomeEmailContext = {
-        to: customer.email,
-        businessName: cleanBusinessName,
-        contactName: cleanDisplayName,
-      };
-
-      // Create default menu + trial subscription
-      try {
-        const menuId  = crypto.randomUUID();
-        const qrCode  = await generateQRCode(menuId, 1).catch(() => '');
-        await pool.query(`
-          INSERT INTO menus (id, restaurant_name, currency, brand_color, logo_url, tagline,
-            font_style, bg_style, show_logo, show_name, header_layout,
-            text_color, heading_color, bg_color, card_bg, price_color,
-            phone, email, address, website,
-            social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-            tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
-          VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
-            '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
-        `, [menuId, cleanBusinessName, qrCode, now, customer.id]);
-
-        const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
-        if (trialPlan.length) {
-          const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-          await pool.query(
-            `INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
-             VALUES ($1,$2,$3,'trial',$4,$5,$4) ON CONFLICT (customer_id) DO NOTHING`,
-            [menuId, customer.id, trialPlan[0].id, now, trialEnd]
-          );
-          // Mark customer as having used their free trial
-          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
-        }
-      } catch (setupErr) {
-        console.warn('Firebase auth: default menu setup failed:', setupErr.message);
-      }
-    }
-
-    if (customer.status !== 'active') {
-      return res.status(403).json({ error: 'Account is not active. Please contact support.' });
-    }
-
-    if (welcomeEmailContext) {
-      queueWelcomeEmail(welcomeEmailContext);
-    }
-
-    const token = await createCustomerSession(customer.id, customer.email);
-    res.cookie('customerToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: SESSION_TTL
-    });
-    return res.json({
-      userType: 'owner',
-      token,
-      redirectTo: '/dashboard',
-      customer: { id: customer.id, email: customer.email, businessName: customer.business_name }
-    });
-  } catch (err) {
-    console.error('Firebase auth error:', err);
-    res.status(500).json({ error: 'Authentication failed. Please try again.' });
-  }
-});
 
 // GET /api/customers/check - Check customer session
 app.get('/api/customers/check', (req, res) => {
