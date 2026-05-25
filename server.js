@@ -3443,6 +3443,40 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     console.log('DEV: Registered /dev/create-test-customer (POST)');
   }
 
+  // DEV utility: auto-login as an existing test customer (convenience for local UI checks)
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/dev/auto-login', async (req, res) => {
+      try {
+        // Restrict dev auto-login to localhost-only requests to reduce accidental exposure
+        const remote = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || '').split(',')[0].trim();
+        const allowed = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
+        if (!allowed.includes(remote)) {
+          console.warn('Blocked /dev/auto-login request from non-local address:', remote);
+          return res.status(403).send('Forbidden');
+        }
+
+        const email = sanitizeEmail(String(req.query.email || 'local.seed@example.com'));
+        const { rows } = await pool.query('SELECT id, email FROM customers WHERE email = $1 LIMIT 1', [email]);
+        if (!rows.length) return res.status(404).send('Test customer not found. Create one via /dev/create-test-customer');
+        const customer = rows[0];
+        const token = await createCustomerSession(customer.id, customer.email || customer.id);
+        // Set cookie and redirect to the menu editor for quick UI inspection
+        res.cookie('customerToken', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: SESSION_TTL
+        });
+        console.log('DEV: Auto-logged in test customer', { email: customer.email });
+        return res.redirect('/menu-editor');
+      } catch (err) {
+        console.error('DEV auto-login error:', err?.message || err);
+        return res.status(500).json({ error: err.message || String(err) });
+      }
+    });
+    console.log('DEV: Registered /dev/auto-login (GET)');
+  }
+
 // GET /api/customers/verify-email – Click-through email verification link
 app.get('/api/customers/verify-email', async (req, res) => {
   const rawToken = sanitizeStr(String(req.query.token || ''), 128);
@@ -8445,6 +8479,33 @@ app.get('/api/settings/currency', async (req, res) => {
 // ── API 404 handler ───────────────────────────────────────────────────────────
 app.use('/api', (req, res) => {
   res.status(404).json({ error: `API route not found: ${req.method} ${req.path}` });
+});
+
+// ── Dev helper: auto-login seeded customer (NON-PRODUCTION ONLY) ──────────────
+app.get('/dev/auto-login', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') return res.status(404).send('Not found');
+  try {
+    // Restrict to localhost addresses to avoid accidental exposure in networks
+    const remote = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || '').split(',')[0].trim();
+    const allowed = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
+    if (!allowed.includes(remote)) {
+      console.warn('Blocked /dev/auto-login (public request) from:', remote);
+      return res.status(403).send('Forbidden');
+    }
+
+    const email = (req.query.email || 'local.seed@example.com').toLowerCase();
+    const { rows } = await pool.query('SELECT id, email, business_name FROM customers WHERE LOWER(email) = $1 LIMIT 1', [email]);
+    if (!rows.length) return res.status(404).send('Dev seed account not found');
+    const customer = rows[0];
+    const token = await createCustomerSession(customer.id, customer.email);
+    // Also set a cookie so server-side routes accept the session
+    res.cookie('customerToken', token, { httpOnly: false, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    // Send a small script to set localStorage and redirect so client-side checks succeed
+    return res.send(`<!doctype html><meta charset="utf-8"><title>Auto Login</title><script>try{localStorage.setItem('customerToken','${token}');localStorage.setItem('customerEmail','${customer.email}');}catch(e){}window.location.href='/menu-editor';</script>`);
+  } catch (err) {
+    console.error('Dev auto-login failed:', err?.message||err);
+    res.status(500).send('Dev auto-login failed');
+  }
 });
 
 // ── Global error handler (returns JSON for /api routes) ───────────────────────
