@@ -98,6 +98,54 @@
     color: white;
   }
 </style>
+<!-- Design overrides: responsive two-column editor and constrained settings panel -->
+<style>
+  /* Constrain content and place settings as a fixed right panel on wide screens */
+  html,body{overflow-x:hidden}
+  @media (min-width:980px){
+    /* Fixed right settings panel so we don't need to change markup */
+    #section-settings{ position:fixed; right:28px; top:86px; width:360px; height:calc(100vh - 110px); overflow:auto; z-index:8; margin:0; }
+
+    /* Make room for the fixed panel so main content doesn't underflow */
+    main{ padding-right:420px; }
+
+    /* Constrain centered content widths to prevent overly wide whitespace */
+    main .max-w-2xl, main .max-w-4xl, main .mx-auto { max-width:900px; }
+  }
+
+  /* Force main children to expand when flex parent collapses (fallback) */
+  @media (min-width:900px){
+    main > * { max-width: none !important; width: calc(100vw - 420px) !important; }
+  }
+
+  /* Constrain the settings panel visual style */
+  #section-settings { background:#fff; border:1px solid rgba(15,23,42,0.06); border-radius:14px; padding:18px; box-shadow:0 8px 24px rgba(16,24,40,0.04); }
+
+  /* Prevent full-height accent columns from stretching the settings area */
+  #section-settings .bg-primary, #section-settings [class*="bg-primary/"] { height:auto!important; min-height:0!important; }
+
+  /* Tighter form controls inside settings */
+  #section-settings input, #section-settings select, #section-settings textarea { border-radius:10px; border:1px solid rgba(15,23,42,0.06); padding:10px 12px; }
+
+  /* Sidebar & header refinements */
+  aside{ box-shadow:0 6px 20px rgba(2,6,23,0.04); }
+  /* Fallback layout: pin the sidebar on wide screens and give the body left padding */
+  @media(min-width:900px){
+    aside{ position:fixed; left:0; top:0; bottom:0; width:240px; z-index:6; }
+    body{ padding-left:260px; }
+  }
+  .nav-link{ display:flex; align-items:center; gap:12px; }
+  header .size-8{ width:36px; height:36px; border-radius:10px; }
+
+  /* Make toasts slightly narrower on small screens */
+  @media (max-width:640px){ #alert-toast-container{ right:8px; left:8px; max-width:unset; } }
+
+  /* Fix collapsed flex child widths so main can grow */
+  div.flex-1, main { min-width: 0; }
+  main { width: auto; }
+  /* Fallback: explicitly size the flex content area to remaining space when flex shrink miscalculates */
+  body > .flex-1 { flex: none !important; width: calc(100% - 260px) !important; }
+</style>
 </head>
 <body class="bg-bg text-stone-900 min-h-screen flex">
 
@@ -1413,7 +1461,7 @@ function initCurrencySelect() {
 }
 
 // -- Navigation ----------------------------------------------------------------
-const SECTIONS = ['upload', 'preview', 'publish', 'published', 'tables', 'settings'];
+const SECTIONS = ['upload', 'preview', 'publish', 'published', 'tables', 'rooms', 'settings'];
 const TITLES   = { upload: 'Upload Menu', preview: 'Preview & Edit', publish: 'QR & Publish', published: 'Published Menus', tables: 'Table Management', rooms: 'Room Management', settings: 'Settings' };
 
 function showSection(name) {
@@ -1432,7 +1480,7 @@ function showSection(name) {
   if (name === 'published') loadPublished();
   if (name === 'settings') loadSettingsMenuList();
   if (name === 'upload') initCurrencySelect();
-  if (name === 'tables') loadTablesMenuList();
+  if (name === 'tables' || name === 'rooms') loadTablesMenuList();
   // close mobile sidebar
   document.querySelector('aside').classList.add('hidden', 'md:flex');
   document.querySelector('aside').classList.remove('hidden');
