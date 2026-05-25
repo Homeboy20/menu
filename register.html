@@ -640,7 +640,8 @@ async function s1Next() {
   try {
     // 1. Send SMS via Firebase if configured
     let fallbackNotice = '';
-    if (_fbAuth) {
+    const isTanzanianClientSide = phone.replace(/\D/g, '').startsWith('255');
+    if (_fbAuth && isTanzanianClientSide) {
       try {
         _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
       } catch (fbErr) {
@@ -679,26 +680,38 @@ async function s1Next() {
     el('verification-panel').classList.remove('hidden');
 
     // Show dev mode helper
-    if (data.dev_email_otp && data.dev_phone_otp) {
+    if (data.dev_email_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      if (data.requirePhone) {
+        el('dev-phone-code').parentNode.style.display = 'block';
+        el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      } else {
+        el('dev-phone-code').parentNode.style.display = 'none';
+      }
     } else {
       el('dev-otp-helper').classList.add('hidden');
     }
 
     // Reset status
     _verifiedEmail = false;
-    _verifiedPhone = false;
     el('verif-email-code').value = '';
-    el('verif-phone-code').value = '';
     el('verif-email-code').disabled = false;
-    el('verif-phone-code').disabled = false;
     el('verif-email-status').textContent = 'Awaiting code';
     el('verif-email-status').style.color = 'var(--text-dim)';
-    el('verif-phone-status').textContent = 'Awaiting code';
-    el('verif-phone-status').style.color = 'var(--text-dim)';
     el('btn-verif-proceed').disabled = true;
+
+    if (data.requirePhone === false) {
+      _verifiedPhone = true;
+      el('verif-phone-code').parentNode.style.display = 'none';
+    } else {
+      _verifiedPhone = false;
+      el('verif-phone-code').parentNode.style.display = 'block';
+      el('verif-phone-code').value = '';
+      el('verif-phone-code').disabled = false;
+      el('verif-phone-status').textContent = 'Awaiting code';
+      el('verif-phone-status').style.color = 'var(--text-dim)';
+    }
     clearError('verif-error');
 
     if (fallbackNotice) {
@@ -724,7 +737,8 @@ async function resendVerificationCodes() {
 
   try {
     let fallbackNotice = '';
-    if (_fbAuth) {
+    const isTanzanianClientSide = phone.replace(/\D/g, '').startsWith('255');
+    if (_fbAuth && isTanzanianClientSide) {
       try {
         _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
       } catch (fbErr) {
@@ -764,10 +778,15 @@ async function resendVerificationCodes() {
       el('verif-error').style.borderColor = 'rgba(34, 197, 94, 0.25)';
     }
 
-    if (data.dev_email_otp && data.dev_phone_otp) {
+    if (data.dev_email_otp) {
       el('dev-otp-helper').classList.remove('hidden');
       el('dev-email-code').textContent = data.dev_email_otp;
-      el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      if (data.requirePhone) {
+        el('dev-phone-code').parentNode.style.display = 'block';
+        el('dev-phone-code').textContent = (_fbAuth && _fbPhoneConfirmResult) ? 'Sent via Firebase (check phone)' : data.dev_phone_otp;
+      } else {
+        el('dev-phone-code').parentNode.style.display = 'none';
+      }
     }
   } catch (err) {
     showError('verif-error', 'Failed to resend. Please check connection.');

@@ -2758,7 +2758,9 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
 
     // 5. Generate 6-digit OTPs
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const phoneOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const isTanzanian = rawPhone.startsWith('255');
+    const phoneOtp = isTanzanian ? Math.floor(100000 + Math.random() * 900000).toString() : 'SKIPPED';
+    const initialPhoneVerified = isTanzanian ? 0 : 1;
 
     // 15 minutes TTL
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
@@ -2767,16 +2769,16 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
     // 6. Save or update registration verifications
     await pool.query(
       `INSERT INTO registration_verifications (email, phone, email_otp, phone_otp, email_verified, phone_verified, expires_at, created_at)
-       VALUES ($1, $2, $3, $4, 0, 0, $5, $6)
+       VALUES ($1, $2, $3, $4, 0, $7, $5, $6)
        ON CONFLICT (email) DO UPDATE SET
          phone = EXCLUDED.phone,
          email_otp = EXCLUDED.email_otp,
          phone_otp = EXCLUDED.phone_otp,
          email_verified = 0,
-         phone_verified = 0,
+         phone_verified = EXCLUDED.phone_verified,
          expires_at = EXCLUDED.expires_at,
          created_at = EXCLUDED.created_at`,
-      [cleanEmail, phone, emailOtp, phoneOtp, expiresAt, now]
+      [cleanEmail, phone, emailOtp, phoneOtp, expiresAt, now, initialPhoneVerified]
     );
 
     // 7. Send the Email OTP
@@ -2807,46 +2809,48 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
     }
 
     // 8. Log Phone OTP to console (Simulate SMS)
-    console.log(`\n======================================================`);
-    console.log(`[SMS GATEWAY SIMULATION]`);
-    console.log(`To: ${phone}`);
-    console.log(`Message: Your RestOrder phone verification code is: ${phoneOtp}`);
-    console.log(`======================================================\n`);
+    if (isTanzanian) {
+      console.log(`\n======================================================`);
+      console.log(`[SMS GATEWAY SIMULATION]`);
+      console.log(`To: ${phone}`);
+      console.log(`Message: Your RestOrder phone verification code is: ${phoneOtp}`);
+      console.log(`======================================================\n`);
 
-    // Send real SMS if NextSMS integration is enabled
-    try {
-      const { rows: smsSettingsRows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_nextsms'");
-      if (smsSettingsRows.length) {
-        const nextSmsConfig = JSON.parse(smsSettingsRows[0].value);
-        if (nextSmsConfig && nextSmsConfig.enabled && nextSmsConfig.username && nextSmsConfig.pass) {
-          const smsPhone = String(phone).replace(/\D/g, '');
-          const credentials = Buffer.from(`${nextSmsConfig.username}:${nextSmsConfig.pass}`).toString('base64');
-          const smsRes = await fetch('https://messaging-service.co.tz/api/sms/v1/text/single', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Basic ${credentials}`
-            },
-            body: JSON.stringify({
-              from: nextSmsConfig.sender_id || 'NEXTSMS',
-              to: smsPhone,
-              text: `Your RestOrder phone verification code is: ${phoneOtp}`
-            })
-          });
-          if (!smsRes.ok) {
-            const errBody = await smsRes.json().catch(() => ({}));
-            console.error('NextSMS send failed status:', smsRes.status, errBody);
-          } else {
-            console.log(`✓ NextSMS successfully sent to ${smsPhone}`);
+      // Send real SMS if NextSMS integration is enabled
+      try {
+        const { rows: smsSettingsRows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_nextsms'");
+        if (smsSettingsRows.length) {
+          const nextSmsConfig = JSON.parse(smsSettingsRows[0].value);
+          if (nextSmsConfig && nextSmsConfig.enabled && nextSmsConfig.username && nextSmsConfig.pass) {
+            const smsPhone = String(phone).replace(/\D/g, '');
+            const credentials = Buffer.from(`${nextSmsConfig.username}:${nextSmsConfig.pass}`).toString('base64');
+            const smsRes = await fetch('https://messaging-service.co.tz/api/sms/v1/text/single', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${credentials}`
+              },
+              body: JSON.stringify({
+                from: nextSmsConfig.sender_id || 'NEXTSMS',
+                to: smsPhone,
+                text: `Your RestOrder phone verification code is: ${phoneOtp}`
+              })
+            });
+            if (!smsRes.ok) {
+              const errBody = await smsRes.json().catch(() => ({}));
+              console.error('NextSMS send failed status:', smsRes.status, errBody);
+            } else {
+              console.log(`✓ NextSMS successfully sent to ${smsPhone}`);
+            }
           }
         }
+      } catch (smsErr) {
+        console.error('NextSMS integration error:', smsErr.message);
       }
-    } catch (smsErr) {
-      console.error('NextSMS integration error:', smsErr.message);
     }
 
     // 9. Return success status (and OTPs in non-production environments for testing)
-    const response = { success: true, message: 'Verification codes sent.' };
+    const response = { success: true, message: 'Verification codes sent.', requirePhone: isTanzanian };
     if (process.env.NODE_ENV !== 'production') {
       response.dev_email_otp = emailOtp;
       response.dev_phone_otp = phoneOtp;
