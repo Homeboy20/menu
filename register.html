@@ -638,20 +638,11 @@ async function s1Next() {
   btn.innerHTML = 'Sending codes... <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg>';
 
   try {
-    // 1. Send SMS via Firebase if configured
+    // 1. SMS delivery is now handled entirely by the backend (NextSMS)
     let fallbackNotice = '';
-    const isTanzanianClientSide = phone.replace(/\D/g, '').startsWith('255');
-    if (_fbAuth && isTanzanianClientSide) {
-      try {
-        _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
-      } catch (fbErr) {
-        console.warn('Firebase Phone Auth error, falling back to simulated OTP:', fbErr);
-        _fbPhoneConfirmResult = null;
-        fallbackNotice = 'Direct SMS delivery failed. Falling back to simulated verification code.';
-      }
-    }
+    _fbPhoneConfirmResult = null; // Disable Firebase Phone Auth frontend trigger
 
-    // 2. Call server to send email OTP
+    // 2. Call server to send email and phone OTPs
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
       .then(d => d.csrfToken || d.token || '')
@@ -737,16 +728,7 @@ async function resendVerificationCodes() {
 
   try {
     let fallbackNotice = '';
-    const isTanzanianClientSide = phone.replace(/\D/g, '').startsWith('255');
-    if (_fbAuth && isTanzanianClientSide) {
-      try {
-        _fbPhoneConfirmResult = await _fbAuth._swpn(_fbAuth, phone, _fbAuth._recaptchaVerifier);
-      } catch (fbErr) {
-        console.warn('Firebase Phone Auth failed to resend, falling back to simulated OTP:', fbErr);
-        _fbPhoneConfirmResult = null;
-        fallbackNotice = 'Direct SMS delivery failed. Falling back to simulated verification code.';
-      }
-    }
+    _fbPhoneConfirmResult = null; // Disable Firebase Phone Auth frontend trigger
 
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
