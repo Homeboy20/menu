@@ -6,6 +6,38 @@
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
   <title>Pricing - RestOrder | Simple, Transparent Pricing for Every Business</title>
   <meta name="description" content="Free forever plan available. Professional at $39/mo, Enterprise at $99/mo. No contracts, cancel anytime. 30-day money-back guarantee.">
+  <meta name="keywords" content="digital menu pricing, restaurant tech cost, free QR menu, affordable restaurant software">
+  <meta name="author" content="RestOrder">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restorder.com/pricing">
+  <meta property="og:title" content="Pricing - RestOrder">
+  <meta property="og:description" content="Simple, transparent pricing for every restaurant business. Free plan available.">
+  <meta property="og:image" content="https://restorder.com/og-pricing.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://restorder.com/pricing">
+  <meta property="twitter:title" content="Pricing - RestOrder">
+  <meta property="twitter:description" content="Simple, transparent pricing for every restaurant business. Free plan available.">
+  <meta property="twitter:image" content="https://restorder.com/og-pricing.jpg">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "RestOrder Pricing",
+    "description": "Pricing plans for RestOrder digital menu software. From free starter plans to enterprise solutions.",
+    "url": "https://restorder.com/pricing",
+    "publisher": {
+      "@type": "Organization",
+      "name": "RestOrder",
+      "logo": "https://restorder.com/logo.png"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,700;1,9..144,800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -479,21 +511,25 @@
     .plan-price {
       display: flex;
       align-items: baseline;
-      gap: 8px;
+      flex-wrap: wrap;
+      column-gap: 8px;
+      row-gap: 2px;
       margin-bottom: 8px;
     }
     
     .old-price {
-      font-size: 28px;
+      font-size: 24px;
       color: var(--text-light);
       text-decoration: line-through;
       font-weight: 600;
+      width: 100%;
     }
     
     .current-price {
-      font-size: 56px;
+      font-size: clamp(32px, 5vw, 48px);
       font-weight: 900;
       color: var(--text);
+      word-break: break-word;
     }
     
     .price-period {
@@ -890,6 +926,7 @@
     </div>
   </div>
 
+  <main>
   <!-- Hero Section -->
   <section class="hero-pricing">
     <div class="container">
@@ -1126,6 +1163,8 @@
       </div>
     </div>
   </section>
+
+  </main>
 
   <!-- Footer -->
   <footer>
@@ -1367,5 +1406,6 @@
     }).catch(function(){});
 })();
 </script>
+<script src="/js/social-links.js"></script>
 </body>
 </html>

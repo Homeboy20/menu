@@ -6,6 +6,63 @@
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
   <title>RestOrder - Digital Menu Platform for Restaurants, Cafes, Bars & Eateries</title>
   <meta name="description" content="Complete digital menu solution for restaurants, cafes, bars & juice bars. QR codes, real-time updates, analytics, online ordering. Boost sales by 30%. Get started today.">
+  <meta name="keywords" content="digital menu, restaurant menu software, QR code menu, online ordering for restaurants, cafe menu app, contactless menu, AI recommended menu software">
+  <meta name="author" content="RestOrder">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://restorder.com/">
+  <meta property="og:title" content="RestOrder - Digital Menu Platform for Restaurants">
+  <meta property="og:description" content="Complete digital menu solution for restaurants, cafes, bars & juice bars. Boost sales by 30%. Get started today.">
+  <meta property="og:image" content="https://restorder.com/og-image.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://restorder.com/">
+  <meta property="twitter:title" content="RestOrder - Digital Menu Platform">
+  <meta property="twitter:description" content="Complete digital menu solution. QR codes, real-time updates, analytics. Boost sales by 30%.">
+  <meta property="twitter:image" content="https://restorder.com/og-image.jpg">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "RestOrder",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Complete digital menu platform for restaurants, cafes, bars & eateries. QR codes, real-time updates, analytics, online ordering.",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "1247"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "RestOrder",
+    "url": "https://restorder.com",
+    "logo": "https://restorder.com/logo.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@restorder.com"
+    },
+    "sameAs": [
+      "https://facebook.com/restorder",
+      "https://twitter.com/restorder",
+      "https://instagram.com/restorder"
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,700;1,9..144,800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -776,21 +833,6 @@
       overflow: hidden;
     }
     
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--gradient-1);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .feature-card:hover::before {
-      transform: scaleX(1);
-    }
-    
     .feature-card:hover {
       transform: translateY(-8px);
       box-shadow: 0 20px 50px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08);
@@ -973,7 +1015,6 @@
       transform: translateY(-3px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       border-color: #d6d3d1;
-      border-top-color: var(--primary);
     }
     
     .pricing-card.popular {
@@ -1049,6 +1090,7 @@
     .plan-price {
       display: flex;
       align-items: baseline;
+      flex-wrap: wrap;
       gap: 2px;
       margin-bottom: 3px;
     }
@@ -1062,12 +1104,13 @@
     }
     
     .price-amount {
-      font-size: 38px;
+      font-size: clamp(24px, 4vw, 36px);
       font-weight: 800;
       color: var(--text);
       letter-spacing: -0.04em;
       line-height: 1;
       font-family: var(--font-display);
+      word-break: break-word;
     }
     
     .price-period {
@@ -2168,6 +2211,7 @@
     </div>
   </div>
 
+  <main>
   <!-- Hero Section -->
   <section class="hero with-urgency">
     <div class="container hero-content">
@@ -2786,6 +2830,8 @@
       </div>
     </div>
   </section>
+
+  </main>
 
   <!-- Footer -->
   <footer>
@@ -3477,9 +3523,9 @@
 
         let origPriceHtml = '';
         if (isAnnualBilling && hasAnnual && monthlyPrice > 0) {
-          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">${formatLocal(monthlyPrice)}</span>`;
+          origPriceHtml = `<div style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;width:100%;">${formatLocal(monthlyPrice)}</div>`;
         } else if (!isAnnualBilling && origPrice) {
-          origPriceHtml = `<span style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;margin-right:2px;">${formatLocal(origPrice)}</span>`;
+          origPriceHtml = `<div style="text-decoration:line-through;font-size:14px;color:#a8a29e;font-weight:500;width:100%;">${formatLocal(origPrice)}</div>`;
         }
         
         let subtitleText = '';
@@ -3560,5 +3606,6 @@
   <script src="/js/chat-triggers.js"></script>
 
 <script src="/js/icons.js"></script>
+<script src="/js/social-links.js"></script>
 </body>
 </html>

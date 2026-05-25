@@ -170,6 +170,24 @@
       </div>
     </div>
 
+    <!-- Go Live — Free Plan Upgrade Banner -->
+    <div id="go-live-banner" class="hidden mb-6 rounded-2xl overflow-hidden shadow-sm border border-amber-200" style="background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 60%,#fed7aa 100%)">
+      <div class="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-start gap-4">
+          <div class="size-11 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="material-symbols-outlined text-amber-600 text-[22px]" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
+          </div>
+          <div>
+            <p class="font-bold text-amber-900 text-sm">You're in Draft Mode — Go Live with a Paid Plan</p>
+            <p class="text-amber-700 text-xs mt-0.5 max-w-lg">Your menu is visible as a draft preview only. Upgrade to make it fully public, unlock QR printing, analytics, table management, order tracking, and more.</p>
+          </div>
+        </div>
+        <a href="/pricing" class="flex-shrink-0 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-xl transition whitespace-nowrap">
+          View Plans &amp; Go Live →
+        </a>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
@@ -757,38 +775,66 @@ async function loadDashboard() {
         </div>
       `;
     } else {
+      // Determine plan level from first menu's plan_name
+      const planName = (menus[0]?.plan_name || '').toLowerCase();
+      const isPaidPlan = planName && planName !== 'starter' && planName !== 'trial' && planName !== 'free' && planName !== '';
+
+      // Show/hide the "Go Live" upgrade banner
+      const goLiveBanner = document.getElementById('go-live-banner');
+      if (goLiveBanner) goLiveBanner.classList.toggle('hidden', isPaidPlan);
+
       container.innerHTML = `
         <div class="divide-y divide-stone-100">
-          ${menus.map(menu => `
+          ${menus.map(menu => {
+            const mPlan = (menu.plan_name || '').toLowerCase();
+            const mPaid = mPlan && mPlan !== 'starter' && mPlan !== 'trial' && mPlan !== 'free';
+            const lockBadge = `<svg class="material-symbols-outlined text-[12px] opacity-50" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="/icons/sprite.svg#icon-lock"/></svg>`;
+            return `
             <div class="p-6 hover:bg-stone-50/30 transition">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
+              <div class="flex items-start justify-between gap-3 flex-wrap">
+                <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-3 mb-2">
-                    <h4 class="font-bold text-lg">${escapeHtml(menu.restaurant_name)}</h4>
+                    <h4 class="font-bold text-lg truncate">${escapeHtml(menu.restaurant_name)}</h4>
                     ${menu.plan_name ? `<span class="badge badge-${menu.plan_name.toLowerCase()}">${menu.plan_name}</span>` : ''}
+                    ${!mPaid ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-700 rounded-full">DRAFT</span>' : ''}
                   </div>
-                  <div class="flex items-center gap-4 text-sm text-stone-400">
+                  <div class="flex flex-wrap items-center gap-4 text-sm text-stone-400">
                     <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-menu_book"/></svg> ${menu.item_count} items</span>
                     <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg> ${menu.total_scans.toLocaleString()} scans</span>
                     <span><svg class="material-symbols-outlined text-[16px] align-middle" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-calendar_today"/></svg> Created ${formatDate(menu.created_at)}</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <a href="/menu?id=${menu.id}" target="_blank" class="px-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600">
+                <div class="flex flex-wrap items-center gap-2">
+                  <a href="/menu?id=${menu.id}" target="_blank" class="px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600">
                     View Menu
                   </a>
-                  <a href="/menu-editor?menu=${menu.id}" class="px-4 py-2 text-sm bg-orange-50 text-primary border border-orange-200 rounded-lg hover:bg-orange-100 transition">
+                  <a href="/menu-editor?menu=${menu.id}" class="px-3 py-2 text-xs bg-orange-50 text-primary border border-orange-200 rounded-lg hover:bg-orange-100 transition">
                     Edit
                   </a>
-                  <button onclick="handleQRPrint('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')"
-                    class="px-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5">
-                    <svg class="material-symbols-outlined text-[15px]" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg>
-                    Print QR
+                  <button onclick="handleQRPrint('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')" title="${mPaid ? 'Print QR Code' : 'Upgrade to print QR codes'}"
+                    class="px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5 ${!mPaid ? 'opacity-60' : ''}">
+                    <svg class="material-symbols-outlined text-[14px]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-qr_code_scanner"/></svg>
+                    Print QR${!mPaid ? ' '+lockBadge : ''}
+                  </button>
+                  <button onclick="handleAnalytics('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')" title="${mPaid ? 'View Analytics' : 'Upgrade to access analytics'}"
+                    class="px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5 ${!mPaid ? 'opacity-60' : ''}">
+                    <svg class="material-symbols-outlined text-[14px]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bar_chart"/></svg>
+                    Analytics${!mPaid ? ' '+lockBadge : ''}
+                  </button>
+                  <button onclick="handleTables('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')" title="${mPaid ? 'Manage Tables' : 'Upgrade to manage tables'}"
+                    class="px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5 ${!mPaid ? 'opacity-60' : ''}">
+                    <svg class="material-symbols-outlined text-[14px]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-table_restaurant"/></svg>
+                    Tables${!mPaid ? ' '+lockBadge : ''}
+                  </button>
+                  <button onclick="handleOrders('${escapeHtml(menu.id)}','${escapeHtml(menu.plan_name||'')}')" title="${mPaid ? 'View Orders' : 'Upgrade to view orders'}"
+                    class="px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg hover:border-primary/50 transition text-stone-600 flex items-center gap-1.5 ${!mPaid ? 'opacity-60' : ''}">
+                    <svg class="material-symbols-outlined text-[14px]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
+                    Orders${!mPaid ? ' '+lockBadge : ''}
                   </button>
                 </div>
               </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
       `;
     }
@@ -1923,6 +1969,60 @@ function handleQRPrint(menuId, planName) {
     return;
   }
   window.open('/menu?id=' + encodeURIComponent(menuId) + '&print_qr=1', '_blank');
+}
+
+// -- Plan-gated action handlers -----------------------------------------------
+function _isPlanPaid(planName) {
+  const p = (planName || '').toLowerCase().trim();
+  return p && p !== 'free' && p !== 'starter' && p !== 'trial' && p !== '';
+}
+function _showGate(title, desc, planName, menuId) {
+  document.getElementById('fgate-title').textContent = title;
+  document.getElementById('fgate-desc').textContent = desc;
+  const href = menuId
+    ? `/checkout?plan=${encodeURIComponent(planName || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
+    : `/checkout?plan=${encodeURIComponent(planName || 'professional')}`;
+  document.getElementById('fgate-cta').href = href;
+  document.getElementById('fgate-cta').textContent = 'Upgrade to Professional';
+  const planRow = document.getElementById('fgate-plan-row');
+  if (planRow) planRow.classList.add('hidden');
+  document.getElementById('feature-gate-modal').classList.remove('hidden');
+}
+
+function handleAnalytics(menuId, planName) {
+  if (!_isPlanPaid(planName)) {
+    _showGate(
+      'Analytics Requires a Paid Plan',
+      'View QR scan trends, daily stats, and real-time data for your menu — available on the Professional plan.',
+      'professional', menuId
+    );
+    return;
+  }
+  window.location.href = `/analytics.html?menu=${encodeURIComponent(menuId)}`;
+}
+
+function handleTables(menuId, planName) {
+  if (!_isPlanPaid(planName)) {
+    _showGate(
+      'Table Management Requires a Paid Plan',
+      'Create table QR codes and enable table-specific ordering — available on the Professional plan.',
+      'professional', menuId
+    );
+    return;
+  }
+  window.location.href = `/menu-editor?menu=${encodeURIComponent(menuId)}&tab=tables`;
+}
+
+function handleOrders(menuId, planName) {
+  if (!_isPlanPaid(planName)) {
+    _showGate(
+      'Order Tracking Requires a Paid Plan',
+      'View, manage, and respond to customer orders in real time — available on the Professional plan.',
+      'professional', menuId
+    );
+    return;
+  }
+  window.location.href = `/admin.html?menu=${encodeURIComponent(menuId)}&tab=orders`;
 }
 
 async function showSubscribePrompt() {

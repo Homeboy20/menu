@@ -355,10 +355,10 @@
         <!-- -- Accent color ------------------------------------------ -->
         <div class="flex items-center gap-3">
           <label class="text-sm text-stone-600 flex-1">Accent Color</label>
-          <input type="color" id="brand-color" value="#2dd4bf"
+          <input type="color" id="brand-color" value="#c2410c"
                  oninput="onAccentChange()"
                  class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-stone-300 p-1"/>
-          <span id="brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#2dd4bf</span>
+          <span id="brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#c2410c</span>
         </div>
 
         <!-- -- Logo ------------------------------------------------- -->
@@ -504,7 +504,7 @@
                   <span class="text-[10px] text-stone-400 ml-1">(defaults to accent)</span>
                 </label>
                 <div class="flex items-center gap-2">
-                  <input type="color" id="price-color" value="#2dd4bf"
+                  <input type="color" id="price-color" value="#c2410c"
                          oninput="onAdvColorInput('price-color')"
                          class="adv-color-input border border-stone-300"/>
                   <button onclick="resetAdvColor('price-color')" class="adv-reset-btn" title="Reset to accent">? Reset</button>
@@ -521,14 +521,14 @@
              style="background:#132639">
           <div id="prev-logo"
                class="shrink-0 size-10 rounded-xl flex items-center justify-center text-sm font-bold overflow-hidden"
-               style="background:rgba(45,212,191,.15); color:#2dd4bf">RS</div>
+               style="background:rgba(194, 65, 12,.15); color:#c2410c">RS</div>
           <div class="min-w-0 flex-1">
             <p id="prev-name" class="font-bold text-white text-sm truncate">The Rusty Spoon</p>
-            <p id="prev-tagline" class="text-xs truncate" style="color:#2dd4bf">Your tagline here</p>
+            <p id="prev-tagline" class="text-xs truncate" style="color:#c2410c">Your tagline here</p>
           </div>
           <div class="shrink-0 flex flex-col items-end gap-1">
             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                  style="background:rgba(45,212,191,.2); color:#2dd4bf; white-space:nowrap">Preview</span>
+                  style="background:rgba(194, 65, 12,.2); color:#c2410c; white-space:nowrap">Preview</span>
             <span id="prev-layout-label" class="text-[9px] text-stone-400">Logo Left</span>
           </div>
         </div>
@@ -949,11 +949,7 @@
             </div>
             <button id="s-logo-clear" onclick="clearSettingsLogo()"
                     class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors flex items-center gap-1">
-              <span class="material-symbols-outlined text-[13px]">close</span> Remove logo
-            </button>
-          </div>
-
-          <!-- Cover Banner -->
+              <span class="material-symbols-outlined text-[13px]">close</span> Remove          <!-- Cover Banner -->
           <div>
             <label class="block text-sm text-stone-600 mb-1.5">Cover Banner</label>
             <div class="flex items-start gap-3">
@@ -968,7 +964,7 @@
                   <span class="material-symbols-outlined text-[16px]">upload</span> Upload Banner
                 </button>
                 <input id="s-cover-file" type="file" accept="image/*" class="hidden" onchange="handleSettingsCoverFile(event)"/>
-                <input id="s-cover-url" type="url" placeholder="�or paste banner URL" oninput="handleSettingsCoverUrl()"
+                <input id="s-cover-url" type="url" placeholder="or paste banner URL" oninput="handleSettingsCoverUrl()"
                        class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-stone-400"/>
               </div>
             </div>
@@ -976,6 +972,23 @@
                     class="hidden mt-1.5 text-xs text-stone-400 hover:text-red-400 transition-colors flex items-center gap-1">
               <span class="material-symbols-outlined text-[13px]">close</span> Remove banner
             </button>
+          </div>
+
+          <!-- Promotional Banners -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-sm text-stone-600">Promotional Banners</label>
+              <button type="button" onclick="addPromoBanner()" class="text-xs text-primary hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">add</span> Add Banner
+              </button>
+            </div>
+            <div id="s-banners-list" class="space-y-3">
+              <!-- Banners will be injected here -->
+            </div>
+            <p class="text-xs text-stone-500 mt-2">Add sliding banners to showcase specials. Use a 2:1 or 16:9 aspect ratio.</p>
+          </div>
+
+          <!-- Tagline -->ton>
           </div>
 
           <!-- Tagline -->
@@ -988,9 +1001,9 @@
           <!-- Accent color -->
           <div class="flex items-center gap-3">
             <label class="text-sm text-stone-600 flex-1">Accent Color</label>
-            <input type="color" id="s-brand-color" value="#2dd4bf"
+            <input type="color" id="s-brand-color" value="#c2410c"
                    class="h-10 w-14 rounded-lg cursor-pointer bg-transparent border border-stone-300 p-1"/>
-            <span id="s-brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#2dd4bf</span>
+            <span id="s-brand-color-hex" class="text-xs font-mono text-stone-500 w-16">#c2410c</span>
           </div>
 
           <!-- Font & Background -->
@@ -1264,6 +1277,8 @@ let currency       = 'USD';
 let editingMenuId  = null;
 let currentLogoSrc = ''; // data-URL (uploaded) or http URL (pasted)
 let currentHeaderLayout = 'logo-left';
+let promoBanners = [];
+
 // Track which advanced colors have been manually set by user
 const advColorCustom = {
   'bg-color-custom': false,
@@ -1683,7 +1698,7 @@ function updateChips() {
 // -- Branding ------------------------------------------------------------------
 function getBranding() {
   return {
-    brandColor:   document.getElementById('brand-color').value || '#2dd4bf',
+    brandColor:   document.getElementById('brand-color').value || '#c2410c',
     logoUrl:      currentLogoSrc,
     tagline:      document.getElementById('tagline').value.trim(),
     fontStyle:    document.getElementById('font-style').value,
@@ -1707,6 +1722,7 @@ function getBranding() {
     socialTiktok:    document.getElementById('social-tiktok').value.trim(),
     socialYoutube:   document.getElementById('social-youtube').value.trim(),
     tablesEnabled:   0,
+    bannersJson:     JSON.stringify(promoBanners)
   };
 }
 
@@ -1777,7 +1793,7 @@ function resizeAndCompressLogo(file, maxPx, quality) {
 }
 
 function updateBrandPreview() {
-  const color    = document.getElementById('brand-color').value || '#2dd4bf';
+  const color    = document.getElementById('brand-color').value || '#c2410c';
   const tagline  = document.getElementById('tagline').value.trim();
   const logoUrl  = currentLogoSrc;
   const bgStyle  = document.getElementById('bg-style').value;
@@ -1866,7 +1882,7 @@ const ADV_SURFACE = { dark: '#132639', darker: '#0d1726', warm: '#241808', light
 function getThemeDefaults() {
   const bgStyle = document.getElementById('bg-style').value;
   const isDark  = bgStyle !== 'light';
-  const accent  = document.getElementById('brand-color').value || '#2dd4bf';
+  const accent  = document.getElementById('brand-color').value || '#c2410c';
   return {
     'bg-color-custom': ADV_BG[bgStyle]      || '#0d1b2a',
     'card-bg-custom':  ADV_SURFACE[bgStyle] || '#132639',
@@ -1958,8 +1974,8 @@ async function loadMenuForEditing(id) {
     setCurrency(currency);
 
     // Branding
-    document.getElementById('brand-color').value = data.brandColor || '#2dd4bf';
-    document.getElementById('brand-color-hex').textContent = data.brandColor || '#2dd4bf';
+    document.getElementById('brand-color').value = data.brandColor || '#c2410c';
+    document.getElementById('brand-color-hex').textContent = data.brandColor || '#c2410c';
     currentLogoSrc = data.logoUrl || '';
     document.getElementById('logo-url').value = currentLogoSrc.startsWith('data:') ? '' : currentLogoSrc;
     applyLogoPreview(currentLogoSrc);
@@ -2885,8 +2901,8 @@ async function loadSettingsBranding(menuId) {
     document.getElementById('s-rest-name').value   = d.restaurantName || '';
     document.getElementById('s-currency').value     = d.currency || 'USD';
     document.getElementById('s-tagline').value       = d.tagline || '';
-    document.getElementById('s-brand-color').value   = d.brandColor || '#2dd4bf';
-    document.getElementById('s-brand-color-hex').textContent = d.brandColor || '#2dd4bf';
+    document.getElementById('s-brand-color').value   = d.brandColor || '#c2410c';
+    document.getElementById('s-brand-color-hex').textContent = d.brandColor || '#c2410c';
     document.getElementById('s-font-style').value    = d.fontStyle || 'modern';
     document.getElementById('s-bg-style').value      = d.bgStyle || 'dark';
     document.getElementById('s-show-logo').checked   = d.showLogo !== 0;
@@ -2927,6 +2943,10 @@ async function loadSettingsBranding(menuId) {
     document.getElementById('s-whatsapp').value  = d.socialWhatsapp || '';
     document.getElementById('s-tiktok').value    = d.socialTiktok || '';
     document.getElementById('s-youtube').value   = d.socialYoutube || '';
+
+    // Banners
+    promoBanners = d.banners || [];
+    renderPromoBanners();
 
     // Tables enabled
     document.getElementById('s-tables-enabled').checked = !!d.tablesEnabled;
@@ -3056,6 +3076,7 @@ async function saveSettingsBranding() {
     socialTiktok:    document.getElementById('s-tiktok').value.trim(),
     socialYoutube:   document.getElementById('s-youtube').value.trim(),
     tablesEnabled:   document.getElementById('s-tables-enabled').checked ? 1 : 0,
+    banners:         promoBanners,
     // Pass existing items so the PUT doesn't fail the items validation
     items:           settingsMenuData.items,
   };
@@ -3088,7 +3109,7 @@ async function loadTablesMenuList() {
     const list = await res.json();
     const sel  = document.getElementById('tables-menu-select');
     const cur  = sel.value;
-    sel.innerHTML = '<option value="">� Choose a menu �</option>';
+    sel.innerHTML = '<option value=""> Choose a menu </option>';
     list.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id;
@@ -3159,7 +3180,7 @@ async function loadTablesForMenu(menuId) {
 async function renderTables() {
   if (!tablesMenuId) return;
   const el = document.getElementById('tables-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/tables', { headers: authHeaders() });
     const rows = await res.json();
@@ -3304,7 +3325,7 @@ async function deleteRoom(roomId) {
 async function loadAlerts() {
   if (!tablesMenuId) return;
   const el = document.getElementById('alerts-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading</p>';
   try {
     const res  = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/alerts', { headers: authHeaders() });
     const rows = await res.json();
@@ -3341,12 +3362,12 @@ async function dismissAlert(alertId) {
 }
 
 // -- Orders ------------------------------------------------------------------------
-const CURR_MAP = {USD:'$',EUR:'�',GBP:'�',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'?',JPY:'�',CNY:'�',NGN:'?',GHS:'?',KES:'KSh',ZAR:'R',EGP:'E�',MAD:'MAD',TRY:'?',MYR:'RM',SGD:'S$',PHP:'?',IDR:'Rp',THB:'?',KRW:'?',PKR:'?',BDT:'?'};
+const CURR_MAP = {USD:'$',EUR:'',GBP:'',BRL:'R$',CAD:'CA$',AUD:'A$',AED:'AED ',SAR:'SAR ',QAR:'QR ',KWD:'KD ',BHD:'BD ',OMR:'OMR ',INR:'?',JPY:'',CNY:'',NGN:'?',GHS:'?',KES:'KSh',ZAR:'R',EGP:'E',MAD:'MAD',TRY:'?',MYR:'RM',SGD:'S$',PHP:'?',IDR:'Rp',THB:'?',KRW:'?',PKR:'?',BDT:'?'};
 
 async function loadOrders() {
   if (!tablesMenuId) return;
   const el = document.getElementById('orders-list');
-  el.innerHTML = '<p class="text-stone-500 text-sm">Loading�</p>';
+  el.innerHTML = '<p class="text-stone-500 text-sm">Loading</p>';
   const status = document.getElementById('orders-status-filter').value || 'pending';
   try {
     const res = await fetch('/api/menus/' + encodeURIComponent(tablesMenuId) + '/orders?status=' + status, { headers: authHeaders() });
@@ -3494,7 +3515,7 @@ function showAlertToast(alert) {
   div.innerHTML = `
     <div class="toast-icon"><span class="material-symbols-outlined">notifications_active</span></div>
     <div class="toast-body">
-      <div class="toast-title">${esc(alert.table_label)} � ${esc(alert.restaurant_name || 'Table Alert')}</div>
+      <div class="toast-title">${esc(alert.table_label)}  ${esc(alert.restaurant_name || 'Table Alert')}</div>
       <div class="toast-msg">${esc(alert.message)}</div>
       <div class="toast-time">${new Date(alert.created_at).toLocaleTimeString()}</div>
     </div>
@@ -3510,7 +3531,7 @@ function sendBrowserNotification(alert) {
   if (Notification.permission !== 'granted') return;
   try {
     const n = new Notification('?? ' + (alert.table_label || 'Table Alert'), {
-      body: alert.message + (alert.restaurant_name ? ' � ' + alert.restaurant_name : ''),
+      body: alert.message + (alert.restaurant_name ? '  ' + alert.restaurant_name : ''),
       icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">??</text></svg>',
       tag: 'table-alert-' + alert.id,
       requireInteraction: true,
@@ -3567,6 +3588,42 @@ function startAlertPolling() {
 
 function stopAlertPolling() {
   if (alertPollTimer) { clearInterval(alertPollTimer); alertPollTimer = null; }
+}
+
+// -- Promotional Banners --------------------------------------------------------
+function renderPromoBanners() {
+  const container = document.getElementById('s-banners-list');
+  if (!promoBanners || promoBanners.length === 0) {
+    container.innerHTML = '<p class="text-xs text-stone-400 italic">No banners added.</p>';
+    return;
+  }
+  container.innerHTML = promoBanners.map((b, i) => `
+    <div class="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2 relative group">
+      <div class="flex gap-2">
+        <input type="text" placeholder="Image URL (e.g. https://.../banner.jpg)" value="${escapeHtml(b.imageUrl || '')}" onchange="updatePromoBanner(${i}, 'imageUrl', this.value)" class="flex-1 bg-white border border-stone-300 rounded-lg px-2 py-1 text-xs text-stone-900 outline-none focus:border-primary"/>
+        <input type="text" placeholder="Link URL (Optional)" value="${escapeHtml(b.linkUrl || '')}" onchange="updatePromoBanner(${i}, 'linkUrl', this.value)" class="flex-1 bg-white border border-stone-300 rounded-lg px-2 py-1 text-xs text-stone-900 outline-none focus:border-primary"/>
+        <button type="button" onclick="removePromoBanner(${i})" class="text-stone-400 hover:text-red-500 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">delete</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addPromoBanner() {
+  promoBanners.push({ imageUrl: '', linkUrl: '' });
+  renderPromoBanners();
+}
+
+function updatePromoBanner(index, field, value) {
+  if (promoBanners[index]) {
+    promoBanners[index][field] = value;
+  }
+}
+
+function removePromoBanner(index) {
+  promoBanners.splice(index, 1);
+  renderPromoBanners();
 }
 
 // init

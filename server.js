@@ -19,6 +19,7 @@ const { doubleCsrf } = require('csrf-csrf');
 const validator    = require('validator');
 const xss          = require('xss');
 const nodemailer   = require('nodemailer');
+const dns          = require('dns');
 
 // ── Firebase Admin SDK (optional – set FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY) ──
 let firebaseAdmin = null;
@@ -201,6 +202,36 @@ function isValidEmail(email) {
   });
 }
 
+// Validate email format and check DNS MX records to ensure the domain is genuine
+async function isGenuineEmail(email) {
+  if (!email || typeof email !== 'string') {
+    return { valid: false, error: 'Email is required.' };
+  }
+  const clean = sanitizeEmail(email);
+  if (!isValidEmail(clean)) {
+    return { valid: false, error: 'Invalid email format.' };
+  }
+  const domain = clean.split('@')[1];
+  try {
+    const mx = await new Promise((resolve, reject) => {
+      dns.resolveMx(domain, (err, addresses) => {
+        if (err) reject(err);
+        else resolve(addresses);
+      });
+    });
+    if (!mx || mx.length === 0) {
+      return { valid: false, error: 'Email domain has no valid mail servers (MX records).' };
+    }
+    return { valid: true, clean };
+  } catch (err) {
+    if (err.code === 'ENOTFOUND' || err.code === 'ENODATA') {
+      return { valid: false, error: 'Email domain does not exist or has no mail servers.' };
+    }
+    // Fallback for general network or DNS query timeout errors to avoid locking out valid signups
+    return { valid: true, clean };
+  }
+}
+
 // ── PII Field Encryption (AES-256-GCM) ───────────────────────────────────────
 // Set FIELD_ENCRYPTION_KEY in .env to a 32-byte hex string:
 //   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -320,6 +351,15 @@ const registerLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders:   false,
   message: { error: 'Too many registration attempts. Please try again later.' },
+});
+
+// Rate-limit for verification attempts (more relaxed than registration to allow retries/resends)
+const verificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window
+  max: 30, // max 30 requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders:   false,
+  message: { error: 'Too many verification attempts. Please wait 15 minutes.' },
 });
 
 // ── Performance & Compression Middleware ──────────────────────────────────────
@@ -958,6 +998,9 @@ async function initDB() {
     // Migration: add tables_enabled column
     await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS tables_enabled INTEGER NOT NULL DEFAULT 0`).catch(() => {});
 
+    // Migration: add banners_json column
+    await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS banners_json TEXT NOT NULL DEFAULT '[]'`).catch(() => {});
+
     // Migration: add rating column to menu_items
     await client.query(`ALTER TABLE menu_items ADD COLUMN IF NOT EXISTS rating REAL NOT NULL DEFAULT 0`).catch(() => {});
 
@@ -1386,6 +1429,12 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
         ['site_logo_url',       ''],
         ['site_favicon_url',    ''],
         ['support_email',       'support@restorder.online'],
+        ['social_facebook',     ''],
+        ['social_instagram',    ''],
+        ['social_twitter',      ''],
+        ['social_linkedin',     ''],
+        ['social_youtube',      ''],
+        ['social_tiktok',       ''],
         ['timezone',            'UTC'],
         ['default_currency',    'USD'],
         ['currency_geo_detect', 'true'],
@@ -1452,6 +1501,22 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     await client.query(`CREATE INDEX IF NOT EXISTS idx_staff_customer ON staff_members (customer_id)`);
     // Migration: persist staff session identity in customer_sessions
     await client.query(`ALTER TABLE customer_sessions ADD COLUMN IF NOT EXISTS staff_id INTEGER REFERENCES staff_members(id) ON DELETE CASCADE`);
+
+    // Registration verifications table to store email & phone verification OTPs before account creation
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS registration_verifications (
+        id SERIAL PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        phone TEXT NOT NULL,
+        email_otp TEXT NOT NULL,
+        phone_otp TEXT NOT NULL,
+        email_verified INTEGER NOT NULL DEFAULT 0,
+        phone_verified INTEGER NOT NULL DEFAULT 0,
+        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_reg_verif_email ON registration_verifications (email)`);
 
     console.log('  ✓ PostgreSQL schema ready');
   } finally {
@@ -1611,6 +1676,7 @@ function buildMenuResponse(menu, rawItems) {
     socialTiktok:    menu.social_tiktok    || '',
     socialYoutube:   menu.social_youtube   || '',
     tablesEnabled:  menu.tables_enabled   || 0,
+    banners:        JSON.parse(menu.banners_json || '[]'),
     createdAt:      menu.created_at,
     items: rawItems.map(it => ({
       id:          it.id,
@@ -1715,8 +1781,8 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       show_logo=$8, show_name=$9, header_layout=$10, text_color=$11, heading_color=$12, bg_color=$13, card_bg=$14, price_color=$15,
       phone=$16, email=$17, address=$18, website=$19,
       social_instagram=$20, social_facebook=$21, social_twitter=$22, social_whatsapp=$23, social_tiktok=$24, social_youtube=$25,
-      tables_enabled=$26, cover_image=$27, updated_at=$28
-      WHERE id=$29`,
+      tables_enabled=$26, cover_image=$27, banners_json=$28, updated_at=$29
+      WHERE id=$30`,
       [
         String(restaurantName),
         String(currency || 'USD'),
@@ -1745,6 +1811,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
         String(branding.socialYoutube   || ''),
         Number(branding.tablesEnabled   || 0),
         String(branding.coverImage     || ''),
+        String(branding.bannersJson    || '[]'),
         new Date().toISOString(),
         String(menuId)
       ]);
@@ -1956,9 +2023,12 @@ app.get('/api/firebase-config', async (req, res) => {
 app.get('/api/public/branding', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      "SELECT key, value FROM app_settings WHERE key IN ('site_name','site_tagline','site_logo_url','site_favicon_url','site_description')"
+      "SELECT key, value FROM app_settings WHERE key IN ('site_name','site_tagline','site_logo_url','site_favicon_url','site_description','social_facebook','social_instagram','social_twitter','social_linkedin','social_youtube','social_tiktok')"
     );
-    const out = { site_name: 'RestOrder', site_tagline: '', site_logo_url: '', site_favicon_url: '', site_description: '' };
+    const out = { 
+      site_name: 'RestOrder', site_tagline: '', site_logo_url: '', site_favicon_url: '', site_description: '',
+      social_facebook: '', social_instagram: '', social_twitter: '', social_linkedin: '', social_youtube: '', social_tiktok: ''
+    };
     for (const r of rows) out[r.key] = r.value || '';
     res.setHeader('Cache-Control', 'public, max-age=300');
     res.json(out);
@@ -2611,6 +2681,155 @@ function requireOwnerOrManager(req, res, next) {
   return res.status(403).json({ error: 'Only account owners and managers can perform this action.' });
 }
 
+// POST /api/customers/send-verification-otps - Validate email/phone, check if exists, generate & send OTPs
+app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsrfProtection, async (req, res) => {
+  try {
+    const { email, phone } = req.body || {};
+    if (!email || !phone) {
+      return res.status(400).json({ error: 'Email and phone number are required.' });
+    }
+
+    // 1. Verify email format and genuineness (MX records check)
+    const emailCheck = await isGenuineEmail(email);
+    if (!emailCheck.valid) {
+      return res.status(400).json({ error: emailCheck.error });
+    }
+    const cleanEmail = emailCheck.clean;
+
+    // 2. Validate phone number format (at least 7 digits)
+    const rawPhone = String(phone).replace(/\D/g, '');
+    if (!rawPhone || rawPhone.length < 7) {
+      return res.status(400).json({ error: 'Please enter a valid phone number.' });
+    }
+
+    // 3. Check if email already registered
+    const { rows: emailExists } = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
+    if (emailExists.length > 0) {
+      return res.status(400).json({ error: 'Email already registered. Please sign in instead.' });
+    }
+
+    // 4. Check if phone number already registered
+    const phoneHash = computePhoneHash(phone);
+    const { rows: phoneExists } = await pool.query('SELECT id FROM customers WHERE phone_hash = $1', [phoneHash]);
+    if (phoneExists.length > 0) {
+      return res.status(400).json({ error: 'Phone number already registered. Please sign in instead.' });
+    }
+
+    // 5. Generate 6-digit OTPs
+    const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const phoneOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 15 minutes TTL
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+    const now = new Date();
+
+    // 6. Save or update registration verifications
+    await pool.query(
+      `INSERT INTO registration_verifications (email, phone, email_otp, phone_otp, email_verified, phone_verified, expires_at, created_at)
+       VALUES ($1, $2, $3, $4, 0, 0, $5, $6)
+       ON CONFLICT (email) DO UPDATE SET
+         phone = EXCLUDED.phone,
+         email_otp = EXCLUDED.email_otp,
+         phone_otp = EXCLUDED.phone_otp,
+         email_verified = 0,
+         phone_verified = 0,
+         expires_at = EXCLUDED.expires_at,
+         created_at = EXCLUDED.created_at`,
+      [cleanEmail, phone, emailOtp, phoneOtp, expiresAt, now]
+    );
+
+    // 7. Send the Email OTP
+    queueTransactionalEmail({
+      to: cleanEmail,
+      subject: 'Verify your RestOrder account',
+      text: `Your email verification code is: ${emailOtp}. It is valid for 15 minutes.`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #1e293b;">
+          <h2>Verify your RestOrder account</h2>
+          <p>Please enter the following 6-digit verification code to verify your email address:</p>
+          <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 5px; text-align: center; margin: 20px 0;">
+            ${emailOtp}
+          </div>
+          <p style="font-size: 12px; color: #64748b;">This code is valid for 15 minutes. If you did not request this code, please ignore this email.</p>
+        </div>
+      `
+    }, 'Email OTP');
+
+    // 8. Log Phone OTP to console (Simulate SMS)
+    console.log(`\n======================================================`);
+    console.log(`[SMS GATEWAY SIMULATION]`);
+    console.log(`To: ${phone}`);
+    console.log(`Message: Your RestOrder phone verification code is: ${phoneOtp}`);
+    console.log(`======================================================\n`);
+
+    // 9. Return success status (and OTPs in non-production environments for testing)
+    const response = { success: true, message: 'Verification codes sent.' };
+    if (process.env.NODE_ENV !== 'production') {
+      response.dev_email_otp = emailOtp;
+      response.dev_phone_otp = phoneOtp;
+    }
+    
+    res.json(response);
+  } catch (err) {
+    console.error('Send verification OTPs error:', err);
+    res.status(500).json({ error: 'Failed to send verification codes. Please try again.' });
+  }
+});
+
+// POST /api/customers/verify-otp - Verify code for email or phone
+app.post('/api/customers/verify-otp', verificationLimiter, doubleCsrfProtection, async (req, res) => {
+  try {
+    const { email, type, code } = req.body || {};
+    if (!email || !type || !code) {
+      return res.status(400).json({ error: 'Email, verification type, and code are required.' });
+    }
+    if (type !== 'email' && type !== 'phone') {
+      return res.status(400).json({ error: 'Invalid verification type. Must be email or phone.' });
+    }
+
+    const cleanEmail = sanitizeEmail(email);
+    const { rows } = await pool.query(
+      'SELECT * FROM registration_verifications WHERE email = $1 LIMIT 1',
+      [cleanEmail]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'No verification request found for this email. Please request a new code.' });
+    }
+
+    const verification = rows[0];
+    if (new Date(verification.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Verification code has expired. Please request a new one.' });
+    }
+
+    const targetCode = type === 'email' ? verification.email_otp : verification.phone_otp;
+    if (String(code).trim() !== targetCode) {
+      return res.status(400).json({ error: `Invalid ${type} verification code.` });
+    }
+
+    // Mark as verified
+    let updateQuery = '';
+    if (type === 'email') {
+      updateQuery = 'UPDATE registration_verifications SET email_verified = 1 WHERE email = $1 RETURNING email_verified, phone_verified';
+    } else {
+      updateQuery = 'UPDATE registration_verifications SET phone_verified = 1 WHERE email = $1 RETURNING email_verified, phone_verified';
+    }
+
+    const updateRes = await pool.query(updateQuery, [cleanEmail]);
+    const currentStatus = updateRes.rows[0];
+
+    res.json({
+      success: true,
+      message: `${type === 'email' ? 'Email' : 'Phone number'} verified successfully.`,
+      email_verified: currentStatus.email_verified === 1,
+      phone_verified: currentStatus.phone_verified === 1
+    });
+  } catch (err) {
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ error: 'Verification failed. Please try again.' });
+  }
+});
+
 // POST /api/payments/paypal/create-order-public - Create PayPal order before registration (no auth)
 app.post('/api/payments/paypal/create-order-public', async (req, res) => {
   try {
@@ -2669,6 +2888,22 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
 
     const cleanEmail = sanitizeEmail(email);
     if (!isValidEmail(cleanEmail)) return res.status(400).json({ error: 'Invalid email address.' });
+
+    // Enforce pre-verification (Email and Phone OTP verification)
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required.' });
+    }
+    const { rows: verifyRows } = await pool.query(
+      'SELECT * FROM registration_verifications WHERE email = $1 AND email_verified = 1 AND phone_verified = 1 LIMIT 1',
+      [cleanEmail]
+    );
+    if (verifyRows.length === 0) {
+      return res.status(400).json({ error: 'Email and phone number verification is incomplete. Please verify first.' });
+    }
+    const verifiedPhone = verifyRows[0].phone;
+    if (String(phone).replace(/\D/g, '') !== String(verifiedPhone).replace(/\D/g, '')) {
+      return res.status(400).json({ error: 'The phone number provided does not match the verified phone number.' });
+    }
     if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     if (!validator.isStrongPassword(password, { minLength: 8, minLowercase: 1, minUppercase: 0, minNumbers: 1, minSymbols: 0 }))
       return res.status(400).json({ error: 'Password must contain at least 8 characters with 1 number.' });
@@ -2766,6 +3001,11 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     `, [cleanEmail, passwordHash, cleanBusinessName, encryptField(cleanContactName), encryptField(sanitizeInput(phone || '', 50)), encryptField(sanitizeInput(address || '', 300)), encryptField(sanitizeInput(country || '', 100)), encryptField(sanitizeInput(city || '', 200)), now]);
     const customer = newCust[0];
 
+    // Clean up registration verification record
+    await pool.query('DELETE FROM registration_verifications WHERE email = $1', [cleanEmail]).catch(err => {
+      console.error('Failed to delete registration verification record:', err.message);
+    });
+
     // Create default menu
     const menuId = crypto.randomUUID();
     const qrCode = await generateQRCode(menuId, 1).catch(() => '');
@@ -2850,6 +3090,24 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
       if (!isValidEmail(cleanEmail)) {
         return res.status(400).json({ error: 'Invalid email address.' });
       }
+
+      // Enforce pre-verification (Email and Phone OTP verification)
+      if (!isPhoneOnly) {
+        if (!phone) {
+          return res.status(400).json({ error: 'Phone number is required.' });
+        }
+        const { rows: verifyRows } = await pool.query(
+          'SELECT * FROM registration_verifications WHERE email = $1 AND email_verified = 1 AND phone_verified = 1 LIMIT 1',
+          [cleanEmail]
+        );
+        if (verifyRows.length === 0) {
+          return res.status(400).json({ error: 'Email and phone number verification is incomplete. Please verify first.' });
+        }
+        const verifiedPhone = verifyRows[0].phone;
+        if (String(phone).replace(/\D/g, '') !== String(verifiedPhone).replace(/\D/g, '')) {
+          return res.status(400).json({ error: 'The phone number provided does not match the verified phone number.' });
+        }
+      }
       // Check if email already exists
       const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
       if (existing.rows.length > 0) {
@@ -2929,6 +3187,13 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     `, [cleanEmail, passwordHash, cleanBusinessName, cleanContactName, finalCleanPhone, phoneHashVal, now, cleanPromoCode, discountPercent, discountMonths, isPhoneOnly ? 'phone' : 'email']);
     
     const customer = rows[0];
+
+    // Clean up registration verification record
+    if (cleanEmail) {
+      await pool.query('DELETE FROM registration_verifications WHERE email = $1', [cleanEmail]).catch(err => {
+        console.error('Failed to delete registration verification record:', err.message);
+      });
+    }
 
     // Increment promo usage
     if (promoRecord) {
@@ -4866,11 +5131,41 @@ app.get('/api/menus/:id', async (req, res) => {
     }
     
     const menuData = buildMenuResponse(menu, rawItems);
+
+    // ── Draft-mode detection ─────────────────────────────────────────────────
+    // If the menu owner is on the free Starter plan (or no subscription), the
+    // public menu viewer gets a draftMode flag so it can display a watermark.
+    // This does NOT block the response — guests can still preview the menu.
+    try {
+      if (menu.customer_id) {
+        const { rows: subRows } = await pool.query(`
+          SELECT s.status, s.trial_end, sp.name AS plan_name
+          FROM subscriptions s
+          JOIN subscription_plans sp ON s.plan_id = sp.id
+          WHERE s.customer_id = $1
+          ORDER BY sp.menu_limit DESC
+          LIMIT 1
+        `, [menu.customer_id]);
+        if (subRows.length > 0) {
+          const sub = subRows[0];
+          const planName = (sub.plan_name || '').toLowerCase();
+          const isPaid = sub.status === 'active' && planName !== 'starter' && planName !== 'trial';
+          const isTrialActive = sub.status === 'trial' && sub.trial_end && new Date(sub.trial_end) >= new Date();
+          menuData.draftMode = !isPaid && !isTrialActive;
+          menuData.planName = planName;
+        } else {
+          menuData.draftMode = true; // no subscription at all
+          menuData.planName = 'starter';
+        }
+      }
+    } catch (_) {
+      // subscription lookup failed — don't block the public menu, just omit draftMode
+    }
     
-    // Cache the result
+    // Cache the result (short TTL so plan upgrades propagate quickly)
     setCachedMenu(id, menuData);
     
-    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.setHeader('Cache-Control', 'public, max-age=60'); // 1-minute cache (was 5 min)
     res.json(menuData);
     
   } catch (error) {
@@ -4953,8 +5248,8 @@ app.delete('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, doubleCsrfPr
   res.json({ success: true });
 });
 
-// GET /api/menus/:id/analytics - Get scan analytics for a menu
-app.get('/api/menus/:id/analytics', requireAnyAuth, async (req, res) => {
+// GET /api/menus/:id/analytics - Get scan analytics for a menu (Professional+)
+app.get('/api/menus/:id/analytics', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     const menuId = req.params.id;
     const menu = await dbGetMenu(menuId);
@@ -4988,8 +5283,8 @@ app.get('/api/menus/:id/analytics', requireAnyAuth, async (req, res) => {
   }
 });
 
-// POST /api/menus/:id/regenerate-qr - Regenerate QR code with new version
-app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
+// POST /api/menus/:id/regenerate-qr - Regenerate QR code with new version (Professional+)
+app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const menuId = req.params.id;
     const menu = await dbGetMenu(menuId);

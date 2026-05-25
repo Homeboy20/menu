@@ -257,6 +257,38 @@ html[data-theme="dark"] .icon-btn{background:rgba(26,25,23,.85);}
 #contact-bar a:active{transform:scale(.92);}
 #contact-bar a svg{width:14px;height:14px;fill:var(--brand);flex-shrink:0;}
 
+/* -- PROMO BANNERS -- */
+#promo-banners {
+  display: none; /* flex when active */
+  overflow-x: auto;
+  gap: 12px;
+  padding: 16px;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+#promo-banners::-webkit-scrollbar { display: none; }
+.promo-banner {
+  flex-shrink: 0;
+  width: 90vw;
+  max-width: 400px;
+  border-radius: var(--r-lg);
+  scroll-snap-align: center;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: block;
+  text-decoration: none;
+  background: var(--surf2);
+  transition: transform .15s;
+}
+.promo-banner:active { transform: scale(.98); }
+.promo-banner img {
+  width: 100%;
+  aspect-ratio: 2/1;
+  object-fit: cover;
+  display: block;
+}
+
 /* -- CATEGORY NAV -- */
 #cat-nav{position:sticky;top:0;z-index:40;background:var(--bg);}
 #cat-tabs{
@@ -806,6 +838,9 @@ html[data-theme="dark"] #checkout-order-btn{background:var(--brand);}
     </div>
   </div>
 
+  <!-- Promotional Banners Slider -->
+  <div id="promo-banners"></div>
+
   <!-- Contact bar -->
   <div id="contact-bar"></div>
 
@@ -1296,6 +1331,23 @@ function applyBranding(data){
   if(data.fontStyle&&data.fontStyle!=='modern'&&data.fontStyle!=='minimal'){let lk=document.getElementById('brand-font');if(!lk){lk=document.createElement('link');lk.id='brand-font';lk.rel='stylesheet';document.head.appendChild(lk);}lk.href='https://fonts.googleapis.com/css2?family='+FONT_URLS[data.fontStyle]+'&display=swap';}
   document.body.style.fontFamily=FONT_FAM[data.fontStyle||'modern']||FONT_FAM.modern;
   buildContactBar(data);
+
+  // Promo Banners
+  const pbContainer = document.getElementById('promo-banners');
+  if (data.banners && data.banners.length > 0) {
+    pbContainer.style.display = 'flex';
+    pbContainer.innerHTML = data.banners.map(b => {
+      if (!b.imageUrl) return '';
+      const imgHtml = `<img src="${esc(b.imageUrl)}" alt="Promo banner" loading="lazy" />`;
+      if (b.linkUrl) {
+        return `<a href="${esc(b.linkUrl)}" target="_blank" rel="noopener noreferrer" class="promo-banner">${imgHtml}</a>`;
+      }
+      return `<div class="promo-banner">${imgHtml}</div>`;
+    }).join('');
+  } else {
+    pbContainer.style.display = 'none';
+  }
+
   if(allItems.length){buildTabs();renderItems();}
 }
 function hexToRgb(h){if(!h||h.length<7)return'194,65,12';return`${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;}
