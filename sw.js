@@ -27,7 +27,7 @@ const CACHE_STRATEGIES = {
   api: ['/api/'],
   
   // External resources - cache first
-  external: ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.tailwindcss.com']
+  external: ['fonts.googleapis.com', 'fonts.gstatic.com']
 };
 
 // Install event - cache critical resources
