@@ -918,6 +918,13 @@
         </select>
       </div>
 
+      <!-- Rooms disabled notice -->
+      <div id="rooms-disabled-notice" class="hidden bg-yellow-400/10 border border-yellow-400/30 rounded-2xl p-5 text-sm text-yellow-300">
+        <span class="material-symbols-outlined text-[18px] align-middle mr-1">warning</span>
+        Room QR codes are <strong>disabled</strong> for this menu. Enable them in
+        <button onclick="showSection('settings')" class="underline hover:text-yellow-100 transition-colors">Settings → Business &amp; Branding</button>.
+      </div>
+
       <!-- Add room form -->
       <div id="rooms-add-form" class="hidden bg-white rounded-2xl border border-stone-200 p-5 space-y-3">
         <h3 class="text-sm font-bold uppercase tracking-wider text-stone-600">Add Room</h3>
@@ -1100,6 +1107,17 @@
             </div>
             <label class="flex items-center gap-2.5 cursor-pointer select-none">
               <input type="checkbox" id="s-tables-enabled" class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4"/>
+            </label>
+          </div>
+
+          <!-- Room QR toggle -->
+          <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <div>
+              <p class="text-sm font-medium text-stone-700">Enable Room QR Codes</p>
+              <p class="text-xs text-stone-500 mt-0.5">Allow hotel/lodge style room QR codes for guests</p>
+            </div>
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input type="checkbox" id="s-rooms-enabled" class="rounded border-slate-600 bg-stone-50 text-primary focus:ring-primary h-4 w-4"/>
             </label>
           </div>
 
@@ -3022,6 +3040,8 @@ async function loadSettingsBranding(menuId) {
 
     // Tables enabled
     document.getElementById('s-tables-enabled').checked = !!d.tablesEnabled;
+    // Rooms enabled (hotel/lodge rooms)
+    if (document.getElementById('s-rooms-enabled')) document.getElementById('s-rooms-enabled').checked = !!d.roomsEnabled;
 
     form.classList.remove('hidden');
   } catch (err) {
@@ -3148,6 +3168,7 @@ async function saveSettingsBranding() {
     socialTiktok:    document.getElementById('s-tiktok').value.trim(),
     socialYoutube:   document.getElementById('s-youtube').value.trim(),
     tablesEnabled:   document.getElementById('s-tables-enabled').checked ? 1 : 0,
+    roomsEnabled:    document.getElementById('s-rooms-enabled') ? (document.getElementById('s-rooms-enabled').checked ? 1 : 0) : 0,
     banners:         promoBanners,
     // Pass existing items so the PUT doesn't fail the items validation
     items:           settingsMenuData.items,
@@ -3317,17 +3338,35 @@ async function loadRoomsForMenu(menuId) {
   roomsMenuId = menuId || null;
   const addForm  = document.getElementById('rooms-add-form');
   const roomsList = document.getElementById('rooms-list');
+  const roomsNotice = document.getElementById('rooms-disabled-notice');
 
   if (!menuId) {
+    if (roomsNotice) roomsNotice.classList.add('hidden');
     addForm.classList.add('hidden');
     roomsList.classList.add('hidden');
     return;
   }
 
-  addForm.classList.remove('hidden');
-  roomsList.classList.remove('hidden');
-
-  await renderRooms();
+  try {
+    const res = await fetch('/api/menus/' + encodeURIComponent(menuId));
+    const d = await res.json();
+    const enabled = !!d.roomsEnabled;
+    if (!enabled) {
+      if (roomsNotice) roomsNotice.classList.remove('hidden');
+      addForm.classList.add('hidden');
+      roomsList.classList.add('hidden');
+      return;
+    }
+    if (roomsNotice) roomsNotice.classList.add('hidden');
+    addForm.classList.remove('hidden');
+    roomsList.classList.remove('hidden');
+    await renderRooms();
+  } catch (err) {
+    if (roomsNotice) roomsNotice.classList.add('hidden');
+    addForm.classList.remove('hidden');
+    roomsList.classList.remove('hidden');
+    await renderRooms();
+  }
 }
 
 async function renderRooms() {

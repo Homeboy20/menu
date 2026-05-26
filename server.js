@@ -993,6 +993,8 @@ async function initDB() {
 
     // Migration: add tables_enabled column
     await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS tables_enabled INTEGER NOT NULL DEFAULT 0`).catch(() => {});
+    // Migration: add rooms_enabled column
+    await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS rooms_enabled INTEGER NOT NULL DEFAULT 0`).catch(() => {});
 
     // Migration: add banners_json column
     await client.query(`ALTER TABLE menus ADD COLUMN IF NOT EXISTS banners_json TEXT NOT NULL DEFAULT '[]'`).catch(() => {});
@@ -1677,6 +1679,7 @@ function buildMenuResponse(menu, rawItems) {
     socialTiktok:    menu.social_tiktok    || '',
     socialYoutube:   menu.social_youtube   || '',
     tablesEnabled:  menu.tables_enabled   || 0,
+    roomsEnabled:   menu.rooms_enabled    || 0,
     banners:        JSON.parse(menu.banners_json || '[]'),
     createdAt:      menu.created_at,
     items: rawItems.map(it => ({
@@ -1704,7 +1707,7 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
        show_logo, show_name, header_layout, text_color, heading_color, bg_color, card_bg, price_color,
        phone, email, address, website,
        social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-       tables_enabled, cover_image,
+      tables_enabled, rooms_enabled, cover_image,
        qr_version, qr_code, total_scans, created_at, updated_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33)`,
       [
@@ -1735,6 +1738,7 @@ async function saveMenuTx(menuId, restaurantName, currency, branding, items, qrC
         String(branding.socialTiktok    || ''),
         String(branding.socialYoutube   || ''),
         Number(branding.tablesEnabled   || 0),
+        Number(branding.roomsEnabled    || 0),
         String(branding.coverImage     || ''),
         1,                            // qr_version
         String(qrCode || ''),         // qr_code
@@ -1782,8 +1786,8 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
       show_logo=$8, show_name=$9, header_layout=$10, text_color=$11, heading_color=$12, bg_color=$13, card_bg=$14, price_color=$15,
       phone=$16, email=$17, address=$18, website=$19,
       social_instagram=$20, social_facebook=$21, social_twitter=$22, social_whatsapp=$23, social_tiktok=$24, social_youtube=$25,
-      tables_enabled=$26, cover_image=$27, banners_json=$28, updated_at=$29
-      WHERE id=$30`,
+      tables_enabled=$26, rooms_enabled=$27, cover_image=$28, banners_json=$29, updated_at=$30
+      WHERE id=$31`,
       [
         String(restaurantName),
         String(currency || 'USD'),
@@ -1811,6 +1815,7 @@ async function updateMenuTx(menuId, restaurantName, currency, branding, items) {
         String(branding.socialTiktok    || ''),
         String(branding.socialYoutube   || ''),
         Number(branding.tablesEnabled   || 0),
+        Number(branding.roomsEnabled    || 0),
         String(branding.coverImage     || ''),
         String(branding.bannersJson    || '[]'),
         new Date().toISOString(),
@@ -2571,9 +2576,9 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
             text_color, heading_color, bg_color, card_bg, price_color,
             phone, email, address, website,
             social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-            tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
+            tables_enabled, rooms_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
           VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
-            '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
+            '','','','','','','','','','','','','','','',0,0,'',1,$3,0,$4,$4,$5)
         `, [menuId, finalName, defaultQr, now, newCustomer[0].id]);
       } catch (menuErr) {
         console.warn('Default menu setup for migrated customer failed:', menuErr.message);
@@ -3114,9 +3119,9 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         text_color, heading_color, bg_color, card_bg, price_color,
         phone, email, address, website,
         social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-        tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
+        tables_enabled, rooms_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
       VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
-        '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
+        '','','','','','','','','','','','','','','',0,0,'',1,$3,0,$4,$4,$5)
     `, [menuId, cleanBusinessName, qrCode, now, customer.id]);
 
     // Create subscription (per-business: keyed on customer.id)
@@ -3312,9 +3317,9 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
           text_color, heading_color, bg_color, card_bg, price_color,
           phone, email, address, website,
           social_instagram, social_facebook, social_twitter, social_whatsapp, social_tiktok, social_youtube,
-          tables_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
+          tables_enabled, rooms_enabled, cover_image, qr_version, qr_code, total_scans, created_at, updated_at, customer_id)
         VALUES ($1,$2,'USD','#c2410c','','','modern','dark',1,1,'logo-left',
-          '','','','','','','','','','','','','','','',0,'',1,$3,0,$4,$4,$5)
+          '','','','','','','','','','','','','','','',0,0,'',1,$3,0,$4,$4,$5)
       `, [defaultMenuId, cleanBusinessName, defaultQr, menuNow, customer.id]);
 
       if (!isPhoneOnly) {
@@ -4873,6 +4878,7 @@ function sanitizeBranding(body) {
     socialTiktok:    sanitizeStr(body.socialTiktok, 500),
     socialYoutube:   sanitizeStr(body.socialYoutube, 500),
     tablesEnabled:   Number(body.tablesEnabled || 0),
+    roomsEnabled:    Number(body.roomsEnabled || 0),
   };
 }
 
