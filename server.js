@@ -337,7 +337,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", 'blob:', 'https://cdn.tailwindcss.com', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'blob:', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
       scriptSrcAttr: ["'unsafe-inline'"],   // allow onclick/oninput/onchange handlers
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
