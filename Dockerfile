@@ -10,14 +10,18 @@ COPY package*.json ./
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev deps so we can build Tailwind CSS)
+RUN npm ci
 
 # Copy application files
 COPY . .
 
-# Create data and uploads directories
+# Build Tailwind CSS and create data/uploads directories
+RUN npm run build:css || true
 RUN mkdir -p data uploads
+
+# Remove dev dependencies to keep image small
+RUN npm prune --production || true
 
 # Set proper permissions
 RUN chown -R node:node /app
