@@ -30,5 +30,11 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start the application
-CMD ["node", "server.js"]
+# Copy and use entrypoint to run migrations before starting the app
+# Note: chmod is run as root before switching to non-root user
+USER root
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+USER node
+
+ENTRYPOINT ["/entrypoint.sh"]
