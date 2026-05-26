@@ -113,9 +113,22 @@
     main .max-w-2xl, main .max-w-4xl, main .mx-auto { max-width:900px; }
   }
 
+  /* menu-editor specific layout tweaks: reduce left/right padding so editor has more usable width */
+  .menu-editor-mode @media (min-width:980px){
+    main { padding-right: 340px; }
+    #section-settings { right: 22px; width: 320px; }
+    main .max-w-2xl, main .max-w-4xl, main .mx-auto { max-width:980px; }
+  }
+
   /* Force main children to expand when flex parent collapses (fallback) */
   @media (min-width:900px){
     main > * { max-width: none !important; width: calc(100vw - 420px) !important; }
+  }
+
+  /* Reduce the calc width for menu-editor so the center panel isn't overly narrow */
+  @media(min-width:900px){
+    .menu-editor-mode main > * { width: calc(100vw - 360px) !important; }
+    .menu-editor-mode body { padding-left: 240px; }
   }
 
   /* Constrain the settings panel visual style */
@@ -146,6 +159,15 @@
   /* Fallback: explicitly size the flex content area to remaining space when flex shrink miscalculates */
   body > .flex-1 { flex: none !important; width: calc(100% - 260px) !important; }
 </style>
+<script>
+  // Enable a menu-editor specific CSS mode when serving /menu-editor so we can
+  // apply layout tweaks without affecting other admin pages.
+  try {
+    if (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.startsWith('/menu-editor')) {
+      document.documentElement.classList.add('menu-editor-mode');
+    }
+  } catch (e) { /* ignore in non-browser environments */ }
+</script>
 </head>
 <body class="bg-bg text-stone-900 min-h-screen flex">
 
