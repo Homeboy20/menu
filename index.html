@@ -936,9 +936,9 @@
     
     .feature-spotlight {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
-      gap: 28px;
-      align-items: stretch;
+      grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+      gap: 24px;
+      align-items: start;
       position: relative;
       z-index: 1;
       margin-bottom: 28px;
@@ -948,7 +948,8 @@
       background: #fff7ed;
       border: 1px solid #fed7aa;
       border-radius: 18px;
-      padding: 28px;
+      padding: clamp(22px, 3vw, 30px);
+      height: 100%;
     }
 
     .feature-panel h3 {
@@ -1010,13 +1011,15 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
+      align-items: stretch;
     }
 
     .feature-list .feature-card {
-      min-height: 0;
+      min-height: 224px;
       padding: 22px;
       gap: 12px;
       border-radius: 14px;
+      height: 100%;
     }
 
     .feature-list .feature-icon {
@@ -1039,7 +1042,7 @@
 
     .ops-band {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px;
       position: relative;
       z-index: 1;
@@ -1049,19 +1052,21 @@
       background: #1c1917;
       color: #fff7ed;
       border-radius: 16px;
-      padding: 22px;
+      padding: 20px;
       border: 1px solid rgba(255,255,255,0.08);
+      min-height: 142px;
     }
 
     .ops-card h3 {
       color: white;
-      font-size: 20px;
+      font-size: clamp(17px, 1.4vw, 20px);
       margin-bottom: 8px;
+      line-height: 1.2;
     }
 
     .ops-card p {
       color: #d6d3d1;
-      font-size: 14.5px;
+      font-size: 14px;
       line-height: 1.6;
       margin: 0;
     }
@@ -1926,6 +1931,14 @@
       .nav-center { display: none; }
       .nav-actions { display: none; }
       .mobile-menu-btn { display: flex; }
+
+      .feature-spotlight {
+        grid-template-columns: 1fr;
+      }
+
+      .ops-band {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
     
     @media (max-width: 768px) {
@@ -1937,16 +1950,21 @@
         grid-template-columns: 1fr; 
         gap: 20px;
       }
-      .feature-spotlight,
-      .ops-band {
-        grid-template-columns: 1fr;
-      }
       .feature-list {
         grid-template-columns: 1fr;
       }
       .feature-card {
         padding: 20px;
         min-height: auto;
+      }
+      .feature-list .feature-card,
+      .ops-card {
+        min-height: auto;
+      }
+      .feature-link-row .btn-primary,
+      .feature-link-row .btn-secondary {
+        width: 100%;
+        justify-content: center;
       }
       
       .pricing-grid { 
@@ -1960,6 +1978,7 @@
       .price-amount { font-size: 32px; }
       @media (max-width: 520px) {
         .pricing-grid { grid-template-columns: 1fr; }
+        .ops-band { grid-template-columns: 1fr; }
       }
       
       .testimonials-grid {
@@ -2324,12 +2343,6 @@
             <p>Support PayPal, Flutterwave, ClickPesa, bank transfer, manual verification, and invoice links.</p>
             <span class="feature-badge">Billing</span>
           </div>
-          <div class="feature-card">
-            <div class="feature-icon">ADM</div>
-            <h3>Admin upgrade requests</h3>
-            <p>Admins can invoice, approve, or dismiss customer upgrade requests from the dashboard.</p>
-            <span class="feature-badge">New</span>
-          </div>
         </div>
       </div>
 
@@ -2339,8 +2352,8 @@
           <p>Enable room QR codes per menu, add room labels, generate guest-ready QR codes, and pass room context into the menu.</p>
         </div>
         <div class="ops-card">
-          <h3>Customer dashboard</h3>
-          <p>Customers can manage plans, request upgrades, see support history, and open invoice links when payment is needed.</p>
+          <h3>Customer and admin dashboard</h3>
+          <p>Customers can request upgrades and open invoice links, while admins can invoice, approve, or dismiss requests.</p>
         </div>
         <div class="ops-card">
           <h3>Analytics and ratings</h3>
