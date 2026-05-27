@@ -62,6 +62,11 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const PG_POOL_MAX = Math.max(1, parseInt(process.env.PG_POOL_MAX || '20', 10));
+const MENU_CACHE_MAX = Math.max(50, parseInt(process.env.MENU_CACHE_MAX || '500', 10));
+const MENU_CACHE_TTL_MS = Math.max(30000, parseInt(process.env.MENU_CACHE_TTL_MS || String(5 * 60 * 1000), 10));
+const SCAN_DEDUPE_TTL_MS = Math.max(60000, parseInt(process.env.SCAN_DEDUPE_TTL_MS || String(5 * 60 * 1000), 10));
+const SCAN_DEDUPE_MAX = Math.max(1000, parseInt(process.env.SCAN_DEDUPE_MAX || '20000', 10));
 // Auto-detect HTTPS in production, default to HTTP in development
 const DEFAULT_HOST = process.env.NODE_ENV === 'production' 
   ? `https://localhost:${PORT}` 
@@ -527,55 +532,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Record menu scans before serving menu.html
-app.get('/menu.html', async (req, res, next) => {
-  const menuId = req.query.id;
-  
-  if (menuId) {
-    try {
-      const now = new Date().toISOString();
-      const rawIp = req.ip || req.connection.remoteAddress || '';
-      const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
-      const userAgent = req.headers['user-agent'] || '';
-      const referrer = req.headers['referer'] || req.headers['referrer'] || '';
-
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const recent = await dbLastScanFrom(String(menuId), String(ipHash), String(fiveMinAgo));
-      if (!recent) {
-        await dbRecordScan(String(menuId), String(now), String(userAgent), String(ipHash), String(referrer));
-        await dbIncrementScans(String(now), String(menuId));
-      }
-    } catch (err) {
-      console.error('Failed to record scan:', err);
-    }
-  }
-  
+// Record menu scans without blocking page delivery.
+app.get('/menu.html', (req, res, next) => {
+  recordMenuScan(req);
   next();
 });
 
 // Also handle clean URL for menu page
-app.get('/menu', async (req, res, next) => {
-  const menuId = req.query.id;
-  
-  if (menuId) {
-    try {
-      const now = new Date().toISOString();
-      const rawIp = req.ip || req.connection.remoteAddress || '';
-      const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
-      const userAgent = req.headers['user-agent'] || '';
-      const referrer = req.headers['referer'] || req.headers['referrer'] || '';
-
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const recent = await dbLastScanFrom(String(menuId), String(ipHash), String(fiveMinAgo));
-      if (!recent) {
-        await dbRecordScan(String(menuId), String(now), String(userAgent), String(ipHash), String(referrer));
-        await dbIncrementScans(String(now), String(menuId));
-      }
-    } catch (err) {
-      console.error('Failed to record scan:', err);
-    }
-  }
-  
+app.get('/menu', (req, res) => {
+  recordMenuScan(req);
   res.sendFile(path.join(__dirname, 'menu.html'));
 });
 
@@ -921,7 +886,7 @@ const sslConfig = isLocalDB ? false : { rejectUnauthorized: false };
 
 const pool = new Pool({
   connectionString: _pgConnStr,
-  max: 20,
+  max: PG_POOL_MAX,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
   ssl: sslConfig,
@@ -1593,11 +1558,11 @@ async function loadCustomerSessionsFromDB() {
 
 // Cache frequently accessed data
 const menuCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const scanDedupeCache = new Map();
 
 function getCachedMenu(menuId) {
   const cached = menuCache.get(menuId);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  if (cached && Date.now() - cached.timestamp < MENU_CACHE_TTL_MS) {
     return cached.data;
   }
   return null;
@@ -1605,11 +1570,52 @@ function getCachedMenu(menuId) {
 
 function setCachedMenu(menuId, data) {
   menuCache.set(menuId, { data, timestamp: Date.now() });
-  if (menuCache.size > 100) {
+  if (menuCache.size > MENU_CACHE_MAX) {
     const oldest = Array.from(menuCache.entries())
       .sort(([,a], [,b]) => a.timestamp - b.timestamp)[0];
     menuCache.delete(oldest[0]);
   }
+}
+
+function rememberScan(scanKey, nowMs) {
+  scanDedupeCache.set(scanKey, nowMs);
+  if (scanDedupeCache.size <= SCAN_DEDUPE_MAX) return;
+
+  const cutoff = nowMs - SCAN_DEDUPE_TTL_MS;
+  for (const [key, timestamp] of scanDedupeCache.entries()) {
+    if (timestamp < cutoff || scanDedupeCache.size > SCAN_DEDUPE_MAX) {
+      scanDedupeCache.delete(key);
+    }
+  }
+}
+
+function recordMenuScan(req) {
+  const menuId = req.query.id;
+  if (!menuId) return;
+
+  const rawIp = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || '';
+  const ipHash = crypto.createHash('sha256').update(rawIp + 'menu-salt').digest('hex').slice(0, 16);
+  const scanKey = `${menuId}:${ipHash}`;
+  const nowMs = Date.now();
+  const recentScanAt = scanDedupeCache.get(scanKey);
+  if (recentScanAt && nowMs - recentScanAt < SCAN_DEDUPE_TTL_MS) return;
+
+  rememberScan(scanKey, nowMs);
+  setImmediate(async () => {
+    try {
+      const now = new Date(nowMs).toISOString();
+      const fiveMinAgo = new Date(nowMs - SCAN_DEDUPE_TTL_MS).toISOString();
+      const recent = await dbLastScanFrom(String(menuId), String(ipHash), String(fiveMinAgo));
+      if (recent) return;
+
+      const userAgent = req.headers['user-agent'] || '';
+      const referrer = req.headers['referer'] || req.headers['referrer'] || '';
+      await dbRecordScan(String(menuId), String(now), String(userAgent), String(ipHash), String(referrer));
+      await dbIncrementScans(String(now), String(menuId));
+    } catch (err) {
+      console.error('Failed to record scan:', err.message || err);
+    }
+  });
 }
 
 // ── DB helper functions ──────────────────────────────────────────────────────
@@ -5176,7 +5182,6 @@ app.get('/api/menus/:id', async (req, res) => {
     // Check cache first
     const cached = getCachedMenu(id);
     if (cached) {
-      console.log(`🎯 Cache hit for menu: ${id}`);
       res.setHeader('Cache-Control', 'public, max-age=300');
       return res.json(cached);
     }
@@ -8808,10 +8813,26 @@ app.use((err, req, res, next) => {
   if (!firebaseAdmin) {
     await reinitFirebaseAdmin().catch(e => console.warn('Firebase init from DB:', e.message));
   }
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`\n  MenuAdmin MVP running at http://localhost:${PORT}`);
     console.log(`  Admin panel   : http://localhost:${PORT}/admin.html`);
     console.log(`  Customer menu : http://localhost:${PORT}/menu.html?id=<menuId>`);
     console.log(`  Database      : PostgreSQL (${process.env.DATABASE_URL ? 'connected' : 'no DATABASE_URL'})\n`);
   });
+
+  const shutdown = (signal) => {
+    console.log(`${signal} received. Closing HTTP server and database pool...`);
+    server.close(() => {
+      pool.end()
+        .then(() => process.exit(0))
+        .catch((err) => {
+          console.error('Error closing database pool:', err);
+          process.exit(1);
+        });
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 })();

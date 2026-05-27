@@ -29,6 +29,11 @@ services:
       - PORT=3000
       - HOST=http://localhost:3000
       - DATABASE_URL=postgres://menu:menu_dev_pass@db:5432/menu
+      - PG_POOL_MAX=20
+      - MENU_CACHE_MAX=500
+      - MENU_CACHE_TTL_MS=300000
+      - SCAN_DEDUPE_TTL_MS=300000
+      - SCAN_DEDUPE_MAX=20000
       - ADMIN_SECRET_HASH=$2b$12$ogZ6ks85LLo5mFHjUgUAWOwt8U0akxiVavATYeCA5cJc2ZWhym7r.
       - SESSION_TTL_MS=28800000
       - LOGIN_RATE_LIMIT=10
