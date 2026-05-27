@@ -37,7 +37,7 @@
           "@type": "ImageObject",
           "url": "https://restorder.online/logo.png"
         },
-        "description": "RestOrder provides a complete digital menu and online ordering platform for restaurants, cafes, bars, and juice bars. Designed to boost sales, reduce costs, and delight customers with professional digital menus.",
+        "description": "RestOrder provides a complete digital menu, ordering, billing, and analytics platform for restaurants, cafes, bars, and juice bars.",
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer support",
@@ -91,17 +91,14 @@
         "featureList": [
           "QR Code Menus",
           "Real-time Updates",
-          "WhatsApp Ordering",
-          "Stripe & PayPal Payments Integration",
-          "Multi-language Support",
-          "Customer Analytics Dashboard"
+          "Table Ordering",
+          "Staff Management",
+          "Manual Upgrade Invoices",
+          "PayPal, Flutterwave and ClickPesa Payments",
+          "Customer Analytics Dashboard",
+          "Subscription and Plan Management"
         ],
-        "description": "Complete digital menu platform for restaurants, cafes, bars & eateries. Generate QR codes, take orders via WhatsApp, receive payments online, and view powerful analytics.",
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "ratingCount": "1247"
-        }
+        "description": "Complete digital menu platform for restaurants, cafes, bars and eateries. Generate QR menus, take table orders, manage staff, handle subscriptions, send upgrade invoices, receive payments online, and view analytics."
       },
       {
         "@type": "WebPage",
@@ -228,16 +225,17 @@
     .feature-ticker::after  { right: 0; background: linear-gradient(to left,  var(--primary), transparent); }
     .ticker-track {
       display: flex;
-      animation: ticker-scroll 38s linear infinite;
-      width: max-content;
-      will-change: transform;
+      justify-content: center;
+      width: 100%;
     }
     .ticker-list {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       list-style: none;
       padding: 0;
       margin: 0;
-      white-space: nowrap;
+      row-gap: 8px;
     }
     .ticker-item {
       display: inline-flex;
@@ -256,13 +254,6 @@
       background: rgba(255,255,255,0.5);
       border-radius: 50%;
       flex-shrink: 0;
-    }
-    @keyframes ticker-scroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .ticker-track { animation: none; }
     }
 
     body {
@@ -942,41 +933,143 @@
       margin-top: auto;
     }
     
-    /* Feature Categories */
-    .feature-category {
-      margin-bottom: 56px;
-    }
-    
-    .feature-category:last-child {
-      margin-bottom: 0;
-    }
-    
-    .category-header {
-      text-align: center;
-      margin-bottom: 48px;
+    .feature-spotlight {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 28px;
+      align-items: stretch;
       position: relative;
-      padding: 24px 0 0;
-      border-top: 4px solid var(--primary);
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
+      z-index: 1;
+      margin-bottom: 28px;
     }
-    
-    .category-title {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--primary);
+
+    .feature-panel {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 18px;
+      padding: 28px;
+    }
+
+    .feature-panel h3 {
+      font-size: clamp(26px, 3vw, 38px);
+      color: var(--rich-dark);
       margin-bottom: 12px;
-      letter-spacing: -0.8px;
-      line-height: 1.1;
     }
-    
-    .category-description {
-      font-size: 17px;
+
+    .feature-panel p {
+      color: #6b4f3b;
+      max-width: 58ch;
+      margin-bottom: 22px;
+    }
+
+    .workflow {
+      display: grid;
+      gap: 12px;
+    }
+
+    .workflow-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(194,65,12,0.12);
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--primary);
+      color: white;
+      font-weight: 800;
+      font-size: 13px;
+      font-family: var(--font-body);
+    }
+
+    .workflow-step strong {
+      display: block;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+
+    .workflow-step span {
+      display: block;
       color: var(--text-light);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.5;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature-list .feature-card {
+      min-height: 0;
+      padding: 22px;
+      gap: 12px;
+      border-radius: 14px;
+    }
+
+    .feature-list .feature-icon {
+      width: auto;
+      min-width: 46px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      font-family: var(--font-body);
+    }
+
+    .feature-list .feature-card:hover .feature-icon {
+      transform: none;
+      color: white;
+    }
+
+    .ops-band {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ops-card {
+      background: #1c1917;
+      color: #fff7ed;
+      border-radius: 16px;
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .ops-card h3 {
+      color: white;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .ops-card p {
+      color: #d6d3d1;
+      font-size: 14.5px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .feature-link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
     }
     
     /* Pricing - Compact Clean Design */
@@ -1843,6 +1936,13 @@
         grid-template-columns: 1fr; 
         gap: 20px;
       }
+      .feature-spotlight,
+      .ops-band {
+        grid-template-columns: 1fr;
+      }
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
       .feature-card {
         padding: 20px;
         min-height: auto;
@@ -1877,7 +1977,6 @@
       .footer-grid { grid-template-columns: 1fr; text-align: center; }
       .footer-brand { max-width: 100%; }
       .section-title { font-size: 28px; }
-      .category-title { font-size: 28px; }
       .demo-container { grid-template-columns: 1fr; gap: 40px; }
       .demo-content { order: 2; }
       .phone-mockup { order: 1; max-width: 320px; }
@@ -1967,25 +2066,6 @@
     }
   </style>
   
-  <!-- Crisp Live Chat Widget -->
-  <script type="text/javascript">
-    window.$crisp = [];
-    window.CRISP_WEBSITE_ID = "YOUR_CRISP_WEBSITE_ID"; // Replace with your actual Crisp website ID
-    (function() {
-      var d = document;
-      var s = d.createElement("script");
-      s.src = "https://client.crisp.chat/l.js";
-      s.async = 1;
-      d.getElementsByTagName("head")[0].appendChild(s);
-    })();
-    
-    // Set Crisp user data (if available)
-    if (typeof $crisp !== 'undefined') {
-      // You can set user email, name, etc. here
-      // $crisp.push(["set", "user:email", ["user@example.com"]]);
-      // $crisp.push(["set", "user:nickname", ["John Doe"]]);
-    }
-  </script>
   <script src="/js/geo.js"></script>
   <script>
     initCountryCustomization('index');
@@ -2122,7 +2202,7 @@
       
       <div style="margin-top: 24px; text-align: center;">
         <p style="color: var(--text-light); font-size: 13.5px; font-weight: 500; font-family: var(--font-body);">
-          🛡️ 30-Day Money-Back Guarantee &nbsp;•&nbsp; 🔒 Bank-Level Security &nbsp;•&nbsp; ✓ Cancel Anytime
+          30-day refund policy &nbsp;•&nbsp; Secure checkout &nbsp;•&nbsp; Cancel anytime
         </p>
         <p style="color: var(--text-light); font-size: 13.5px; margin-top: 10px; font-family: var(--font-body);">
           Already have an account? <a href="/login" style="color: var(--primary); font-weight: 700; text-decoration: none;">Sign in →</a>
@@ -2158,28 +2238,12 @@
         <li class="ticker-item"><span class="ticker-dot"></span>Real-Time Updates</li>
         <li class="ticker-item"><span class="ticker-dot"></span>Online Ordering</li>
         <li class="ticker-item"><span class="ticker-dot"></span>Analytics Dashboard</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Custom Branding</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Manual Upgrade Invoices</li>
         <li class="ticker-item"><span class="ticker-dot"></span>Staff Management</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Multiple Currencies</li>
+        <li class="ticker-item"><span class="ticker-dot"></span>Payment Gateways</li>
         <li class="ticker-item"><span class="ticker-dot"></span>Table Alerts</li>
         <li class="ticker-item"><span class="ticker-dot"></span>CSV Import</li>
         <li class="ticker-item"><span class="ticker-dot"></span>Email Receipts</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Mobile-First Design</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Inventory Tracking</li>
-      </ul>
-      <ul class="ticker-list" aria-hidden="true">
-        <li class="ticker-item"><span class="ticker-dot"></span>QR Code Menus</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Real-Time Updates</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Online Ordering</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Analytics Dashboard</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Custom Branding</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Staff Management</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Multiple Currencies</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Table Alerts</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>CSV Import</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Email Receipts</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Mobile-First Design</li>
-        <li class="ticker-item"><span class="ticker-dot"></span>Inventory Tracking</li>
       </ul>
     </div>
   </div>
@@ -2188,337 +2252,91 @@
   <div class="trust-bar">
     <div class="container">
       <div class="trust-content">
-        <span class="trust-text">Trusted by leading businesses:</span>
+        <span class="trust-text">Built for daily restaurant operations:</span>
         <div class="trust-logos">
-          <span style="font-weight: 700; color: var(--text-light);">🍕 Pizza Palace</span>
-          <span style="font-weight: 700; color: var(--text-light);">☕ Café Luna</span>
-          <span style="font-weight: 700; color: var(--text-light);">🍺 The Craft Tap</span>
-          <span style="font-weight: 700; color: var(--text-light);">🥗 Green Juice Bar</span>
+          <span style="font-weight: 700; color: var(--text-light);">Fast edits before service</span>
+          <span style="font-weight: 700; color: var(--text-light);">Table-level QR ordering</span>
+          <span style="font-weight: 700; color: var(--text-light);">Manual and gateway payments</span>
+          <span style="font-weight: 700; color: var(--text-light);">Customer upgrade requests</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Features Section - Redesigned -->
+  <!-- Features Section -->
   <section id="features" style="padding: 64px 0;">
     <div class="container">
       <div class="section-header">
-        <span class="section-label">Complete Solution</span>
-        <h2 class="section-title">Everything You Need to Succeed</h2>
+        <span class="section-label">Current Platform</span>
+        <h2 class="section-title">The front counter, menu, billing, and back office in one flow</h2>
         <p class="section-subtitle">
-          Powerful features designed for restaurants, cafes, bars, juice bars & eateries. No complicated setup, no hidden fees.
+          RestOrder now covers the full customer journey: publish the menu, take table orders, manage staff, collect payments, and handle plan upgrades without manual back-and-forth.
         </p>
       </div>
-      
-      <!-- Menu Management -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Menu Management</h3>
-          <p class="category-description">Create, organize, and update your digital menu effortlessly</p>
-        </div>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📱</div>
-            <h3>QR Code Access</h3>
-            <p>Customers scan your QR code to instantly view the menu on their phone. Works on any device, no app download needed.</p>
-            <span class="feature-badge">Essential</span>
+      <div class="feature-spotlight">
+        <div class="feature-panel">
+          <h3>From scan to paid upgrade, without changing tools</h3>
+          <p>The current app supports the practical restaurant workflow: customers scan, browse, order, staff respond, owners review analytics, and admins can approve or invoice subscription upgrades.</p>
+          <div class="workflow">
+            <div class="workflow-step">
+              <div class="step-number">01</div>
+              <div><strong>Publish the live menu</strong><span>Create categories, upload items, add images, set currency, and share QR codes for tables or counters.</span></div>
+            </div>
+            <div class="workflow-step">
+              <div class="step-number">02</div>
+              <div><strong>Run service from the dashboard</strong><span>Take table orders, handle waiter alerts, track order history, and control staff access by role.</span></div>
+            </div>
+            <div class="workflow-step">
+              <div class="step-number">03</div>
+              <div><strong>Bill and upgrade cleanly</strong><span>Use gateway payments where available, or send manual upgrade invoices for admin verification.</span></div>
+            </div>
           </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Real-Time Updates</h3>
-            <p>Change prices, add specials, or update descriptions instantly. Changes appear immediately for all customers.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📤</div>
-            <h3>Easy Import/Export</h3>
-            <p>Upload menus from PDF, CSV, Excel, or text files. Export your menu data anytime. Bulk updates made easy.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🏷️</div>
-            <h3>Categories & Tags</h3>
-            <p>Organize with unlimited categories and subcategories. Tag items (vegan, gluten-free, spicy) for easy filtering.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🔍</div>
-            <h3>Smart Search</h3>
-            <p>Powerful search lets customers find exactly what they want instantly. Search by name, description, category, or tags.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🔗</div>
-            <h3>QR Code Redirects</h3>
-            <p>Map one QR code to another menu instantly. Perfect for seasonal menus, events, or rebranding without reprinting.</p>
-            <span class="feature-badge">Premium</span>
+          <div class="feature-link-row">
+            <a href="/register" class="btn-primary">Create Free Menu</a>
+            <a href="/menu?id=demo" target="_blank" class="btn-secondary">Open Demo Menu</a>
           </div>
         </div>
-      </div>
-      
-      <!-- Branding & Design -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Branding & Design</h3>
-          <p class="category-description">Make your menu uniquely yours with powerful customization options</p>
-        </div>
-        
-        <div class="features-grid">
+
+        <div class="feature-list">
           <div class="feature-card">
-            <div class="feature-icon">🎨</div>
-            <h3>Custom Branding</h3>
-            <p>Match your brand with custom colors, fonts, logos, and themes. Professional design options that make your menu stand out.</p>
-            <span class="feature-badge">Essential</span>
+            <div class="feature-icon">QR</div>
+            <h3>QR menus that stay current</h3>
+            <p>Update prices, specials, availability, categories, images, tags, and descriptions without reprinting.</p>
+            <span class="feature-badge">Menu</span>
           </div>
-          
           <div class="feature-card">
-            <div class="feature-icon">🌙</div>
-            <h3>Dark/Light Themes</h3>
-            <p>Customers choose their preferred theme. Automatic detection based on device settings for comfortable viewing.</p>
-            <span class="feature-badge">Essential</span>
+            <div class="feature-icon">ORD</div>
+            <h3>Table ordering and alerts</h3>
+            <p>Customers can order from their phone, request service, and send table context to staff.</p>
+            <span class="feature-badge">Service</span>
           </div>
-          
           <div class="feature-card">
-            <div class="feature-icon">📐</div>
-            <h3>Multiple Header Layouts</h3>
-            <p>Choose from different header styles — centered, left-aligned, or compact — to match your restaurant's personality.</p>
-            <span class="feature-badge">Premium</span>
+            <div class="feature-icon">PAY</div>
+            <h3>Gateway and manual payments</h3>
+            <p>Support PayPal, Flutterwave, ClickPesa, bank transfer, manual verification, and invoice links.</p>
+            <span class="feature-badge">Billing</span>
           </div>
-          
           <div class="feature-card">
-            <div class="feature-icon">📸</div>
-            <h3>Item Images & Descriptions</h3>
-            <p>Showcase dishes with high-quality images and rich descriptions. Upload custom photos or use AI-assisted suggestions.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📱</div>
-            <h3>Social Media Links</h3>
-            <p>Connect Instagram, Facebook, Twitter, WhatsApp, TikTok & YouTube directly on your menu to grow your following.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <h3>Multi-Currency</h3>
-            <p>Support for all major currencies worldwide. Perfect for tourist areas and international restaurants.</p>
-            <span class="feature-badge">Premium</span>
+            <div class="feature-icon">ADM</div>
+            <h3>Admin upgrade requests</h3>
+            <p>Admins can invoice, approve, or dismiss customer upgrade requests from the dashboard.</p>
+            <span class="feature-badge">New</span>
           </div>
         </div>
       </div>
-      
-      <!-- Ordering & Table Service -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Ordering & Table Service</h3>
-          <p class="category-description">Streamline orders and table service with smart digital tools</p>
+
+      <div class="ops-band">
+        <div class="ops-card">
+          <h3>Customer dashboard</h3>
+          <p>Customers can manage plans, request upgrades, see support history, and open invoice links when payment is needed.</p>
         </div>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">🪑</div>
-            <h3>Table Management</h3>
-            <p>Generate unique QR codes for each table. Customers can call waiters, place orders, and view bills from their phone.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🛒</div>
-            <h3>Online Ordering</h3>
-            <p>Let customers add items to cart and place orders. Collect customer info, integrate with WhatsApp for notifications.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🔔</div>
-            <h3>Table Alerts</h3>
-            <p>Customers can request service with one tap. Real-time notifications keep your staff responsive and customers happy.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🖨️</div>
-            <h3>Bill Printing</h3>
-            <p>Auto-format and print customer bills with all order details. Works with standard thermal receipt printers.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📋</div>
-            <h3>Order History</h3>
-            <p>Track all orders with timestamps, table numbers, and item details. Review past orders for insights and dispute resolution.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">💬</div>
-            <h3>WhatsApp Integration</h3>
-            <p>Receive order notifications directly on WhatsApp. Quick communication with customers for order confirmations and updates.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
+        <div class="ops-card">
+          <h3>Analytics and ratings</h3>
+          <p>Track menu scans, popular items, item ratings, peak activity, and engagement patterns from the business dashboard.</p>
         </div>
-      </div>
-      
-      <!-- Payments & Pricing -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Flexible Pricing</h3>
-          <p class="category-description">Simple, transparent plans that scale with your business — no surprises</p>
-        </div>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">🆓</div>
-            <h3>7-Day Free Trial</h3>
-            <p>Try any plan free for 7 days with full access to every feature. No credit card required — upgrade only if you love it.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📅</div>
-            <h3>Monthly & Annual Billing</h3>
-            <p>Choose the billing cycle that works for you. Save big with annual plans or stay flexible with monthly — cancel anytime.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">💳</div>
-            <h3>Pay Your Way</h3>
-            <p>Pay with PayPal, Flutterwave, ClickPesa, or bank transfer. We accept cards, mobile money, and direct deposits worldwide.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🎟️</div>
-            <h3>Discount Codes</h3>
-            <p>Use promo codes at checkout for instant savings. Watch for seasonal offers, launch deals, and partner discounts.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">⏰</div>
-            <h3>Instant Setup</h3>
-            <p>Sign up in under 2 minutes, no technical skills needed. Your digital menu is live and ready to share from day one.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3>Upgrade Anytime</h3>
-            <p>Start small and scale up as your business grows. Seamlessly switch between plans without losing any data or settings.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Analytics & Engagement -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Analytics & Engagement</h3>
-          <p class="category-description">Understand your customers and grow your business with data-driven insights</p>
-        </div>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Advanced Analytics</h3>
-            <p>Track menu scans, popular items, peak hours, and customer behavior. Make data-driven decisions to boost sales.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">⭐</div>
-            <h3>Item Ratings & Reviews</h3>
-            <p>Customers rate individual menu items 1–5 stars. Duplicate prevention ensures authentic reviews you can trust.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3>Scan Tracking</h3>
-            <p>Monitor QR code scans with timestamps, device info, and location. Understand when and how customers engage with your menu.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🧪</div>
-            <h3>Menu Performance</h3>
-            <p>See which menu items get the most views, orders, and ratings. Identify top sellers and underperformers at a glance.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">💡</div>
-            <h3>Peak Hour Insights</h3>
-            <p>Discover when your menu gets the most traffic. Optimize staffing, specials, and promotions around your busiest times.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">📧</div>
-            <h3>Customer Engagement</h3>
-            <p>Understand how customers interact with your menu — which categories they browse, how long they stay, and what they order most.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Team & Security -->
-      <div class="feature-category">
-        <div class="category-header">
-          <h3 class="category-title">Team & Security</h3>
-          <p class="category-description">Manage your team and protect your data with enterprise-grade security</p>
-        </div>
-        
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon">👥</div>
-            <h3>Staff Management</h3>
-            <p>Add managers, waiters, and cashiers with role-based access. Each role sees only what they need to get the job done.</p>
-            <span class="feature-badge">Premium</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🛡️</div>
-            <h3>Secure Accounts</h3>
-            <p>Your account is protected with encrypted passwords, secure sessions, and email verification. Your data stays private and safe.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🔐</div>
-            <h3>Data Protection</h3>
-            <p>Bank-level AES-256 encryption for all personal data. Your business information is encrypted at rest and in transit.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">✉️</div>
-            <h3>Email Verification</h3>
-            <p>Secure email verification for customer accounts. Token-based password reset ensures only verified users access their data.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🔒</div>
-            <h3>99.9% Uptime</h3>
-            <p>Your menu is always available. Reliable cloud hosting with automatic backups means your customers never see downtime.</p>
-            <span class="feature-badge">Essential</span>
-          </div>
-          
-          <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <h3>Custom Domain & White-Label</h3>
-            <p>Use your own domain and remove all RestOrder branding. Full white-label solution for agencies and large restaurant chains.</p>
-            <span class="feature-badge">Enterprise</span>
-          </div>
+        <div class="ops-card">
+          <h3>Production-ready serving</h3>
+          <p>Static assets are cached, menu data is cached, and scan tracking is deduped so public menu pages stay responsive.</p>
         </div>
       </div>
       
@@ -2720,7 +2538,7 @@
             <span>RestOrder</span>
           </div>
           <p class="footer-description">
-            The complete digital menu platform for modern restaurants. Boost sales, reduce costs, and delight customers with professional digital menus.
+            The complete digital menu platform for modern restaurants: QR menus, table ordering, subscriptions, payments, staff tools, and analytics in one place.
           </p>
           <div id="footer-social-links" style="display:flex;gap:16px;margin-top:20px;"></div>
         </div>
@@ -3237,7 +3055,7 @@
     // Add reveal classes to sections dynamically
     function addRevealClasses() {
       document.querySelectorAll('.section-header').forEach(el => el.classList.add('reveal'));
-      document.querySelectorAll('.features-grid, .pricing-grid, .testimonial-grid').forEach(el => el.classList.add('reveal'));
+      document.querySelectorAll('.feature-spotlight, .ops-band, .pricing-grid, .testimonials-grid').forEach(el => el.classList.add('reveal'));
       document.querySelectorAll('.hero-stats').forEach(el => el.classList.add('stagger-children'));
     }
     
