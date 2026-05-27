@@ -1,5 +1,5 @@
-# Use Node.js 18 Alpine for smaller size
-FROM node:18-alpine
+# Use Node.js 22 Alpine to match the production runtime configured in Coolify
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
