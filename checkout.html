@@ -321,6 +321,7 @@ let detectedCountry = ''; // ISO country code from geo-detection
 const planSlug = qs('plan');       // e.g. "professional"
 const billingInterval = qs('billing') || 'monthly'; // 'monthly' or 'annual'
 const menuIdParam = qs('menu_id'); // pre-selected menu (from dashboard)
+const paymentIdParam = qs('payment_id'); // optional invoice/payment request id
 
 async function detectCountry() {
   // Use geo.js centralized detection (Cloudflare CF-IPCountry backed)
@@ -890,6 +891,19 @@ async function init() {
         setStep(2);
         document.getElementById('payment-section').classList.remove('hidden');
         selectedMenuId = menuIdParam || null;
+        if (paymentIdParam) {
+          try {
+            const invRes = await fetch(`/api/customers/upgrade-invoices/${encodeURIComponent(paymentIdParam)}`, { headers: { 'x-customer-token': token } });
+            const inv = await invRes.json().catch(() => ({}));
+            if (invRes.ok && inv && inv.payment_id) {
+              if (inv.menu_id) selectedMenuId = inv.menu_id;
+              const invAmt = inv.amount ? `$${Number(inv.amount).toFixed(2)} ${inv.currency || 'USD'}` : '';
+              document.getElementById('payment-subtitle').textContent = `Invoice #${inv.payment_id}${invAmt ? ' · ' + invAmt : ''} · Pay to activate your subscription.`;
+            } else if (!invRes.ok) {
+              document.getElementById('payment-subtitle').textContent = 'Invoice not found or not accessible. Choose a payment method to activate your subscription.';
+            }
+          } catch (_) { /* ignore invoice load errors */ }
+        }
         await loadMenusAndGateways();
         return;
       }
@@ -900,6 +914,10 @@ async function init() {
   // Not logged in � show auth section (step 1 in 2-step flow)  // Default to login tab when upgrading (plan preselected) — user likely already has an account
   if (hasPlanPreselected) showTab('login');  setStep(1);
   document.getElementById('auth-section').classList.remove('hidden');
+  if (paymentIdParam) {
+    const hint = document.querySelector('#auth-section p.text-sm.text-stone-500');
+    if (hint) hint.textContent = 'Sign in to view your invoice and complete payment.';
+  }
 }
 
 init();

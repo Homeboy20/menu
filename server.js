@@ -1270,6 +1270,8 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_sub ON payments (subscription_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status)`);
+    await client.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS invoice_url TEXT NOT NULL DEFAULT ''`).catch(() => {});
+    await client.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS invoiced_at TEXT`).catch(() => {});
 
     // Customer contact / upgrade requests table
     await client.query(`
@@ -6047,6 +6049,10 @@ app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
              p.amount,
              p.currency,
              p.notes,
+             p.payment_method,
+             p.status AS payment_status,
+             p.invoice_url,
+             p.invoiced_at,
              p.created_at,
              s.id AS subscription_id,
              s.menu_id,
@@ -6067,7 +6073,10 @@ app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
       LEFT JOIN menus m ON COALESCE(r.menu_id, s.menu_id) = m.id
       LEFT JOIN customers c ON r.customer_id = c.id
       LEFT JOIN subscription_plans sp ON r.requested_plan_id = sp.id
-      WHERE r.request_type = 'upgrade' AND r.status = 'open'
+      WHERE r.request_type = 'upgrade'
+        AND r.status = 'open'
+        AND p.payment_method = 'customer_upgrade'
+        AND p.status = 'pending'
       ORDER BY r.created_at DESC
       LIMIT 200
     `);
@@ -6129,24 +6138,35 @@ app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCs
   if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
   try {
     const { rows: pRows } = await pool.query(
-      `SELECT p.id, p.subscription_id, p.amount, p.currency, s.plan_id, s.menu_id
-       FROM payments p JOIN subscriptions s ON p.subscription_id = s.id
-       WHERE p.id = $1 AND p.payment_method = 'customer_upgrade' AND p.status = 'pending'`,
+      `SELECT p.id,
+              p.subscription_id,
+              p.amount,
+              p.currency,
+              s.plan_id AS current_plan_id,
+              s.menu_id,
+              COALESCE(r.requested_plan_id, s.plan_id) AS requested_plan_id,
+              sp.interval
+       FROM payments p
+       JOIN subscriptions s ON p.subscription_id = s.id
+       LEFT JOIN customer_contact_requests r ON r.payment_id = p.id AND r.request_type = 'upgrade'
+       LEFT JOIN subscription_plans sp ON sp.id = COALESCE(r.requested_plan_id, s.plan_id)
+       WHERE p.id = $1 AND p.status = 'pending'`,
       [paymentId]
     );
     if (!pRows.length) return res.status(404).json({ error: 'Pending upgrade request not found.' });
     const pay = pRows[0];
     const now = new Date().toISOString();
     const nextDate = new Date();
-    nextDate.setMonth(nextDate.getMonth() + 1);
+    if ((pay.interval || '').toLowerCase() === 'year') nextDate.setFullYear(nextDate.getFullYear() + 1);
+    else nextDate.setMonth(nextDate.getMonth() + 1);
     const nextBilling = nextDate.toISOString();
     await pool.query(
       `UPDATE payments SET status = 'completed', paid_at = $1 WHERE id = $2`,
       [now, paymentId]
     );
     await pool.query(
-      `UPDATE subscriptions SET status = 'active', end_date = $1, next_billing_date = $1, updated_at = $2 WHERE id = $3`,
-      [nextBilling, now, pay.subscription_id]
+      `UPDATE subscriptions SET plan_id = $1, status = 'active', end_date = $2, next_billing_date = $2, updated_at = $3 WHERE id = $4`,
+      [pay.requested_plan_id, nextBilling, now, pay.subscription_id]
     );
     await pool.query(
       `UPDATE customer_contact_requests
@@ -6160,6 +6180,69 @@ app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCs
 });
 
 // POST /api/admin/upgrade-requests/:id/dismiss – Admin: dismiss/reject a manual upgrade request
+// POST /api/admin/upgrade-requests/:id/invoice - Admin: send payment link/invoice for a pending upgrade
+app.post('/api/admin/upgrade-requests/:paymentId/invoice', requireAuth, doubleCsrfProtection, async (req, res) => {
+  const paymentId = parseInt(req.params.paymentId, 10);
+  if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
+  try {
+    const adminNote = sanitizeStr(req.body.message || '', 800);
+    const { rows } = await pool.query(
+      `SELECT p.id,
+              p.amount,
+              p.currency,
+              r.id AS request_id,
+              COALESCE(NULLIF(r.menu_id, ''), s.menu_id) AS menu_id,
+              COALESCE(NULLIF(r.customer_email, ''), c.email, '') AS customer_email,
+              c.business_name,
+              m.restaurant_name,
+              sp.name AS plan_slug,
+              sp.display_name AS plan_name
+       FROM payments p
+       JOIN customer_contact_requests r ON r.payment_id = p.id AND r.request_type = 'upgrade'
+       JOIN subscriptions s ON p.subscription_id = s.id
+       LEFT JOIN customers c ON r.customer_id = c.id
+       LEFT JOIN menus m ON COALESCE(NULLIF(r.menu_id, ''), s.menu_id) = m.id
+       LEFT JOIN subscription_plans sp ON r.requested_plan_id = sp.id
+       WHERE p.id = $1 AND p.status = 'pending' AND r.status = 'open'
+       LIMIT 1`,
+      [paymentId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Open pending upgrade request not found.' });
+
+    const row = rows[0];
+    const now = new Date().toISOString();
+    const paymentUrl = `${getPublicBaseUrl()}/checkout?plan=${encodeURIComponent(row.plan_slug || 'professional')}&menu_id=${encodeURIComponent(row.menu_id || '')}&source=admin_invoice&payment_id=${encodeURIComponent(String(paymentId))}`;
+    await pool.query(
+      `UPDATE payments
+       SET invoice_url = $1,
+           invoiced_at = $2,
+           notes = TRIM(COALESCE(notes, '') || ' [invoice sent]' || $3)
+       WHERE id = $4`,
+      [paymentUrl, now, adminNote ? ` Admin note: ${adminNote}` : '', paymentId]
+    );
+    await pool.query(
+      `UPDATE customer_contact_requests SET updated_at = $1 WHERE id = $2`,
+      [now, row.request_id]
+    );
+
+    queueUpgradeInvoiceEmail({
+      to: row.customer_email,
+      businessName: row.business_name,
+      restaurantName: row.restaurant_name,
+      planName: row.plan_name,
+      amount: row.amount,
+      currency: row.currency || 'USD',
+      paymentUrl,
+      adminNote,
+    });
+
+    res.json({ success: true, payment_url: paymentUrl });
+  } catch (err) {
+    console.error('invoice upgrade request error:', err);
+    res.status(500).json({ error: 'Failed to send invoice.' });
+  }
+});
+
 app.post('/api/admin/upgrade-requests/:paymentId/dismiss', requireAuth, doubleCsrfProtection, async (req, res) => {
   const paymentId = parseInt(req.params.paymentId);
   if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
@@ -6619,6 +6702,7 @@ app.get('/api/customers/support-requests', requireCustomerAuth, async (req, res)
     const customerId = req.customer.id;
     const { rows } = await pool.query(
       `SELECT r.id AS request_id,
+              r.payment_id,
               r.menu_id,
               r.request_type,
               r.requested_plan_id,
@@ -6630,8 +6714,14 @@ app.get('/api/customers/support-requests', requireCustomerAuth, async (req, res)
               r.created_at,
               r.updated_at,
               r.handled_at,
-              m.restaurant_name
+              m.restaurant_name,
+              p.amount AS payment_amount,
+              p.currency AS payment_currency,
+              p.status AS payment_status,
+              p.invoice_url,
+              p.invoiced_at
        FROM customer_contact_requests r
+       LEFT JOIN payments p ON r.payment_id = p.id
        LEFT JOIN menus m ON r.menu_id = m.id
        LEFT JOIN subscription_plans sp ON r.requested_plan_id = sp.id
        WHERE r.customer_id = $1
@@ -6643,6 +6733,43 @@ app.get('/api/customers/support-requests', requireCustomerAuth, async (req, res)
   } catch (err) {
     console.error('customer contact history error:', err);
     res.status(500).json({ error: 'Failed to load request history.' });
+  }
+});
+
+// GET /api/customers/upgrade-invoices/:paymentId - Customer: view an upgrade invoice/payment request
+app.get('/api/customers/upgrade-invoices/:paymentId', requireCustomerAuth, async (req, res) => {
+  const paymentId = parseInt(req.params.paymentId, 10);
+  if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
+  try {
+    const customerId = req.customer.id;
+    const { rows } = await pool.query(
+      `SELECT p.id AS payment_id,
+              p.amount,
+              p.currency,
+              p.status AS payment_status,
+              p.invoice_url,
+              p.invoiced_at,
+              r.id AS request_id,
+              r.status AS request_status,
+              COALESCE(NULLIF(r.menu_id, ''), s.menu_id) AS menu_id,
+              m.restaurant_name,
+              sp.id AS plan_id,
+              sp.name AS plan_slug,
+              sp.display_name AS plan_name
+       FROM payments p
+       JOIN subscriptions s ON p.subscription_id = s.id
+       LEFT JOIN customer_contact_requests r ON r.payment_id = p.id AND r.request_type = 'upgrade'
+       LEFT JOIN menus m ON COALESCE(NULLIF(r.menu_id, ''), s.menu_id) = m.id
+       LEFT JOIN subscription_plans sp ON COALESCE(r.requested_plan_id, s.plan_id) = sp.id
+       WHERE p.id = $1 AND s.customer_id = $2
+       LIMIT 1`,
+      [paymentId, customerId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Invoice not found.' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('customer upgrade invoice error:', err);
+    res.status(500).json({ error: 'Failed to load invoice.' });
   }
 });
 
@@ -7603,6 +7730,47 @@ function queuePaymentReceiptEmailForPayment(paymentId) {
   });
 }
 
+function queueUpgradeInvoiceEmail({ to, businessName, restaurantName, planName, amount, currency, paymentUrl, adminNote }) {
+  const safeTo = sanitizeEmail(to || '');
+  if (!safeTo || !isValidEmail(safeTo) || !paymentUrl) return;
+
+  const safeBusiness = sanitizeStr(restaurantName || businessName || 'your business', 160);
+  const safePlan = sanitizeStr(planName || 'Subscription', 120);
+  const amountLabel = formatCurrencyAmount(amount || 0, currency || 'USD');
+  const note = sanitizeStr(adminNote || '', 800);
+  const supportEmail = process.env.SUPPORT_EMAIL || 'support@restorder.online';
+
+  const subject = `Invoice for ${safePlan} upgrade`;
+  const text = [
+    `Hi ${safeBusiness},`,
+    '',
+    `Your RestOrder upgrade invoice is ready.`,
+    `Plan: ${safePlan}`,
+    `Amount: ${amountLabel}`,
+    `Pay online: ${paymentUrl}`,
+    note ? `Note: ${note}` : '',
+    '',
+    'After online payment, verification is automatic. If you pay manually, reply with your payment reference and an admin will approve the upgrade after confirmation.',
+    supportEmail,
+  ].filter(Boolean).join('\n');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:680px;margin:0 auto;padding:20px;">
+      <h2 style="margin:0 0 12px 0;color:#ea580c;">Upgrade Invoice</h2>
+      <p style="margin:0 0 12px 0;">Hi ${validator.escape(safeBusiness)}, your RestOrder upgrade invoice is ready.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;">
+        <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Plan</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePlan)}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Amount</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(amountLabel)}</td></tr>
+      </table>
+      ${note ? `<p style="margin:0 0 12px 0;color:#475569;"><strong>Note:</strong> ${validator.escape(note)}</p>` : ''}
+      <p style="margin:0 0 20px 0;"><a href="${paymentUrl}" style="display:inline-block;padding:12px 26px;background:#ea580c;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;">Pay Invoice</a></p>
+      <p style="margin:0;color:#475569;font-size:13px;">Online payment verifies automatically. Manual payment is approved after admin confirmation.</p>
+    </div>
+  `;
+
+  queueTransactionalEmail({ to: safeTo, subject, text, html }, 'upgrade-invoice');
+}
+
 // Helper: activate subscription after a confirmed payment
 async function activateSubscriptionPayment(menuId, planId, amount, currency, method, paymentRef, notes, billingCycle = 'monthly') {
   const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1', [planId]);
@@ -7656,6 +7824,28 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   if (paymentRows.length) {
     queuePaymentReceiptEmailForPayment(paymentRows[0].id);
   }
+  await pool.query(
+    `UPDATE customer_contact_requests
+     SET status = 'approved', handled_at = $1, updated_at = $1
+     WHERE customer_id = $2
+       AND request_type = 'upgrade'
+       AND status = 'open'
+       AND ($3::TEXT = '' OR menu_id = $3 OR menu_id = '')
+       AND (requested_plan_id = $4 OR requested_plan_id IS NULL)`,
+    [nowISO, customerId, menuId || '', planId]
+  );
+  await pool.query(
+    `UPDATE payments p
+     SET status = 'cancelled',
+         notes = TRIM(COALESCE(p.notes, '') || $1)
+     FROM customer_contact_requests r
+     WHERE r.payment_id = p.id
+       AND r.customer_id = $2
+       AND r.request_type = 'upgrade'
+       AND p.status = 'pending'
+       AND (r.requested_plan_id = $3 OR r.requested_plan_id IS NULL)`,
+    [` [paid automatically via ${sanitizeStr(method || 'gateway', 50)} ref ${sanitizeStr(paymentRef || '', 120)}]`, customerId, planId]
+  );
   return subId;
 }
 

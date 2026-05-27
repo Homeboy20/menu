@@ -1253,6 +1253,8 @@ async function loadSubscription() {
               const subjectLine = isUpgrade
                 ? (req.requested_plan_name ? 'Upgrade to ' + escapeHtml(req.requested_plan_name) + ' plan' : 'Plan upgrade request')
                 : escapeHtml(req.subject || 'Support request');
+              const hasInvoice = isUpgrade && (req.invoice_url || '') && (req.status === 'open' || req.status === 'approved');
+              const invoiceHref = req.invoice_url || (req.payment_id ? `/checkout?plan=${encodeURIComponent(req.requested_plan_name || 'professional')}&menu_id=${encodeURIComponent(req.menu_id || '')}&source=customer_history&payment_id=${encodeURIComponent(String(req.payment_id))}` : '');
               return `<div class="p-6">
                 <div class="flex items-start justify-between gap-4 flex-wrap mb-2">
                   <div>
@@ -1266,6 +1268,10 @@ async function loadSubscription() {
                 </div>
                 <p class="text-xs uppercase tracking-wide text-stone-400 mb-2">Preferred contact: ${escapeHtml(req.preferred_contact || 'email')}</p>
                 ${req.message ? `<p class="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">${escapeHtml(req.message)}</p>` : ''}
+                ${hasInvoice ? `<div class="mt-3 flex items-center gap-3 flex-wrap">
+                  <a class="px-3 py-2 rounded-xl bg-primary text-white font-semibold text-xs no-underline hover:bg-primary-dark transition" href="${escapeHtml(invoiceHref)}">View Invoice</a>
+                  ${(req.payment_status || '') === 'pending' ? `<span class="text-xs text-stone-500">Payment status: pending</span>` : ''}
+                </div>` : ''}
               </div>`;
             }).join('')}
           </div>`}
@@ -1340,10 +1346,13 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
     return;
   }
 
-  // Paid plan � load available gateways
+  renderUpgradePaymentChoice(planId, planName, planPrice, targetMenuId || getPrimaryMenuId());
+  return;
+
+  // Paid plan: legacy gateway loader kept below for compatibility.
   confirmBtn.classList.add('hidden');
   document.getElementById('pcm-payment-section').innerHTML =
-    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><svg class="material-symbols-outlined spin text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading payment options�</div>';
+    '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><svg class="material-symbols-outlined spin text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading payment options...</div>';
 
   try {
     await detectCountry();
@@ -1451,6 +1460,140 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
   } catch(err) {
     document.getElementById('pcm-payment-section').innerHTML =
       '<p class="text-red-500 text-sm text-center py-2">Failed to load payment options. Please refresh.</p>';
+  }
+}
+
+function renderUpgradePaymentChoice(planId, planName, planPrice, menuId) {
+  const confirmBtn = document.getElementById('pcm-confirm-btn');
+  confirmBtn.classList.add('hidden');
+  document.getElementById('pcm-note').textContent = 'Choose automatic verification for instant activation, or manual verification if you prefer bank transfer/support confirmation.';
+  document.getElementById('pcm-payment-section').innerHTML = `
+    <div class="grid gap-3">
+      <button id="upgrade-auto-pay" type="button" class="text-left p-4 rounded-2xl border border-orange-200 bg-orange-50 hover:border-primary transition">
+        <div class="flex items-start gap-3">
+          <svg class="material-symbols-outlined text-primary text-[24px] mt-0.5" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>
+          <div>
+            <p class="font-bold text-stone-900">Automatic payment</p>
+            <p class="text-xs text-stone-600 mt-1">Pay by enabled gateway. Your payment is verified instantly when the gateway confirms it.</p>
+          </div>
+        </div>
+      </button>
+      <button id="upgrade-manual-pay" type="button" class="text-left p-4 rounded-2xl border border-stone-200 bg-white hover:border-stone-300 transition">
+        <div class="flex items-start gap-3">
+          <svg class="material-symbols-outlined text-stone-500 text-[24px] mt-0.5" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-receipt_long"/></svg>
+          <div>
+            <p class="font-bold text-stone-900">Manual payment</p>
+            <p class="text-xs text-stone-600 mt-1">Submit an upgrade request. Admin/support will verify the payment manually and approve the upgrade.</p>
+          </div>
+        </div>
+      </button>
+    </div>`;
+  document.getElementById('upgrade-auto-pay').onclick = () => loadAutomaticUpgradeGateways(planId, planName, planPrice, menuId);
+  document.getElementById('upgrade-manual-pay').onclick = () => renderManualUpgradeRequest(planId, planName, planPrice, menuId);
+}
+
+function renderManualUpgradeRequest(planId, planName, planPrice, menuId) {
+  const confirmBtn = document.getElementById('pcm-confirm-btn');
+  confirmBtn.classList.remove('hidden');
+  confirmBtn.textContent = 'Submit Manual Request';
+  confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, menuId, 'manual_verification');
+  document.getElementById('pcm-note').textContent = 'Manual payment requires admin verification before your new plan is activated.';
+  document.getElementById('pcm-payment-section').innerHTML = `
+    <div class="p-4 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-600">
+      <p class="font-semibold text-stone-800 mb-1">Manual verification</p>
+      <p>Use this if you paid by bank transfer, cash, mobile money outside the gateway, or need admin/support to send an invoice. Add any reference in the message field above.</p>
+    </div>`;
+}
+
+async function loadAutomaticUpgradeGateways(planId, planName, planPrice, menuId) {
+  const section = document.getElementById('pcm-payment-section');
+  document.getElementById('pcm-confirm-btn').classList.add('hidden');
+  document.getElementById('pcm-note').textContent = 'Automatic payment activates the plan as soon as the gateway verifies the transaction.';
+  section.innerHTML = '<div class="flex items-center justify-center gap-3 py-4 text-stone-400 text-sm"><svg class="material-symbols-outlined spin text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg>Loading automatic payment options...</div>';
+  try {
+    await detectCountry();
+    const gateways = await fetch('/api/payments/gateways').then(r => r.json());
+    const hasFW = !!(gateways.flutterwave?.public_key);
+    const hasPP = !!(gateways.paypal?.client_id);
+    const hasCP = !!(gateways.clickpesa?.merchant_id);
+    const resolvedMenuId = menuId || getPrimaryMenuId();
+
+    if (!hasFW && !hasPP && !hasCP) {
+      section.innerHTML = `
+        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+          No automatic gateway is configured yet. Use manual payment verification for this upgrade.
+        </div>`;
+      document.getElementById('pcm-confirm-btn').classList.remove('hidden');
+      document.getElementById('pcm-confirm-btn').textContent = 'Submit Manual Request';
+      document.getElementById('pcm-confirm-btn').onclick = () => doChangePlan(planId, planName, planPrice, resolvedMenuId, 'manual_verification');
+      return;
+    }
+
+    let html = '<p class="text-stone-500 text-xs mb-3">Choose an automatic payment method:</p>';
+    if (hasFW) html += `<button id="fw-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mb-2 font-semibold text-sm transition" style="background:#f5a623;color:#fff;"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>Pay with Flutterwave</button>`;
+    if (hasPP) html += `<div id="paypal-button-container" class="mt-2"></div>`;
+    if (hasCP) html += `<button id="cp-pay-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl mt-2 font-semibold text-sm transition" style="background:#3b82f6;color:#fff;"><svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>Pay $${planPrice.toFixed(2)} with ClickPesa</button>`;
+    html += `<button type="button" onclick="renderUpgradePaymentChoice('${escapeJsSingle(planId)}','${escapeJsSingle(planName)}',${planPrice},'${escapeJsSingle(resolvedMenuId)}')" class="w-full mt-3 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-semibold text-sm transition">Back to payment choices</button>`;
+    section.innerHTML = html;
+
+    if (hasFW) {
+      await loadScript('https://checkout.flutterwave.com/v3.js');
+      document.getElementById('fw-pay-btn').onclick = () =>
+        handleFlutterwavePayment(planId, planPrice, planName, resolvedMenuId, gateways.flutterwave.public_key);
+    }
+    if (hasPP) {
+      await loadPayPalSDK(gateways.paypal.client_id, gateways.paypal.environment);
+      window.paypal.Buttons({
+        style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+        createOrder: async () => {
+          const csrf = await getCsrf();
+          const r = await fetch('/api/payments/paypal/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+            body: JSON.stringify({ plan_id: planId, menu_id: resolvedMenuId })
+          });
+          const d = await r.json();
+          if (!d.order_id) throw new Error(d.error || 'Failed to create order');
+          return d.order_id;
+        },
+        onApprove: async (data) => {
+          showSubToast('Processing payment...');
+          const csrf = await getCsrf();
+          const r = await fetch('/api/payments/paypal/capture-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
+            body: JSON.stringify({ order_id: data.orderID, plan_id: planId, menu_id: resolvedMenuId })
+          });
+          const d = await r.json();
+          if (d.success) showPaymentResult(true, planId, planName, planPrice, resolvedMenuId);
+          else showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, d.error || 'Capture failed');
+        },
+        onError: () => showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, 'PayPal error. Please try again.')
+      }).render('#paypal-button-container');
+    }
+    if (hasCP) {
+      document.getElementById('cp-pay-btn').onclick = async () => {
+        const btn = document.getElementById('cp-pay-btn');
+        btn.disabled = true; btn.textContent = 'Processing...';
+        try {
+          const r = await fetch('/api/payments/clickpesa/create-order-public', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: planId, menu_id: resolvedMenuId, email: localStorage.getItem('customerEmail') || '', name: localStorage.getItem('customerBusiness') || '' })
+          });
+          const d = await r.json();
+          if (d.redirect_url) window.location.href = d.redirect_url;
+          else if (d.reference) showSubToast('Payment initiated (ref: ' + d.reference + '). Your plan activates after gateway confirmation.');
+          else showSubToast(d.error || 'Failed to initiate ClickPesa payment.', true);
+        } catch(e) {
+          showSubToast('Failed to initiate payment.', true);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = `<svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>Pay $${planPrice.toFixed(2)} with ClickPesa`;
+        }
+      };
+    }
+  } catch (err) {
+    section.innerHTML = '<p class="text-red-500 text-sm text-center py-2">Failed to load automatic payment options. Please try manual verification.</p>';
   }
 }
 
@@ -1635,8 +1778,8 @@ async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) 
     if (!res.ok) throw new Error(data.error || 'Failed to change plan');
 
     closePlanChangeModal();
-    showSubToast(paymentMethod === 'bank_transfer'
-      ? `Bank transfer received! Your ${planName} plan will be activated once payment is confirmed.`
+    showSubToast(paymentMethod === 'bank_transfer' || paymentMethod === 'manual_verification'
+      ? `Manual payment request sent. Your ${planName} plan will be activated after admin payment confirmation.`
       : planPrice > 0
       ? `Upgrade to ${planName} requested. Admin/support has received your contact details.`
       : `Downgraded to ${planName} successfully.`);
