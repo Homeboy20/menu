@@ -101,6 +101,15 @@ function createSession(user) {
   return token;
 }
 
+function setAdminSessionCookie(res, token) {
+  res.cookie('adminToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: SESSION_TTL,
+  });
+}
+
 function isValidSession(token) {
   if (!token) return false;
   const s = sessions.get(token);
@@ -342,7 +351,7 @@ app.use(helmet({
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co', 'https://open.er-api.com'],
+      connectSrc:    ["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co', 'https://open.er-api.com'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       workerSrc:     ["'self'", 'blob:'],
@@ -588,6 +597,21 @@ app.use('/js', express.static(path.join(PUBLIC_DIR, 'js'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+}));
+
+// Serve compiled CSS from public/css so requests to /css/* return actual CSS files
+app.use('/css', express.static(path.join(PUBLIC_DIR, 'css'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0',
+  etag: true,
+  lastModified: true,
+  immutable: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      // Ensure correct MIME even if other middleware alters headers
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
     }
   }
 }));
@@ -2165,6 +2189,7 @@ async function handleAdminLogin(req, res) {
         const envMatch = await bcrypt.compare(loginPassword, ADMIN_SECRET_HASH);
         if (envMatch) {
           const token = createSession({ id: 0, email: 'admin@env', name: 'Admin (Legacy)', role: 'super_admin' });
+          setAdminSessionCookie(res, token);
           return res.json({ token, expiresIn: SESSION_TTL, user: { name: 'Admin', role: 'super_admin' } });
         }
       }
@@ -2216,6 +2241,7 @@ async function handleAdminLogin(req, res) {
       response.mustChangePassword = true;
     }
 
+    setAdminSessionCookie(res, token);
     res.json(response);
   } catch (err) {
     console.error('Login error:', err);
@@ -2315,11 +2341,8 @@ app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (r
       const adminMatch = await bcrypt.compare(password, admin.password_hash);
       if (adminMatch) {
         await pool.query('UPDATE admin_users SET login_attempts = 0, lockout_until = NULL WHERE id = $1', [admin.id]);
-        const token = crypto.randomUUID();
-        sessions.set(token, {
-          userId: admin.id, email: admin.email, name: admin.name, role: admin.role,
-          createdAt: Date.now(), lastActivity: Date.now(),
-        });
+        const token = createSession({ id: admin.id, email: admin.email, name: admin.name, role: admin.role });
+        setAdminSessionCookie(res, token);
         return res.json({
           type: 'admin',
           token,
@@ -6709,6 +6732,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
     const requestMessage = sanitizeStr(req.body.request_message, 1200);
     const preferredContactRaw = sanitizeStr(req.body.preferred_contact, 20).toLowerCase();
     const preferredContact = ['email', 'phone', 'either'].includes(preferredContactRaw) ? preferredContactRaw : 'email';
+    const requestedMenuId = sanitizeStr(req.body.menu_id, 120);
 
     if (!planId) {
       return res.status(400).json({ error: 'plan_id required.' });
@@ -6739,6 +6763,19 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
     const customerPhone = sanitizeStr(decryptField(custInfo.encrypted_phone || '') || '', 80);
     const businessName = sanitizeStr(custInfo.business_name || '', 120);
     const requestSubject = `Upgrade request to ${sanitizeStr(newPlan.display_name || 'paid plan', 120)}`;
+    let ownedMenuId = null;
+    let ownedMenuName = '';
+    if (requestedMenuId) {
+      const { rows: menuRows } = await pool.query(
+        'SELECT id, restaurant_name FROM menus WHERE id = $1 AND customer_id = $2 LIMIT 1',
+        [requestedMenuId, customerId]
+      );
+      if (!menuRows.length) {
+        return res.status(403).json({ error: 'Selected menu is not available for this account.' });
+      }
+      ownedMenuId = menuRows[0].id;
+      ownedMenuName = sanitizeStr(menuRows[0].restaurant_name || '', 200);
+    }
 
     // Check if subscription exists for this customer
     const { rows: existingSub } = await pool.query(
@@ -6771,6 +6808,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
           businessName ? `Business: ${businessName}` : '',
           customerEmail ? `Email: ${customerEmail}` : '',
           customerPhone ? `Phone: ${customerPhone}` : '',
+          ownedMenuName ? `Menu: ${ownedMenuName}` : '',
           `Preferred contact: ${preferredContact}`,
           `Payment method: ${paymentMethod}`,
           requestMessage ? `Message: ${requestMessage}` : ''
@@ -6801,7 +6839,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
         await upsertCustomerContactRequest({
           paymentId,
           customerId,
-          menuId: null,
+          menuId: ownedMenuId,
           subscriptionId: subId,
           requestType: 'upgrade',
           requestedPlanId: planId,
@@ -6814,7 +6852,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
 
         queueUpgradeRequestNotification({
           businessName,
-          restaurantName: businessName,
+          restaurantName: ownedMenuName || businessName,
           customerEmail,
           customerPhone,
           requestedPlanName: newPlan.display_name,
@@ -6822,7 +6860,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
           paymentMethod,
           preferredContact,
           requestMessage,
-          menuId: null,
+          menuId: ownedMenuId,
         });
       }
 
@@ -6834,8 +6872,9 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
       });
     } else {
       // Create new subscription — use first menu for legacy menu_id field
-      const { rows: firstMenu } = await pool.query('SELECT id FROM menus WHERE customer_id=$1 ORDER BY created_at ASC LIMIT 1', [customerId]);
-      const legacyMenuId = firstMenu[0]?.id || null;
+      const { rows: firstMenu } = await pool.query('SELECT id, restaurant_name FROM menus WHERE customer_id=$1 ORDER BY created_at ASC LIMIT 1', [customerId]);
+      const legacyMenuId = ownedMenuId || firstMenu[0]?.id || null;
+      const legacyMenuName = ownedMenuName || sanitizeStr(firstMenu[0]?.restaurant_name || '', 200);
 
       // Free/trial plan is activated immediately. Paid plan via manual/bank transfer is created with status 'pending'.
       const subStatus = newPlan.price === 0 ? 'active' : 'pending';
@@ -6848,10 +6887,52 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
 
       // Log payment if paid plan
       if (newPlan.price > 0) {
-        await pool.query(`
+        const { rows: paymentRows } = await pool.query(`
           INSERT INTO payments (subscription_id, amount, currency, payment_method, status, notes, created_at)
-          VALUES ($1, $2, 'USD', 'customer_signup', 'pending', 'New subscription', $3)
-        `, [subId, newPlan.price, now]);
+          VALUES ($1, $2, 'USD', 'customer_signup', 'pending', $3, $4)
+          RETURNING id
+        `, [
+          subId,
+          newPlan.price,
+          [
+            'New subscription',
+            legacyMenuName ? `Menu: ${legacyMenuName}` : '',
+            customerEmail ? `Email: ${customerEmail}` : '',
+            customerPhone ? `Phone: ${customerPhone}` : '',
+            `Preferred contact: ${preferredContact}`,
+            `Payment method: ${paymentMethod}`,
+            requestMessage ? `Message: ${requestMessage}` : ''
+          ].filter(Boolean).join(' | '),
+          now
+        ]);
+        const paymentId = paymentRows[0]?.id || null;
+
+        await upsertCustomerContactRequest({
+          paymentId,
+          customerId,
+          menuId: legacyMenuId,
+          subscriptionId: subId,
+          requestType: 'upgrade',
+          requestedPlanId: planId,
+          subject: requestSubject,
+          message: requestMessage,
+          preferredContact,
+          customerEmail,
+          customerPhone,
+        });
+
+        queueUpgradeRequestNotification({
+          businessName,
+          restaurantName: legacyMenuName || businessName,
+          customerEmail,
+          customerPhone,
+          requestedPlanName: newPlan.display_name,
+          currentPlanName: '',
+          paymentMethod,
+          preferredContact,
+          requestMessage,
+          menuId: legacyMenuId,
+        });
       }
 
       res.json({

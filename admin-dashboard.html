@@ -696,7 +696,10 @@ let currentUser = null;
 window.csrfToken = null;
 
 function authHeaders(extra) {
-  const headers = { 'x-admin-token': adminToken };
+  const headers = {};
+  if (adminToken) {
+    headers['x-admin-token'] = adminToken;
+  }
   if (window.csrfToken) {
     headers['x-csrf-token'] = window.csrfToken;
   }
@@ -748,8 +751,9 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       return;
     }
     
-    adminToken = data.token;
-    localStorage.setItem('admin-token', adminToken);
+    adminToken = data.token || null;
+    localStorage.removeItem('admin-token');
+    localStorage.removeItem('adminToken');
     document.getElementById('login-overlay').classList.add('hidden');
     applyUserUI(data.user);
     await loadDashboard();
@@ -760,8 +764,9 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  try { await fetch('/api/admin/logout', { method: 'POST', headers: authHeaders() }); } catch(e) {}
   localStorage.removeItem('admin-token');
+  localStorage.removeItem('adminToken');
   location.reload();
 });
 
@@ -774,17 +779,17 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     console.warn('Failed to fetch CSRF token:', err);
   }
 
-  const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-  if (!token) return;
+  const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken') || null;
   
   try {
-    const res = await fetch('/api/admin/check', {
-      headers: { 'x-admin-token': token }
-    });
+    const headers = token ? { 'x-admin-token': token } : {};
+    const res = await fetch('/api/admin/check', { headers });
     const data = await res.json();
     
     if (data.authenticated) {
       adminToken = token;
+      localStorage.removeItem('admin-token');
+      localStorage.removeItem('adminToken');
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       await loadDashboard();

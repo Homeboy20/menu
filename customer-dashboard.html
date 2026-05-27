@@ -38,6 +38,26 @@
   .badge-pro { background: rgba(124, 58, 237, 0.10); color: #7c3aed; }
   .badge-enterprise { background: rgba(217, 119, 6, 0.10); color: #d97706; }
 
+  .subscription-plan-card {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    border: 1px solid #e7e5e4;
+    border-radius: 18px;
+    background: #fff;
+    padding: 22px;
+    box-shadow: 0 1px 2px rgba(28,25,23,.04);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .subscription-plan-card:hover { border-color: #fdba74; box-shadow: 0 14px 32px rgba(28,25,23,.08); transform: translateY(-1px); }
+  .subscription-plan-card.is-current { border-color: #c2410c; box-shadow: 0 0 0 3px rgba(194,65,12,.12); }
+  .subscription-plan-feature { display: flex; align-items: flex-start; gap: 8px; color: #57534e; font-size: 13px; line-height: 1.4; }
+  .subscription-plan-feature svg { flex: 0 0 auto; margin-top: 1px; color: #c2410c; }
+  .subscription-upgrade-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .subscription-modal-panel { max-height: min(90vh, 820px); overflow-y: auto; }
+  @media (max-width: 1024px) { .subscription-upgrade-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 720px) { .subscription-upgrade-card-grid { grid-template-columns: 1fr; } }
+
   /* Mobile Header */
   .mobile-header { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 40; background: white; border-bottom: 1px solid #e7e5e4; padding: 12px 16px; }
   .mobile-header-content { display: flex; align-items: center; justify-content: space-between; }
@@ -1129,7 +1149,7 @@ async function loadSubscription() {
               <p class="font-semibold text-sm ${expired ? 'text-red-800' : 'text-amber-800'}">${expired ? 'Your trial has expired' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left in your free trial`}</p>
               <p class="text-xs ${expired ? 'text-red-600' : 'text-amber-600'} mt-0.5">${expired ? 'Upgrade now to keep your menu online.' : `Trial ends ${trialEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}</p>
             </div>
-            <a href="/checkout?plan=professional" class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition flex-shrink-0">Upgrade Now</a>
+            <a href="${buildCheckoutUrl('professional', getPrimaryMenuId(), 'trial_banner')}" class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm hover:bg-primary-dark transition flex-shrink-0">Upgrade Now</a>
           </div>`;
         })() : ''}
       </div>
@@ -1140,31 +1160,14 @@ async function loadSubscription() {
         <p class="text-stone-500 text-sm">Upgrade anytime. Our team will contact you with payment details within 24 hours.</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-5 mb-8">
-        ${plans.filter(plan => (plan.price > 0 || plan.id === currentPlanId) && (plan.name !== 'trial' || plan.id === currentPlanId)).map(plan => {
-          const isCurrent = plan.id === currentPlanId;
-          const isUpgrade = plan.price > (currentPlan?.price || 0);
-          return `
-            <div class="bg-white border ${isCurrent ? 'border-primary ring-2 ring-primary/20' : 'border-stone-200 hover:border-stone-300'} rounded-2xl p-6 relative shadow-sm transition">
-              ${isCurrent ? '<div class="absolute top-4 right-4 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full">CURRENT</div>' : ''}
-              <h4 class="text-lg font-bold text-stone-900 mb-1">${escapeHtml(plan.display_name)}</h4>
-              <div class="mb-4">
-                <span class="text-2xl font-bold text-stone-900">${plan.price === 0 ? 'FREE' : '$' + plan.price}</span>
-                ${plan.price > 0 ? '<span class="text-stone-400 text-sm">/' + plan.interval + '</span>' : '<span class="text-stone-400 text-sm">/month</span>'}
-              </div>
-              <div class="space-y-1.5 mb-5 text-sm">
-                <div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">${plan.menu_limit === 999 ? 'Unlimited' : plan.menu_limit} Menu${plan.menu_limit !== 1 ? 's' : ''}</span></div>
-                <div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">${plan.location_limit === 999 ? 'Unlimited' : plan.location_limit} Location${plan.location_limit !== 1 ? 's' : ''}</span></div>
-                ${plan.features && Array.isArray(plan.features) ? plan.features.slice(0,3).map(f => '<div class="flex items-center gap-2"><svg class="material-symbols-outlined text-primary text-[16px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg><span class="text-stone-600">' + escapeHtml(f) + '</span></div>').join('') : ''}
-              </div>
-              ${!isCurrent ? `
-                <button onclick="handlePlanClick(${plan.id}, '${escapeHtml(plan.display_name).replace(/'/g, "\\\\'")}', ${plan.price})"
-                  class="w-full px-4 py-2.5 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-semibold rounded-xl transition text-sm">
-                  ${isUpgrade ? '? Upgrade' : '? Downgrade'} to ${escapeHtml(plan.display_name)}
-                </button>` : `
-                <button disabled class="w-full px-4 py-2.5 bg-stone-100 text-stone-400 font-semibold rounded-xl cursor-not-allowed text-sm">? Current Plan</button>`}
-            </div>`;
-        }).join('')}
+      <div class="subscription-upgrade-card-grid mb-8">
+        ${plans
+          .filter(plan => (Number(plan.price || 0) > 0 || String(plan.id) === String(currentPlanId)) && (plan.name !== 'trial' || String(plan.id) === String(currentPlanId)))
+          .map(plan => renderSubscriptionPlanCard(plan, {
+            currentPlanId,
+            currentPrice: currentPlan?.price || 0,
+            menuId: getPrimaryMenuId()
+          })).join('')}
       </div>
 
       <!-- Payment History -->
@@ -1310,7 +1313,7 @@ function loadPayPalSDK(clientId, environment) {
 
 // Plan click: open plan-change modal for all plans (payment gateways loaded inside modal)
 function handlePlanClick(planId, planName, planPrice) {
-  openChangePlanModal(planId, planName, planPrice);
+  openChangePlanModal(planId, planName, planPrice, getPrimaryMenuId());
 }
 
 // Plan change modal
@@ -1333,7 +1336,7 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
 
   if (planPrice === 0) {
     document.getElementById('pcm-note').textContent = 'You will be moved to the free plan immediately.';
-    confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice);
+    confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId || getPrimaryMenuId());
     return;
   }
 
@@ -1356,7 +1359,7 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
       section.innerHTML = '';
       document.getElementById('pcm-note').textContent = 'Our team will contact you within 24 hours with payment instructions.';
       confirmBtn.classList.remove('hidden');
-      confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice);
+      confirmBtn.onclick = () => doChangePlan(planId, planName, planPrice, targetMenuId || getPrimaryMenuId());
       return;
     }
 
@@ -1381,7 +1384,7 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
     if (hasFW) {
       await loadScript('https://checkout.flutterwave.com/v3.js');
       document.getElementById('fw-pay-btn').onclick = () =>
-        handleFlutterwavePayment(planId, planPrice, planName, null, gateways.flutterwave.public_key);
+        handleFlutterwavePayment(planId, planPrice, planName, targetMenuId || getPrimaryMenuId(), gateways.flutterwave.public_key);
     }
 
     if (hasPP) {
@@ -1416,13 +1419,13 @@ async function openChangePlanModal(planId, planName, planPrice, targetMenuId = n
             showPaymentResult(true, planId, planName, planPrice, resolvedMenuId);
           } else { showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, d.error || 'Capture failed'); }
         },
-        onError: (err) => showPaymentResult(false, planId, planName, planPrice, resolvedMenuId, 'PayPal error. Please try again.')
+        onError: (err) => showPaymentResult(false, planId, planName, planPrice, targetMenuId || getPrimaryMenuId(), 'PayPal error. Please try again.')
       }).render('#paypal-button-container');
     }
 
     if (hasBT) {
       document.getElementById('bt-pay-btn').onclick = () => {
-        doChangePlan(planId, planName, planPrice, null, 'bank_transfer');
+        doChangePlan(planId, planName, planPrice, targetMenuId || getPrimaryMenuId(), 'bank_transfer');
       };
     }
 
@@ -1621,6 +1624,7 @@ async function doChangePlan(planId, planName, planPrice, menuId, paymentMethod) 
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-customer-token': getToken(), 'x-csrf-token': csrf },
       body: JSON.stringify({
+        menu_id: menuId || getPrimaryMenuId(),
         plan_id: planId,
         payment_method: paymentMethod || 'manual',
         request_message: requestMessage,
@@ -1877,6 +1881,80 @@ function formatDate(isoStr) {
   });
 }
 
+function escapeJsSingle(value) {
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
+}
+
+function normalizePlanFeatures(features) {
+  if (Array.isArray(features)) return features;
+  if (!features) return [];
+  try {
+    const parsed = JSON.parse(features);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function getPrimaryMenuId() {
+  const menus = window.customerMenus || [];
+  return menus[0]?.id || '';
+}
+
+function buildCheckoutUrl(planName, menuId, source = 'dashboard') {
+  const params = new URLSearchParams({ plan: planName || 'professional', source });
+  if (menuId) params.set('menu_id', menuId);
+  return `/checkout?${params.toString()}`;
+}
+
+function formatPlanPrice(plan) {
+  const price = Number(plan?.price || 0);
+  if (price === 0) return 'FREE';
+  return `$${price}<span class="text-base text-stone-400 font-normal">/${escapeHtml(plan?.interval || 'month')}</span>`;
+}
+
+function renderSubscriptionPlanCard(plan, options = {}) {
+  const price = Number(plan.price || 0);
+  const currentPrice = Number(options.currentPrice || 0);
+  const isCurrent = String(plan.id) === String(options.currentPlanId);
+  const isUpgrade = price > currentPrice;
+  const menuLimit = plan.menu_limit === 999 ? 'Unlimited' : (plan.menu_limit || 1);
+  const locationLimit = plan.location_limit === 999 ? 'Unlimited' : (plan.location_limit || 1);
+  const features = [
+    `${menuLimit} Menu${plan.menu_limit !== 1 ? 's' : ''}`,
+    `${locationLimit} Location${plan.location_limit !== 1 ? 's' : ''}`,
+    ...normalizePlanFeatures(plan.features)
+  ].slice(0, options.compact ? 4 : 6);
+  const rawPlanName = plan.display_name || plan.name || 'Plan';
+  const planName = escapeHtml(rawPlanName);
+  const actionLabel = isCurrent ? 'Current Plan' : `${isUpgrade ? 'Upgrade' : 'Switch'} to ${rawPlanName}`;
+  const action = options.action === 'checkout'
+    ? `<a href="${buildCheckoutUrl(plan.name, options.menuId || getPrimaryMenuId(), options.source || 'dashboard_subscription')}" class="mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary hover:bg-orange-700 text-white font-bold text-sm transition no-underline">${escapeHtml(options.actionText || actionLabel)}</a>`
+    : isCurrent
+      ? `<button disabled class="mt-auto w-full px-4 py-3 bg-stone-100 text-stone-400 font-semibold rounded-xl cursor-not-allowed text-sm">Current Plan</button>`
+      : `<button onclick="openChangePlanModal('${escapeJsSingle(plan.id)}','${escapeJsSingle(rawPlanName)}',${price},'${escapeJsSingle(options.menuId || getPrimaryMenuId())}')" class="mt-auto w-full px-4 py-3 ${isUpgrade ? 'bg-primary hover:bg-orange-700 text-white' : 'bg-stone-100 hover:bg-stone-200 text-stone-700'} font-bold rounded-xl transition text-sm">${escapeHtml(actionLabel)}</button>`;
+
+  return `
+    <div class="subscription-plan-card ${isCurrent ? 'is-current' : ''}">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h4 class="text-lg font-bold text-stone-900">${planName}</h4>
+          <p class="mt-1 text-3xl font-bold text-stone-900">${formatPlanPrice(plan)}</p>
+        </div>
+        ${isCurrent ? '<span class="px-3 py-1 rounded-full bg-primary text-white text-xs font-bold">CURRENT</span>' : ''}
+      </div>
+      <div class="space-y-2.5 mb-6">
+        ${features.map(f => `
+          <div class="subscription-plan-feature">
+            <svg class="material-symbols-outlined text-[17px]" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg>
+            <span>${escapeHtml(f)}</span>
+          </div>
+        `).join('')}
+      </div>
+      ${action}
+    </div>`;
+}
+
 // Show trial-expired overlay with upgrade options
 async function showTrialExpiredOverlay() {
   try {
@@ -1885,21 +1963,13 @@ async function showTrialExpiredOverlay() {
       const plans = await plansRes.json();
       const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise' && p.name !== 'trial');
       const container = document.getElementById('trial-expired-plans');
-      container.innerHTML = paidPlans.map(p => {
-        const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
-        const href = `/checkout?plan=${encodeURIComponent(p.name)}`;
-        return `
-          <a href="${href}" class="block border border-stone-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition cursor-pointer no-underline">
-            <div class="flex items-center justify-between mb-2">
-              <div>
-                <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
-                <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
-              </div>
-              <span class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm">Upgrade &rarr;</span>
-            </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>&#10003; ' + escapeHtml(f) + '</span>').join('')}</div>
-          </a>`;
-      }).join('');
+      container.innerHTML = paidPlans.map(p => renderSubscriptionPlanCard(p, {
+        action: 'checkout',
+        actionText: 'Upgrade Now',
+        compact: true,
+        source: 'trial_expired',
+        menuId: getPrimaryMenuId()
+      })).join('');
       // Also add enterprise contact option
       container.innerHTML += `
         <div class="border border-stone-200 rounded-xl p-4 text-center">
@@ -1908,22 +1978,6 @@ async function showTrialExpiredOverlay() {
     }
   } catch(e) { console.error('Failed to load plans for trial overlay:', e); }
   document.getElementById('trial-expired-overlay').classList.remove('hidden');
-}
-
-// -- Upgrade Required Prompt -------------------------------------------------
-function showUpgradePrompt(data, menuId) {
-  const planLabels = { starter: 'Starter', professional: 'Professional', enterprise: 'Enterprise', trial: 'Trial' };
-  const required = planLabels[data.required_plan] || (data.required_plan || 'Higher Plan');
-  const current = planLabels[data.current_plan] || (data.current_plan || 'Current Plan');
-  document.getElementById('fgate-title').textContent = `${required} Plan Required`;
-  document.getElementById('fgate-desc').textContent =
-    `${data.error || 'This feature is not available on your current plan.'} You\'re on the ${current} plan.`;
-  const href = menuId
-    ? `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
-    : `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}`;
-  document.getElementById('fgate-cta').href = href;
-  document.getElementById('fgate-cta').textContent = `Upgrade to ${required}`;
-  document.getElementById('feature-gate-modal').classList.remove('hidden');
 }
 
 // -- Upgrade Required Prompt -------------------------------------------------
@@ -1942,10 +1996,7 @@ function showUpgradePrompt(data, menuId) {
   } else {
     document.getElementById('fgate-plan-row').classList.add('hidden');
   }
-  const href = menuId
-    ? `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
-    : `/checkout?plan=${encodeURIComponent(data.required_plan || 'professional')}`;
-  document.getElementById('fgate-cta').href = href;
+  document.getElementById('fgate-cta').href = buildCheckoutUrl(data.required_plan || 'professional', menuId || getPrimaryMenuId(), 'feature_gate');
   document.getElementById('fgate-cta').textContent = `Upgrade to ${required}`;
   document.getElementById('feature-gate-modal').classList.remove('hidden');
 }
@@ -1979,10 +2030,7 @@ function _isPlanPaid(planName) {
 function _showGate(title, desc, planName, menuId) {
   document.getElementById('fgate-title').textContent = title;
   document.getElementById('fgate-desc').textContent = desc;
-  const href = menuId
-    ? `/checkout?plan=${encodeURIComponent(planName || 'professional')}&menu_id=${encodeURIComponent(menuId)}`
-    : `/checkout?plan=${encodeURIComponent(planName || 'professional')}`;
-  document.getElementById('fgate-cta').href = href;
+  document.getElementById('fgate-cta').href = buildCheckoutUrl(planName || 'professional', menuId || getPrimaryMenuId(), 'feature_gate');
   document.getElementById('fgate-cta').textContent = 'Upgrade to Professional';
   const planRow = document.getElementById('fgate-plan-row');
   if (planRow) planRow.classList.add('hidden');
@@ -2032,20 +2080,13 @@ async function showSubscribePrompt() {
       const plans = await plansRes.json();
       const paidPlans = plans.filter(p => p.price > 0 && p.name !== 'enterprise' && p.name !== 'trial');
       const container = document.getElementById('subscribe-prompt-plans');
-      container.innerHTML = paidPlans.map(p => {
-        const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features || '[]');
-        return `
-          <a href="/checkout?plan=${encodeURIComponent(p.name)}" class="block border border-stone-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition cursor-pointer no-underline">
-            <div class="flex items-center justify-between mb-2">
-              <div>
-                <h4 class="font-bold text-stone-900">${escapeHtml(p.display_name)}</h4>
-                <p class="text-primary font-bold text-lg">$${p.price}<span class="text-stone-400 text-sm font-normal">/${p.interval || 'month'}</span></p>
-              </div>
-              <span class="px-4 py-2 bg-primary text-white font-bold rounded-xl text-sm">Choose &rarr;</span>
-            </div>
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-500">${features.slice(0,3).map(f => '<span>&#10003; ' + escapeHtml(f) + '</span>').join('')}</div>
-          </a>`;
-      }).join('');
+      container.innerHTML = paidPlans.map(p => renderSubscriptionPlanCard(p, {
+        action: 'checkout',
+        actionText: 'Choose Plan',
+        compact: true,
+        source: 'subscribe_prompt',
+        menuId: getPrimaryMenuId()
+      })).join('');
     }
   } catch(e) { console.error('Failed to load plans for subscribe prompt:', e); }
   document.getElementById('subscribe-prompt-overlay').classList.remove('hidden');
@@ -2099,7 +2140,7 @@ async function showSubscribePrompt() {
 <!-- Plan Change Modal -->
 <div id="plan-change-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closePlanChangeModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+  <div class="subscription-modal-panel relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
     <button onclick="closePlanChangeModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 transition">
       <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
     </button>
@@ -2247,7 +2288,7 @@ async function showSubscribePrompt() {
 
 <!-- Subscribe Prompt Modal (phone-only registrations / no active subscription) -->
 <div id="subscribe-prompt-overlay" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);">
-  <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
+  <div class="subscription-modal-panel bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
     <div class="size-20 mx-auto mb-5 rounded-full bg-orange-100 flex items-center justify-center">
       <svg class="material-symbols-outlined text-orange-500 text-[40px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
     </div>
@@ -2262,7 +2303,7 @@ async function showSubscribePrompt() {
 </div>
 
 <div id="trial-expired-overlay" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);">
-  <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
+  <div class="subscription-modal-panel bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full text-center">
     <div class="size-20 mx-auto mb-5 rounded-full bg-red-100 flex items-center justify-center">
       <svg class="material-symbols-outlined text-red-500 text-[40px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-timer_off"/></svg>
     </div>
