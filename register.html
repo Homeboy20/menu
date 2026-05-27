@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Create Free Account  RestOrder</title>
+<title>Create Free Account - RestOrder</title>
 <meta name="description" content="Launch your digital restaurant menu in under 60 seconds. No credit card needed."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,10 +12,10 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0c0c0f;--surface:#16161a;--surface-2:#1e1e24;--border:#2a2a32;
-  --text:#e8e6e3;--text-muted:#8a8a8e;--text-dim:#5c5c62;
-  --accent:#ea580c;--accent-dark:#c2410c;--accent-glow:rgba(234,88,12,.15);
-  --success:#22c55e;--error:#ef4444;
+  --bg:#fafaf9;--surface:#ffffff;--surface-2:#f5f5f4;--border:#e7e5e4;
+  --text:#1c1917;--text-muted:#57534e;--text-dim:#78716c;
+  --accent:#c2410c;--accent-dark:#9a3412;--accent-glow:rgba(194,65,12,.14);
+  --success:#16a34a;--error:#dc2626;
 }
 body{font-family:"Outfit",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
 h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:700;letter-spacing:-.015em;}
@@ -238,7 +238,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
     <div class="step-line" id="line-3"></div>
     <div class="step-dot" id="dot-4">4</div>
   </div>
-  <div class="step-caption" id="step-caption">Step 1 of 4 — Let’s get you in</div>
+  <div class="step-caption" id="step-caption">Step 1 of 4 â€” Letâ€™s get you in</div>
 
   <!-- FORM CARD -->
   <div class="form-card">
@@ -247,7 +247,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
     <div id="step-1" class="step-panel">
       <div class="section-label">Get Started</div>
       <h2 class="form-title">Create your <span class="serif-accent">free menu</span></h2>
-      <p class="form-subtitle">Your restaurant menu goes live in under 60 seconds. Free forever.</p>
+      <p class="form-subtitle">Build your menu in draft mode for free, then upgrade when you are ready to go live.</p>
 
       <!-- Google (hidden when Firebase not configured) -->
       <button id="btn-google" onclick="handleGoogle()" type="button" class="btn-outline" style="display:none;margin-bottom:.75rem">
@@ -317,7 +317,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 
         <!-- Dev Mode OTP Helper Alert (Only visible on localhost) -->
         <div id="dev-otp-helper" class="hidden" style="background:rgba(234,88,12,0.1);border:1px solid rgba(234,88,12,0.25);border-radius:10px;padding:0.75rem 1rem;font-size:0.8125rem;color:#fdba74;margin-bottom:1rem;line-height:1.4">
-          <div style="font-weight:bold;margin-bottom:0.25rem">🛠️ Dev Mode: Autodetected Codes</div>
+          <div style="font-weight:bold;margin-bottom:0.25rem">ðŸ› ï¸ Dev Mode: Autodetected Codes</div>
           <div>Email Code: <strong id="dev-email-code" style="letter-spacing:1px">-</strong></div>
           <div>Phone Code: <strong id="dev-phone-code" style="letter-spacing:1px">-</strong></div>
         </div>
@@ -348,7 +348,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
         </button>
 
         <div style="display:flex;justify-content:space-between;margin-top:1rem">
-          <button type="button" onclick="backToCredentials()" class="btn-back" style="font-size:0.8rem">← Edit credentials</button>
+          <button type="button" onclick="backToCredentials()" class="btn-back" style="font-size:0.8rem">â† Edit credentials</button>
           <button type="button" onclick="resendVerificationCodes()" id="btn-resend-codes" style="background:none;border:none;color:var(--accent);font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;">Resend codes</button>
         </div>
       </div>
@@ -375,7 +375,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <button onclick="goBack(1)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">&#8592; Back</button>
     </div><!-- /step-2 -->
 
-    <!--  STEP 3 — Choose Your Plan  -->
+    <!--  STEP 3 â€” Choose Your Plan  -->
     <div id="step-3" class="step-panel hidden">
       <div class="section-label">Choose Plan</div>
       <h2 class="form-title">Pick your <span class="serif-accent">plan</span></h2>
@@ -389,7 +389,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 
       <!-- Plan cards container -->
       <div class="plan-cards" id="plan-cards">
-        <div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plans…</div>
+        <div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plansâ€¦</div>
       </div>
 
       <!-- Promo code -->
@@ -404,14 +404,14 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
         <span id="btn-s3-text">Continue</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
-      <button onclick="goBack(2)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">← Back</button>
+      <button onclick="goBack(2)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">â† Back</button>
     </div><!-- /step-3 -->
 
-    <!--  STEP 4 — Payment (only for paid plans)  -->
+    <!--  STEP 4 â€” Payment (only for paid plans)  -->
     <div id="step-4" class="step-panel hidden">
       <div class="section-label">Payment</div>
       <h2 class="form-title">Complete <span class="serif-accent">payment</span></h2>
-      <p class="form-subtitle" id="s4-subtitle">Secure checkout — your subscription starts immediately.</p>
+      <p class="form-subtitle" id="s4-subtitle">Secure checkout â€” your subscription starts immediately.</p>
 
       <!-- Order Summary -->
       <div class="order-summary" id="order-summary">
@@ -423,11 +423,11 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 
       <!-- Gateway buttons -->
       <div id="gateway-container">
-        <div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment options…</div>
+        <div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment optionsâ€¦</div>
       </div>
 
       <p id="s4-error" class="err-msg hidden"></p>
-      <button onclick="goBack(3)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">← Back to plans</button>
+      <button onclick="goBack(3)" type="button" class="btn-back" style="width:100%;text-align:center;margin-top:.75rem">â† Back to plans</button>
 
       <div style="text-align:center;margin-top:1rem">
         <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>SSL Encrypted</span>
@@ -435,7 +435,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       </div>
     </div><!-- /step-4 -->
 
-    <!--  STEP 5 — Success  -->
+    <!--  STEP 5 â€” Success  -->
     <div id="step-5" class="step-panel hidden">
       <div style="text-align:center">
         <div id="s5-icon-ring" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
@@ -452,7 +452,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       </div>
       <p id="s5-error" class="err-msg hidden"></p>
       <button id="btn-retry" onclick="doRegister()" class="btn-primary hidden">Try Again</button>
-      <button id="btn-edit-details" onclick="goBack(1)" class="btn-back hidden" style="width:100%;text-align:center;margin-top:.75rem">← Edit Registration Details</button>
+      <button id="btn-edit-details" onclick="goBack(1)" class="btn-back hidden" style="width:100%;text-align:center;margin-top:.75rem">â† Edit Registration Details</button>
       <button id="btn-dashboard" onclick="window.location.href='/dashboard?onboard=1'" class="btn-primary hidden">
         <span>Open your dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -470,7 +470,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 
 <script>
 "use strict";
-//  Country data: ISO  { flag, dial, name } 
+//  Country data: ISO  { flag, dial, name }
 const COUNTRIES = [
   {c:"AF",f:"\ud83c\udde6\ud83c\uddeb",d:"+93",n:"Afghanistan"},{c:"AL",f:"\ud83c\udde6\ud83c\uddf1",d:"+355",n:"Albania"},{c:"DZ",f:"\ud83c\udde9\ud83c\uddff",d:"+213",n:"Algeria"},
   {c:"AR",f:"\ud83c\udde6\ud83c\uddf7",d:"+54",n:"Argentina"},{c:"AU",f:"\ud83c\udde6\ud83c\uddfa",d:"+61",n:"Australia"},{c:"AT",f:"\ud83c\udde6\ud83c\uddf9",d:"+43",n:"Austria"},
@@ -503,7 +503,7 @@ const COUNTRIES = [
 var currentStep = 1;
 function el(id) { return document.getElementById(id); }
 
-//  Country selector setup 
+//  Country selector setup
 function buildCountrySelect(detectedCode) {
   const sel = el('country-select');
   sel.innerHTML = '';
@@ -548,16 +548,16 @@ function getFullPhone() {
 if (window.innerWidth >= 900) { const d = el('desktop-signin'); if(d) d.style.display=''; }
 else { const m = el('mobile-signin'); if(m) m.style.display=''; }
 
-//  Error helpers 
+//  Error helpers
 function showError(id,msg){const e=el(id);if(e){e.textContent=msg;e.classList.remove('hidden');e.style.color='';e.style.background='';e.style.borderColor='';}}
 function clearError(id){const e=el(id);if(e){e.textContent='';e.classList.add('hidden');e.style.color='';e.style.background='';e.style.borderColor='';}}
 
-//  Step navigation 
+//  Step navigation
 const stepCaptions = [
-  'Step 1 of 4 — Let’s get you in',
-  'Step 2 of 4 — Name your restaurant',
-  'Step 3 of 4 — Select your plan',
-  'Step 4 of 4 — Complete payment'
+  'Step 1 of 4 â€” Letâ€™s get you in',
+  'Step 2 of 4 â€” Name your restaurant',
+  'Step 3 of 4 â€” Select your plan',
+  'Step 4 of 4 â€” Complete payment'
 ];
 function updateDots(n) {
   for(let i=1;i<=4;i++){
@@ -586,7 +586,7 @@ function goToStep(n){
 }
 function goBack(n){goToStep(n);}
 
-//  Password toggle & strength 
+//  Password toggle & strength
 function togglePw(){
   const inp=el('s1-pw');
   inp.type=inp.type==='password'?'text':'password';
@@ -616,7 +616,7 @@ async function s1Next() {
     showError('s1-error', 'Please enter a valid email address.');
     return;
   }
-  
+
   const rawPhone = phone.replace(/\D/g, '');
   if (!rawPhone || rawPhone.length < 7) {
     showError('s1-error', 'Please enter a valid phone number.');
@@ -650,7 +650,7 @@ async function s1Next() {
 
     const res = await fetch('/api/customers/send-verification-otps', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'x-csrf-token': csrfToken
       },
@@ -737,7 +737,7 @@ async function resendVerificationCodes() {
 
     const res = await fetch('/api/customers/send-verification-otps', {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'x-csrf-token': csrfToken
       },
@@ -811,18 +811,18 @@ async function onVerifCodeInput(type) {
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          statusEl.textContent = '✓ Verified';
+          statusEl.textContent = 'âœ“ Verified';
           statusEl.style.color = 'var(--success)';
           inputEl.disabled = true;
           _verifiedPhone = true;
           if (_verifiedEmail && _verifiedPhone) el('btn-verif-proceed').disabled = false;
         } else {
-          statusEl.textContent = '✗ Invalid';
+          statusEl.textContent = 'âœ— Invalid';
           statusEl.style.color = 'var(--error)';
           showError('verif-error', data.error || 'Phone verification failed.');
         }
       } catch (fbErr) {
-        statusEl.textContent = '✗ Invalid';
+        statusEl.textContent = 'âœ— Invalid';
         statusEl.style.color = 'var(--error)';
         const msg = fbErr.code === 'auth/invalid-verification-code'
           ? 'Incorrect SMS code. Please check and try again.'
@@ -841,7 +841,7 @@ async function onVerifCodeInput(type) {
 
       const res = await fetch('/api/customers/verify-otp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'x-csrf-token': csrfToken
         },
@@ -851,7 +851,7 @@ async function onVerifCodeInput(type) {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        statusEl.textContent = '✓ Verified';
+        statusEl.textContent = 'âœ“ Verified';
         statusEl.style.color = 'var(--success)';
         inputEl.disabled = true;
         if (type === 'email') _verifiedEmail = true;
@@ -861,7 +861,7 @@ async function onVerifCodeInput(type) {
           el('btn-verif-proceed').disabled = false;
         }
       } else {
-        statusEl.textContent = '✗ Invalid';
+        statusEl.textContent = 'âœ— Invalid';
         statusEl.style.color = 'var(--error)';
         showError('verif-error', data.error || 'Verification code is incorrect.');
       }
@@ -888,7 +888,7 @@ function backToCredentials() {
   el('verif-phone-code').disabled = false;
 }
 
-//  Step 2 next 
+//  Step 2 next
 function s2Next(){
   const biz=el('s2-biz').value.trim();clearError('s2-error');
   if(!biz||biz.length<2){showError('s2-error','Please enter your business name.');return;}
@@ -910,7 +910,7 @@ try {
   const params = new URLSearchParams(window.location.search);
   const planParam = params.get('plan');
   const billingParam = params.get('billing');
-  
+
   if (billingParam === 'annual') {
     currentBillingCycle = 'annual';
     const btnMonthly = document.getElementById('btn-monthly');
@@ -918,7 +918,7 @@ try {
     if (btnMonthly) btnMonthly.classList.remove('active');
     if (btnAnnual) btnAnnual.classList.add('active');
   }
-  
+
   if (planParam) {
     window._targetPlanName = planParam;
   }
@@ -928,26 +928,18 @@ try {
 
 async function loadPlans() {
   const container = el('plan-cards');
-  container.innerHTML = '<div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plans…</div>';
+  container.innerHTML = '<div style="text-align:center;padding:2rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading plansâ€¦</div>';
   try {
     const res = await fetch('/api/public/plans');
     plansData = await res.json();
-    
+
     if (window._targetPlanName && plansData && plansData.length > 0) {
       const matched = plansData.find(p => p.name.toLowerCase() === window._targetPlanName.toLowerCase());
       if (matched) {
         selectedPlanId = matched.id;
-        // If target plan is 'trial' (monthly-only) but billing cycle is 'annual', force cycle back to monthly
-        if (matched.name === 'trial' && currentBillingCycle === 'annual') {
-          currentBillingCycle = 'monthly';
-          const btnMonthly = el('btn-monthly');
-          const btnAnnual = el('btn-annual');
-          if (btnMonthly) btnMonthly.classList.add('active');
-          if (btnAnnual) btnAnnual.classList.remove('active');
-        }
-      }
+              }
     }
-    
+
     renderPlans();
   } catch (err) {
     container.innerHTML = '<p class="err-msg">Failed to load subscription plans. Please refresh or try again.</p>';
@@ -958,22 +950,7 @@ function setBilling(cycle) {
   currentBillingCycle = cycle;
   el('btn-monthly').classList.toggle('active', cycle === 'monthly');
   el('btn-annual').classList.toggle('active', cycle === 'annual');
-  
-  // If switching to annual and trial plan is selected, auto-select the next active plan
-  const selectedPlan = plansData.find(p => p.id === selectedPlanId);
-  if (cycle === 'annual' && selectedPlan && selectedPlan.name === 'trial') {
-    const defaultAnnualPlan = plansData.find(p => p.name !== 'trial');
-    if (defaultAnnualPlan) {
-      selectedPlanId = defaultAnnualPlan.id;
-    } else {
-      selectedPlanId = null;
-    }
-  }
-  
   renderPlans();
-  if (selectedPlanId) {
-    updateOrderSummary();
-  }
 }
 
 function renderPlans() {
@@ -983,9 +960,9 @@ function renderPlans() {
     container.innerHTML = '<p class="err-msg">No plans available.</p>';
     return;
   }
-  
+
   plansData.forEach(p => {
-    if (currentBillingCycle === 'annual' && p.name === 'trial') return;
+
 
     const isSelected = selectedPlanId === p.id;
     let displayPrice = p.price;
@@ -997,34 +974,34 @@ function renderPlans() {
       period = '/mo';
       billedText = `<div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.25rem;">Billed $${p.annual_price} annually</div>`;
     }
-    
+
     let features = [];
     try {
       features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features;
     } catch (e) {
       features = [];
     }
-    
+
     const card = document.createElement('div');
     card.className = `plan-card${isSelected ? ' selected' : ''}`;
     card.style.position = 'relative';
     card.onclick = () => selectPlan(p.id);
-    
+
     let badgeHtml = '';
     if (p.name === 'professional') {
       badgeHtml = '<div class="plan-badge">Popular</div>';
-    } else if (p.name === 'trial') {
-      badgeHtml = '<div class="plan-trial-tag" style="margin-top:0.25rem">Free 7-Day Trial</div>';
+    } else if (p.name === 'starter') {
+      badgeHtml = '<div class="plan-trial-tag" style="margin-top:0.25rem">Free Account</div>';
     }
-    
+
     let featHtml = '';
     if (Array.isArray(features)) {
-      featHtml = `<div class="plan-features">` + 
+      featHtml = `<div class="plan-features">` +
         features.slice(0, 3).map(f => `<span class="plan-feat">${f}</span>`).join('') +
         (features.length > 3 ? `<span class="plan-feat">+${features.length - 3} more</span>` : '') +
         `</div>`;
     }
-    
+
     card.innerHTML = `
       ${badgeHtml}
       <div class="plan-header">
@@ -1036,11 +1013,11 @@ function renderPlans() {
     `;
     container.appendChild(card);
   });
-  
+
   if (selectedPlanId) {
     selectPlan(selectedPlanId);
   } else if (plansData.length > 0) {
-    const defaultPlan = plansData.find(p => p.name === 'trial') || plansData.find(p => p.name === 'starter') || plansData[0];
+    const defaultPlan = plansData.find(p => p.name === 'starter') || plansData[0];
     if (defaultPlan) selectPlan(defaultPlan.id);
   }
 }
@@ -1048,8 +1025,8 @@ function renderPlans() {
 function selectPlan(planId) {
   selectedPlanId = planId;
   const cards = el('plan-cards').querySelectorAll('.plan-card');
-  const renderedPlans = plansData.filter(p => !(currentBillingCycle === 'annual' && p.name === 'trial'));
-  
+  const renderedPlans = plansData;
+
   cards.forEach((card, idx) => {
     const plan = renderedPlans[idx];
     if (plan && plan.id === planId) {
@@ -1075,7 +1052,7 @@ let appliedPromo = null;
 async function validatePromo() {
   const input = el('promo-input');
   const code = input.value.trim();
-  
+
   if (!code) {
     showPromoResult('Please enter a promo code.', 'error');
     return;
@@ -1084,16 +1061,16 @@ async function validatePromo() {
     showPromoResult('Please select a plan first.', 'error');
     return;
   }
-  
+
   const btn = el('btn-promo');
   btn.disabled = true;
-  btn.textContent = 'Checking…';
-  
+  btn.textContent = 'Checkingâ€¦';
+
   try {
     const url = `/api/promo/validate?code=${encodeURIComponent(code)}&plan_id=${selectedPlanId}&billing_cycle=${currentBillingCycle}`;
     const res = await fetch(url);
     const data = await res.json();
-    
+
     if (data.valid) {
       appliedPromo = {
         code: code.toUpperCase(),
@@ -1103,14 +1080,14 @@ async function validatePromo() {
         original_price: data.original_price,
         effective_price: data.effective_price
       };
-      
+
       let discountText = '';
       if (data.discount_type === 'percentage') {
         discountText = `${data.discount_value}% off`;
       } else {
         discountText = `$${data.discount_value} off`;
       }
-      
+
       showPromoResult(`Promo code applied: ${discountText}! (${data.description})`, 'success');
       updateOrderSummary();
     } else {
@@ -1148,13 +1125,13 @@ function showPromoResult(msg, type) {
 function updateOrderSummary() {
   const plan = plansData.find(p => p.id === selectedPlanId);
   if (!plan) return;
-  
+
   el('os-plan').textContent = plan.display_name;
   el('os-billing').textContent = currentBillingCycle === 'annual' ? 'Annual' : 'Monthly';
-  
+
   let price = currentBillingCycle === 'annual' ? plan.annual_price : plan.price;
   let total = price;
-  
+
   if (appliedPromo) {
     el('os-discount-row').style.display = '';
     let discountAmt = 0;
@@ -1165,12 +1142,12 @@ function updateOrderSummary() {
     }
     discountAmt = Math.min(price, discountAmt);
     total = Math.max(0, price - discountAmt);
-    
+
     el('os-discount').textContent = `-$${discountAmt.toFixed(2)}`;
   } else {
     el('os-discount-row').style.display = 'none';
   }
-  
+
   el('os-total').textContent = `$${total.toFixed(2)}`;
 }
 
@@ -1181,7 +1158,7 @@ function s3Next() {
     showError('s3-error', 'Please select a plan.');
     return;
   }
-  
+
   let originalPrice = currentBillingCycle === 'annual' && plan.annual_price > 0 ? plan.annual_price : plan.price;
   let finalPrice = originalPrice;
   if (appliedPromo) {
@@ -1193,7 +1170,7 @@ function s3Next() {
     }
     finalPrice = Math.max(0, originalPrice - discount);
   }
-  
+
   if (finalPrice === 0) {
     goToStep(5);
     doRegister();
@@ -1207,7 +1184,7 @@ function s3Next() {
 let gatewaysData = {};
 async function loadGateways(billingPrice) {
   const container = el('gateway-container');
-  container.innerHTML = '<div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment options…</div>';
+  container.innerHTML = '<div style="text-align:center;padding:1.5rem 0;color:var(--text-dim)"><svg class="spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" stroke-dashoffset="10"/></svg><br>Loading payment optionsâ€¦</div>';
   clearError('s4-error');
   try {
     const res = await fetch('/api/payments/gateways');
@@ -1236,21 +1213,21 @@ async function renderGatewaysInRegister(gateways, billingPrice) {
   }
 
   let html = '<div style="display:flex;flex-direction:column;gap:.75rem">';
-  
+
   if (hasFW) {
     html += `<button id="fw-register-btn" class="btn-primary" style="background:#f5a623;border-color:#f5a623;color:#fff;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Pay with Flutterwave</button>`;
   }
-  
+
   if (hasPP) {
     html += `<div id="paypal-register-btn-wrap" style="margin-top:.25rem"></div>`;
   }
-  
+
   if (hasCP) {
     html += `<button id="cp-register-btn" class="btn-primary" style="background:#3b82f6;border-color:#3b82f6;color:#fff;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa</button>`;
   }
-  
+
   if (hasBT) {
     const bt = gateways.bank_transfer;
     let bankInfo = '';
@@ -1260,12 +1237,12 @@ async function renderGatewaysInRegister(gateways, billingPrice) {
     if (bt.swift_code) bankInfo += `<div><strong>SWIFT/BIC:</strong> ${bt.swift_code}</div>`;
     if (bt.routing_number) bankInfo += `<div><strong>Routing Number:</strong> ${bt.routing_number}</div>`;
     if (bt.instructions) bankInfo += `<div style="margin-top:.5rem;font-style:italic">${bt.instructions}</div>`;
-    
+
     html += `<div style="margin-top:.75rem;padding:1rem;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;font-size:.75rem;color:var(--text-muted);line-height:1.5">${bankInfo}</div>`;
     html += `<button id="bt-register-btn" class="btn-primary" style="background:#10b981;border-color:#10b981;color:#fff;margin-top:.5rem;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>I've Sent $${billingPrice.toFixed(2)} via Bank Transfer</button>`;
   }
-  
+
   html += '</div>';
   container.innerHTML = html;
 
@@ -1346,11 +1323,11 @@ function doFlutterwaveRegister(publicKey, billingPrice) {
     showError('s4-error', 'Flutterwave SDK not loaded. Please try again.');
     return;
   }
-  
+
   const email = el('s1-email').value.trim();
   const name = el('s2-biz').value.trim();
   const txRef = `reg:${selectedPlanId}:${Date.now()}`;
-  
+
   FlutterwaveCheckout({
     public_key: publicKey,
     tx_ref: txRef,
@@ -1381,9 +1358,9 @@ function doFlutterwaveRegister(publicKey, billingPrice) {
 async function doClickPesaRegister(billingPrice) {
   const btn = el('cp-register-btn');
   btn.disabled = true;
-  btn.textContent = 'Processing…';
+  btn.textContent = 'Processingâ€¦';
   clearError('s4-error');
-  
+
   try {
     const email = el('s1-email').value.trim();
     const password = el('s1-pw').value;
@@ -1391,12 +1368,12 @@ async function doClickPesaRegister(billingPrice) {
     const phone = getFullPhone();
     const country = el('country-select').value;
     const promo = appliedPromo ? appliedPromo.code : '';
-    
+
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
       .then(d => d.csrfToken || d.token || '')
       .catch(() => '');
-      
+
     const regRes = await fetch('/api/customers/checkout-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
@@ -1413,7 +1390,7 @@ async function doClickPesaRegister(billingPrice) {
         billing_cycle: currentBillingCycle
       })
     });
-    
+
     const regData = await regRes.json();
     if (!regRes.ok) {
       showError('s4-error', regData.error || 'Failed to initiate registration.');
@@ -1421,13 +1398,13 @@ async function doClickPesaRegister(billingPrice) {
       btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:.5rem"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>Pay $${billingPrice.toFixed(2)} with ClickPesa`;
       return;
     }
-    
+
     if (regData.token) localStorage.setItem('customerToken', regData.token);
     if (regData.customer?.email) localStorage.setItem('customerEmail', regData.customer.email);
     if (regData.customer?.businessName) localStorage.setItem('customerBusiness', regData.customer.businessName);
-    
+
     const menuId = regData.defaultMenuId;
-    
+
     const orderRes = await fetch('/api/payments/clickpesa/create-order-public', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1440,7 +1417,7 @@ async function doClickPesaRegister(billingPrice) {
         name: businessName
       })
     });
-    
+
     const orderData = await orderRes.json();
     if (orderData.redirect_url) {
       window.location.href = orderData.redirect_url;
@@ -1470,34 +1447,34 @@ async function doRegister(paymentMethod = null, paymentDetails = {}) {
   el('btn-retry').classList.add('hidden');
   el('btn-dashboard').classList.add('hidden');
   if (el('btn-edit-details')) el('btn-edit-details').classList.add('hidden');
-  
+
   ['s5-c1', 's5-c2', 's5-c3'].forEach(id => {
     const d = el(id).querySelector('.s5-dot');
     if (d) { d.className = 's5-dot'; d.innerHTML = ''; }
   });
-  
+
   el('s5-spinner').style.display = '';
   el('s5-spinner').classList.add('spin');
   el('s5-icon-ring').style.borderColor = 'var(--accent)';
   el('s5-label').textContent = 'Setting Up';
   el('s5-title').innerHTML = 'Welcome to <span class="serif-accent">RestOrder</span>';
-  el('s5-sub').textContent = 'Your workspace is being prepared…';
-  
+  el('s5-sub').textContent = 'Your workspace is being preparedâ€¦';
+
   const email = el('s1-email').value.trim();
   const password = el('s1-pw').value;
   const businessName = el('s2-biz').value.trim();
   const phone = getFullPhone();
   const country = el('country-select').value;
   const promo = appliedPromo ? appliedPromo.code : '';
-  
+
   await animateCheckRegister('s5-c1', 600);
-  
+
   try {
     const csrfToken = await fetch('/api/csrf-token', { credentials: 'include' })
       .then(r => r.json())
       .then(d => d.csrfToken || d.token || '')
       .catch(() => '');
-      
+
     const reqBody = {
       email,
       password,
@@ -1509,31 +1486,31 @@ async function doRegister(paymentMethod = null, paymentDetails = {}) {
       billing_cycle: currentBillingCycle,
       ...paymentDetails
     };
-    
+
     if (paymentMethod) {
       reqBody.payment_method = paymentMethod;
     }
-    
+
     const res = await fetch('/api/customers/checkout-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       credentials: 'include',
       body: JSON.stringify(reqBody)
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       showRegisterError(data.error || 'Registration failed.');
       return;
     }
-    
+
     if (data.token) localStorage.setItem('customerToken', data.token);
     if (data.customer?.email) localStorage.setItem('customerEmail', data.customer.email);
     if (data.customer?.businessName) localStorage.setItem('customerBusiness', data.customer.businessName);
-    
+
     await animateCheckRegister('s5-c2', 500);
     await animateCheckRegister('s5-c3', 400);
-    
+
     if (paymentMethod === 'bank_transfer' || paymentMethod === 'manual') {
       showPendingSuccess(paymentMethod);
     } else {
@@ -1563,10 +1540,10 @@ function showSuccessPanel() {
   el('s5-icon-ring').style.borderColor = 'var(--success)';
   el('s5-icon-ring').innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   el('s5-label').textContent = "You're In!";
-  el('s5-title').innerHTML = 'Welcome to <span class="serif-accent">RestOrder</span> 🚀';
+  el('s5-title').innerHTML = 'Welcome to <span class="serif-accent">RestOrder</span> ðŸš€';
   el('s5-sub').textContent = "Your workspace is ready. Here's what we've set up for you.";
   el('btn-dashboard').classList.remove('hidden');
-  
+
   setTimeout(() => {
     window.location.href = '/dashboard?onboard=1';
   }, 2000);
@@ -1577,10 +1554,10 @@ function showPendingSuccess(method, reference = '') {
   el('s5-spinner').style.display = 'none';
   el('s5-icon-ring').style.borderColor = 'var(--warning)';
   el('s5-icon-ring').innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-  
+
   el('s5-label').textContent = "Pending Activation";
   el('s5-title').innerHTML = 'Account <span class="serif-accent">Created</span>!';
-  
+
   if (method === 'bank_transfer') {
     el('s5-sub').textContent = "Your account is created. Once we verify your bank transfer, your subscription will be activated automatically (usually within 24 hours).";
   } else if (method === 'clickpesa') {
@@ -1588,7 +1565,7 @@ function showPendingSuccess(method, reference = '') {
   } else {
     el('s5-sub').textContent = "Your account is created and is pending subscription activation. Our support team will contact you shortly.";
   }
-  
+
   el('btn-dashboard').classList.remove('hidden');
 }
 
@@ -1603,7 +1580,7 @@ function showRegisterError(msg) {
   el('s5-sub').textContent = 'Please check your details and try again.';
 }
 
-//  Firebase helpers 
+//  Firebase helpers
 let _fbAuth=null,_fbPhoneConfirm=null;
 
 async function initFirebaseReg(cfg){
@@ -1662,7 +1639,7 @@ async function doFirebaseRegister(idToken,businessName){
 }
 
 
-//  Google sign-up 
+//  Google sign-up
 async function handleGoogle(){
   if(!_fbAuth){showFbError('Google sign-up is loading. Please wait a moment.');return;}
   el('google-reg-text').textContent='Signing in\u2026';el('google-reg-spin').classList.remove('hidden');el('btn-google').disabled=true;
@@ -1672,14 +1649,14 @@ async function handleGoogle(){
   finally{el('google-reg-text').textContent='Continue with Google';el('google-reg-spin').classList.add('hidden');el('btn-google').disabled=false;}
 }
 
-//  Firebase init on load 
+//  Firebase init on load
 (async()=>{
   try{
     const cfg=await fetch('/api/firebase-config').then(r=>r.json());
     if(cfg&&cfg.enabled){
       await initFirebaseReg(cfg);
     } else {
-      // Firebase not configured — hide Google button and divider
+      // Firebase not configured â€” hide Google button and divider
       const hideIds=['btn-google','firebase-divider'];
       hideIds.forEach(id=>{const e=el(id);if(e)e.style.display='none';});
     }

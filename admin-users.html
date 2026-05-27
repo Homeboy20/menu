@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Admin Users � RestOrder Admin</title>
+<title>Admin Users — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@
   .badge-active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
   .badge-disabled { background: rgba(248, 113, 113, 0.15); color: #f87171; }
 
-  /* ── Input fields: white bg, charcoal text ── */
+  /* â”€â”€ Input fields: white bg, charcoal text â”€â”€ */
   input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
   select, textarea { background: #ffffff !important; color: #1e293b !important; }
   input::placeholder, textarea::placeholder { color: #94a3b8 !important; }
@@ -183,7 +183,7 @@
 
 <!-- Main Content -->
 <main class="flex-1 p-8 overflow-auto">
-  
+
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between">
@@ -288,17 +288,17 @@
         <label class="block text-sm font-medium text-slate-300 mb-1.5">
           Password <span id="password-hint" class="text-slate-500 text-xs">(min 8 characters)</span>
         </label>
-        <input id="form-password" type="password" minlength="8" placeholder="��������"
+        <input id="form-password" type="password" minlength="8" placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
           class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
       </div>
       <div>
         <label class="block text-sm font-medium text-slate-300 mb-1.5">Role</label>
         <select id="form-role"
           class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
-          <option value="admin">Admin � Full management access</option>
-          <option value="viewer">Viewer � Read-only access</option>
-          <option value="customer">Customer � No admin portal access</option>
-          <option value="super_admin">Super Admin � Full access + user management</option>
+          <option value="admin">Admin ï¿½ Full management access</option>
+          <option value="viewer">Viewer ï¿½ Read-only access</option>
+          <option value="customer">Customer ï¿½ No admin portal access</option>
+          <option value="super_admin">Super Admin ï¿½ Full access + user management</option>
         </select>
       </div>
       <div id="status-group" class="hidden">
@@ -365,7 +365,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
   errorEl.classList.add('hidden');
-  
+
   try {
     const csrfRes = await fetch('/api/csrf-token');
     const { csrfToken } = await csrfRes.json();
@@ -473,7 +473,7 @@ function updateStats(users) {
 
 function renderUsers(users) {
   const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', viewer: 'Viewer', customer: 'Customer' };
-  
+
   if (!users.length) {
     document.getElementById('users-table').innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No admin users found.</td></tr>`;
     return;
@@ -503,8 +503,8 @@ function renderUsers(users) {
               <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
             </button>
             ${!isMe ? `
-              <button onclick="toggleStatus(${user.id}, '${user.status === 'active' ? 'disabled' : 'active'}')" 
-                class="p-2 rounded-lg hover:bg-bg-dark ${user.status === 'active' ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 hover:text-green-400'} transition" 
+              <button onclick="toggleStatus(${user.id}, '${user.status === 'active' ? 'disabled' : 'active'}')"
+                class="p-2 rounded-lg hover:bg-bg-dark ${user.status === 'active' ? 'text-slate-400 hover:text-red-400' : 'text-slate-400 hover:text-green-400'} transition"
                 title="${user.status === 'active' ? 'Disable' : 'Enable'}">
                 <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${user.status === 'active' ? 'block' : 'check_circle'}"/></svg>
               </button>
@@ -517,7 +517,7 @@ function renderUsers(users) {
       </tr>
     `;
   }).join('');
-  
+
   document.getElementById('users-table').innerHTML = html;
 }
 
@@ -586,10 +586,10 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
     const existingUser = allUsers.find(u => u.id === parseInt(id));
     if (existingUser && existingUser.role !== 'customer') {
       const confirmed = confirm(
-        `⚠️ Changing "${existingUser.name || existingUser.email}" to Customer role will:\n\n` +
-        `• Migrate them to the Customers section\n` +
-        `• Remove their admin access permanently\n` +
-        `• Create a new customer account with their credentials\n\n` +
+        `âš ï¸ Changing "${existingUser.name || existingUser.email}" to Customer role will:\n\n` +
+        `â€¢ Migrate them to the Customers section\n` +
+        `â€¢ Remove their admin access permanently\n` +
+        `â€¢ Create a new customer account with their credentials\n\n` +
         `This action cannot be undone. Continue?`
       );
       if (!confirmed) return;
@@ -630,7 +630,7 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
 
     // Show migration success message
     if (data.migrated) {
-      alert(`✅ ${data.message}\n\nThey can now log in at the Customer portal.`);
+      alert(`âœ… ${data.message}\n\nThey can now log in at the Customer portal.`);
     }
 
     closeModal();
@@ -645,7 +645,7 @@ document.getElementById('user-form').addEventListener('submit', async (e) => {
 async function toggleStatus(userId, newStatus) {
   const action = newStatus === 'disabled' ? 'disable' : 'enable';
   if (!confirm(`Are you sure you want to ${action} this admin user?`)) return;
-  
+
   try {
     const res = await fetch(`/api/admin/users/${userId}`, {
       method: 'PUT',
@@ -663,7 +663,7 @@ async function toggleStatus(userId, newStatus) {
 // Delete user
 async function deleteUser(userId, userName) {
   if (!confirm(`Are you sure you want to permanently delete "${userName}"?\n\nThis action cannot be undone.`)) return;
-  
+
   try {
     const res = await fetch(`/api/admin/users/${userId}`, {
       method: 'DELETE',
@@ -686,7 +686,7 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '�';
+  if (!isoStr) return 'ï¿½';
   return new Date(isoStr).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric'
   });

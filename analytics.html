@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Analytics ? RestOrder Admin</title>
+<title>Analytics — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -176,7 +176,7 @@
 
 <!-- Main Content -->
 <main class="flex-1 p-8 overflow-auto">
-  
+
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between">
@@ -311,7 +311,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
   errorEl.classList.add('hidden');
-  
+
   try {
     const csrfRes = await fetch('/api/csrf-token');
     const { csrfToken } = await csrfRes.json();
@@ -320,14 +320,14 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ email, password })
     });
-    
+
     const data = await res.json();
     if (!res.ok) {
       errorEl.textContent = data.error || 'Invalid email or password.';
       errorEl.classList.remove('hidden');
       return;
     }
-    
+
     adminToken = data.token;
     localStorage.setItem('admin-token', adminToken);
     document.getElementById('login-overlay').classList.add('hidden');
@@ -349,13 +349,13 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 (async () => {
   const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
   if (!token) return;
-  
+
   try {
     const res = await fetch('/api/admin/check', {
       headers: { 'x-admin-token': token }
     });
     const data = await res.json();
-    
+
     if (data.authenticated) {
       adminToken = token;
       document.getElementById('login-overlay').classList.add('hidden');
@@ -373,49 +373,49 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 async function loadAnalytics() {
   try {
     const headers = { 'x-admin-token': adminToken };
-    
+
     // Fetch all data
     const [customersRes, subsRes] = await Promise.all([
       fetch('/api/admin/customers', { headers }),
       fetch('/api/subscriptions?status=active', { headers })
     ]);
-    
+
     if (!customersRes.ok || !subsRes.ok) throw new Error('Failed to load data');
-    
+
     const customers = await customersRes.json();
     const subscriptions = await subsRes.json();
-    
+
     // Calculate metrics
     const totalCustomers = customers.length;
     const activeCustomers = customers.filter(c => c.status === 'active').length;
     const paidCustomers = subscriptions.filter(s => (s.plan_price || 0) > 0).length;
     const conversionRate = totalCustomers > 0 ? (paidCustomers / totalCustomers * 100) : 0;
-    
+
     // New customers in last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const newCustomers = customers.filter(c => new Date(c.created_at) >= thirtyDaysAgo).length;
-    
+
     // Average revenue per user
     const totalRevenue = subscriptions.reduce((sum, s) => sum + (parseFloat(s.plan_price) || 0), 0);
     const arpu = activeCustomers > 0 ? (totalRevenue / activeCustomers) : 0;
-    
+
     // Update stats
     document.getElementById('stat-conversion').textContent = `${conversionRate.toFixed(1)}%`;
     document.getElementById('stat-new-customers').textContent = newCustomers;
     document.getElementById('stat-arpu').textContent = `$${arpu.toFixed(0)}`;
     document.getElementById('stat-churn').textContent = `0%`;
-    
+
     // Render charts (simplified bar charts)
     renderCustomerGrowthChart(customers);
     renderRevenueGrowthChart(subscriptions);
-    
+
     // Top menus
     renderTopMenus(customers);
-    
+
     // Scan analytics
     renderScanAnalytics(customers);
-    
+
   } catch (err) {
     console.error(err);
   }
@@ -425,22 +425,22 @@ function renderCustomerGrowthChart(customers) {
   // Group by last 7 days
   const days = [];
   const counts = [];
-  
+
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dayStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     days.push(dayStr);
-    
+
     const count = customers.filter(c => {
       const createdDate = new Date(c.created_at);
       return createdDate.toDateString() === date.toDateString();
     }).length;
     counts.push(count);
   }
-  
+
   const maxCount = Math.max(...counts, 1);
-  
+
   const html = `
     <div class="h-full flex items-end gap-3 px-4">
       ${counts.map((count, i) => `
@@ -454,7 +454,7 @@ function renderCustomerGrowthChart(customers) {
       `).join('')}
     </div>
   `;
-  
+
   document.getElementById('customer-growth-chart').innerHTML = html;
 }
 
@@ -462,21 +462,21 @@ function renderRevenueGrowthChart(subscriptions) {
   // Simplified revenue by last 7 days (using created_at as proxy)
   const days = [];
   const revenues = [];
-  
+
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dayStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     days.push(dayStr);
-    
+
     const revenue = subscriptions
       .filter(s => new Date(s.created_at).toDateString() === date.toDateString())
       .reduce((sum, s) => sum + (parseFloat(s.plan_price) || 0), 0);
     revenues.push(revenue);
   }
-  
+
   const maxRevenue = Math.max(...revenues, 1);
-  
+
   const html = `
     <div class="h-full flex items-end gap-3 px-4">
       ${revenues.map((revenue, i) => `
@@ -490,7 +490,7 @@ function renderRevenueGrowthChart(subscriptions) {
       `).join('')}
     </div>
   `;
-  
+
   document.getElementById('revenue-growth-chart').innerHTML = html;
 }
 
@@ -500,12 +500,12 @@ function renderTopMenus(customers) {
     .filter(c => c.menu_count > 0)
     .sort((a, b) => (b.total_scans || 0) - (a.total_scans || 0))
     .slice(0, 5);
-  
+
   if (!topCustomers.length) {
     document.getElementById('top-menus').innerHTML = '<p class="text-slate-400 text-center py-8">No menu data available</p>';
     return;
   }
-  
+
   const html = topCustomers.map((customer, index) => `
     <div class="flex items-center gap-4 p-4 bg-bg-dark/30 rounded-xl mb-3">
       <div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold">
@@ -521,7 +521,7 @@ function renderTopMenus(customers) {
       </div>
     </div>
   `).join('');
-  
+
   document.getElementById('top-menus').innerHTML = html;
 }
 
@@ -529,7 +529,7 @@ function renderScanAnalytics(customers) {
   const totalScans = customers.reduce((sum, c) => sum + (c.total_scans || 0), 0);
   const totalMenus = customers.reduce((sum, c) => sum + (c.menu_count || 0), 0);
   const avgScansPerMenu = totalMenus > 0 ? (totalScans / totalMenus) : 0;
-  
+
   const html = `
     <div class="space-y-4">
       <div class="p-6 bg-bg-dark/30 rounded-xl">
@@ -539,7 +539,7 @@ function renderScanAnalytics(customers) {
         </div>
         <p class="text-3xl font-bold">${totalScans.toLocaleString()}</p>
       </div>
-      
+
       <div class="p-6 bg-bg-dark/30 rounded-xl">
         <div class="flex items-center justify-between mb-2">
           <p class="text-slate-400">Avg. Scans per Menu</p>
@@ -547,7 +547,7 @@ function renderScanAnalytics(customers) {
         </div>
         <p class="text-3xl font-bold">${avgScansPerMenu.toFixed(0)}</p>
       </div>
-      
+
       <div class="p-6 bg-bg-dark/30 rounded-xl">
         <div class="flex items-center justify-between mb-2">
           <p class="text-slate-400">Active Menus</p>
@@ -557,7 +557,7 @@ function renderScanAnalytics(customers) {
       </div>
     </div>
   `;
-  
+
   document.getElementById('scan-analytics').innerHTML = html;
 }
 

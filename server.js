@@ -62,6 +62,14 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const SITE_URL = (process.env.SITE_URL || 'https://restorder.online').replace(/\/$/, '');
+const SITE_HOST = (() => {
+  try {
+    return new URL(SITE_URL).host.toLowerCase();
+  } catch {
+    return 'restorder.online';
+  }
+})();
 const PG_POOL_MAX = Math.max(1, parseInt(process.env.PG_POOL_MAX || '20', 10));
 const MENU_CACHE_MAX = Math.max(50, parseInt(process.env.MENU_CACHE_MAX || '500', 10));
 const MENU_CACHE_TTL_MS = Math.max(30000, parseInt(process.env.MENU_CACHE_TTL_MS || String(5 * 60 * 1000), 10));
@@ -72,8 +80,16 @@ const DEFAULT_HOST = process.env.NODE_ENV === 'production'
   ? `https://localhost:${PORT}` 
   : `http://localhost:${PORT}`;
 const HOST = (process.env.HOST || DEFAULT_HOST).replace(/\/$/, '');
+const ENABLE_DEV_ROUTES = process.env.ENABLE_DEV_ROUTES === 'true';
 
-// ── Admin password (bcrypt hash) ──────────────────────────────────────────────
+function isLocalRequest(req) {
+  const remote = String(req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || '')
+    .split(',')[0]
+    .trim();
+  return ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(remote) || ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
+}
+
+// Ã¢â€â‚¬Ã¢â€â‚¬ Admin password (bcrypt hash) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 let ADMIN_SECRET_HASH = process.env.ADMIN_SECRET_HASH || '';
 
 // Strip surrounding quotes that some deployment platforms inject around env values
@@ -82,14 +98,14 @@ if (ADMIN_SECRET_HASH) {
 }
 
 if (!ADMIN_SECRET_HASH || !ADMIN_SECRET_HASH.startsWith('$2') || ADMIN_SECRET_HASH.length < 59) {
-  console.warn('\n  ⚠  WARNING: ADMIN_SECRET_HASH is not set or is not a valid bcrypt hash.');
+  console.warn('\n  Ã¢Å¡Â   WARNING: ADMIN_SECRET_HASH is not set or is not a valid bcrypt hash.');
   console.warn('     Generate one with: node -e "require(\'bcrypt\').hash(\'yourPassword\',12).then(h=>console.log(h))"');
   console.warn('     Then set ADMIN_SECRET_HASH=<hash> in .env\n');
 }
 const SESSION_TTL = parseInt(process.env.SESSION_TTL_MS || '28800000', 10); // 8 h
 const PASSWORD_RESET_TTL_MS = parseInt(process.env.PASSWORD_RESET_TTL_MS || '3600000', 10); // 1 h
 
-// In-memory session store: token → { createdAt, user }
+// In-memory session store: token Ã¢â€ â€™ { createdAt, user }
 // Backed by admin_sessions DB table for persistence across restarts.
 const sessions = new Map();
 
@@ -142,16 +158,16 @@ async function restoreAdminSessions() {
         sessions.set(row.token, { createdAt: Number(row.created_at), user: JSON.parse(row.user_data) });
       } catch { /* skip corrupted rows */ }
     }
-    if (rows.length) console.log(`  ✓ Restored ${rows.length} admin session(s) from DB`);
+    if (rows.length) console.log(`  Ã¢Å“â€œ Restored ${rows.length} admin session(s) from DB`);
   } catch (err) {
-    // Table may not exist yet on first boot — safe to ignore
+    // Table may not exist yet on first boot Ã¢â‚¬â€ safe to ignore
     if (!String(err.message).includes('does not exist')) {
       console.error('Failed to restore admin sessions:', err.message);
     }
   }
 }
 
-// ── Input Sanitization ─────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Input Sanitization Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Enhanced input sanitization using validator and xss libraries
 function sanitizeInput(input, maxLength = 1000) {
@@ -256,7 +272,7 @@ async function isGenuineEmail(email) {
   }
 }
 
-// ── PII Field Encryption (AES-256-GCM) ───────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ PII Field Encryption (AES-256-GCM) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // Set FIELD_ENCRYPTION_KEY in .env to a 32-byte hex string:
 //   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 const FIELD_ENC_KEY_HEX = process.env.FIELD_ENCRYPTION_KEY || '';
@@ -265,7 +281,7 @@ const FIELD_ENC_KEY = FIELD_ENC_KEY_HEX.length === 64
   : null;
 
 if (!FIELD_ENC_KEY) {
-  console.warn('  ⚠  WARNING: FIELD_ENCRYPTION_KEY is not set. PII fields will be stored in plaintext.');
+  console.warn('  Ã¢Å¡Â   WARNING: FIELD_ENCRYPTION_KEY is not set. PII fields will be stored in plaintext.');
   console.warn('     Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
   console.warn('     Then set FIELD_ENCRYPTION_KEY=<hex> in .env\n');
 }
@@ -295,7 +311,7 @@ function decryptField(value) {
   }
 }
 
-// ── CSRF Protection ────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ CSRF Protection Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
 
@@ -317,7 +333,7 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
   }
 });
 
-// ── Security middleware ────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Security middleware Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Force HTTPS in production when the request is behind a proxy that sets x-forwarded-proto.
 app.use((req, res, next) => {
@@ -340,7 +356,7 @@ app.use((req, res, next) => {
 
   if (isProd && !isLocalHost && normalizedProto && normalizedProto !== 'https') {
     const httpsUrl = `https://${req.headers.host}${req.url}`;
-    console.log(`🔒 Redirecting HTTP to HTTPS: ${httpsUrl}`);
+    console.log(`Ã°Å¸â€â€™ Redirecting HTTP to HTTPS: ${httpsUrl}`);
     return res.redirect(301, httpsUrl);
   }
 
@@ -395,6 +411,14 @@ const registerLimiter = rateLimit({
   message: { error: 'Too many registration attempts. Please try again later.' },
 });
 
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.CONTACT_RATE_LIMIT || '5', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many contact attempts. Please try again later or email support@restorder.online.' },
+});
+
 // Rate-limit for verification attempts (more relaxed than registration to allow retries/resends)
 const verificationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes window
@@ -404,7 +428,7 @@ const verificationLimiter = rateLimit({
   message: { error: 'Too many verification attempts. Please wait 15 minutes.' },
 });
 
-// ── Performance & Compression Middleware ──────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Performance & Compression Middleware Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // High-performance compression with optimal settings
 app.use(compression({
   filter: (req, res) => {
@@ -425,14 +449,14 @@ app.use((req, res, next) => {
     const responseTime = Number(end - start) / 1000000; // Convert to ms
     
     if (responseTime > 100) { // Log slow requests
-      console.log(`⚠️  Slow request: ${req.method} ${req.path} - ${responseTime.toFixed(2)}ms`);
+      console.log(`Ã¢Å¡Â Ã¯Â¸Â  Slow request: ${req.method} ${req.path} - ${responseTime.toFixed(2)}ms`);
     }
   });
   
   next();
 });
 
-// ── Additional Security Headers ───────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Additional Security Headers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.use((req, res, next) => {
   // Prevent clickjacking
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -445,6 +469,27 @@ app.use((req, res, next) => {
   
   // Referrer Policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Canonical URL header for crawlers.
+  const canonicalPath = req.path === '/' ? '/' : req.path.replace(/\/+$/, '');
+  res.setHeader('Link', `<${SITE_URL}${canonicalPath}>; rel="canonical"`);
+
+  // Keep private/auth surfaces out of search engines.
+  const privatePatterns = [
+    /^\/admin(\/|$)/i,
+    /^\/staff-panel(\/|$)/i,
+    /^\/customer-dashboard(\/|$)/i,
+    /^\/settings(\/|$)/i,
+    /^\/analytics(\/|$)/i,
+    /^\/checkout(\/|$)/i,
+    /^\/payments(\/|$)/i,
+    /^\/subscriptions(\/|$)/i,
+    /^\/register(\/|$)/i,
+    /^\/customer-login(\/|$)/i,
+  ];
+  if (privatePatterns.some((pattern) => pattern.test(req.path))) {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  }
   
   // Permissions Policy (limit browser features)
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
@@ -452,7 +497,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── CORS Configuration (for API endpoints only) ────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ CORS Configuration (for API endpoints only) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.use('/api', (req, res, next) => {
   const allowedOrigins = [
     HOST,
@@ -478,11 +523,11 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// ── Legacy/alternate registration URLs — redirect to canonical /register ──────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Legacy/alternate registration URLs Ã¢â‚¬â€ redirect to canonical /register Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.get('/start', (req, res) => res.redirect(301, '/register'));
 app.get('/register-new', (req, res) => res.redirect(301, '/register'));
 
-// ── Clean URLs - Remove .html Extension ────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Clean URLs - Remove .html Extension Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // This middleware serves HTML files without the .html extension
 app.use((req, res, next) => {
   // Skip if URL already has .html or is an API route
@@ -515,6 +560,9 @@ app.use((req, res, next) => {
     '/about': 'about.html',
     '/contact': 'contact.html',
     '/faq': 'faq.html',
+    '/qr-menu-for-cafes': 'qr-menu-for-cafes.html',
+    '/restaurant-qr-code-menu': 'restaurant-qr-code-menu.html',
+    '/digital-menu-for-bars': 'digital-menu-for-bars.html',
     '/privacy': 'privacy.html',
     '/terms': 'terms.html'
   };
@@ -535,6 +583,20 @@ app.use((req, res, next) => {
 // Record menu scans without blocking page delivery.
 app.get('/menu.html', (req, res, next) => {
   recordMenuScan(req);
+  next();
+});
+
+// Canonical host redirect in production to avoid duplicate domain indexing.
+app.use((req, res, next) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  const incomingHost = String(req.get('host') || '').toLowerCase();
+  const hostOnly = incomingHost.split(':')[0];
+  const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(req.hostname);
+
+  if (isProd && !isLocalHost && hostOnly && SITE_HOST && hostOnly !== SITE_HOST) {
+    return res.redirect(301, `${SITE_URL}${req.originalUrl}`);
+  }
+
   next();
 });
 
@@ -587,7 +649,7 @@ app.use(express.static('.', {
   lastModified: true,
   immutable: true,
   setHeaders: (res, path) => {
-    // HTML files must never be cached — always revalidate so config/script order fixes take effect
+    // HTML files must never be cached Ã¢â‚¬â€ always revalidate so config/script order fixes take effect
     if (path.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
@@ -596,13 +658,13 @@ app.use(express.static('.', {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
     }
     // Note: compression is handled by the compression() middleware above.
-    // Do NOT set Content-Encoding manually — the files are not pre-compressed.
+    // Do NOT set Content-Encoding manually Ã¢â‚¬â€ the files are not pre-compressed.
   }
 }));
 
 app.use('/api/', apiLimiter);
 
-// ── Auth middleware (protects write routes) ────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Auth middleware (protects write routes) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 function requireAuth(req, res, next) {
   const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (isValidSession(token)) {
@@ -628,7 +690,7 @@ function requireRole(...roles) {
   };
 }
 
-// ── Accept admin OR customer auth (shared menu-editor endpoints) ───────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Accept admin OR customer auth (shared menu-editor endpoints) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 function requireAnyAuth(req, res, next) {
   const adminToken = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (isValidSession(adminToken)) {
@@ -658,12 +720,12 @@ async function assertMenuOwnership(menuId, customerId, res) {
   return true;
 }
 
-// ── Subscription access control ────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Subscription access control Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Tier order used for comparison (lower index = lower tier)
 const PLAN_ORDER = ['trial', 'starter', 'professional', 'enterprise'];
 
-// requirePlan(minPlan) – middleware factory that enforces a minimum subscription tier.
+// requirePlan(minPlan) Ã¢â‚¬â€œ middleware factory that enforces a minimum subscription tier.
 // When req.params.id (menu_id) is present, checks that specific menu's subscription.
 // When no menu_id is available (e.g. staff routes), checks the customer's best plan.
 // Admin users always bypass.
@@ -735,12 +797,12 @@ function requirePlan(minPlan) {
       next();
     } catch (err) {
       console.error('Plan check error:', err);
-      next(); // fail open – don't block on DB errors
+      next(); // fail open Ã¢â‚¬â€œ don't block on DB errors
     }
   };
 }
 
-// checkMenuLimit – blocks POST /api/menus if the customer has reached their plan's menu limit.
+// checkMenuLimit Ã¢â‚¬â€œ blocks POST /api/menus if the customer has reached their plan's menu limit.
 async function checkMenuLimit(req, res, next) {
   try {
     if (req.adminUser) return next();
@@ -784,7 +846,7 @@ async function checkMenuLimit(req, res, next) {
   }
 }
 
-// ── Legacy subscription check (kept for reference, not applied) ───────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Legacy subscription check (kept for reference, not applied) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 async function checkSubscriptionLimit(req, res, next) {
   try {
     // Get menu ID from request (could be in params or body)
@@ -825,7 +887,7 @@ async function checkSubscriptionLimit(req, res, next) {
           subscription_status: 'trial'
         });
       }
-      // Trial still active — allow through
+      // Trial still active Ã¢â‚¬â€ allow through
     } else if (subscription.status !== 'active') {
       // Check if subscription is active
       return res.status(403).json({ 
@@ -865,12 +927,12 @@ async function checkSubscriptionLimit(req, res, next) {
 
 
 
-// ── Directories ───────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Directories Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const DATA_DIR    = path.join(__dirname, 'data');
 [UPLOADS_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
 
-// ── PostgreSQL database ──────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ PostgreSQL database Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // Strip sslmode from URL so pg-connection-string doesn't override our ssl config
 let _pgConnStr = process.env.DATABASE_URL || '';
 try {
@@ -896,7 +958,7 @@ pool.on('error', (err) => {
   console.error('Unexpected PG pool error:', err);
 });
 
-// ── Schema setup (runs once on startup) ──────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Schema setup (runs once on startup) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 async function initDB() {
   const client = await pool.connect();
   try {
@@ -1061,7 +1123,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_name TEXT NOT NULL DEFAULT ''`);
     await client.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone TEXT NOT NULL DEFAULT ''`);
 
-    // ── Customer Management Tables ──────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Customer Management Tables Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     
     // Customers table - Restaurant owners/businesses
     await client.query(`
@@ -1144,7 +1206,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
         )
     `).catch(() => {});
 
-    // ── Subscription Management Tables ──────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Subscription Management Tables Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     
     // Subscription Plans table
     await client.query(`
@@ -1361,13 +1423,13 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
       if (!defaultHash || !defaultHash.startsWith('$2') || defaultHash.length < 59) {
         defaultHash = await bcrypt.hash('admin123', 12);
         mustChange = 1;
-        console.log('  ⚠ No ADMIN_SECRET_HASH set – seeded super admin with default password "admin123". CHANGE THIS IMMEDIATELY!');
+        console.log('  Ã¢Å¡Â  No ADMIN_SECRET_HASH set Ã¢â‚¬â€œ seeded super admin with default password "admin123". CHANGE THIS IMMEDIATELY!');
       }
       await client.query(`
         INSERT INTO admin_users (email, password_hash, name, role, status, must_change_password, created_at, updated_at)
         VALUES ($1, $2, $3, 'super_admin', 'active', $4, $5, $5)
       `, ['admin@restorder.online', defaultHash, 'Super Admin', mustChange, now]);
-      console.log('  ✓ Seeded default super admin (admin@restorder.online)');
+      console.log('  Ã¢Å“â€œ Seeded default super admin (admin@restorder.online)');
     }
 
     // Migration: add annual_price column if missing
@@ -1385,7 +1447,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
           ('professional', 'Professional', 39, 374, 'monthly', 5, 5, '["Everything in Starter","Up to 5 Locations","Table Management System","Online Ordering & Cart","Customer Ratings & Reviews","Advanced Analytics Dashboard","WhatsApp Integration","Import/Export CSV","Print Bills & Receipts","Priority Support (24h response)","99.9% Uptime SLA"]', 1, 2, $1),
           ('enterprise', 'Enterprise', 99, 950, 'monthly', 999, 999, '["Everything in Professional","Unlimited Locations","Multi-Location Management","Custom Domain","White-Label Branding","API Access & Webhooks","Advanced Security & SSO","Team Collaboration Tools","Dedicated Account Manager","24/7 Phone & Chat Support","Custom Onboarding & Training","99.99% Uptime SLA"]', 1, 3, $1)
       `, [now]);
-      console.log('  ✓ Seeded subscription plans');
+      console.log('  Ã¢Å“â€œ Seeded subscription plans');
     }
 
     // Ensure trial plan exists (may be missing if plans were seeded before trial was added)
@@ -1396,7 +1458,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
         INSERT INTO subscription_plans (name, display_name, price, annual_price, interval, menu_limit, location_limit, features, is_active, sort_order, created_at)
         VALUES ('trial', '7-Day Trial', 0, 0, 'monthly', 1, 1, '["1 Digital Menu","QR Code Generation","Real-Time Menu Updates","Basic Analytics","7-Day Full Access to Pro Features","No credit card required"]', 1, 0, $1)
       `, [now]);
-      console.log('  ✓ Added trial plan');
+      console.log('  Ã¢Å“â€œ Added trial plan');
     }
 
     // App settings table
@@ -1441,7 +1503,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
           [key, value, settingsNow]
         );
       }
-      console.log('  ✓ Seeded default app settings');
+      console.log('  Ã¢Å“â€œ Seeded default app settings');
     }
     await client.query(
       'INSERT INTO app_settings (key, value, updated_at) VALUES ($1, $2, $3) ON CONFLICT (key) DO NOTHING',
@@ -1478,7 +1540,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     await client.query(`CREATE INDEX IF NOT EXISTS idx_asessions_user ON admin_sessions (user_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_asessions_expires ON admin_sessions (expires_at)`);
 
-    // Staff members table – sub-users per business (manager / waiter / cashier)
+    // Staff members table Ã¢â‚¬â€œ sub-users per business (manager / waiter / cashier)
     await client.query(`
       CREATE TABLE IF NOT EXISTS staff_members (
         id            SERIAL PRIMARY KEY,
@@ -1512,7 +1574,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
     `);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_reg_verif_email ON registration_verifications (email)`);
 
-    console.log('  ✓ PostgreSQL schema ready');
+    console.log('  Ã¢Å“â€œ PostgreSQL schema ready');
   } finally {
     client.release();
   }
@@ -1550,9 +1612,9 @@ async function loadCustomerSessionsFromDB() {
         });
       }
     }
-    if (rows.length > 0) console.log(`  ✓ Restored ${rows.length} customer session(s) from DB`);
+    if (rows.length > 0) console.log(`  Ã¢Å“â€œ Restored ${rows.length} customer session(s) from DB`);
   } catch (err) {
-    console.error('  ⚠ Failed to load customer sessions from DB:', err.message);
+    console.error('  Ã¢Å¡Â  Failed to load customer sessions from DB:', err.message);
   }
 }
 
@@ -1618,7 +1680,7 @@ function recordMenuScan(req) {
   });
 }
 
-// ── DB helper functions ──────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ DB helper functions Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 async function dbGetMenu(id) {
   const { rows } = await pool.query('SELECT * FROM menus WHERE id = $1', [id]);
@@ -1902,11 +1964,11 @@ const upload = multer({
   },
 });
 
-app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8–10 MB encoded)
+app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8Ã¢â‚¬â€œ10 MB encoded)
 app.use(cookieParser());  // Parse cookies for secure session management
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-// ── Item image upload (auto-resize & optimize) ────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Item image upload (auto-resize & optimize) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const ITEM_IMG_DIR = path.join(UPLOADS_DIR, 'items');
 if (!fs.existsSync(ITEM_IMG_DIR)) fs.mkdirSync(ITEM_IMG_DIR, { recursive: true });
 
@@ -1919,7 +1981,7 @@ const imgUpload = multer({
   },
 });
 
-app.post('/api/upload-item-image', requireAnyAuth, imgUpload.single('image'), async (req, res) => {
+app.post('/api/upload-item-image', requireAnyAuth, doubleCsrfProtection, imgUpload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file provided.' });
     const filename = crypto.randomUUID() + '.webp';
@@ -1936,7 +1998,7 @@ app.post('/api/upload-item-image', requireAnyAuth, imgUpload.single('image'), as
   }
 });
 
-// ── Branding image upload (logo / favicon) ─────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Branding image upload (logo / favicon) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const BRANDING_DIR = path.join(UPLOADS_DIR, 'branding');
 if (!fs.existsSync(BRANDING_DIR)) fs.mkdirSync(BRANDING_DIR, { recursive: true });
 
@@ -1950,7 +2012,7 @@ const brandingUpload = multer({
   },
 });
 
-app.post('/api/admin/branding/upload', requireRole('super_admin'), brandingUpload.single('image'), async (req, res) => {
+app.post('/api/admin/branding/upload', requireRole('super_admin'), doubleCsrfProtection, brandingUpload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file provided.' });
     const type = (req.body.type || '').toLowerCase();
@@ -1979,7 +2041,7 @@ app.post('/api/admin/branding/upload', requireRole('super_admin'), brandingUploa
   }
 });
 
-// ── Static routes ──────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Static routes Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Health check endpoint for deployment platforms
 app.get('/health', (req, res) => {
@@ -1996,7 +2058,7 @@ app.get('/health', (req, res) => {
 // overwrite=false: reuse the existing valid cookie so multiple tabs never fight.
 // validateOnReuse=false: if the existing cookie is stale/invalid (e.g. after a
 // server restart that generated a new CSRF_SECRET), generate a fresh one instead
-// of throwing – otherwise login returns 403 until the old cookie expires.
+// of throwing Ã¢â‚¬â€œ otherwise login returns 403 until the old cookie expires.
 app.get('/api/csrf-token', (req, res) => {
   try {
     const csrfToken = generateToken(req, res, false, false);
@@ -2008,7 +2070,7 @@ app.get('/api/csrf-token', (req, res) => {
   }
 });
 
-// GET /api/geo – return visitor country code from Cloudflare CF-IPCountry header
+// GET /api/geo Ã¢â‚¬â€œ return visitor country code from Cloudflare CF-IPCountry header
 app.get('/api/geo', (req, res) => {
   const country = (req.headers['cf-ipcountry'] || '').toUpperCase();
   res.json({ country: country && country !== 'XX' && country !== 'T1' ? country : '' });
@@ -2057,13 +2119,13 @@ async function handleFirebaseConfigRequest(req, res) {
   }
 }
 
-// GET /api/firebase-config – public Firebase SDK config for registration/login pages
+// GET /api/firebase-config Ã¢â‚¬â€œ public Firebase SDK config for registration/login pages
 app.get('/api/firebase-config', handleFirebaseConfigRequest);
 app.get('/firebase-config', handleFirebaseConfigRequest);
 console.log('REGISTERED /api/firebase-config and /firebase-config routes');
 
 
-// GET /api/public/branding – public site identity (no auth required)
+// GET /api/public/branding Ã¢â‚¬â€œ public site identity (no auth required)
 app.get('/api/public/branding', async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -2079,7 +2141,7 @@ app.get('/api/public/branding', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /favicon.ico – serve dynamic favicon from branding settings
+// GET /favicon.ico Ã¢â‚¬â€œ serve dynamic favicon from branding settings
 app.get('/favicon.ico', async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'site_favicon_url'");
@@ -2107,6 +2169,24 @@ app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.send(`User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /staff-panel
+Disallow: /staff-panel/
+Disallow: /customer-dashboard
+Disallow: /customer-dashboard/
+Disallow: /settings
+Disallow: /settings/
+Disallow: /analytics
+Disallow: /analytics/
+Disallow: /checkout
+Disallow: /checkout/
+Disallow: /payments
+Disallow: /payments/
+Disallow: /subscriptions
+Disallow: /subscriptions/
+Disallow: /customer-login
+Disallow: /customer-login/
 User-agent: GPTBot
 Allow: /
 User-agent: Google-Extended
@@ -2117,17 +2197,16 @@ User-agent: Omgilibot
 Allow: /
 User-agent: FacebookBot
 Allow: /
-Sitemap: https://${req.get('host')}/sitemap.xml`);
+Sitemap: ${SITE_URL}/sitemap.xml`);
 });
 
 // GET /sitemap.xml
 app.get('/sitemap.xml', (req, res) => {
   res.type('application/xml');
-  const host = `https://${req.get('host')}`;
-  const urls = ['/', '/features', '/pricing', '/register', '/login', '/about', '/contact', '/faq', '/privacy', '/terms'];
+  const urls = ['/', '/features', '/pricing', '/about', '/contact', '/faq', '/qr-menu-for-cafes', '/restaurant-qr-code-menu', '/digital-menu-for-bars', '/privacy', '/terms', '/refund'];
   const urlNodes = urls.map(url => `
   <url>
-    <loc>${host}${url}</loc>
+    <loc>${SITE_URL}${url}</loc>
     <changefreq>weekly</changefreq>
     <priority>${url === '/' ? '1.0' : '0.8'}</priority>
   </url>`).join('');
@@ -2138,13 +2217,37 @@ ${urlNodes}
 </urlset>`);
 });
 
-// GET /  – serve landing page
+// GET /llms.txt for answer-engine optimization context.
+app.get('/llms.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`RestOrder
+
+RestOrder helps restaurants and cafes launch and manage QR code menus, online ordering, and digital menu updates.
+
+Canonical: ${SITE_URL}
+Primary pages:
+- ${SITE_URL}/
+- ${SITE_URL}/features
+- ${SITE_URL}/pricing
+- ${SITE_URL}/faq
+- ${SITE_URL}/contact
+
+Summary:
+- Product: Digital menu and QR ordering platform for food businesses
+- Target users: Restaurants, cafes, bars, hotels, and fast-food operators
+- Key benefits: faster menu updates, contactless ordering, and better customer conversion
+
+Support:
+- Contact: support@restorder.online`);
+});
+
+// GET /  Ã¢â‚¬â€œ serve landing page
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// GET /terms and /privacy – legal pages
+// GET /terms and /privacy Ã¢â‚¬â€œ legal pages
 app.get('/terms', (req, res) => {
   res.set('Cache-Control', 'no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'terms.html'));
@@ -2158,9 +2261,9 @@ app.get('/refund', (req, res) => {
   res.sendFile(path.join(__dirname, 'refund.html'));
 });
 
-// ── Auth routes ────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Auth routes Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-// Shared login handler – authenticates against admin_users table
+// Shared login handler Ã¢â‚¬â€œ authenticates against admin_users table
 async function handleAdminLogin(req, res) {
   const { email, password, secret } = req.body || {};
   // Support both new (email+password) and legacy (secret-only) login
@@ -2257,12 +2360,12 @@ async function handleAdminLogin(req, res) {
   }
 }
 
-// POST /api/auth/login – multi-user admin login
+// POST /api/auth/login Ã¢â‚¬â€œ multi-user admin login
 app.post('/api/auth/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 // Alias for admin-dashboard pages that use /api/admin/login
 app.post('/api/admin/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 
-// POST /api/auth/unified-login – single form that tries customer → staff → admin
+// POST /api/auth/unified-login Ã¢â‚¬â€œ single form that tries customer Ã¢â€ â€™ staff Ã¢â€ â€™ admin
 app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -2305,7 +2408,7 @@ app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (r
           expiresIn: SESSION_TTL,
         });
       }
-      // Wrong password — increment attempts
+      // Wrong password Ã¢â‚¬â€ increment attempts
       const attempts = (cust.login_attempts || 0) + 1;
       const lockout = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
       await pool.query('UPDATE customers SET login_attempts = $1, lockout_until = $2 WHERE id = $3', [attempts, lockout, cust.id]);
@@ -2358,7 +2461,7 @@ app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (r
           expiresIn: SESSION_TTL,
         });
       }
-      // Wrong password — increment attempts
+      // Wrong password Ã¢â‚¬â€ increment attempts
       const attempts = (admin.login_attempts || 0) + 1;
       const lockout = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
       await pool.query('UPDATE admin_users SET login_attempts = $1, lockout_until = $2 WHERE id = $3', [attempts, lockout, admin.id]);
@@ -2371,7 +2474,7 @@ app.post('/api/auth/unified-login', loginLimiter, doubleCsrfProtection, async (r
   }
 });
 
-// POST /api/auth/logout  – invalidate current session token
+// POST /api/auth/logout  Ã¢â‚¬â€œ invalidate current session token
 app.post('/api/auth/logout', (req, res) => {
   const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
   if (token) { sessions.delete(token); pool.query('DELETE FROM admin_sessions WHERE token = $1', [token]).catch(() => {}); }
@@ -2385,7 +2488,7 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-// GET /api/auth/check  – verify token is still valid + return user info
+// GET /api/auth/check  Ã¢â‚¬â€œ verify token is still valid + return user info
 app.get('/api/auth/check', (req, res) => {
   const token = req.headers['x-admin-token'];
   const valid = isValidSession(token);
@@ -2399,8 +2502,8 @@ app.get('/api/admin/check', (req, res) => {
   res.json({ authenticated: valid, user: user ? { id: user.id, name: user.name, email: user.email, role: user.role } : null });
 });
 
-// POST /api/auth/change-password  – change the logged-in admin's password
-app.post('/api/auth/change-password', requireAuth, async (req, res) => {
+// POST /api/auth/change-password  Ã¢â‚¬â€œ change the logged-in admin's password
+app.post('/api/auth/change-password', requireAuth, doubleCsrfProtection, async (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ error: 'Current and new passwords are required.' });
@@ -2459,9 +2562,9 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
   }
 });
 
-// ── Admin User Management routes (super_admin only) ────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Admin User Management routes (super_admin only) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-// GET /api/admin/users – list all admin users
+// GET /api/admin/users Ã¢â‚¬â€œ list all admin users
 app.get('/api/admin/users', requireRole('super_admin'), async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -2473,8 +2576,8 @@ app.get('/api/admin/users', requireRole('super_admin'), async (req, res) => {
   }
 });
 
-// POST /api/admin/users – create a new admin user
-app.post('/api/admin/users', requireRole('super_admin'), async (req, res) => {
+// POST /api/admin/users Ã¢â‚¬â€œ create a new admin user
+app.post('/api/admin/users', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password, name, role } = req.body || {};
     if (!email || !password || !name) {
@@ -2509,8 +2612,8 @@ app.post('/api/admin/users', requireRole('super_admin'), async (req, res) => {
   }
 });
 
-// PUT /api/admin/users/:id – update an admin user (role, status, name)
-app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => {
+// PUT /api/admin/users/:id Ã¢â‚¬â€œ update an admin user (role, status, name)
+app.put('/api/admin/users/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const { name, role, status, password } = req.body || {};
@@ -2564,7 +2667,7 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
     values.push(new Date().toISOString());
     values.push(userId);
 
-    // ── If changing role to 'customer', migrate to customers table and remove from admin ──
+    // Ã¢â€â‚¬Ã¢â€â‚¬ If changing role to 'customer', migrate to customers table and remove from admin Ã¢â€â‚¬Ã¢â€â‚¬
     if (role === 'customer' && targetUser.role !== 'customer') {
       // Fetch full admin record for migration
       const { rows: fullRows } = await pool.query(
@@ -2652,8 +2755,8 @@ app.put('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => 
   }
 });
 
-// DELETE /api/admin/users/:id – delete an admin user
-app.delete('/api/admin/users/:id', requireRole('super_admin'), async (req, res) => {
+// DELETE /api/admin/users/:id Ã¢â‚¬â€œ delete an admin user
+app.delete('/api/admin/users/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
@@ -2685,7 +2788,7 @@ app.delete('/api/admin/users/:id', requireRole('super_admin'), async (req, res) 
   }
 });
 
-// ── Customer Auth routes ───────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Customer Auth routes Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Customer session storage (separate from admin)
 const customerSessions = new Map();
@@ -2753,7 +2856,7 @@ function requireCustomerOwner(req, res, next) {
   return res.status(403).json({ error: 'Only account owners can perform this action.' });
 }
 
-// Owner or Manager – for menu creation/deletion
+// Owner or Manager Ã¢â‚¬â€œ for menu creation/deletion
 function requireOwnerOrManager(req, res, next) {
   if (req.adminUser) return next();
   if (req.customer && (!req.customer.isStaff || req.customer.staffRole === 'manager')) return next();
@@ -2880,7 +2983,7 @@ app.post('/api/customers/send-verification-otps', verificationLimiter, doubleCsr
               const errBody = await smsRes.json().catch(() => ({}));
               console.error('NextSMS send failed status:', smsRes.status, errBody);
             } else {
-              console.log(`✓ NextSMS successfully sent to ${smsPhone}`);
+              console.log(`Ã¢Å“â€œ NextSMS successfully sent to ${smsPhone}`);
             }
           }
         }
@@ -3115,11 +3218,11 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         const ppAmount = parseFloat(ppCapture?.amount?.value || '0');
         if (ppAmount < effectivePrice * 0.99) return res.status(400).json({ error: `PayPal payment amount insufficient. Expected $${effectivePrice}.` });
       } else if (payment_method === 'bank_transfer') {
-        // Bank transfer — account created with pending payment; admin confirms later
+        // Bank transfer Ã¢â‚¬â€ account created with pending payment; admin confirms later
         const btCfg = await getGatewayConfig('bank_transfer');
         if (!btCfg?.enabled) return res.status(400).json({ error: 'Bank Transfer not configured.' });
       } else if (payment_method === 'clickpesa') {
-        // ClickPesa — account created with pending payment; redirect to clickpesa gateway on client side
+        // ClickPesa Ã¢â‚¬â€ account created with pending payment; redirect to clickpesa gateway on client side
         const cpCfg = await getGatewayConfig('clickpesa');
         if (!cpCfg?.enabled) return res.status(400).json({ error: 'ClickPesa not configured.' });
       } else {
@@ -3206,7 +3309,7 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     const { email, password, businessName, contactName, phone, promoCode, registrationType } = req.body || {};
     const isPhoneOnly = registrationType === 'phone' || (!email && phone);
 
-    // Validation — phone-only path requires phone + businessName + password
+    // Validation Ã¢â‚¬â€ phone-only path requires phone + businessName + password
     if (isPhoneOnly) {
       if (!phone || !businessName || !password) {
         return res.status(400).json({ error: 'Phone number, business name, and password are required.' });
@@ -3336,7 +3439,7 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     }
 
     // Auto-create a default menu for new customers
-    // Phone-only accounts get no trial subscription — they will subscribe later
+    // Phone-only accounts get no trial subscription Ã¢â‚¬â€ they will subscribe later
     let defaultMenuId = null;
     try {
       const menuNow = new Date().toISOString();
@@ -3354,17 +3457,14 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
       `, [defaultMenuId, cleanBusinessName, defaultQr, menuNow, customer.id]);
 
       if (!isPhoneOnly) {
-        // Email-registered accounts get an auto 7-day trial subscription
-        const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-        const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
-        if (trialPlan.length > 0) {
+        // Email-registered accounts get an active Starter subscription by default.
+        const { rows: starterPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='starter' LIMIT 1");
+        if (starterPlan.length > 0) {
           await pool.query(`
-            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
-            VALUES ($1, $2, $3, 'trial', $4, $5, $4)
+            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, created_at)
+            VALUES ($1, $2, $3, 'active', $4, $4)
             ON CONFLICT (customer_id) DO NOTHING
-          `, [defaultMenuId, customer.id, trialPlan[0].id, menuNow, trialEnd]);
-          // Mark customer as having used their free trial
-          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [customer.id]).catch(() => {});
+          `, [defaultMenuId, customer.id, starterPlan[0].id, menuNow]);
         }
       }
     } catch (setupErr) {
@@ -3428,9 +3528,10 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
 });
 
   // DEV utility: create a test customer (development only)
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && ENABLE_DEV_ROUTES) {
   app.post('/dev/create-test-customer', async (req, res) => {
       try {
+      if (!isLocalRequest(req)) return res.status(403).send('Forbidden');
       console.log('DEV POST /dev/create-test-customer hit', { bodySample: JSON.stringify(req.body || {}).substring(0,200) });
         const { email = 'test+local@localhost', password = 'Password1', businessName = 'Local Test Bistro' } = req.body || {};
         // avoid duplicate
@@ -3455,6 +3556,7 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     // Convenience GET endpoint for quick testing from browser/curl
     app.get('/dev/create-test-customer', async (req, res) => {
       try {
+        if (!isLocalRequest(req)) return res.status(403).send('Forbidden');
         console.log('DEV GET /dev/create-test-customer hit', { query: req.query });
         const email = String(req.query.email || 'test+local@localhost');
         const password = String(req.query.password || 'Password1');
@@ -3480,14 +3582,12 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
   }
 
   // DEV utility: auto-login as an existing test customer (convenience for local UI checks)
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && ENABLE_DEV_ROUTES) {
     app.get('/dev/auto-login', async (req, res) => {
       try {
         // Restrict dev auto-login to localhost-only requests to reduce accidental exposure
-        const remote = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || '').split(',')[0].trim();
-        const allowed = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
-        if (!allowed.includes(remote)) {
-          console.warn('Blocked /dev/auto-login request from non-local address:', remote);
+        if (!isLocalRequest(req)) {
+          console.warn('Blocked /dev/auto-login request from non-local address:', req.ip);
           return res.status(403).send('Forbidden');
         }
 
@@ -3513,7 +3613,7 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
     console.log('DEV: Registered /dev/auto-login (GET)');
   }
 
-// GET /api/customers/verify-email – Click-through email verification link
+// GET /api/customers/verify-email Ã¢â‚¬â€œ Click-through email verification link
 app.get('/api/customers/verify-email', async (req, res) => {
   const rawToken = sanitizeStr(String(req.query.token || ''), 128);
   if (!rawToken) return res.redirect('/login?verified=invalid');
@@ -3534,7 +3634,7 @@ app.get('/api/customers/verify-email', async (req, res) => {
   }
 });
 
-// POST /api/customers/resend-verification – Resend verification email (authenticated)
+// POST /api/customers/resend-verification Ã¢â‚¬â€œ Resend verification email (authenticated)
 app.post('/api/customers/resend-verification', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -3560,7 +3660,7 @@ app.post('/api/customers/resend-verification', requireCustomerAuth, doubleCsrfPr
   }
 });
 
-// POST /api/login – Unified login: checks customers first, then staff
+// POST /api/login Ã¢â‚¬â€œ Unified login: checks customers first, then staff
 app.post('/api/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -3655,7 +3755,7 @@ app.post('/api/customers/login', loginLimiter, doubleCsrfProtection, async (req,
       }
       customer = rows[0] || null;
     } else {
-      // Phone login — use phone_hash for O(1) lookup, fall back to scan if no hash
+      // Phone login Ã¢â‚¬â€ use phone_hash for O(1) lookup, fall back to scan if no hash
       const cleanPhone = sanitizeInput(phone, 50);
       const phoneHash = computePhoneHash(cleanPhone);
       if (phoneHash) {
@@ -3814,7 +3914,7 @@ app.get('/api/customers/me', requireCustomerAuth, async (req, res) => {
 });
 
 // PUT /api/customers/me - Update customer profile
-app.put('/api/customers/me', requireCustomerAuth, async (req, res) => {
+app.put('/api/customers/me', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { businessName, contactName, phone, address, city, country } = req.body || {};
     
@@ -3868,7 +3968,7 @@ app.put('/api/customers/me', requireCustomerAuth, async (req, res) => {
 });
 
 // POST /api/customers/change-password
-app.post('/api/customers/change-password', requireCustomerAuth, async (req, res) => {
+app.post('/api/customers/change-password', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body || {};
 
@@ -4116,7 +4216,7 @@ app.get('/api/admin/customers/:id', requireAuth, async (req, res) => {
 });
 
 // Admin endpoint: PUT /api/admin/customers/:id - Update customer (status, notes, etc.)
-app.put('/api/admin/customers/:id', requireAuth, async (req, res) => {
+app.put('/api/admin/customers/:id', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
     const { status, business_name, contact_name, phone, address, city, country } = req.body;
@@ -4209,7 +4309,7 @@ app.get('/api/admin/menus/unassigned', requireRole('super_admin'), async (req, r
 });
 
 // Admin endpoint: POST /api/admin/customers/:id/assign-menu - Assign an existing menu to a customer
-app.post('/api/admin/customers/:id/assign-menu', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/customers/:id/assign-menu', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const customerId = parseInt(req.params.id);
     const { menuId } = req.body || {};
@@ -4241,7 +4341,7 @@ app.post('/api/admin/customers/:id/assign-menu', requireRole('super_admin'), asy
 });
 
 // Admin endpoint: POST /api/admin/customers/:id/unassign-menu - Unassign a menu from a customer
-app.post('/api/admin/customers/:id/unassign-menu', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/customers/:id/unassign-menu', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const customerId = parseInt(req.params.id);
     const { menuId } = req.body || {};
@@ -4265,7 +4365,7 @@ app.post('/api/admin/customers/:id/unassign-menu', requireRole('super_admin'), a
 });
 
 // Admin endpoint: POST /api/admin/menus/:menuId/transfer - Transfer a menu to a different customer
-app.post('/api/admin/menus/:menuId/transfer', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/menus/:menuId/transfer', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { menuId } = req.params;
     const { targetCustomerId } = req.body || {};
@@ -4292,7 +4392,7 @@ app.post('/api/admin/menus/:menuId/transfer', requireRole('super_admin'), async 
 });
 
 // Admin endpoint: DELETE /api/admin/customers/:id - Delete a customer
-app.delete('/api/admin/customers/:id', requireRole('super_admin'), async (req, res) => {
+app.delete('/api/admin/customers/:id', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
     const { rows } = await pool.query('SELECT business_name FROM customers WHERE id = $1', [id]);
@@ -4306,7 +4406,7 @@ app.delete('/api/admin/customers/:id', requireRole('super_admin'), async (req, r
 });
 
 // Admin endpoint: POST /api/admin/customers/:id/reset-password - Reset customer password
-app.post('/api/admin/customers/:id/reset-password', requireRole('super_admin'), async (req, res) => {
+app.post('/api/admin/customers/:id/reset-password', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { id } = req.params;
     const { newPassword } = req.body;
@@ -4323,7 +4423,7 @@ app.post('/api/admin/customers/:id/reset-password', requireRole('super_admin'), 
   }
 });
 
-// GET /api/health  – health check for containers/monitoring
+// GET /api/health  Ã¢â‚¬â€œ health check for containers/monitoring
 app.get('/api/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -4341,7 +4441,7 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 
-// GET /api/debug/env  – debug environment configuration (safe for production)
+// GET /api/debug/env  Ã¢â‚¬â€œ debug environment configuration (safe for production)
 app.get('/api/debug/env', requireRole('super_admin'), (_req, res) => {
   res.json({
     nodeEnv: process.env.NODE_ENV,
@@ -4358,14 +4458,14 @@ app.get('/api/debug/env', requireRole('super_admin'), (_req, res) => {
 });
 
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 /**
  * Known food-section keywords used to detect category headings in free-form text.
  */
 const KNOWN_CATEGORIES = [
   'appetizer', 'appetizers', 'starter', 'starters', 'entree', 'entrees',
-  'main', 'mains', 'main course', 'main courses', 'entrée', 'entrées',
+  'main', 'mains', 'main course', 'main courses', 'entrÃƒÂ©e', 'entrÃƒÂ©es',
   'soup', 'soups', 'salad', 'salads', 'sandwich', 'sandwiches', 'wrap', 'wraps',
   'pizza', 'pizzas', 'pasta', 'pastas', 'burger', 'burgers',
   'seafood', 'grill', 'grills', 'bbq', 'barbeque', 'barbecue',
@@ -4390,8 +4490,8 @@ function detectCategoryHeading(line) {
 
   // Strip common decorators: dashes, asterisks, underscores, equals, tildes, brackets
   const stripped = clean
-    .replace(/^[\-=*~_▪►●•★◆▶]+\s*/, '')
-    .replace(/\s*[\-=*~_▪►●•★◆▶]+$/, '')
+    .replace(/^[\-=*~_Ã¢â€“ÂªÃ¢â€“ÂºÃ¢â€”ÂÃ¢â‚¬Â¢Ã¢Ëœâ€¦Ã¢â€”â€ Ã¢â€“Â¶]+\s*/, '')
+    .replace(/\s*[\-=*~_Ã¢â€“ÂªÃ¢â€“ÂºÃ¢â€”ÂÃ¢â‚¬Â¢Ã¢Ëœâ€¦Ã¢â€”â€ Ã¢â€“Â¶]+$/, '')
     .replace(/^\[|\]$/g, '')
     .replace(/^[(\[{]\s*(.*?)\s*[)\]}]$/, '$1')
     .trim();
@@ -4399,7 +4499,7 @@ function detectCategoryHeading(line) {
   if (!stripped) return null;
 
   // Explicit colon-terminated heading: "Starters:" or "-- MAINS --"
-  const colonMatch = stripped.match(/^([A-Za-zÀ-ÿ &'\-\/]+):?\s*$/);
+  const colonMatch = stripped.match(/^([A-Za-zÃƒâ‚¬-ÃƒÂ¿ &'\-\/]+):?\s*$/);
   if (colonMatch) {
     const candidate = colonMatch[1].trim();
     const lower = candidate.toLowerCase();
@@ -4410,7 +4510,7 @@ function detectCategoryHeading(line) {
     // Known category keyword
     if (KNOWN_CATEGORIES.includes(lower)) return toTitleCase(candidate);
     // Short single/double word with no price indicators
-    if (/^[A-Za-zÀ-ÿ &'\/\-]{3,30}$/.test(candidate) && clean.endsWith(':')) {
+    if (/^[A-Za-zÃƒâ‚¬-ÃƒÂ¿ &'\/\-]{3,30}$/.test(candidate) && clean.endsWith(':')) {
       return toTitleCase(candidate);
     }
   }
@@ -4428,24 +4528,24 @@ function toTitleCase(s) {
  */
 function detectCurrency(strings) {
   const tests = [
-    // ── Major global ─────────────────────────────────────────────────────────
-    [/₹|\bINR\b/,        'INR'], [/€|\bEUR\b/i,      'EUR'], [/£|\bGBP\b/i,      'GBP'],
-    [/₩|\bKRW\b/i,       'KRW'], [/₱|\bPHP\b/i,      'PHP'], [/฿|\bTHB\b/i,      'THB'],
-    [/₨|\bPKR\b/i,       'PKR'], [/৳|\bBDT\b/i,      'BDT'], [/₺|\bTRY\b/i,      'TRY'],
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Major global Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    [/Ã¢â€šÂ¹|\bINR\b/,        'INR'], [/Ã¢â€šÂ¬|\bEUR\b/i,      'EUR'], [/Ã‚Â£|\bGBP\b/i,      'GBP'],
+    [/Ã¢â€šÂ©|\bKRW\b/i,       'KRW'], [/Ã¢â€šÂ±|\bPHP\b/i,      'PHP'], [/Ã Â¸Â¿|\bTHB\b/i,      'THB'],
+    [/Ã¢â€šÂ¨|\bPKR\b/i,       'PKR'], [/Ã Â§Â³|\bBDT\b/i,      'BDT'], [/Ã¢â€šÂº|\bTRY\b/i,      'TRY'],
     [/Rp\b|\bIDR\b/i,    'IDR'], [/R\$|\bBRL\b/i,    'BRL'], [/S\$|\bSGD\b/i,    'SGD'],
-    [/CA\$|\bCAD\b/i,    'CAD'], [/A\$|\bAUD\b/i,    'AUD'], [/¥|\bJPY\b|\bCNY\b/i,'JPY'],
-    // ── Middle East ──────────────────────────────────────────────────────────
+    [/CA\$|\bCAD\b/i,    'CAD'], [/A\$|\bAUD\b/i,    'AUD'], [/Ã‚Â¥|\bJPY\b|\bCNY\b/i,'JPY'],
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Middle East Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/\bAED\b/i, 'AED'], [/\bSAR\b/i, 'SAR'], [/\bQAR\b/i, 'QAR'],
     [/\bKWD\b/i, 'KWD'], [/\bBHD\b/i, 'BHD'], [/\bOMR\b/i, 'OMR'],
-    // ── SE Asia ──────────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ SE Asia Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/RM\b|\bMYR\b/i, 'MYR'],
-    // ── Africa – existing ────────────────────────────────────────────────────
-    [/₦|\bNGN\b/i,         'NGN'], // Nigeria
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Africa Ã¢â‚¬â€œ existing Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    [/Ã¢â€šÂ¦|\bNGN\b/i,         'NGN'], // Nigeria
     [/KSh\b|\bKES\b/i,     'KES'], // Kenya
     [/\bZAR\b/i,            'ZAR'], // South Africa
-    [/E£|\bLE\b|\bEGP\b/i, 'EGP'], // Egypt
-    // ── Africa – West ────────────────────────────────────────────────────────
-    [/GH₵|₵|\bGHS\b/i,    'GHS'], // Ghana
+    [/EÃ‚Â£|\bLE\b|\bEGP\b/i, 'EGP'], // Egypt
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Africa Ã¢â‚¬â€œ West Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+    [/GHÃ¢â€šÂµ|Ã¢â€šÂµ|\bGHS\b/i,    'GHS'], // Ghana
     [/FCFA\b|\bXAF\b/i,   'XAF'], // Central African CFA (match FCFA before CFA)
     [/\bCFA\b|\bXOF\b/i,  'XOF'], // West African CFA
     [/\bGMD\b/i,            'GMD'], // Gambia
@@ -4453,7 +4553,7 @@ function detectCurrency(strings) {
     [/\bSLE\b|\bSLL\b/i,  'SLE'], // Sierra Leone
     [/\bLRD\b/i,            'LRD'], // Liberia
     [/\bCVE\b/i,            'CVE'], // Cape Verde
-    // ── Africa – East ────────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Africa Ã¢â‚¬â€œ East Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/\bETB\b|\bBirr\b/i,  'ETB'], // Ethiopia
     [/TSh\b|\bTZS\b/i,     'TZS'], // Tanzania
     [/USh\b|\bUGX\b/i,     'UGX'], // Uganda
@@ -4467,13 +4567,13 @@ function detectCurrency(strings) {
     [/\bSCR\b/i,            'SCR'], // Seychelles
     [/\bMUR\b/i,            'MUR'], // Mauritius
     [/\bMGA\b/i,            'MGA'], // Madagascar
-    // ── Africa – North ───────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Africa Ã¢â‚¬â€œ North Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/\bMAD\b/i,            'MAD'], // Morocco
     [/\bDZD\b/i,            'DZD'], // Algeria
     [/\bTND\b/i,            'TND'], // Tunisia
     [/\bLYD\b/i,            'LYD'], // Libya
     [/\bSDG\b/i,            'SDG'], // Sudan
-    // ── Africa – Southern ────────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Africa Ã¢â‚¬â€œ Southern Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/N\$|\bNAD\b/i,       'NAD'], // Namibia
     [/\bBWP\b/i,            'BWP'], // Botswana
     [/\bLSL\b/i,            'LSL'], // Lesotho
@@ -4484,8 +4584,8 @@ function detectCurrency(strings) {
     [/\bMZN\b/i,            'MZN'], // Mozambique
     [/\bAOA\b|\bKz\b/i,    'AOA'], // Angola
     [/\bCDF\b/i,            'CDF'], // DR Congo
-    [/\bSTN\b/i,            'STN'], // São Tomé
-    // ── Catch-all ────────────────────────────────────────────────────────────
+    [/\bSTN\b/i,            'STN'], // SÃƒÂ£o TomÃƒÂ©
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Catch-all Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     [/\$/, 'USD'],
   ];
   for (const s of strings) {
@@ -4498,15 +4598,15 @@ function detectCurrency(strings) {
 }
 
 /**
- * Smart text → menu items parser.
+ * Smart text Ã¢â€ â€™ menu items parser.
  * Tracks the current category heading as it reads through lines.
  */
 function parseTextToItems(text) {
   const items   = [];
   const lines   = text.split(/\r?\n/).map(l => l.trim());
   // Matches a price at end of line with an optional currency prefix.
-  // Handles: $12.99  ₹450  £12  €15.50  ₵25  ₦200  KSh 200  AED 50  45.00
-  const CSYM    = '[$£€¥₹₦₩₵₱฿₺₨৳₼₽₾]';
+  // Handles: $12.99  Ã¢â€šÂ¹450  Ã‚Â£12  Ã¢â€šÂ¬15.50  Ã¢â€šÂµ25  Ã¢â€šÂ¦200  KSh 200  AED 50  45.00
+  const CSYM    = '[$Ã‚Â£Ã¢â€šÂ¬Ã‚Â¥Ã¢â€šÂ¹Ã¢â€šÂ¦Ã¢â€šÂ©Ã¢â€šÂµÃ¢â€šÂ±Ã Â¸Â¿Ã¢â€šÂºÃ¢â€šÂ¨Ã Â§Â³Ã¢â€šÂ¼Ã¢â€šÂ½Ã¢â€šÂ¾]';
   const priceRE = new RegExp(
     '[\\s.\\-]*(?:' + CSYM + '|[A-Za-z]{2,5}\\s+)?\\s*(\\d{1,5}(?:[.,]\\d{1,2})?)\\s*$'
   );
@@ -4518,7 +4618,7 @@ function parseTextToItems(text) {
     const raw  = lines[i].trim();
     if (!raw) { lastDesc = ''; continue; }
 
-    // ── 1. Check for category heading ──────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ 1. Check for category heading Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     const heading = detectCategoryHeading(raw);
     if (heading) {
       currentCategory = heading;
@@ -4526,11 +4626,11 @@ function parseTextToItems(text) {
       continue;
     }
 
-    // ── 2. CSV-style line: "name [, category] , price" ─────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ 2. CSV-style line: "name [, category] , price" Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     const parts = raw.split(',').map(p => p.trim());
     if (parts.length >= 2) {
       const last       = parts[parts.length - 1];
-      const priceMatch = last.match(/^[$£€¥₹₦₩₵₱฿₺₨৳₼₽₾]?\s*(\d{1,5}(?:[.,]\d{1,2})?)$/);
+      const priceMatch = last.match(/^[$Ã‚Â£Ã¢â€šÂ¬Ã‚Â¥Ã¢â€šÂ¹Ã¢â€šÂ¦Ã¢â€šÂ©Ã¢â€šÂµÃ¢â€šÂ±Ã Â¸Â¿Ã¢â€šÂºÃ¢â€šÂ¨Ã Â§Â³Ã¢â€šÂ¼Ã¢â€šÂ½Ã¢â€šÂ¾]?\s*(\d{1,5}(?:[.,]\d{1,2})?)$/);
       if (priceMatch) {
         const price     = parseFloat(priceMatch[1].replace(',', '.'));
         const hasExplicitCat = parts.length >= 3;
@@ -4547,15 +4647,15 @@ function parseTextToItems(text) {
       }
     }
 
-    // ── 3. Free-text line ending with a price ──────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ 3. Free-text line ending with a price Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     const m = raw.match(priceRE);
     if (m) {
       const rawName = raw.replace(priceRE, '')
-        .replace(/[$£€¥₹₦₩₵₱฿₺₨৳₼₽₾]\s*$/, '') // strip orphaned currency symbol
+        .replace(/[$Ã‚Â£Ã¢â€šÂ¬Ã‚Â¥Ã¢â€šÂ¹Ã¢â€šÂ¦Ã¢â€šÂ©Ã¢â€šÂµÃ¢â€šÂ±Ã Â¸Â¿Ã¢â€šÂºÃ¢â€šÂ¨Ã Â§Â³Ã¢â€šÂ¼Ã¢â€šÂ½Ã¢â€šÂ¾]\s*$/, '') // strip orphaned currency symbol
         .replace(/[\s.\-]+$/, '').trim();
       if (rawName.length >= 2) {
         const price = parseFloat(m[1].replace(',', '.'));
-        // Peek at next line: if short & no price → it's a description
+        // Peek at next line: if short & no price Ã¢â€ â€™ it's a description
         const nextLine = lines[i + 1] ? lines[i + 1].trim() : '';
         const desc = (!nextLine.match(priceRE) && nextLine.length > 0 && nextLine.length < 120
           && !detectCategoryHeading(nextLine))
@@ -4575,7 +4675,7 @@ function parseTextToItems(text) {
       }
     }
 
-    // ── 4. No price → possible multi-line description for previous item ─────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ 4. No price Ã¢â€ â€™ possible multi-line description for previous item Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     if (items.length && raw.length < 120) {
       const last = items[items.length - 1];
       if (!last.description) last.description = raw;
@@ -4648,7 +4748,7 @@ function parseCsvFile(filePath) {
  *  Strategy:
  *    1. Read every sheet as an array-of-arrays (raw values as formatted strings).
  *    2. Scan the first 10 rows for a header row whose cells match known column
- *       aliases (name, price, category …).  If found, map by name.
+ *       aliases (name, price, category Ã¢â‚¬Â¦).  If found, map by name.
  *    3. If no recognised header is found, fall back to POSITIONAL mapping:
  *       col 0 = name, rightmost mostly-numeric col = price, col 1 = category.
  *    4. While iterating data rows, detect section-heading rows (single non-empty
@@ -4715,7 +4815,7 @@ async function parseXlsxFile(filePath) {
       if (!rawRows.length) return;
       allHeaders.push(...rawRows.slice(0, 3).flat());
 
-      // ── Step 1: find header row ─────────────────────────────────────────
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Step 1: find header row Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
       let headerIdx = -1;
       let colMap    = { name: -1, category: -1, subcategory: -1, price: -1, description: -1, tags: -1, size: -1 };
 
@@ -4747,7 +4847,7 @@ async function parseXlsxFile(filePath) {
         }
       }
 
-      // ── Step 2: positional fallback when no header row found ────────────
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Step 2: positional fallback when no header row found Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
       if (headerIdx < 0) {
         colMap.name = 0;
         const sampleLen = Math.min(rawRows.length, 30);
@@ -4768,14 +4868,14 @@ async function parseXlsxFile(filePath) {
         if (numCols >= 4)                        colMap.description = 2;
       }
 
-      // ── Step 3: determine category seed from sheet name ─────────────────
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Step 3: determine category seed from sheet name Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
       const GENERIC_SHEETS = ['sheet1','sheet 1','sheet2','sheet3','menu','data','items','all'];
       const sheetCat = !GENERIC_SHEETS.includes(sheetName.toLowerCase())
         ? toTitleCase(sheetName) : 'General';
       let currentCategory = sheetCat;
       const startRow = headerIdx >= 0 ? headerIdx + 1 : 0;
 
-      // ── Step 4: parse data rows ──────────────────────────────────────────
+      // Ã¢â€â‚¬Ã¢â€â‚¬ Step 4: parse data rows Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
       for (let ri = startRow; ri < rawRows.length; ri++) {
         const row      = rawRows[ri];
         const nonEmpty = row.filter(c => c.length > 0);
@@ -4840,7 +4940,7 @@ async function parsePdfFile(filePath) {
   }
 }
 
-// ── Input validation helpers ──────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Input validation helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 const VALID_HEX_COLOR    = /^#[0-9a-fA-F]{6}$/;
 const VALID_FONT_STYLES  = ['modern','classic','playful','elegant','bold'];
@@ -4929,7 +5029,7 @@ function sanitizeItem(it) {
   };
 }
 
-// ── QR Code generation ────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ QR Code generation Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 /** Generate QR code for a menu URL with version tracking */
 async function generateQRCode(menuId, version = 1) {
@@ -4944,10 +5044,10 @@ async function generateQRCode(menuId, version = 1) {
 
 // Schema migrations will be handled first, then prepared statements will be created later
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Routes Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-// POST /api/upload  – upload a file, parse it, create a new menu draft
-app.post('/api/upload', requireAnyAuth, upload.single('menuFile'), async (req, res) => {
+// POST /api/upload  Ã¢â‚¬â€œ upload a file, parse it, create a new menu draft
+app.post('/api/upload', requireAnyAuth, doubleCsrfProtection, upload.single('menuFile'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
@@ -4986,7 +5086,7 @@ app.post('/api/upload', requireAnyAuth, upload.single('menuFile'), async (req, r
   }
 });
 
-// POST /api/menus  – save a reviewed set of items and get back a QR code
+// POST /api/menus  Ã¢â‚¬â€œ save a reviewed set of items and get back a QR code
 app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtection, checkMenuLimit, async (req, res) => {
   try {
     const { restaurantName, items, currency } = req.body;
@@ -5010,22 +5110,19 @@ app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtecti
     if (req.isCustomer) {
       await pool.query('UPDATE menus SET customer_id = $1 WHERE id = $2', [req.customer.id, menuId]);
 
-      // Auto-assign trial subscription to new customers that don't have one yet (per-business)
+      // Auto-assign starter subscription to new customers that don't have one yet (per-business)
       try {
-        const { rows: trialPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='trial' LIMIT 1");
-        if (trialPlan.length > 0) {
-          const trialNow = new Date().toISOString();
-          const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        const { rows: starterPlan } = await pool.query("SELECT id FROM subscription_plans WHERE name='starter' LIMIT 1");
+        if (starterPlan.length > 0) {
+          const starterNow = new Date().toISOString();
           await pool.query(`
-            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, trial_end, created_at)
-            VALUES ($1, $2, $3, 'trial', $4, $5, $4)
+            INSERT INTO subscriptions (menu_id, customer_id, plan_id, status, start_date, created_at)
+            VALUES ($1, $2, $3, 'active', $4, $4)
             ON CONFLICT (customer_id) DO NOTHING
-          `, [menuId, req.customer.id, trialPlan[0].id, trialNow, trialEnd]);
-          // Mark customer as having used their free trial
-          await pool.query('UPDATE customers SET had_trial = 1 WHERE id = $1', [req.customer.id]).catch(() => {});
+          `, [menuId, req.customer.id, starterPlan[0].id, starterNow]);
         }
-      } catch (trialErr) {
-        console.warn('Trial subscription auto-assign failed:', trialErr.message);
+      } catch (starterErr) {
+        console.warn('Starter subscription auto-assign failed:', starterErr.message);
       }
     }
 
@@ -5038,7 +5135,7 @@ app.post('/api/menus', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtecti
   }
 });
 
-// GET /api/menus  – list saved menus (scoped to customer or all for admin)
+// GET /api/menus  Ã¢â‚¬â€œ list saved menus (scoped to customer or all for admin)
 app.get('/api/menus', requireAnyAuth, async (req, res) => {
   const start = performance.now();
   
@@ -5058,7 +5155,7 @@ app.get('/api/menus', requireAnyAuth, async (req, res) => {
     
     const responseTime = performance.now() - start;
     if (responseTime > 50) {
-      console.log(`⚡ Slow query - getMenus: ${responseTime.toFixed(2)}ms`);
+      console.log(`Ã¢Å¡Â¡ Slow query - getMenus: ${responseTime.toFixed(2)}ms`);
     }
     
     res.setHeader('Cache-Control', 'no-store');
@@ -5072,12 +5169,12 @@ app.get('/api/menus', requireAnyAuth, async (req, res) => {
       lastScanAt:     r.last_scan_at || null,
     })));
   } catch (error) {
-    console.error('❌ Error fetching menus:', error);
+    console.error('Ã¢ÂÅ’ Error fetching menus:', error);
     res.status(500).json({ error: 'Failed to fetch menus' });
   }
 });
 
-// GET /api/menus/:id  – get a single menu (optimized with caching)
+// GET /api/menus/:id  Ã¢â‚¬â€œ get a single menu (optimized with caching)
 app.get('/api/menus/:id', async (req, res) => {
   const { id } = req.params;
   const start = performance.now();
@@ -5212,15 +5309,15 @@ app.get('/api/menus/:id', async (req, res) => {
     const responseTime = performance.now() - start;
     
     if (responseTime > 100) {
-      console.log(`⚡ Slow menu query for ${id}: ${responseTime.toFixed(2)}ms`);
+      console.log(`Ã¢Å¡Â¡ Slow menu query for ${id}: ${responseTime.toFixed(2)}ms`);
     }
     
     const menuData = buildMenuResponse(menu, rawItems);
 
-    // ── Draft-mode detection ─────────────────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Draft-mode detection Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     // If the menu owner is on the free Starter plan (or no subscription), the
     // public menu viewer gets a draftMode flag so it can display a watermark.
-    // This does NOT block the response — guests can still preview the menu.
+    // This does NOT block the response Ã¢â‚¬â€ guests can still preview the menu.
     try {
       if (menu.customer_id) {
         const { rows: subRows } = await pool.query(`
@@ -5237,14 +5334,16 @@ app.get('/api/menus/:id', async (req, res) => {
           const isPaid = sub.status === 'active' && planName !== 'starter' && planName !== 'trial';
           const isTrialActive = sub.status === 'trial' && sub.trial_end && new Date(sub.trial_end) >= new Date();
           menuData.draftMode = !isPaid && !isTrialActive;
+          menuData.goLiveUpgradeRequired = menuData.draftMode;
           menuData.planName = planName;
         } else {
           menuData.draftMode = true; // no subscription at all
+          menuData.goLiveUpgradeRequired = true;
           menuData.planName = 'starter';
         }
       }
     } catch (_) {
-      // subscription lookup failed — don't block the public menu, just omit draftMode
+      // subscription lookup failed Ã¢â‚¬â€ don't block the public menu, just omit draftMode
     }
     
     // Cache the result (short TTL so plan upgrades propagate quickly)
@@ -5254,12 +5353,12 @@ app.get('/api/menus/:id', async (req, res) => {
     res.json(menuData);
     
   } catch (error) {
-    console.error(`❌ Error fetching menu ${id}:`, error);
+    console.error(`Ã¢ÂÅ’ Error fetching menu ${id}:`, error);
     res.status(500).json({ error: 'Failed to fetch menu' });
   }
 });
 
-// GET /api/menus/:id/export-csv  – download menu items as CSV
+// GET /api/menus/:id/export-csv  Ã¢â‚¬â€œ download menu items as CSV
 app.get('/api/menus/:id/export-csv', requireAnyAuth, requirePlan('professional'), async (req, res) => {
   try {
     const menu = await dbGetMenu(req.params.id);
@@ -5285,12 +5384,12 @@ app.get('/api/menus/:id/export-csv', requireAnyAuth, requirePlan('professional')
     res.setHeader('Content-Disposition', `attachment; filename="${safeName}_menu.csv"`);
     res.send(csv);
   } catch (error) {
-    console.error('❌ CSV export error:', error);
+    console.error('Ã¢ÂÅ’ CSV export error:', error);
     res.status(500).json({ error: 'Failed to export menu' });
   }
 });
 
-// PUT /api/menus/:id  – update an existing menu (items + branding)
+// PUT /api/menus/:id  Ã¢â‚¬â€œ update an existing menu (items + branding)
 app.put('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, doubleCsrfProtection, async (req, res) => {
   try {
     const menu = await dbGetMenu(req.params.id);
@@ -5401,7 +5500,7 @@ app.post('/api/menus/:id/regenerate-qr', requireAnyAuth, requirePlan('profession
   }
 });
 
-// ── QR Redirect (Link / Reprogram) ─────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ QR Redirect (Link / Reprogram) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // POST /api/qr-redirects - Create a redirect from a decoded QR menu ID to a target menu
 app.post('/api/qr-redirects', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
@@ -5484,7 +5583,7 @@ app.delete('/api/qr-redirects/:id', requireAnyAuth, doubleCsrfProtection, async 
   }
 });
 
-// ── Table Management ──────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Table Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/menus/:id/tables - List tables for a menu
 app.get('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
@@ -5533,7 +5632,7 @@ app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('profes
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Room Management ──────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Room Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/menus/:id/rooms - List rooms for a menu
 app.get('/api/menus/:id/rooms', requireAnyAuth, requirePlan('professional'), async (req, res) => {
@@ -5582,7 +5681,7 @@ app.delete('/api/menus/:id/rooms/:roomId', requireAnyAuth, requirePlan('professi
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Table Alerts ──────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Table Alerts Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // POST /api/menus/:id/alerts - Customer sends alert from table
 app.post('/api/menus/:id/alerts', async (req, res) => {
@@ -5618,7 +5717,7 @@ app.get('/api/menus/:id/alerts', requireAnyAuth, async (req, res) => {
 });
 
 // PUT /api/alerts/:id/dismiss - Admin/customer dismisses an alert
-app.put('/api/alerts/:id/dismiss', requireAnyAuth, async (req, res) => {
+app.put('/api/alerts/:id/dismiss', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
   try {
     if (req.isCustomer) {
       const { rows: ownerCheck } = await pool.query(
@@ -5661,7 +5760,7 @@ app.get('/api/alerts/pending', requireAnyAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Orders ────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Orders Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // POST /api/menus/:id/orders - Customer submits an order
 app.post('/api/menus/:id/orders', async (req, res) => {
@@ -5706,7 +5805,7 @@ app.get('/api/menus/:id/orders', requireAnyAuth, requirePlan('professional'), as
 });
 
 // PUT /api/orders/:id/status - Admin/customer updates order status
-app.put('/api/orders/:id/status', requireAnyAuth, async (req, res) => {
+app.put('/api/orders/:id/status', requireAnyAuth, doubleCsrfProtection, async (req, res) => {
   try {
     if (req.isCustomer) {
       // Verify the order belongs to one of this customer's menus
@@ -5727,7 +5826,7 @@ app.put('/api/orders/:id/status', requireAnyAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 })
 
-// ── Item Ratings ──────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Item Ratings Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // POST /api/items/:itemId/rate - Customer rates an item
 app.post('/api/items/:itemId/rate', async (req, res) => {
@@ -5768,7 +5867,7 @@ app.post('/api/items/:itemId/rate', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Subscription Management ───────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Subscription Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/subscription-plans - Get all subscription plans (public - active only)
 app.get('/api/subscription-plans', async (_req, res) => {
@@ -5780,8 +5879,8 @@ app.get('/api/subscription-plans', async (_req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/admin/customers/:id/assign-subscription – Admin: assign a subscription plan to a customer and optionally record payment
-app.post('/api/admin/customers/:id/assign-subscription', requireRole('super_admin'), async (req, res) => {
+// POST /api/admin/customers/:id/assign-subscription Ã¢â‚¬â€œ Admin: assign a subscription plan to a customer and optionally record payment
+app.post('/api/admin/customers/:id/assign-subscription', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   const customerId = parseInt(req.params.id);
   if (!customerId) return res.status(400).json({ error: 'Invalid customer ID.' });
   try {
@@ -5956,7 +6055,7 @@ app.delete('/api/admin/subscription-plans/:id', requireRole('super_admin'), doub
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Promo Code Endpoints ──────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Promo Code Endpoints Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/admin/promo-codes - Admin: list all promo codes
 app.get('/api/admin/promo-codes', requireAuth, async (_req, res) => {
@@ -6045,7 +6144,7 @@ app.post('/api/public/validate-promo', async (req, res) => {
   } catch (err) { res.status(500).json({ valid: false, error: err.message }); }
 });
 
-// GET /api/admin/upgrade-requests – Admin: list pending manual upgrade requests
+// GET /api/admin/upgrade-requests Ã¢â‚¬â€œ Admin: list pending manual upgrade requests
 app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -6089,7 +6188,7 @@ app.get('/api/admin/upgrade-requests', requireAuth, async (req, res) => {
   } catch (err) { console.error('upgrade-requests error:', err); res.status(500).json({ error: 'Failed to load upgrade requests.' }); }
 });
 
-// GET /api/admin/support-requests – Admin: list open support inbox requests
+// GET /api/admin/support-requests Ã¢â‚¬â€œ Admin: list open support inbox requests
 app.get('/api/admin/support-requests', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -6117,7 +6216,7 @@ app.get('/api/admin/support-requests', requireAuth, async (req, res) => {
   }
 });
 
-// POST /api/admin/support-requests/:id/resolve – Admin: mark a support request resolved
+// POST /api/admin/support-requests/:id/resolve Ã¢â‚¬â€œ Admin: mark a support request resolved
 app.post('/api/admin/support-requests/:requestId/resolve', requireAuth, doubleCsrfProtection, async (req, res) => {
   const requestId = parseInt(req.params.requestId, 10);
   if (!requestId) return res.status(400).json({ error: 'Invalid request ID.' });
@@ -6137,7 +6236,7 @@ app.post('/api/admin/support-requests/:requestId/resolve', requireAuth, doubleCs
   }
 });
 
-// POST /api/admin/upgrade-requests/:id/approve – Admin: approve a manual upgrade request
+// POST /api/admin/upgrade-requests/:id/approve Ã¢â‚¬â€œ Admin: approve a manual upgrade request
 app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCsrfProtection, async (req, res) => {
   const paymentId = parseInt(req.params.paymentId);
   if (!paymentId) return res.status(400).json({ error: 'Invalid payment ID.' });
@@ -6184,7 +6283,7 @@ app.post('/api/admin/upgrade-requests/:paymentId/approve', requireAuth, doubleCs
   } catch (err) { console.error('approve upgrade error:', err); res.status(500).json({ error: 'Failed to approve upgrade.' }); }
 });
 
-// POST /api/admin/upgrade-requests/:id/dismiss – Admin: dismiss/reject a manual upgrade request
+// POST /api/admin/upgrade-requests/:id/dismiss Ã¢â‚¬â€œ Admin: dismiss/reject a manual upgrade request
 // POST /api/admin/upgrade-requests/:id/invoice - Admin: send payment link/invoice for a pending upgrade
 app.post('/api/admin/upgrade-requests/:paymentId/invoice', requireAuth, doubleCsrfProtection, async (req, res) => {
   const paymentId = parseInt(req.params.paymentId, 10);
@@ -6291,7 +6390,7 @@ app.get('/api/admin/payments', requireAuth, async (req, res) => {
 });
 
 // PUT /api/admin/payments/:id - Admin: Update payment status
-app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
+app.put('/api/admin/payments/:id', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const { rows: existingPaymentRows } = await pool.query('SELECT status FROM payments WHERE id = $1 LIMIT 1', [req.params.id]);
     if (!existingPaymentRows.length) return res.status(404).json({ error: 'Payment not found.' });
@@ -6336,7 +6435,7 @@ app.put('/api/admin/payments/:id', requireAuth, async (req, res) => {
 });
 
 // POST /api/admin/payments - Admin: Create a new payment record
-app.post('/api/admin/payments', requireAuth, async (req, res) => {
+app.post('/api/admin/payments', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const subId = parseInt(req.body.subscription_id);
     const amount = parseFloat(req.body.amount);
@@ -6487,7 +6586,7 @@ app.get('/api/menus/:id/subscription', async (req, res) => {
 });
 
 // POST /api/subscriptions - Admin: Create subscription
-app.post('/api/subscriptions', requireAuth, async (req, res) => {
+app.post('/api/subscriptions', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const menuId = sanitizeStr(req.body.menu_id, 100);
     const planId = parseInt(req.body.plan_id) || 0;
@@ -6520,7 +6619,7 @@ app.post('/api/subscriptions', requireAuth, async (req, res) => {
 });
 
 // PUT /api/subscriptions/:id - Admin: Update subscription (upgrade/downgrade)
-app.put('/api/subscriptions/:id', requireAuth, async (req, res) => {
+app.put('/api/subscriptions/:id', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const subId = req.params.id;
     const planId = parseInt(req.body.plan_id);
@@ -6580,7 +6679,7 @@ app.put('/api/subscriptions/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/subscriptions/:id - Admin: Cancel subscription
-app.delete('/api/subscriptions/:id', requireAuth, async (req, res) => {
+app.delete('/api/subscriptions/:id', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     await pool.query(
       `UPDATE subscriptions SET status = 'cancelled', cancel_at_end = 1, updated_at = $1 WHERE id = $2`,
@@ -6602,7 +6701,7 @@ app.get('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
 });
 
 // POST /api/subscriptions/:id/payments - Admin: Record payment
-app.post('/api/subscriptions/:id/payments', requireAuth, async (req, res) => {
+app.post('/api/subscriptions/:id/payments', requireAuth, doubleCsrfProtection, async (req, res) => {
   try {
     const subId = req.params.id;
     const amount = parseFloat(req.body.amount) || 0;
@@ -6647,7 +6746,7 @@ app.get('/api/menus/:id/usage', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Customer Subscription Management ──────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Customer Subscription Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/customers/subscriptions - Get customer's subscription (per-business model)
 app.get('/api/customers/subscriptions', requireCustomerAuth, async (req, res) => {
@@ -7003,7 +7102,7 @@ app.post('/api/customers/subscription/change', requireCustomerAuth, requireCusto
         plan: newPlan
       });
     } else {
-      // Create new subscription — use first menu for legacy menu_id field
+      // Create new subscription Ã¢â‚¬â€ use first menu for legacy menu_id field
       const { rows: firstMenu } = await pool.query('SELECT id, restaurant_name FROM menus WHERE customer_id=$1 ORDER BY created_at ASC LIMIT 1', [customerId]);
       const legacyMenuId = ownedMenuId || firstMenu[0]?.id || null;
       const legacyMenuName = ownedMenuName || sanitizeStr(firstMenu[0]?.restaurant_name || '', 200);
@@ -7122,7 +7221,7 @@ app.post('/api/customers/subscription/cancel', requireCustomerAuth, requireCusto
   }
 });
 
-// ── Payment Gateway Integration ───────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Payment Gateway Integration Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // Helper: load a gateway's config from settings
 async function getGatewayConfig(name) {
@@ -7306,9 +7405,9 @@ function queueTransactionalEmail(payload, context = 'transactional') {
   setImmediate(async () => {
     const result = await sendTransactionalEmail(payload);
     if (result.sent) {
-      console.log(`✓ ${context} email queued/sent:`, result.messageId || 'no-message-id');
+      console.log(`Ã¢Å“â€œ ${context} email queued/sent:`, result.messageId || 'no-message-id');
     } else {
-      console.warn(`⚠ ${context} email skipped/failed:`, result.reason || 'unknown');
+      console.warn(`Ã¢Å¡Â  ${context} email skipped/failed:`, result.reason || 'unknown');
     }
   });
 }
@@ -7337,7 +7436,7 @@ async function getSupportNotificationRecipients() {
       if (email && isValidEmail(email)) recipients.add(email);
     }
   } catch (err) {
-    console.warn('⚠ support recipients lookup failed:', err.message || err);
+    console.warn('Ã¢Å¡Â  support recipients lookup failed:', err.message || err);
   }
 
   return Array.from(recipients);
@@ -7370,7 +7469,7 @@ function queueUpgradeRequestNotification({
     const safeMessage = sanitizeStr(requestMessage || '', 1200);
     const dashboardUrl = `${getPublicBaseUrl()}/subscriptions`;
 
-    const subject = `Upgrade request: ${safeBusiness} → ${safeRequestedPlan}`;
+    const subject = `Upgrade request: ${safeBusiness} Ã¢â€ â€™ ${safeRequestedPlan}`;
     const text = [
       'A customer requested a subscription upgrade.',
       '',
@@ -7479,7 +7578,7 @@ function queueSupportRequestNotification({
     for (const to of recipients) {
       queueTransactionalEmail({
         to,
-        subject: `Support request: ${safeBusiness} — ${safeSubject}`,
+        subject: `Support request: ${safeBusiness} Ã¢â‚¬â€ ${safeSubject}`,
         text,
         html,
         replyTo: safeEmail && isValidEmail(safeEmail) ? safeEmail : undefined,
@@ -7487,6 +7586,99 @@ function queueSupportRequestNotification({
     }
   });
 }
+
+function queuePublicContactNotification({
+  name,
+  email,
+  business,
+  phone,
+  subject,
+  message,
+  preferredContact,
+}) {
+  setImmediate(async () => {
+    const recipients = await getSupportNotificationRecipients();
+    if (!recipients.length) return;
+
+    const safeName = sanitizeStr(name || 'Website visitor', 120);
+    const safeEmail = sanitizeEmail(email || '');
+    const safeBusiness = sanitizeStr(business || '', 160);
+    const safePhone = sanitizeStr(phone || '', 80);
+    const safeSubject = sanitizeStr(subject || 'Website contact request', 160);
+    const safePreferredContact = sanitizeStr(preferredContact || 'email', 20);
+    const safeMessage = sanitizeStr(message || '', 1500);
+
+    const text = [
+      'A public website visitor submitted the contact form.',
+      '',
+      `Name: ${safeName}`,
+      safeBusiness ? `Business: ${safeBusiness}` : '',
+      `Email: ${safeEmail}`,
+      safePhone ? `Phone/WhatsApp: ${safePhone}` : '',
+      `Preferred contact: ${safePreferredContact}`,
+      `Topic: ${safeSubject}`,
+      '',
+      safeMessage,
+    ].filter(Boolean).join('\n');
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a;max-width:680px;margin:0 auto;padding:20px;">
+        <h2 style="margin:0 0 12px 0;color:#059669;">New Website Contact</h2>
+        <p style="margin:0 0 12px 0;">A public website visitor submitted the RestOrder contact form.</p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Name</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeName)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Email</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeEmail)}</td></tr>
+          ${safeBusiness ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Business</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeBusiness)}</td></tr>` : ''}
+          ${safePhone ? `<tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Phone/WhatsApp</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePhone)}</td></tr>` : ''}
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Preferred contact</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safePreferredContact)}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e2e8f0;"><strong>Topic</strong></td><td style="padding:8px;border:1px solid #e2e8f0;">${validator.escape(safeSubject)}</td></tr>
+        </table>
+        <p style="margin:12px 0 0 0;"><strong>Message:</strong> ${validator.escape(safeMessage)}</p>
+      </div>
+    `;
+
+    for (const to of recipients) {
+      queueTransactionalEmail({
+        to,
+        subject: `Website contact: ${safeSubject}`,
+        text,
+        html,
+        replyTo: safeEmail && isValidEmail(safeEmail) ? safeEmail : undefined,
+      }, 'public-contact');
+    }
+  });
+}
+
+app.post('/api/contact', contactLimiter, express.urlencoded({ extended: false, limit: '20kb' }), async (req, res) => {
+  try {
+    const cleanName = sanitizeStr(req.body?.name, 120);
+    const cleanEmail = sanitizeEmail(req.body?.email || '');
+    const cleanMessage = sanitizeStr(req.body?.message, 1500);
+    const cleanSubject = sanitizeStr(req.body?.subject, 160) || 'Website contact request';
+    const cleanBusiness = sanitizeStr(req.body?.business, 160);
+    const cleanPhone = sanitizeStr(req.body?.phone, 80);
+    const cleanPreferred = sanitizeStr(req.body?.preferred_contact, 20) || 'email';
+
+    if (!cleanName) return res.status(400).json({ error: 'Name is required.' });
+    if (!cleanEmail || !isValidEmail(cleanEmail)) return res.status(400).json({ error: 'A valid email is required.' });
+    if (!cleanMessage || cleanMessage.length < 10) return res.status(400).json({ error: 'Please include a message with at least 10 characters.' });
+
+    queuePublicContactNotification({
+      name: cleanName,
+      email: cleanEmail,
+      business: cleanBusiness,
+      phone: cleanPhone,
+      subject: cleanSubject,
+      message: cleanMessage,
+      preferredContact: cleanPreferred,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('public contact request error:', err);
+    res.status(500).json({ error: 'Unable to send message right now. Please email support@restorder.online.' });
+  }
+});
 
 async function upsertCustomerContactRequest({
   paymentId,
@@ -7730,7 +7922,7 @@ function queuePaymentReceiptEmailForPayment(paymentId) {
 
       queueTransactionalEmail({ to, subject, text, html }, 'receipt');
     } catch (err) {
-      console.warn('⚠ receipt lookup/email failed:', err.message || err);
+      console.warn('Ã¢Å¡Â  receipt lookup/email failed:', err.message || err);
     }
   });
 }
@@ -7854,7 +8046,7 @@ async function activateSubscriptionPayment(menuId, planId, amount, currency, met
   return subId;
 }
 
-// GET /api/promo/validate – Real-time promo code validation for registration/checkout UI
+// GET /api/promo/validate Ã¢â‚¬â€œ Real-time promo code validation for registration/checkout UI
 const promoValidateLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many validation attempts.' } });
 app.get('/api/promo/validate', promoValidateLimiter, async (req, res) => {
   try {
@@ -7903,7 +8095,7 @@ app.get('/api/promo/validate', promoValidateLimiter, async (req, res) => {
   } catch (err) { res.status(500).json({ valid: false, reason: 'Validation failed.' }); }
 });
 
-// GET /api/admin/revenue-stats – Revenue analytics for admin dashboard
+// GET /api/admin/revenue-stats Ã¢â‚¬â€œ Revenue analytics for admin dashboard
 app.get('/api/admin/revenue-stats', requireAuth, async (req, res) => {
   try {
     // MRR: sum of plan prices for all active subscriptions
@@ -7947,28 +8139,19 @@ app.get('/api/admin/revenue-stats', requireAuth, async (req, res) => {
   } catch (err) { console.error('Revenue stats error:', err); res.status(500).json({ error: 'Failed to load revenue stats.' }); }
 });
 
-// GET /api/public/plans – All active subscription plans (no auth required)
-// If an authenticated customer token is passed, the trial plan is hidden for customers who already used it
+// GET /api/public/plans Ã¢â‚¬â€œ All active subscription plans (no auth required)
+// Public model: starter is the default free account; trial is hidden from acquisition flows.
 app.get('/api/public/plans', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, name, display_name, price, annual_price, interval, menu_limit, location_limit, features, sort_order
        FROM subscription_plans WHERE is_active = 1 ORDER BY sort_order ASC`
     );
-    // If customer is authenticated, check whether they already used their trial
-    const token = req.headers['x-customer-token'] || req.cookies?.customerToken;
-    const session = token ? isValidCustomerSession(token) : null;
-    if (session) {
-      const { rows: custRows } = await pool.query('SELECT had_trial FROM customers WHERE id = $1', [session.customerId || session.id]);
-      if (custRows.length && custRows[0].had_trial) {
-        return res.json(rows.filter(p => p.name !== 'trial'));
-      }
-    }
-    res.json(rows);
+    res.json(rows.filter(p => p.name !== 'trial'));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /api/customers/trial-eligibility – Check whether the current customer can start a free trial
+// GET /api/customers/trial-eligibility Ã¢â‚¬â€œ Check whether the current customer can start a free trial
 app.get('/api/customers/trial-eligibility', requireCustomerAuth, async (req, res) => {
   try {
     const customerId = req.customer.customerId || req.customer.id;
@@ -7981,7 +8164,7 @@ app.get('/api/customers/trial-eligibility', requireCustomerAuth, async (req, res
 // East African country codes for gateway routing
 const EA_COUNTRIES = new Set(['KE','TZ','UG','RW','BI','ET','SO','SS','ER','DJ','SD']);
 
-// GET /api/payments/gateways – Public keys for enabled payment gateways
+// GET /api/payments/gateways Ã¢â‚¬â€œ Public keys for enabled payment gateways
 // Returns ALL enabled gateways so checkout always shows available options
 app.get('/api/payments/gateways', async (req, res) => {  try {
     const { rows } = await pool.query(
@@ -7993,7 +8176,7 @@ app.get('/api/payments/gateways', async (req, res) => {  try {
         const cfg = JSON.parse(r.value);
         if (!cfg.enabled) continue;
         const name = r.key.replace('integration_', '');
-        // Only expose public-facing keys – never secret keys
+        // Only expose public-facing keys Ã¢â‚¬â€œ never secret keys
         if (name === 'flutterwave') gateways.flutterwave = { public_key: cfg.public_key, environment: cfg.environment || 'live' };
         if (name === 'paypal')      gateways.paypal      = { client_id: cfg.client_id,   environment: cfg.environment || 'live' };
         if (name === 'clickpesa')   gateways.clickpesa   = { merchant_id: cfg.merchant_id, environment: cfg.environment || 'live' };
@@ -8032,7 +8215,7 @@ async function getCustomerDiscount(customerId) {
   }
 }
 
-// POST /api/payments/flutterwave/verify – Verify a Flutterwave transaction + activate subscription
+// POST /api/payments/flutterwave/verify Ã¢â‚¬â€œ Verify a Flutterwave transaction + activate subscription
 app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { transaction_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!transaction_id || !menu_id || !plan_id)
@@ -8088,7 +8271,7 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
   } catch (err) { console.error('Flutterwave verify error:', err); res.status(500).json({ error: 'Payment verification failed. Please contact support.' }); }
 });
 
-// POST /api/payments/paypal/create-order – Create a PayPal order for a plan
+// POST /api/payments/paypal/create-order Ã¢â‚¬â€œ Create a PayPal order for a plan
 app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { plan_id, menu_id, billing_cycle } = req.body;
   if (!plan_id || !menu_id) return res.status(400).json({ error: 'plan_id and menu_id required.' });
@@ -8138,7 +8321,7 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
         intent: 'CAPTURE',
         purchase_units: [{
           amount: { currency_code: 'USD', value: Number(price).toFixed(2) },
-          description: `${plan.display_name} Plan (${billing_cycle || 'monthly'}) – RestOrder`,
+          description: `${plan.display_name} Plan (${billing_cycle || 'monthly'}) Ã¢â‚¬â€œ RestOrder`,
           custom_id: `${menu_id}:${plan_id}:${billing_cycle || 'monthly'}`
         }]
       })
@@ -8150,7 +8333,7 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
   } catch (err) { console.error('PayPal create-order error:', err); res.status(500).json({ error: 'Failed to create PayPal order. Please try again.' }); }
 });
 
-// POST /api/payments/paypal/capture-order – Capture approved PayPal order + activate subscription
+// POST /api/payments/paypal/capture-order Ã¢â‚¬â€œ Capture approved PayPal order + activate subscription
 app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { order_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!order_id || !menu_id || !plan_id) return res.status(400).json({ error: 'order_id, menu_id, plan_id required.' });
@@ -8218,7 +8401,7 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfPr
   } catch (err) { console.error('PayPal capture-order error:', err); res.status(500).json({ error: 'Payment capture failed. Please contact support.' }); }
 });
 
-// POST /webhooks/flutterwave – Flutterwave async payment webhook
+// POST /webhooks/flutterwave Ã¢â‚¬â€œ Flutterwave async payment webhook
 app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
   // Always respond 200 quickly to satisfy webhook retries
   res.json({ status: 'ok' });
@@ -8243,10 +8426,10 @@ app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
         }
       }
     }
-  } catch(e) { /* silent – already responded 200 */ }
+  } catch(e) { /* silent Ã¢â‚¬â€œ already responded 200 */ }
 });
 
-// POST /api/payments/clickpesa/create-order-public – Initiate a ClickPesa payment request
+// POST /api/payments/clickpesa/create-order-public Ã¢â‚¬â€œ Initiate a ClickPesa payment request
 app.post('/api/payments/clickpesa/create-order-public', express.json(), async (req, res) => {
   try {
     const cfg = await getGatewayConfig('clickpesa');
@@ -8306,7 +8489,7 @@ app.post('/api/payments/clickpesa/create-order-public', express.json(), async (r
   }
 });
 
-// POST /webhooks/clickpesa – ClickPesa async payment webhook
+// POST /webhooks/clickpesa Ã¢â‚¬â€œ ClickPesa async payment webhook
 app.post('/webhooks/clickpesa', express.json(), async (req, res) => {
   res.json({ status: 'ok' });
   try {
@@ -8331,10 +8514,10 @@ app.post('/webhooks/clickpesa', express.json(), async (req, res) => {
         }
       }
     }
-  } catch(e) { /* silent – already responded 200 */ }
+  } catch(e) { /* silent Ã¢â‚¬â€œ already responded 200 */ }
 });
 
-// POST /webhooks/paypal – PayPal IPN / Webhook notification
+// POST /webhooks/paypal Ã¢â‚¬â€œ PayPal IPN / Webhook notification
 app.post('/webhooks/paypal', express.json(), async (req, res) => {
   res.json({ status: 'ok' });
   try {
@@ -8387,12 +8570,12 @@ app.post('/webhooks/paypal', express.json(), async (req, res) => {
         }
       }
     }
-  } catch(e) { /* silent – already responded 200 */ }
+  } catch(e) { /* silent Ã¢â‚¬â€œ already responded 200 */ }
 });
 
-// ── Staff Management ──────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Staff Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
-// POST /api/staff/login – Staff member login
+// POST /api/staff/login Ã¢â‚¬â€œ Staff member login
 app.post('/api/staff/login', loginLimiter, doubleCsrfProtection, async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -8439,7 +8622,7 @@ app.post('/api/staff/login', loginLimiter, doubleCsrfProtection, async (req, res
   }
 });
 
-// GET /api/staff – List staff for the authenticated business owner
+// GET /api/staff Ã¢â‚¬â€œ List staff for the authenticated business owner
 app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -8450,7 +8633,7 @@ app.get('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('pr
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/staff – Create a staff member (owner only)
+// POST /api/staff Ã¢â‚¬â€œ Create a staff member (owner only)
 app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const { name, email, password, role } = req.body || {};
@@ -8493,7 +8676,7 @@ app.post('/api/staff', requireCustomerAuth, requireCustomerOwner, requirePlan('p
   }
 });
 
-// PUT /api/staff/:id – Update a staff member (owner only)
+// PUT /api/staff/:id Ã¢â‚¬â€œ Update a staff member (owner only)
 app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
@@ -8542,7 +8725,7 @@ app.put('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan
   }
 });
 
-// DELETE /api/staff/:id – Remove a staff member (owner only)
+// DELETE /api/staff/:id Ã¢â‚¬â€œ Remove a staff member (owner only)
 app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requirePlan('professional'), doubleCsrfProtection, async (req, res) => {
   try {
     const staffId = parseInt(req.params.id);
@@ -8566,8 +8749,8 @@ app.delete('/api/staff/:id', requireCustomerAuth, requireCustomerOwner, requireP
   }
 });
 
-// ── Customer menu list (customer-scoped) ────────────────────────────────────
-// GET /api/customer/menus – List menus belonging to the authenticated customer
+// Ã¢â€â‚¬Ã¢â€â‚¬ Customer menu list (customer-scoped) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// GET /api/customer/menus Ã¢â‚¬â€œ List menus belonging to the authenticated customer
 app.get('/api/customer/menus', requireCustomerAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -8594,8 +8777,8 @@ app.get('/api/customer/menus', requireCustomerAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── Settings API ────────────────────────────────────────────────────────────
-// GET /api/admin/settings – All settings (secrets masked for non-super_admin)
+// Ã¢â€â‚¬Ã¢â€â‚¬ Settings API Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+// GET /api/admin/settings Ã¢â‚¬â€œ All settings (secrets masked for non-super_admin)
 app.get('/api/admin/settings', requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT key, value FROM app_settings ORDER BY key');
@@ -8606,7 +8789,7 @@ app.get('/api/admin/settings', requireAuth, async (req, res) => {
       let val; try { val = JSON.parse(row.value); } catch(e) { val = row.value; }
       if (!isSA && val && typeof val === 'object') {
         val = {...val};
-        for (const f of SECRET_FIELDS) { if (f in val && val[f]) val[f] = '••••••••'; }
+        for (const f of SECRET_FIELDS) { if (f in val && val[f]) val[f] = 'Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢'; }
       }
       out[row.key] = val;
     }
@@ -8614,7 +8797,7 @@ app.get('/api/admin/settings', requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// PUT /api/admin/settings – Update settings (super_admin only)
+// PUT /api/admin/settings Ã¢â‚¬â€œ Update settings (super_admin only)
 app.put('/api/admin/settings', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const updates = req.body;
@@ -8640,7 +8823,7 @@ app.put('/api/admin/settings', requireRole('super_admin'), doubleCsrfProtection,
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// POST /api/admin/settings/email/test – Send a test email using integration_email config
+// POST /api/admin/settings/email/test Ã¢â‚¬â€œ Send a test email using integration_email config
 app.post('/api/admin/settings/email/test', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const to = sanitizeEmail(req.body?.to || req.adminUser?.email || '');
@@ -8706,7 +8889,7 @@ app.post('/api/admin/settings/email/test', requireRole('super_admin'), doubleCsr
   }
 });
 
-// POST /api/admin/settings/sms/test – Test NextSMS credentials using test endpoint
+// POST /api/admin/settings/sms/test Ã¢â‚¬â€œ Test NextSMS credentials using test endpoint
 app.post('/api/admin/settings/sms/test', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
   try {
     const { username, pass } = req.body || {};
@@ -8743,7 +8926,7 @@ app.post('/api/admin/settings/sms/test', requireRole('super_admin'), doubleCsrfP
   }
 });
 
-// GET /api/settings/currency – Public: currency config for customer-facing pages
+// GET /api/settings/currency Ã¢â‚¬â€œ Public: currency config for customer-facing pages
 app.get('/api/settings/currency', async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -8758,20 +8941,18 @@ app.get('/api/settings/currency', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── API 404 handler ───────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ API 404 handler Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.use('/api', (req, res) => {
   res.status(404).json({ error: `API route not found: ${req.method} ${req.path}` });
 });
 
-// ── Dev helper: auto-login seeded customer (NON-PRODUCTION ONLY) ──────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Dev helper: auto-login seeded customer (NON-PRODUCTION ONLY) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.get('/dev/auto-login', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') return res.status(404).send('Not found');
+  if (process.env.NODE_ENV === 'production' || !ENABLE_DEV_ROUTES) return res.status(404).send('Not found');
   try {
     // Restrict to localhost addresses to avoid accidental exposure in networks
-    const remote = (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip || '').split(',')[0].trim();
-    const allowed = ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
-    if (!allowed.includes(remote)) {
-      console.warn('Blocked /dev/auto-login (public request) from:', remote);
+    if (!isLocalRequest(req)) {
+      console.warn('Blocked /dev/auto-login (public request) from:', req.ip);
       return res.status(403).send('Forbidden');
     }
 
@@ -8781,7 +8962,7 @@ app.get('/dev/auto-login', async (req, res) => {
     const customer = rows[0];
     const token = await createCustomerSession(customer.id, customer.email);
     // Also set a cookie so server-side routes accept the session
-    res.cookie('customerToken', token, { httpOnly: false, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+    res.cookie('customerToken', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/', maxAge: SESSION_TTL });
     // Send a small script to set localStorage and redirect so client-side checks succeed
     return res.send(`<!doctype html><meta charset="utf-8"><title>Auto Login</title><script>try{localStorage.setItem('customerToken','${token}');localStorage.setItem('customerEmail','${customer.email}');}catch(e){}window.location.href='/menu-editor';</script>`);
   } catch (err) {
@@ -8790,7 +8971,7 @@ app.get('/dev/auto-login', async (req, res) => {
   }
 });
 
-// ── Global error handler (returns JSON for /api routes) ───────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Global error handler (returns JSON for /api routes) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.use((err, req, res, next) => {
   if (req.path.startsWith('/api')) {
     const status = err.status || err.statusCode || 500;
@@ -8804,7 +8985,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬ Start Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 (async () => {
   await initDB();
   await restoreAdminSessions();

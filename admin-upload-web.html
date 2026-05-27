@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Web Admin File Upload &amp; Import</title>
+<title>File Upload & Import — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +20,9 @@
     theme: {
       extend: {
         colors: {
-          "primary": "#ee9d2b",
+          "primary": "#c2410c",
           "background-light": "#f8f7f6",
-          "background-dark": "#221a10",
+          "background-dark": "#1c1917",
         },
         fontFamily: {
           "display": ["Work Sans", "sans-serif"]
@@ -34,9 +34,9 @@
 </script>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen antialiased overflow-hidden flex">
-<aside class="w-64 border-r border-primary/10 flex flex-col bg-white dark:bg-[#2a2115] shrink-0 h-screen hidden md:flex">
+<aside class="w-64 border-r border-primary/10 flex flex-col bg-white dark:bg-[#292524] shrink-0 h-screen hidden md:flex">
 <div class="h-16 flex items-center px-6 border-b border-primary/10 shrink-0">
-<div class="size-8 rounded bg-primary flex items-center justify-center text-background-dark mr-3 shrink-0">
+<div class="size-8 rounded bg-primary flex items-center justify-center text-white mr-3 shrink-0">
 <span class="material-symbols-outlined text-[20px] font-bold">restaurant</span>
 </div>
 <h2 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">MenuAdmin</h2>
@@ -95,7 +95,7 @@
 </div>
 <h3 class="text-2xl font-bold mb-3 text-slate-800 dark:text-slate-100">Upload Menu Files</h3>
 <p class="text-slate-500 dark:text-slate-400 mb-6 max-w-md">Drag and drop your menu files here, or click to browse. We will automatically parse and categorize your items.</p>
-<div class="flex gap-3 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#2a2115] px-4 py-2 rounded-lg border border-primary/10 shadow-sm">
+<div class="flex gap-3 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#292524] px-4 py-2 rounded-lg border border-primary/10 shadow-sm">
 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-red-500">picture_as_pdf</span> PDF</span>
 <span class="text-slate-300 dark:text-slate-600">|</span>
 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-500">table_chart</span> CSV</span>
@@ -103,13 +103,13 @@
 <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-green-600">grid_on</span> XLSX</span>
 </div>
 </div>
-<div class="w-full lg:w-80 rounded-2xl border border-primary/10 bg-white dark:bg-[#2a2115] p-8 shadow-sm flex flex-col items-center justify-center text-center shrink-0">
+<div class="w-full lg:w-80 rounded-2xl border border-primary/10 bg-white dark:bg-[#292524] p-8 shadow-sm flex flex-col items-center justify-center text-center shrink-0">
 <div class="size-16 rounded-xl bg-[#0F9D58]/10 flex items-center justify-center mb-5">
 <span class="material-symbols-outlined text-4xl text-[#0F9D58]">description</span>
 </div>
 <h3 class="text-xl font-bold mb-3">Import from Google Sheets</h3>
 <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Keep your menu in sync directly from a connected spreadsheet.</p>
-<button class="w-full flex items-center justify-center gap-2 bg-transparent text-primary border-2 border-primary/30 rounded-xl py-3 font-bold hover:bg-primary hover:text-background-dark hover:border-primary transition-colors">
+<button class="w-full flex items-center justify-center gap-2 bg-transparent text-primary border-2 border-primary/30 rounded-xl py-3 font-bold hover:bg-primary hover:text-white hover:border-primary transition-colors">
 <span class="material-symbols-outlined text-[20px]">link</span>
               Connect Sheet
             </button>
@@ -122,7 +122,7 @@
               View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
 </button>
 </div>
-<div class="bg-white dark:bg-[#2a2115] rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+<div class="bg-white dark:bg-[#292524] rounded-xl border border-primary/10 shadow-sm overflow-hidden">
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse min-w-[800px]">
 <thead>

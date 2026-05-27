@@ -8,20 +8,22 @@
   <meta name="description" content="QR codes, real-time updates, analytics, custom branding, multi-language support. Everything you need to run a modern restaurant menu.">
   <meta name="keywords" content="digital menu features, QR code menu, restaurant analytics, multi-language menu, custom restaurant branding">
   <meta name="author" content="RestOrder">
-  
+  <link rel="canonical" href="https://restorder.online/features">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restorder.com/features">
+  <meta property="og:url" content="https://restorder.online/features">
   <meta property="og:title" content="Features - RestOrder">
   <meta property="og:description" content="QR codes, real-time updates, analytics, custom branding, multi-language support.">
-  <meta property="og:image" content="https://restorder.com/og-features.jpg">
+  <meta property="og:image" content="https://restorder.online/og-features.jpg">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://restorder.com/features">
+  <meta property="twitter:url" content="https://restorder.online/features">
   <meta property="twitter:title" content="Features - RestOrder">
   <meta property="twitter:description" content="QR codes, real-time updates, analytics, custom branding, multi-language support.">
-  <meta property="twitter:image" content="https://restorder.com/og-features.jpg">
+  <meta property="twitter:image" content="https://restorder.online/og-features.jpg">
 
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -30,13 +32,13 @@
     "@graph": [
       {
         "@type": "WebPage",
-        "@id": "https://restorder.com/features/#webpage",
-        "url": "https://restorder.com/features",
+        "@id": "https://restorder.online/features/#webpage",
+        "url": "https://restorder.online/features",
         "name": "RestOrder Features",
         "description": "Comprehensive list of features provided by the RestOrder digital menu platform including QR codes, analytics, and multi-language support.",
         "isPartOf": {
           "@type": "Organization",
-          "@id": "https://restorder.com/#organization",
+          "@id": "https://restorder.online/#organization",
           "name": "RestOrder"
         }
       },
@@ -86,25 +88,25 @@
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     :root {
-      --primary: #c2410c;
-      --primary-dark: #9a3412;
-      --primary-light: #ea580c;
-      --accent: #4d7c5f;
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #10b981;
+      --accent: #059669;
       --bg: #fafaf9;
       --text: #1c1917;
       --text-light: #78716c;
       --border: #e7e5e4;
       --surface: #ffffff;
-      --gradient-1: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      --gradient-1: linear-gradient(135deg, #059669 0%, #10b981 100%);
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
       --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
       --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
       --font-display: 'Fraunces', Georgia, serif;
       --font-body: 'Outfit', system-ui, sans-serif;
     }
-    
+
     body {
       font-family: var(--font-body);
       font-size: 16px;
@@ -114,16 +116,16 @@
       -webkit-font-smoothing: antialiased;
       letter-spacing: -0.01em;
     }
-    
+
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--font-display);
       font-weight: 700;
       letter-spacing: -0.025em;
       line-height: 1.2;
     }
-    
+
     .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-    
+
     /* Header - Optimized */
     header {
       position: fixed;
@@ -137,14 +139,14 @@
       z-index: 1000;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     header.scrolled {
       background: rgba(255,255,255,0.95);
       box-shadow: 0 2px 20px rgba(0,0,0,0.06);
       border-bottom-color: var(--border);
       padding: 4px 0;
     }
-    
+
     nav {
       display: flex;
       justify-content: space-between;
@@ -152,11 +154,11 @@
       padding: 20px 0;
       transition: padding 0.4s ease;
     }
-    
+
     header.scrolled nav {
       padding: 12px 0;
     }
-    
+
     .logo {
       display: flex;
       align-items: center;
@@ -169,11 +171,11 @@
       transition: all 0.3s ease;
       position: relative;
     }
-    
+
     .logo:hover {
       transform: translateY(-1px);
     }
-    
+
     .logo-icon {
       width: 48px;
       height: 48px;
@@ -182,30 +184,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 3px 10px rgba(194,65,12,0.3));
+      filter: drop-shadow(0 3px 10px rgba(5,150,105,0.3));
       transition: all 0.3s ease;
     }
-    
+
     .logo-icon svg {
       width: 26px;
       height: 26px;
       fill: white;
     }
-    
+
     header.scrolled .logo-icon {
       width: 40px;
       height: 40px;
     }
-    
+
     header.scrolled .logo-icon svg {
       width: 22px;
       height: 22px;
     }
-    
+
     .logo:hover .logo-icon {
       transform: rotate(-5deg) scale(1.05);
     }
-    
+
     .nav-center {
       display: flex;
       gap: 8px;
@@ -216,7 +218,7 @@
       border-radius: 12px;
       border: 1px solid var(--border);
     }
-    
+
     .nav-center li a {
       color: var(--text);
       text-decoration: none;
@@ -227,25 +229,25 @@
       transition: all 0.2s ease;
       position: relative;
     }
-    
+
     .nav-center li a:hover {
       color: var(--primary);
       background: white;
       transform: translateY(-1px);
     }
-    
+
     .nav-center li a.active {
       color: var(--primary);
       background: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    
+
     .nav-actions {
       display: flex;
       gap: 12px;
       align-items: center;
     }
-    
+
     .btn-nav-secondary {
       color: var(--primary);
       text-decoration: none;
@@ -260,13 +262,13 @@
       align-items: center;
       gap: 6px;
     }
-    
+
     .btn-nav-secondary:hover {
       border-color: var(--primary);
-      background: rgba(194,65,12,0.05);
+      background: rgba(5,150,105,0.05);
       transform: translateY(-2px);
     }
-    
+
     .btn-nav {
       background: var(--gradient-1);
       color: white;
@@ -276,23 +278,23 @@
       font-weight: 700;
       font-size: 14px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 16px rgba(194,65,12,0.3);
+      box-shadow: 0 4px 16px rgba(5,150,105,0.3);
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
-    
+
     .btn-nav:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(194,65,12,0.4);
+      box-shadow: 0 6px 24px rgba(5,150,105,0.4);
     }
-    
+
     .btn-nav:active {
       transform: translateY(0);
     }
-    
+
     /* Mobile Menu */
     .mobile-menu-btn {
       display: none;
@@ -302,7 +304,7 @@
       cursor: pointer;
       color: var(--text);
     }
-    
+
     .mobile-menu {
       display: none;
       position: fixed;
@@ -316,12 +318,12 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    
+
     .mobile-menu.active {
       display: block;
       opacity: 1;
     }
-    
+
     .mobile-menu-content {
       position: absolute;
       top: 0;
@@ -335,11 +337,11 @@
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
-    
+
     .mobile-menu.active .mobile-menu-content {
       transform: translateX(0);
     }
-    
+
     .mobile-menu-header {
       display: flex;
       justify-content: space-between;
@@ -348,7 +350,7 @@
       padding-bottom: 20px;
       border-bottom: 2px solid var(--border);
     }
-    
+
     .mobile-menu-close {
       background: var(--bg);
       border: none;
@@ -360,20 +362,20 @@
       color: var(--text);
       transition: all 0.2s;
     }
-    
+
     .mobile-menu-close:hover {
       background: var(--border);
     }
-    
+
     .mobile-nav-links {
       list-style: none;
       margin-bottom: 24px;
     }
-    
+
     .mobile-nav-links li {
       margin-bottom: 8px;
     }
-    
+
     .mobile-nav-link {
       display: block;
       padding: 14px 16px;
@@ -385,12 +387,12 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    
+
     .mobile-nav-link:hover, .mobile-nav-link.active {
-      background: rgba(194,65,12,0.1);
+      background: rgba(5,150,105,0.1);
       color: var(--primary);
     }
-    
+
     .mobile-nav-actions {
       display: flex;
       flex-direction: column;
@@ -413,19 +415,19 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(194, 65, 12, 0.2);
     }
-    
+
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(194, 65, 12, 0.3);
     }
-    
+
     /* Hero */
     .hero-features {
       padding: 140px 0 80px;
       background: linear-gradient(135deg, #fff9f5 0%, #fef3f2 100%);
       text-align: center;
     }
-    
+
     .hero-features h1 {
       font-size: 56px;
       font-weight: 900;
@@ -436,7 +438,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .hero-features p {
       font-size: 20px;
       color: var(--text-light);
@@ -444,30 +446,30 @@
       margin: 0 auto;
       line-height: 1.7;
     }
-    
+
     /* Features Grid */
     .features-section {
       padding: 100px 0;
       background: white;
     }
-    
+
     .features-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 40px;
     }
-    
+
     .feature-card {
       background: var(--bg);
       padding: 40px;
       border-radius: 16px;
       transition: transform 0.3s ease;
     }
-    
+
     .feature-card:hover {
       transform: translateY(-4px);
     }
-    
+
     .feature-icon {
       width: 80px;
       height: 80px;
@@ -480,64 +482,64 @@
       color: white;
       font-size: 40px;
     }
-    
+
     .feature-card h3 {
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 16px;
     }
-    
+
     .feature-card p {
       font-size: 16px;
       color: var(--text-light);
       line-height: 1.6;
     }
-    
+
     /* Use Cases */
     .usecases-section {
       padding: 100px 0;
       background: var(--bg);
     }
-    
+
     .usecases-section h2 {
       font-size: 40px;
       font-weight: 900;
       text-align: center;
       margin-bottom: 60px;
     }
-    
+
     .usecases-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 40px;
     }
-    
+
     .usecase-card {
       background: white;
       padding: 40px;
       border-radius: 16px;
       box-shadow: var(--shadow-md);
     }
-    
+
     .usecase-card h3 {
       font-size: 28px;
       font-weight: 700;
       margin-bottom: 16px;
       color: var(--primary);
     }
-    
+
     .usecase-card p {
       font-size: 16px;
       color: var(--text-light);
       margin-bottom: 20px;
       line-height: 1.7;
     }
-    
+
     .usecase-list {
       list-style: none;
       padding: 0;
     }
-    
+
     .usecase-list li {
       padding: 12px 0;
       display: flex;
@@ -546,37 +548,37 @@
       font-size: 15px;
       border-bottom: 1px solid var(--border);
     }
-    
+
     .usecase-list li:last-child {
       border-bottom: none;
     }
-    
+
     .usecase-list .check {
       color: #16a34a;
       font-size: 20px;
       flex-shrink: 0;
     }
-    
+
     /* CTA Section */
     .cta-section {
       padding: 100px 0;
-      background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
       color: white;
       text-align: center;
     }
-    
+
     .cta-section h2 {
       font-size: 48px;
       font-weight: 900;
       margin-bottom: 24px;
     }
-    
+
     .cta-section p {
       font-size: 20px;
       margin-bottom: 40px;
       opacity: 0.95;
     }
-    
+
     .btn-white {
       background: white;
       color: var(--primary);
@@ -593,26 +595,26 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     }
-    
+
     .btn-white:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 30px rgba(0,0,0,0.25);
     }
-    
+
     /* Footer */
     footer {
       background: #1c1917;
       color: white;
       padding: 60px 0 30px;
     }
-    
+
     .footer-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 60px;
       margin-bottom: 40px;
     }
-    
+
     .footer-brand .footer-logo {
       display: flex;
       align-items: center;
@@ -621,44 +623,44 @@
       font-weight: 900;
       margin-bottom: 16px;
     }
-    
+
     .footer-description {
       color: #a8a29e;
       line-height: 1.6;
       margin-bottom: 24px;
     }
-    
+
     .footer-links h4 {
       font-size: 16px;
       font-weight: 700;
       margin-bottom: 16px;
     }
-    
+
     .footer-links ul {
       list-style: none;
     }
-    
+
     .footer-links ul li {
       margin-bottom: 12px;
     }
-    
+
     .footer-links ul li a {
       color: #a8a29e;
       text-decoration: none;
       transition: color 0.2s;
     }
-    
+
     .footer-links ul li a:hover {
       color: white;
     }
-    
+
     .footer-bottom {
       text-align: center;
       padding-top: 30px;
       border-top: 1px solid #3f3f3f;
       color: #a8a29e;
     }
-    
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero-features h1 { font-size: 36px; }
@@ -690,61 +692,10 @@
     }
   </style>
 </head>
-<body>
-  <!-- Header -->
-  <header id="header">
-    <nav class="container">
-      <a href="/" class="logo">
-        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
-        <span>RestOrder</span>
-      </a>
-      
-      <ul class="nav-center">
-        <li><a href="/features" class="active">Features</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/contact">Contact</a></li>
-      </ul>
-      
-      <div class="nav-actions">
-        <a href="/login" class="btn-nav-secondary">Sign In</a>
-        <a href="/register" class="btn-nav">
-          <svg class="material-symbols-outlined" style="font-size: 16px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
-          Get Started
-        </a>
-      </div>
-      
-      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
-    </nav>
-  </header>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" id="mobile-menu">
-    <div class="mobile-menu-content">
-      <div class="mobile-menu-header">
-        <a href="/" class="logo">
-          <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
-          <span>RestOrder</span>
-        </a>
-        <button class="mobile-menu-close" id="mobile-menu-close">×</button>
-      </div>
-      
-      <ul class="mobile-nav-links">
-        <li><a href="/features" class="mobile-nav-link active">Features</a></li>
-        <li><a href="/pricing" class="mobile-nav-link">Pricing</a></li>
-        <li><a href="/about" class="mobile-nav-link">About</a></li>
-        <li><a href="/contact" class="mobile-nav-link">Contact</a></li>
-      </ul>
-      
-      <div class="mobile-nav-actions">
-        <a href="/login" class="btn-nav-secondary">Sign In</a>
-        <a href="/register" class="btn-nav">
-          <svg class="material-symbols-outlined" style="font-size: 18px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
-          Get Started
-        </a>
-      </div>
-    </div>
-  </div>
+<body data-page="features">
+    <!-- Shared Header -->
+  <div id="site-header-container"></div>
+  <script src="/js/public-header.js"></script>
 
   <main>
   <!-- Hero -->
@@ -766,7 +717,7 @@
           <h3>Dynamic QR Codes</h3>
           <p>Generate high-res QR codes for tables, marketing, or flyers. Instantly change the active menu without reprinting QR codes.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-bolt"/></svg>
@@ -774,7 +725,7 @@
           <h3>Real-time Updates</h3>
           <p>Change prices, descriptions, or mark items as sold out instantly. Your customers always see the most accurate menu.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-payments"/></svg>
@@ -782,7 +733,7 @@
           <h3>Payment Gateway</h3>
           <p>Accept cards, Apple Pay, Google Pay, or mobile money directly from the menu. Fast checkouts that keep tables turning.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-chat"/></svg>
@@ -790,7 +741,7 @@
           <h3>WhatsApp Ordering</h3>
           <p>Customers submit orders directly to your restaurant's WhatsApp. Great for take-away, delivery, or quick service operations.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-translate"/></svg>
@@ -798,7 +749,7 @@
           <h3>Multi-language</h3>
           <p>Automatically translate your menu into 50+ languages. Perfect for tourist destinations, expat hotspots, and international chains.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-analytics"/></svg>
@@ -806,7 +757,7 @@
           <h3>Analytics & Insights</h3>
           <p>See exactly what dishes customers are looking at. Spot trends, optimize your menu, and track overall views from our rich analytics dashboard.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-image"/></svg>
@@ -814,15 +765,15 @@
           <h3>Image Optimization</h3>
           <p>Upload high-res food photos, we automatically compress and optimize them for fast loading. Beautiful menus that load in under 2 seconds.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-devices"/></svg>
           </div>
           <h3>Mobile Optimized</h3>
-          <p>Perfect on any device—iPhone, Android, tablet, desktop. Responsive design that looks gorgeous everywhere.</p>
+          <p>Perfect on any deviceâ€”iPhone, Android, tablet, desktop. Responsive design that looks gorgeous everywhere.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-security"/></svg>
@@ -830,7 +781,7 @@
           <h3>Bank-Level Security</h3>
           <p>Enterprise-grade encryption, GDPR compliant, 99.9% uptime. Your data is protected like it's at Fort Knox.</p>
         </div>
-        
+
         <div class="feature-card">
           <div class="feature-icon">
             <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-support"/></svg>
@@ -846,10 +797,10 @@
   <section class="usecases-section">
     <div class="container">
       <h2>Perfect For Every Business Type</h2>
-      
+
       <div class="usecases-grid">
         <div class="usecase-card">
-          <h3>🍽️ Restaurants</h3>
+          <h3>ðŸ½ï¸ Restaurants</h3>
           <p>Full-service restaurants love RestOrder for comprehensive menu management</p>
           <ul class="usecase-list">
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Seasonal menu updates</li>
@@ -858,9 +809,9 @@
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Multi-course organization</li>
           </ul>
         </div>
-        
+
         <div class="usecase-card">
-          <h3>☕ Cafes & Coffee Shops</h3>
+          <h3>â˜• Cafes & Coffee Shops</h3>
           <p>Coffee shops use RestOrder for quick, beautiful menu displays</p>
           <ul class="usecase-list">
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Drink customization options</li>
@@ -869,9 +820,9 @@
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Nutritional information</li>
           </ul>
         </div>
-        
+
         <div class="usecase-card">
-          <h3>🍺 Bars & Pubs</h3>
+          <h3>ðŸº Bars & Pubs</h3>
           <p>Bars rely on RestOrder for ever-changing drink menus</p>
           <ul class="usecase-list">
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Rotating tap lists</li>
@@ -880,9 +831,9 @@
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Real-time availability</li>
           </ul>
         </div>
-        
+
         <div class="usecase-card">
-          <h3>🥤 Juice Bars & Health Cafes</h3>
+          <h3>ðŸ¥¤ Juice Bars & Health Cafes</h3>
           <p>Health-focused businesses showcase ingredients beautifully</p>
           <ul class="usecase-list">
             <li><svg class="check material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-check_circle"/></svg> Ingredient highlights</li>
@@ -915,14 +866,14 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span style="font-size: 32px;">🍽️</span>
+            <span style="font-size: 32px;">ðŸ½ï¸</span>
             <span>RestOrder</span>
           </div>
           <p class="footer-description">
-            The complete digital menu platform for modern restaurants, cafes, bars & eateries.
+            The complete digital menu platform for modern restaurants, cafes, bars, and eateries.
           </p>
         </div>
-        
+
         <div class="footer-links">
           <h4>Product</h4>
           <ul>
@@ -932,7 +883,7 @@
             <li><a href="/customer-login">Sign In</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-links">
           <h4>Company</h4>
           <ul>
@@ -941,7 +892,7 @@
             <li><a href="/faq">FAQ</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-links">
           <h4>Legal</h4>
           <ul>
@@ -951,9 +902,9 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
-        <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+        <p>&copy; 2026 RestOrder. All rights reserved. Built for restaurants worldwide.</p>
       </div>
     </div>
   </footer>
@@ -968,30 +919,30 @@
         header.classList.remove('scrolled');
       }
     });
-    
+
     // Mobile menu
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuClose = document.getElementById('mobile-menu-close');
-    
+
     if (mobileMenuBtn) {
       mobileMenuBtn.addEventListener('click', function() {
         mobileMenu.classList.add('active');
         document.body.style.overflow = 'hidden';
       });
     }
-    
+
     function closeMobileMenu() {
       mobileMenu.classList.remove('active');
       document.body.style.overflow = '';
     }
-    
+
     if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
-    
+
     mobileMenu.addEventListener('click', function(e) {
       if (e.target === mobileMenu) closeMobileMenu();
     });
-    
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMobileMenu();
     });

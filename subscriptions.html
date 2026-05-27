@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Subscription Management � RestOrder Admin</title>
+<title>Subscription Management — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,20 +32,20 @@
   body { font-family: "Work Sans", sans-serif; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  
+
   /* Status badges */
   .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
   .badge-active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
   .badge-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
   .badge-expired { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
   .badge-trial { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
-  
+
   /* Plan badges */
   .plan-starter { color: #06b6d4; }
   .plan-professional { color: #8b5cf6; }
   .plan-enterprise { color: #f59e0b; }
 
-  /* ── Input fields: white bg, charcoal text ── */
+  /* â”€â”€ Input fields: white bg, charcoal text â”€â”€ */
   input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
   select, textarea { background: #ffffff !important; color: #1e293b !important; }
   input::placeholder, textarea::placeholder { color: #94a3b8 !important; }
@@ -189,7 +189,7 @@
 
 <!-- -- Main Content --------------------------------------------------------- -->
 <main class="flex-1 p-8 overflow-auto">
-  
+
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-2">
@@ -245,7 +245,7 @@
       </div>
       <p class="text-3xl font-bold" id="stat-total">0</p>
     </div>
-    
+
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Active</span>
@@ -253,7 +253,7 @@
       </div>
       <p class="text-3xl font-bold text-green-500" id="stat-active">0</p>
     </div>
-    
+
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Monthly Revenue</span>
@@ -261,7 +261,7 @@
       </div>
       <p class="text-3xl font-bold text-amber-500" id="stat-revenue">$0</p>
     </div>
-    
+
     <div class="bg-surface border border-slate-700 rounded-2xl p-6">
       <div class="flex items-center justify-between mb-2">
         <span class="text-slate-400 text-sm">Cancelled</span>
@@ -283,13 +283,13 @@
           <option value="expired">Expired</option>
         </select>
       </div>
-      
+
       <div class="flex-1 min-w-[200px]">
         <label class="block text-sm font-medium text-slate-300 mb-2">Search</label>
-        <input id="search-input" type="text" placeholder="Search by restaurant name..." 
+        <input id="search-input" type="text" placeholder="Search by restaurant name..."
           class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
       </div>
-      
+
       <button id="refresh-btn" class="px-6 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center gap-2">
         <svg class="material-symbols-outlined text-[20px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-refresh"/></svg>
         Refresh
@@ -302,7 +302,7 @@
     <div class="p-6 border-b border-slate-700">
       <h3 class="text-lg font-bold">All Subscriptions</h3>
     </div>
-    
+
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead class="bg-bg-dark/50">
@@ -490,11 +490,11 @@
         <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
       </button>
     </div>
-    
+
     <div id="modal-content" class="p-6 space-y-6">
       <!-- Content loaded via JS -->
     </div>
-    
+
     <div class="sticky bottom-0 bg-surface border-t border-slate-700 p-6 space-y-3">
       <div class="flex gap-3">
         <button id="upgrade-btn" class="flex-1 px-4 py-2.5 bg-primary text-bg-dark font-semibold rounded-xl hover:bg-primary/90 transition flex items-center justify-center gap-2">
@@ -523,7 +523,7 @@
       </button>
     </div>
     <div class="p-6">
-      <p class="text-slate-400 text-sm mb-5">Select a new plan. A pending payment will be created � mark it completed in Payments to activate.</p>
+      <p class="text-slate-400 text-sm mb-5">Select a new plan. A pending payment will be created ï¿½ mark it completed in Payments to activate.</p>
       <div id="upgrade-plans-list" class="space-y-3">
         <div class="text-center py-4 text-slate-400">Loading plans...</div>
       </div>
@@ -652,7 +652,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   const password = document.getElementById('login-password').value;
   const errorEl = document.getElementById('login-error');
   errorEl.classList.add('hidden');
-  
+
   try {
     const csrfRes = await fetch('/api/csrf-token');
     const { csrfToken } = await csrfRes.json();
@@ -662,7 +662,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ email, password })
     });
-    
+
     const data = await res.json();
     if (res.ok) {
       isAuthenticated = true;
@@ -858,13 +858,13 @@ let allSubscriptions = [];
 
 async function loadSubscriptions() {
   const status = document.getElementById('filter-status').value;
-  
+
   try {
     const res = await fetch(`/api/subscriptions?status=${status}`, {
       headers: { 'x-admin-token': adminToken }
     });
     if (!res.ok) throw new Error('Failed to load subscriptions');
-    
+
     allSubscriptions = await res.json();
     renderSubscriptions(allSubscriptions);
     updateStats(allSubscriptions);
@@ -880,7 +880,7 @@ async function loadSubscriptions() {
 
 function renderSubscriptions(subscriptions) {
   const tbody = document.getElementById('subscriptions-tbody');
-  
+
   if (!subscriptions.length) {
     tbody.innerHTML = `
       <tr><td colspan="7" class="px-6 py-12 text-center text-slate-400">
@@ -890,7 +890,7 @@ function renderSubscriptions(subscriptions) {
     `;
     return;
   }
-  
+
   tbody.innerHTML = subscriptions.map(sub => `
     <tr class="hover:bg-bg-dark/30 transition cursor-pointer" onclick="showDetails(${sub.id})">
       <td class="px-6 py-4">
@@ -914,10 +914,10 @@ function renderSubscriptions(subscriptions) {
       <td class="px-6 py-4">
         ${sub.next_billing_date
           ? `<div class="text-sm font-medium ${isOverdue(sub.next_billing_date) && sub.status === 'active' ? 'text-red-400' : sub.status === 'active' ? 'text-green-400' : 'text-slate-400'}">${formatDate(sub.next_billing_date)}</div>`
-          : `<div class="text-xs text-slate-500">�</div>`}
+          : `<div class="text-xs text-slate-500">ï¿½</div>`}
       </td>
       <td class="px-6 py-4 text-right">
-        <button onclick="event.stopPropagation(); showDetails(${sub.id})" 
+        <button onclick="event.stopPropagation(); showDetails(${sub.id})"
           class="px-3 py-1.5 text-xs bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition">
           View
         </button>
@@ -933,7 +933,7 @@ function updateStats(subscriptions) {
   const revenue = subscriptions
     .filter(s => s.status === 'active')
     .reduce((sum, s) => sum + parseFloat(s.plan_price), 0);
-  
+
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-active').textContent = active;
   document.getElementById('stat-cancelled').textContent = cancelled;
@@ -944,21 +944,21 @@ function updateStats(subscriptions) {
 async function showDetails(subId) {
   const modal = document.getElementById('detail-modal');
   const content = document.getElementById('modal-content');
-  
+
   modal.classList.remove('hidden');
   content.innerHTML = '<div class="text-center py-8"><svg class="material-symbols-outlined spin text-[48px] text-primary" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-progress_activity"/></svg></div>';
-  
+
   try {
     const [subRes, paymentsRes] = await Promise.all([
       fetch(`/api/subscriptions/${subId}`, { headers: { 'x-admin-token': adminToken } }),
       fetch(`/api/subscriptions/${subId}/payments`, { headers: { 'x-admin-token': adminToken } })
     ]);
-    
+
     if (!subRes.ok) throw new Error('Failed to load subscription');
-    
+
     const sub = await subRes.json();
     const payments = paymentsRes.ok ? await paymentsRes.json() : [];
-    
+
     content.innerHTML = `
       <div class="space-y-6">
         <!-- Restaurant Info -->
@@ -969,7 +969,7 @@ async function showDetails(subId) {
             <div class="text-xs text-slate-400 mt-1">Menu ID: ${escapeHtml(sub.menu_id)}</div>
           </div>
         </div>
-        
+
         <!-- Plan Info -->
         <div>
           <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Plan Details</h4>
@@ -992,7 +992,7 @@ async function showDetails(subId) {
             </div>
           </div>
         </div>
-        
+
         <!-- Subscription Status -->
         <div>
           <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Status</h4>
@@ -1020,7 +1020,7 @@ async function showDetails(subId) {
             ${sub.cancel_at_end ? '<div class="text-amber-500 text-sm">? Subscription will cancel at period end</div>' : ''}
           </div>
         </div>
-        
+
         <!-- Features -->
         <div>
           <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Features</h4>
@@ -1035,7 +1035,7 @@ async function showDetails(subId) {
             </div>
           </div>
         </div>
-        
+
         <!-- Payment History -->
         ${payments.length ? `
           <div>
@@ -1047,7 +1047,7 @@ async function showDetails(subId) {
                     <span class="font-semibold">$${p.amount}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
                   </div>
-                  <div class="text-xs text-slate-400">${formatDate(p.created_at)} � ${p.payment_method}</div>
+                  <div class="text-xs text-slate-400">${formatDate(p.created_at)} ï¿½ ${p.payment_method}</div>
                   ${p.notes ? `<div class="text-xs text-slate-400 mt-1">${escapeHtml(p.notes)}</div>` : ''}
                 </div>
               `).join('')}
@@ -1056,11 +1056,11 @@ async function showDetails(subId) {
         ` : ''}
       </div>
     `;
-    
+
     // Store current sub ID for actions
     window.currentSubId = subId;
     window.currentSub = sub;
-    
+
   } catch (err) {
     console.error('Error loading details:', err);
     content.innerHTML = '<div class="text-center text-red-400 py-8">Failed to load subscription details.</div>';
@@ -1116,7 +1116,7 @@ async function openUpgradeModal() {
           onchange="selectedUpgradePlanId=${p.id}; document.getElementById('upgrade-confirm-btn').disabled=(${p.id}===${currentPlanId}); document.querySelectorAll('[id^=plan-label-]').forEach(el=>el.classList.remove('border-primary','bg-primary/10')); document.getElementById('plan-label-${p.id}').classList.add('border-primary','bg-primary/10');" />
         <div class="flex-1">
           <div class="font-semibold">${escapeHtml(p.display_name)}</div>
-          <div class="text-xs text-slate-400">${p.menu_limit === 999 ? 'Unlimited' : p.menu_limit} menus � ${p.location_limit === 999 ? 'Unlimited' : p.location_limit} locations</div>
+          <div class="text-xs text-slate-400">${p.menu_limit === 999 ? 'Unlimited' : p.menu_limit} menus ï¿½ ${p.location_limit === 999 ? 'Unlimited' : p.location_limit} locations</div>
         </div>
         <div class="text-right">
           <div class="font-bold text-primary">$${parseFloat(p.price).toFixed(2)}</div>
@@ -1141,7 +1141,7 @@ document.getElementById('upgrade-confirm-btn').addEventListener('click', async (
   const btn = document.getElementById('upgrade-confirm-btn');
   const errorEl = document.getElementById('upgrade-error');
   btn.disabled = true;
-  btn.textContent = 'Saving�';
+  btn.textContent = 'Savingï¿½';
   errorEl.classList.add('hidden');
   try {
     const res = await fetch(`/api/subscriptions/${window.currentSubId}`, {
@@ -1152,7 +1152,7 @@ document.getElementById('upgrade-confirm-btn').addEventListener('click', async (
     if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to change plan.'); }
     closeUpgradeModal();
     document.getElementById('detail-modal').classList.add('hidden');
-    showToast('Plan changed! A pending payment was created � mark it completed in Payments to activate.');
+    showToast('Plan changed! A pending payment was created ï¿½ mark it completed in Payments to activate.');
     loadSubscriptions();
   } catch (err) {
     errorEl.textContent = err.message;
@@ -1205,7 +1205,7 @@ document.getElementById('record-payment-form').addEventListener('submit', async 
     closeRecordPaymentModal();
     document.getElementById('detail-modal').classList.add('hidden');
     const msg = payload.status === 'completed'
-      ? 'Payment recorded � subscription is now active!'
+      ? 'Payment recorded ï¿½ subscription is now active!'
       : 'Pending payment recorded.';
     showToast(msg);
     loadSubscriptions();
@@ -1262,9 +1262,9 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '�';
-  return new Date(isoStr).toLocaleDateString('en-US', { 
-    year: 'numeric', month: 'short', day: 'numeric' 
+  if (!isoStr) return 'ï¿½';
+  return new Date(isoStr).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric'
   });
 }
 
@@ -1471,7 +1471,7 @@ function renderPromosTable(promos) {
               <td class="py-3 pr-4 font-mono font-bold text-primary">${escHtml(p.code)}</td>
               <td class="py-3 pr-4 text-slate-300">${discStr}</td>
               <td class="py-3 pr-4 text-slate-400">${usesStr}</td>
-              <td class="py-3 pr-4 text-slate-400">${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : '�'}</td>
+              <td class="py-3 pr-4 text-slate-400">${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : 'ï¿½'}</td>
               <td class="py-3 pr-4">${statusBadge}</td>
               <td class="py-3">
                 <div class="flex items-center gap-2">

@@ -5,7 +5,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: menu
-      POSTGRES_PASSWORD: menu_dev_pass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
       POSTGRES_DB: menu
     ports:
       - "5432:5432"
@@ -27,14 +27,17 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - HOST=http://localhost:3000
-      - DATABASE_URL=postgres://menu:menu_dev_pass@db:5432/menu
+      - HOST=${HOST:?Set HOST to your public app URL}
+      - DATABASE_URL=${DATABASE_URL:?Set DATABASE_URL in your environment}
       - PG_POOL_MAX=20
       - MENU_CACHE_MAX=500
       - MENU_CACHE_TTL_MS=300000
       - SCAN_DEDUPE_TTL_MS=300000
       - SCAN_DEDUPE_MAX=20000
-      - ADMIN_SECRET_HASH=$2b$12$ogZ6ks85LLo5mFHjUgUAWOwt8U0akxiVavATYeCA5cJc2ZWhym7r.
+      - ADMIN_SECRET_HASH=${ADMIN_SECRET_HASH:?Set ADMIN_SECRET_HASH in your environment}
+      - CSRF_SECRET=${CSRF_SECRET:?Set CSRF_SECRET in your environment}
+      - FIELD_ENCRYPTION_KEY=${FIELD_ENCRYPTION_KEY:?Set FIELD_ENCRYPTION_KEY in your environment}
+      - PHONE_HASH_SECRET=${PHONE_HASH_SECRET:?Set PHONE_HASH_SECRET in your environment}
       - SESSION_TTL_MS=28800000
       - LOGIN_RATE_LIMIT=10
     volumes:

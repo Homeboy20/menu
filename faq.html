@@ -5,23 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
   <title>FAQ - RestOrder | Frequently Asked Questions</title>
-  <meta name="description" content="Get answers to common questions about RestOrder digital menus. Setup,pricing, features, and support.">
+  <meta name="description" content="Get answers to common questions about RestOrder digital menus. Setup, pricing, features, and support.">
   <meta name="keywords" content="digital menu faq, restaurant tech questions, restorder help, qr menu support">
   <meta name="author" content="RestOrder">
-  
+  <link rel="canonical" href="https://restorder.online/faq">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restorder.com/faq">
+  <meta property="og:url" content="https://restorder.online/faq">
   <meta property="og:title" content="FAQ - RestOrder">
   <meta property="og:description" content="Get answers to common questions about RestOrder digital menus.">
-  <meta property="og:image" content="https://restorder.com/og-faq.jpg">
+  <meta property="og:image" content="https://restorder.online/og-faq.jpg">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://restorder.com/faq">
+  <meta property="twitter:url" content="https://restorder.online/faq">
   <meta property="twitter:title" content="FAQ - RestOrder">
   <meta property="twitter:description" content="Get answers to common questions about RestOrder digital menus.">
-  <meta property="twitter:image" content="https://restorder.com/og-faq.jpg">
+  <meta property="twitter:image" content="https://restorder.online/og-faq.jpg">
 
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -30,11 +32,77 @@
     "@type": "FAQPage",
     "name": "RestOrder FAQ",
     "description": "Frequently asked questions about RestOrder digital menu software.",
-    "url": "https://restorder.com/faq",
+    "url": "https://restorder.online/faq",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I sign up for RestOrder?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Click Get Started, enter your email and business details, and create your first menu. No credit card is required to begin."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need technical skills to use RestOrder?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. RestOrder is designed for restaurant teams without technical experience, with a simple menu builder and guided setup."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I import my existing menu?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can upload a PDF, image, or spreadsheet. Professional and Enterprise plans include assisted import support."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do menu updates happen in real time?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Changes appear instantly on your live menu links and QR code destinations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a credit card to sign up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. You can start with your email and only add payment details when you choose a paid plan."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I cancel anytime?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can cancel from your dashboard and your account remains active until the current billing period ends."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you offer discounts for annual billing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Annual billing includes savings versus monthly pricing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What devices are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "RestOrder works in modern web browsers on phones, tablets, and desktop devices."
+        }
+      }
+    ],
     "publisher": {
       "@type": "Organization",
       "name": "RestOrder",
-      "logo": "https://restorder.com/logo.png"
+      "logo": "https://restorder.online/logo.png"
     }
   }
   </script>
@@ -44,23 +112,27 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
   <style>.material-symbols-outlined{visibility:hidden}.fonts-loaded .material-symbols-outlined{visibility:visible}</style>
   <script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
-  
+
   <style>
 .material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}.hidden{display:none!important}
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+
     :root {
-      --primary: #c2410c;
-      --gradient-1: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #10b981;
+      --accent: #059669;
+      --gradient-1: linear-gradient(135deg, #059669 0%, #10b981 100%);
       --bg: #fafaf9;
       --text: #1c1917;
       --text-light: #78716c;
       --border: #e7e5e4;
+      --surface: #ffffff;
       --font-display: 'Fraunces', Georgia, serif;
       --font-body: 'Outfit', system-ui, sans-serif;
     }
-    
+
     body {
       font-family: var(--font-body);
       font-size: 16px;
@@ -70,16 +142,16 @@
       -webkit-font-smoothing: antialiased;
       letter-spacing: -0.01em;
     }
-    
+
     h1, h2, h3, h4, h5, h6 {
       font-family: var(--font-display);
       font-weight: 700;
       letter-spacing: -0.025em;
       line-height: 1.2;
     }
-    
+
     .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-    
+
     /* Header - Optimized */
     header {
       position: fixed;
@@ -93,14 +165,14 @@
       z-index: 1000;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     header.scrolled {
       background: rgba(255,255,255,0.95);
       box-shadow: 0 2px 20px rgba(0,0,0,0.06);
       border-bottom-color: var(--border);
       padding: 4px 0;
     }
-    
+
     nav {
       display: flex;
       justify-content: space-between;
@@ -108,11 +180,11 @@
       padding: 20px 0;
       transition: padding 0.4s ease;
     }
-    
+
     header.scrolled nav {
       padding: 12px 0;
     }
-    
+
     .logo {
       display: flex;
       align-items: center;
@@ -124,11 +196,11 @@
       letter-spacing: -0.5px;
       transition: all 0.3s ease;
     }
-    
+
     .logo:hover {
       transform: translateY(-1px);
     }
-    
+
     .logo-icon {
       width: 48px;
       height: 48px;
@@ -137,30 +209,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 3px 10px rgba(194,65,12,0.3));
+      filter: drop-shadow(0 3px 10px rgba(5,150,105,0.3));
       transition: all 0.3s ease;
     }
-    
+
     .logo-icon svg {
       width: 26px;
       height: 26px;
       fill: white;
     }
-    
+
     header.scrolled .logo-icon {
       width: 40px;
       height: 40px;
     }
-    
+
     header.scrolled .logo-icon svg {
       width: 22px;
       height: 22px;
     }
-    
+
     .logo:hover .logo-icon {
       transform: rotate(-5deg) scale(1.05);
     }
-    
+
     .nav-center {
       display: flex;
       gap: 8px;
@@ -171,7 +243,7 @@
       border-radius: 12px;
       border: 1px solid var(--border);
     }
-    
+
     .nav-center li a {
       color: var(--text);
       text-decoration: none;
@@ -181,25 +253,25 @@
       border-radius: 8px;
       transition: all 0.2s ease;
     }
-    
+
     .nav-center li a:hover {
       color: var(--primary);
       background: white;
       transform: translateY(-1px);
     }
-    
+
     .nav-center li a.active {
       color: var(--primary);
       background: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    
+
     .nav-actions {
       display: flex;
       gap: 12px;
       align-items: center;
     }
-    
+
     .btn-nav-secondary {
       color: var(--primary);
       text-decoration: none;
@@ -214,13 +286,13 @@
       align-items: center;
       gap: 6px;
     }
-    
+
     .btn-nav-secondary:hover {
       border-color: var(--primary);
-      background: rgba(194,65,12,0.05);
+      background: rgba(5,150,105,0.05);
       transform: translateY(-2px);
     }
-    
+
     .btn-nav {
       background: var(--gradient-1);
       color: white;
@@ -230,23 +302,23 @@
       font-weight: 700;
       font-size: 14px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 16px rgba(194,65,12,0.3);
+      box-shadow: 0 4px 16px rgba(5,150,105,0.3);
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
-    
+
     .btn-nav:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(194,65,12,0.4);
+      box-shadow: 0 6px 24px rgba(5,150,105,0.4);
     }
-    
+
     .btn-nav:active {
       transform: translateY(0);
     }
-    
+
     .mobile-menu-btn {
       display: none;
       background: none;
@@ -255,7 +327,7 @@
       cursor: pointer;
       color: var(--text);
     }
-    
+
     .mobile-menu {
       display: none;
       position: fixed;
@@ -269,12 +341,12 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    
+
     .mobile-menu.active {
       display: block;
       opacity: 1;
     }
-    
+
     .mobile-menu-content {
       position: absolute;
       top: 0;
@@ -288,11 +360,11 @@
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
-    
+
     .mobile-menu.active .mobile-menu-content {
       transform: translateX(0);
     }
-    
+
     .mobile-menu-header {
       display: flex;
       justify-content: space-between;
@@ -301,7 +373,7 @@
       padding-bottom: 20px;
       border-bottom: 2px solid var(--border);
     }
-    
+
     .mobile-menu-close {
       background: var(--bg);
       border: none;
@@ -313,20 +385,20 @@
       color: var(--text);
       transition: all 0.2s;
     }
-    
+
     .mobile-menu-close:hover {
       background: var(--border);
     }
-    
+
     .mobile-nav-links {
       list-style: none;
       margin-bottom: 24px;
     }
-    
+
     .mobile-nav-links li {
       margin-bottom: 8px;
     }
-    
+
     .mobile-nav-link {
       display: block;
       padding: 14px 16px;
@@ -338,18 +410,18 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    
+
     .mobile-nav-link:hover, .mobile-nav-link.active {
-      background: rgba(194,65,12,0.1);
+      background: rgba(5,150,105,0.1);
       color: var(--primary);
     }
-    
+
     .mobile-nav-actions {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    
+
     .btn-primary {
       background: var(--gradient-1);
       color: white;
@@ -363,18 +435,18 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(194, 65, 12, 0.2);
     }
-    
+
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(194, 65, 12, 0.3);
     }
-    
+
     .hero-faq {
       padding: 140px 0 80px;
       background: linear-gradient(135deg, #fff9f5 0%, #fef3f2 100%);
       text-align: center;
     }
-    
+
     .hero-faq h1 {
       font-size: 56px;
       font-weight: 900;
@@ -385,86 +457,86 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
     .hero-faq p {
       font-size: 20px;
       color: var(--text-light);
       max-width: 700px;
       margin: 0 auto;
     }
-    
+
     .faq-section {
       padding: 100px 0;
       background: white;
     }
-    
+
     .faq-container {
       max-width: 900px;
       margin: 0 auto;
     }
-    
+
     .faq-category {
       margin-bottom: 60px;
     }
-    
+
     .faq-category h2 {
       font-size: 32px;
       font-weight: 800;
       margin-bottom: 32px;
       color: var(--primary);
     }
-    
+
     .faq-item {
       background: var(--bg);
       padding: 32px;
       border-radius: 12px;
       margin-bottom: 16px;
     }
-    
+
     .faq-item h3 {
       font-size: 20px;
       font-weight: 700;
       margin-bottom: 12px;
      color: var(--text);
     }
-    
+
     .faq-item p {
       font-size: 16px;
       color: var(--text-light);
       line-height: 1.7;
     }
-    
+
     .cta-section {
       padding: 80px 0;
       background: var(--bg);
       text-align: center;
     }
-    
+
     .cta-section h2 {
       font-size: 40px;
       font-weight: 900;
       margin-bottom: 24px;
     }
-    
+
     .cta-section p {
       font-size: 18px;
       color: var(--text-light);
       margin-bottom: 32px;
     }
-    
+
     footer {
       background: #1c1917;
       color: white;
       padding: 60px 0 30px;
     }
-    
+
     .footer-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
       gap: 60px;
       margin-bottom: 40px;
     }
-    
+
     .footer-brand .footer-logo {
       display: flex;
       align-items: center;
@@ -473,43 +545,43 @@
       font-weight: 900;
       margin-bottom: 16px;
     }
-    
+
     .footer-description {
       color: #a8a29e;
       line-height: 1.6;
     }
-    
+
     .footer-links h4 {
       font-size: 16px;
       font-weight: 700;
       margin-bottom: 16px;
     }
-    
+
     .footer-links ul {
       list-style: none;
     }
-    
+
     .footer-links ul li {
       margin-bottom: 12px;
     }
-    
+
     .footer-links ul li a {
       color: #a8a29e;
       text-decoration: none;
       transition: color 0.2s;
     }
-    
+
     .footer-links ul li a:hover {
       color: white;
     }
-    
+
     .footer-bottom {
       text-align: center;
       padding-top: 30px;
       border-top: 1px solid #3f3f3f;
       color: #a8a29e;
     }
-    
+
     @media (max-width: 768px) {
       .hero-faq h1 { font-size: 36px; }
       .nav-center { display: none; }
@@ -544,14 +616,14 @@
         <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
         <span>RestOrder</span>
       </a>
-      
+
       <ul class="nav-center">
         <li><a href="/features">Features</a></li>
         <li><a href="/pricing">Pricing</a></li>
         <li><a href="/about">About</a></li>
         <li><a href="/contact">Contact</a></li>
       </ul>
-      
+
       <div class="nav-actions">
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
@@ -559,8 +631,8 @@
           Get Started
         </a>
       </div>
-      
-      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+
+      <button class="mobile-menu-btn" id="mobile-menu-btn">â˜°</button>
     </nav>
   </header>
 
@@ -572,16 +644,16 @@
           <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
           <span>RestOrder</span>
         </a>
-        <button class="mobile-menu-close" id="mobile-menu-close">×</button>
+        <button class="mobile-menu-close" id="mobile-menu-close">Ã—</button>
       </div>
-      
+
       <ul class="mobile-nav-links">
         <li><a href="/features" class="mobile-nav-link">Features</a></li>
         <li><a href="/pricing" class="mobile-nav-link">Pricing</a></li>
         <li><a href="/about" class="mobile-nav-link">About</a></li>
         <li><a href="/contact" class="mobile-nav-link">Contact</a></li>
       </ul>
-      
+
       <div class="mobile-nav-actions">
         <a href="/login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
@@ -606,52 +678,52 @@
         <!-- Getting Started -->
         <div class="faq-category">
           <h2>Getting Started</h2>
-          
+
           <div class="faq-item">
             <h3>How do I sign up for RestOrder?</h3>
             <p>Click "Get Started" on any page, enter your email and business details, and you're in! No credit card required. You can create your first menu in under 10 minutes.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Do I need technical skills to use RestOrder?</h3>
             <p>Not at all! RestOrder is designed for restaurant owners, not developers. If you can use email, you can use RestOrder. Our drag-and-drop menu builder makes it easy to add dishes, upload photos, and customize your menu.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>How long does it take to set up my first menu?</h3>
             <p>Most restaurants have their first menu live in 10-15 minutes. Upload your items, add prices, generate a QR code, and you're done. No waiting for printing or delivery.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can I import my existing menu?</h3>
-            <p>Yes! Upload a PDF, image, or spreadsheet and we'll help you import it. Professional and Enterprise plans include assisted import—our team will do it for you.</p>
+            <p>Yes! Upload a PDF, image, or spreadsheet and we'll help you import it. Professional and Enterprise plans include assisted importâ€”our team will do it for you.</p>
           </div>
         </div>
 
         <!-- Features -->
         <div class="faq-category">
           <h2>Features</h2>
-          
+
           <div class="faq-item">
             <h3>Can I customize the look and feel of my menu?</h3>
             <p>Absolutely! Professional and Enterprise plans let you customize colors, fonts, logos, and layouts. Match your restaurant's branding perfectly with no RestOrder watermark.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Do menu updates happen in real-time?</h3>
-            <p>Yes—changes appear instantly on all QR codes and links. Mark an item as sold out at 7 PM, and customers see the update immediately. No reprinting, no delays.</p>
+            <p>Yesâ€”changes appear instantly on all QR codes and links. Mark an item as sold out at 7 PM, and customers see the update immediately. No reprinting, no delays.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Does RestOrder support multiple languages?</h3>
             <p>Yes! Add translations for any language. Customers click their flag icon and see your menu in English, Spanish, French, Chinese, or 50+ other languages.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can I add photos to my menu items?</h3>
             <p>Definitely! Upload high-res images and we'll automatically optimize them for fast loading. Beautiful food photos boost orders by 30% on average.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>What kind of analytics does RestOrder provide?</h3>
             <p>See which dishes customers view most, peak viewing times, popular categories, and conversion rates. Professional plans unlock advanced analytics with custom reports.</p>
@@ -661,27 +733,27 @@
         <!-- Pricing & Billing -->
         <div class="faq-category">
           <h2>Pricing & Billing</h2>
-          
+
           <div class="faq-item">
             <h3>What's included in the free plan?</h3>
             <p>One digital menu, up to 50 items, QR code generation, basic analytics, and mobile optimization. Perfect for testing RestOrder or small cafes with simple menus.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Do I need a credit card to sign up?</h3>
             <p>No! Get started with just your email. We only ask for payment when you choose a paid plan.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can I cancel anytime?</h3>
             <p>Yes. No contracts, no commitments. Cancel from your dashboard anytime. Your account stays active until the end of your billing period, then automatically downgrades to Free.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>What's your refund policy?</h3>
             <p>30-day money-back guarantee, no questions asked. If RestOrder isn't the right fit, we'll refund your first month in full. Just email support@restorder.online.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Do you offer discounts for annual billing?</h3>
             <p>Yes! Save 20% when you pay annually. Professional drops from $468/year to $372/year. Enterprise from $1,188/year to $948/year.</p>
@@ -691,27 +763,27 @@
         <!-- Technical -->
         <div class="faq-category">
           <h2>Technical</h2>
-          
+
           <div class="faq-item">
             <h3>What devices are supported?</h3>
-            <p>RestOrder works on any device with a web browser—iPhone, Android, tablets, laptops, desktop computers. No app download required. Your customers just scan the QR code.</p>
+            <p>RestOrder works on any device with a web browserâ€”iPhone, Android, tablets, laptops, desktop computers. No app download required. Your customers just scan the QR code.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can customers view menus offline?</h3>
             <p>Menus require internet to load initially, but they're optimized to load in under 2 seconds. We recommend having WiFi available for customers (or they use their mobile data).</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Does RestOrder integrate with my POS system?</h3>
             <p>Enterprise plans include API access for custom integrations. We work with most major POS systems (Square, Toast, Clover, etc.). Contact sales@restorder.online for details.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Is my data secure?</h3>
             <p>Yes! Bank-level encryption, GDPR compliant, SOC 2 certified. Your data is backed up daily and stored on secure servers. We'll never sell your information.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>What's your uptime guarantee?</h3>
             <p>99.9% uptime SLA for Enterprise plans. Our infrastructure is hosted on AWS with automatic failover. In 2025, we achieved 99.97% uptime.</p>
@@ -721,25 +793,25 @@
         <!-- Account Management -->
         <div class="faq-category">
           <h2>Account Management</h2>
-          
+
           <div class="faq-item">
             <h3>How do I change my password?</h3>
-            <p>Go to Dashboard → Settings → Security. Click "Change Password", enter your current password and new password. You'll receive a confirmation email.</p>
+            <p>Go to Dashboard â†’ Settings â†’ Security. Click "Change Password", enter your current password and new password. You'll receive a confirmation email.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can I add team members to my account?</h3>
             <p>Yes! Professional plans allow up to 3 team members. Enterprise plans support unlimited users with role-based permissions (admin, editor, viewer).</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>How do I delete my account?</h3>
-            <p>Go to Settings → Account → Delete Account. We'll ask for confirmation and give you 30 days to change your mind. After 30 days, all data is permanently deleted.</p>
+            <p>Go to Settings â†’ Account â†’ Delete Account. We'll ask for confirmation and give you 30 days to change your mind. After 30 days, all data is permanently deleted.</p>
           </div>
-          
+
           <div class="faq-item">
             <h3>Can I export my menu data?</h3>
-            <p>Yes! Export your menu as JSON, CSV, or PDF anytime. Go to Dashboard → Export Data. Your data is yours—we make it easy to take it with you.</p>
+            <p>Yes! Export your menu as JSON, CSV, or PDF anytime. Go to Dashboard â†’ Export Data. Your data is yoursâ€”we make it easy to take it with you.</p>
           </div>
         </div>
       </div>
@@ -764,14 +836,14 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span style="font-size: 32px;">🍽️</span>
+            <span style="font-size: 32px;">ðŸ½ï¸</span>
             <span>RestOrder</span>
           </div>
           <p class="footer-description">
-            The complete digital menu platform for modern restaurants, cafes, bars & eateries.
+            The complete digital menu platform for modern restaurants, cafes, bars, and eateries.
           </p>
         </div>
-        
+
         <div class="footer-links">
           <h4>Product</h4>
           <ul>
@@ -781,7 +853,7 @@
             <li><a href="/customer-login">Sign In</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-links">
           <h4>Company</h4>
           <ul>
@@ -790,7 +862,7 @@
             <li><a href="/faq">FAQ</a></li>
           </ul>
         </div>
-        
+
         <div class="footer-links">
           <h4>Legal</h4>
           <ul>
@@ -800,9 +872,9 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
-        <p>&copy; 2026 RestOrder. All rights reserved. Built with ❤️ for restaurants worldwide.</p>
+        <p>&copy; 2026 RestOrder. All rights reserved. Built for restaurants worldwide.</p>
       </div>
     </div>
   </footer>
@@ -817,30 +889,30 @@
         header.classList.remove('scrolled');
       }
     });
-    
+
     // Mobile menu
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuClose = document.getElementById('mobile-menu-close');
-    
+
     if (mobileMenuBtn) {
       mobileMenuBtn.addEventListener('click', function() {
         mobileMenu.classList.add('active');
         document.body.style.overflow = 'hidden';
       });
     }
-    
+
     function closeMobileMenu() {
       mobileMenu.classList.remove('active');
       document.body.style.overflow = '';
     }
-    
+
     if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
-    
+
     mobileMenu.addEventListener('click', function(e) {
       if (e.target === mobileMenu) closeMobileMenu();
     });
-    
+
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && mobileMenu.classList.contains('active')) closeMobileMenu();
     });

@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Customer Management � RestOrder Admin</title>
+<title>Customer Management — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,13 +31,13 @@
   body { font-family: "Work Sans", sans-serif; }
   .spin { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  
+
   .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
   .badge-active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
   .badge-inactive { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
   .badge-suspended { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
-  /* ── Input fields: white bg, charcoal text ── */
+  /* â”€â”€ Input fields: white bg, charcoal text â”€â”€ */
   input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
   select, textarea { background: #ffffff !important; color: #1e293b !important; }
   input::placeholder, textarea::placeholder { color: #94a3b8 !important; }
@@ -181,7 +181,7 @@
 
 <!-- Main Content -->
 <main class="flex-1 p-8 overflow-auto">
-  
+
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center justify-between">
@@ -247,7 +247,7 @@
         <label class="block text-sm font-medium text-slate-300 mb-2">Search</label>
         <div class="relative">
           <svg class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
-          <input id="search-input" type="text" placeholder="Search by business, email, or contact name..." 
+          <input id="search-input" type="text" placeholder="Search by business, email, or contact name..."
             class="w-full pl-10 pr-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent" />
         </div>
       </div>
@@ -256,8 +256,8 @@
         <select id="sort-by" class="w-full px-4 py-2.5 bg-bg-dark border border-slate-700 rounded-xl text-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent">
           <option value="created_desc">Newest First</option>
           <option value="created_asc">Oldest First</option>
-          <option value="name_asc">Business A�Z</option>
-          <option value="name_desc">Business Z�A</option>
+          <option value="name_asc">Business Aï¿½Z</option>
+          <option value="name_desc">Business Zï¿½A</option>
           <option value="scans_desc">Most Scans</option>
           <option value="menus_desc">Most Menus</option>
         </select>
@@ -310,7 +310,7 @@
       <h3 class="text-xl font-bold">Customer Details</h3>
       <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-200 transition p-1">
         <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-close"/></svg>
-      </button>    
+      </button>
     </div>
     <!-- Drawer Body -->
     <div id="drawer-body" class="flex-1 overflow-y-auto p-6">
@@ -436,7 +436,7 @@
       </button>
     </div>
     <input type="hidden" id="assign-customer-id" />
-    
+
     <!-- Search -->
     <div class="relative mb-4">
       <svg class="material-symbols-outlined text-[18px] absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-search"/></svg>
@@ -731,8 +731,8 @@ function renderCustomers(customers) {
         </div>
       </td>
       <td class="px-6 py-4">
-        <div class="text-sm">${escapeHtml(c.contact_name || '�')}</div>
-        <div class="text-xs text-slate-400">${escapeHtml(c.phone || '�')}</div>
+        <div class="text-sm">${escapeHtml(c.contact_name || 'ï¿½')}</div>
+        <div class="text-xs text-slate-400">${escapeHtml(c.phone || 'ï¿½')}</div>
       </td>
       <td class="px-6 py-4">
         <div class="font-medium">${c.menu_count || 0}</div>
@@ -755,8 +755,8 @@ function renderCustomers(customers) {
           <button onclick="openEditModal(${c.id})" class="p-2 rounded-lg hover:bg-bg-dark text-slate-400 hover:text-primary transition" title="Edit">
             <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-edit"/></svg>
           </button>
-          <button onclick="toggleStatus(${c.id}, '${c.status}')" 
-            class="p-2 rounded-lg hover:bg-bg-dark ${c.status === 'suspended' ? 'text-slate-400 hover:text-green-400' : 'text-slate-400 hover:text-red-400'} transition" 
+          <button onclick="toggleStatus(${c.id}, '${c.status}')"
+            class="p-2 rounded-lg hover:bg-bg-dark ${c.status === 'suspended' ? 'text-slate-400 hover:text-green-400' : 'text-slate-400 hover:text-red-400'} transition"
             title="${c.status === 'suspended' ? 'Activate' : 'Suspend'}">
             <svg class="material-symbols-outlined text-[18px]" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-${c.status === 'suspended' ? 'check_circle' : 'block'}"/></svg>
           </button>
@@ -842,19 +842,19 @@ async function viewCustomer(customerId) {
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span class="text-slate-500">Contact</span>
-            <p class="font-medium mt-0.5">${escapeHtml(customer.contact_name || '�')}</p>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.contact_name || 'ï¿½')}</p>
           </div>
           <div>
             <span class="text-slate-500">Phone</span>
-            <p class="font-medium mt-0.5">${escapeHtml(customer.phone || '�')}</p>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.phone || 'ï¿½')}</p>
           </div>
           <div>
             <span class="text-slate-500">Address</span>
-            <p class="font-medium mt-0.5">${escapeHtml(customer.address || '�')}</p>
+            <p class="font-medium mt-0.5">${escapeHtml(customer.address || 'ï¿½')}</p>
           </div>
           <div>
             <span class="text-slate-500">City / Country</span>
-            <p class="font-medium mt-0.5">${escapeHtml([customer.city, customer.country].filter(Boolean).join(', ') || '�')}</p>
+            <p class="font-medium mt-0.5">${escapeHtml([customer.city, customer.country].filter(Boolean).join(', ') || 'ï¿½')}</p>
           </div>
         </div>
       </div>
@@ -1260,7 +1260,7 @@ async function openAssignSubModal(customerId, customerName) {
     assignSubPlans = await res.json();
     select.innerHTML = '<option value="">Select a plan</option>' +
       assignSubPlans.filter(p => p.is_active).map(p =>
-        `<option value="${p.id}">${escapeHtml(p.display_name)} — $${p.price}/${p.interval || 'month'}</option>`
+        `<option value="${p.id}">${escapeHtml(p.display_name)} â€” $${p.price}/${p.interval || 'month'}</option>`
       ).join('');
   } catch (err) {
     select.innerHTML = `<option value="">Error loading plans</option>`;
@@ -1272,7 +1272,7 @@ document.getElementById('assign-sub-plan').addEventListener('change', () => {
   const plan = assignSubPlans.find(p => p.id === planId);
   const priceEl = document.getElementById('assign-sub-plan-price');
   if (plan) {
-    priceEl.textContent = plan.price === 0 ? 'Free plan — no payment needed' : `Plan price: $${plan.price}/${plan.interval || 'month'}`;
+    priceEl.textContent = plan.price === 0 ? 'Free plan â€” no payment needed' : `Plan price: $${plan.price}/${plan.interval || 'month'}`;
     if (!document.getElementById('assign-sub-amount').value) {
       document.getElementById('assign-sub-amount').placeholder = plan.price === 0 ? '0' : plan.price.toFixed(2);
     }
@@ -1360,12 +1360,12 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return '�';
+  if (!isoStr) return 'ï¿½';
   return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function formatDateTime(isoStr) {
-  if (!isoStr) return '�';
+  if (!isoStr) return 'ï¿½';
   return new Date(isoStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
