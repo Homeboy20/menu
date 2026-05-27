@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
   <title>RestOrder - Digital Menu Platform for Restaurants, Cafes, Bars & Eateries</title>
-  <meta name="description" content="Complete digital menu solution for restaurants, cafes, bars & juice bars. QR codes, real-time updates, analytics, online ordering. Boost sales by 30%. Get started today.">
+  <meta name="description" content="Complete digital menu platform for restaurants, cafes, bars and juice bars. Create QR menus, update items in real time, accept orders, and track performance.">
   <meta name="keywords" content="digital menu, restaurant menu software, QR code menu, online ordering for restaurants, cafe menu app, contactless menu, AI recommended menu software">
   <meta name="author" content="RestOrder">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://restorder.com/">
+  <meta property="og:url" content="https://restorder.online/">
   <meta property="og:title" content="RestOrder - Digital Menu Platform for Restaurants">
-  <meta property="og:description" content="Complete digital menu solution for restaurants, cafes, bars & juice bars. Boost sales by 30%. Get started today.">
-  <meta property="og:image" content="https://restorder.com/og-image.jpg">
+  <meta property="og:description" content="Create QR menus, update items in real time, accept orders, and track performance from one restaurant dashboard.">
+  <meta property="og:image" content="https://restorder.online/og-image.jpg">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://restorder.com/">
+  <meta property="twitter:url" content="https://restorder.online/">
   <meta property="twitter:title" content="RestOrder - Digital Menu Platform">
-  <meta property="twitter:description" content="Complete digital menu solution. QR codes, real-time updates, analytics. Boost sales by 30%.">
-  <meta property="twitter:image" content="https://restorder.com/og-image.jpg">
+  <meta property="twitter:description" content="Create QR menus, update items in real time, accept orders, and track performance from one dashboard.">
+  <meta property="twitter:image" content="https://restorder.online/og-image.jpg">
 
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
@@ -30,18 +30,18 @@
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://restorder.com/#organization",
+        "@id": "https://restorder.online/#organization",
         "name": "RestOrder",
-        "url": "https://restorder.com",
+        "url": "https://restorder.online",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://restorder.com/logo.png"
+          "url": "https://restorder.online/logo.png"
         },
         "description": "RestOrder provides a complete digital menu and online ordering platform for restaurants, cafes, bars, and juice bars. Designed to boost sales, reduce costs, and delight customers with professional digital menus.",
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer support",
-          "email": "support@restorder.com",
+          "email": "support@restorder.online",
           "availableLanguage": ["English"]
         },
         "sameAs": [
@@ -52,12 +52,12 @@
       },
       {
         "@type": "SoftwareApplication",
-        "@id": "https://restorder.com/#software",
+        "@id": "https://restorder.online/#software",
         "name": "RestOrder Digital Menu Platform",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web, Mobile",
-        "url": "https://restorder.com",
-        "publisher": {"@id": "https://restorder.com/#organization"},
+        "url": "https://restorder.online",
+        "publisher": {"@id": "https://restorder.online/#organization"},
         "offers": {
           "@type": "AggregateOffer",
           "priceCurrency": "USD",
@@ -105,11 +105,11 @@
       },
       {
         "@type": "WebPage",
-        "@id": "https://restorder.com/#webpage",
-        "url": "https://restorder.com",
+        "@id": "https://restorder.online/#webpage",
+        "url": "https://restorder.online",
         "name": "RestOrder - Best Digital Menu Platform",
-        "isPartOf": {"@id": "https://restorder.com/#organization"},
-        "about": {"@id": "https://restorder.com/#software"}
+        "isPartOf": {"@id": "https://restorder.online/#organization"},
+        "about": {"@id": "https://restorder.online/#software"}
       }
     ]
   }
@@ -1955,156 +1955,10 @@
       padding-top: 180px;
     }
     
-    /* Exit Intent Popup */
-    .exit-popup-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
-      z-index: 10000;
-      align-items: center;
-      justify-content: center;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    .exit-popup-overlay.active {
-      display: flex;
-    }
-    
-    .exit-popup {
-      background: white;
-      max-width: 600px;
-      width: 90%;
-      border-radius: 20px;
-      padding: 48px;
-      position: relative;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      text-align: center;
-    }
-    
-    @keyframes popIn {
-      from { 
-        opacity: 0;
-        transform: scale(0.8) translateY(20px);
-      }
-      to { 
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    
-    .exit-popup-close {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: #f3f4f6;
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 24px;
-      cursor: pointer;
-      color: #6b7280;
-      transition: all 0.2s;
-      line-height: 1;
-    }
-    
-    .exit-popup-close:hover {
-      background: #dc2626;
-      color: white;
-      transform: rotate(90deg);
-    }
-    
-    .exit-popup-icon {
-      font-size: 64px;
-      margin-bottom: 24px;
-    }
-    
-    .exit-popup h2 {
-      font-size: 32px;
-      font-weight: 900;
-      margin-bottom: 16px;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    
-    .exit-popup h2 .highlight {
-      color: #dc2626;
-    }
-    
-    .exit-popup p {
-      font-size: 18px;
-      color: var(--text-light);
-      margin-bottom: 32px;
-      line-height: 1.6;
-    }
-    
-    .exit-popup-discount {
-      background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
-      color: white;
-      padding: 24px;
-      border-radius: 12px;
-      margin-bottom: 32px;
-    }
-    
-    .exit-popup-discount-text {
-      font-size: 48px;
-      font-weight: 900;
-      margin-bottom: 8px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .exit-popup-discount-subtitle {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-    
-    .exit-popup-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
-      color: white;
-      padding: 18px 40px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: 18px;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(194,65,12,0.3);
-      border: none;
-      cursor: pointer;
-    }
-    
-    .exit-popup-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 40px rgba(194,65,12,0.4);
-    }
-    
-    .exit-popup-guarantee {
-      margin-top: 24px;
-      font-size: 14px;
-      color: var(--text-light);
-    }
-    
     @media (max-width: 768px) {
       .urgency-bar { font-size: 12px; padding: 10px 40px 10px 16px; }
       .urgency-bar-content { gap: 8px; }
       .urgency-timer { font-size: 13px; }
-      .exit-popup { padding: 32px 24px; }
-      .exit-popup h2 { font-size: 24px; }
-      .exit-popup p { font-size: 16px; }
-      .exit-popup-discount-text { font-size: 36px; }
     }
     
     @keyframes spin {
@@ -2139,38 +1993,13 @@
 </head>
 <body>
 
-  <!-- Urgency Bar - Limited Time Offer -->
+  <!-- Product notice bar -->
   <div class="urgency-bar" id="urgency-bar">
     <div class="urgency-bar-content">
-      <span>🔥 <strong>LIMITED OFFER:</strong> Get 50% OFF Professional Plan</span>
-      <span class="urgency-timer">⏰ Ends in: <span id="urgency-countdown">2d 14h 32m</span></span>
-      <span>• Only <strong id="spots-left">47</strong> spots left this month!</span>
+      <span><strong>New:</strong> Start with a free QR menu, then upgrade when ordering and analytics are needed.</span>
+      <span>• No credit card required</span>
     </div>
     <button class="urgency-close" id="urgency-close" aria-label="Close">&times;</button>
-  </div>
-
-  <!-- Exit Intent Popup -->
-  <div class="exit-popup-overlay" id="exit-popup">
-    <div class="exit-popup">
-      <button class="exit-popup-close" id="exit-popup-close">&times;</button>
-      <div class="exit-popup-icon">⏰</div>
-      <h2>Wait! Don't Miss <span class="highlight">50% OFF</span></h2>
-      <p>You're losing $3,600/month with paper menus. Get 50% off for 3 months when you sign up today!</p>
-      
-      <div class="exit-popup-discount">
-        <div class="exit-popup-discount-text">50% OFF</div>
-        <div class="exit-popup-discount-subtitle">Your First 3 Months • Limited Time</div>
-      </div>
-      
-      <a href="/start?promo=EXIT50" class="exit-popup-cta">
-        <svg class="material-symbols-outlined" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
-        Claim My 50% Discount Now
-      </a>
-      
-      <p class="exit-popup-guarantee">
-        🛡️ 30-Day Money-Back Guarantee • No Credit Card Required
-      </p>
-    </div>
   </div>
 
   <!-- Header -->
@@ -2268,16 +2097,16 @@
     <div class="container hero-content">
       <div class="hero-badge">
         <svg class="material-symbols-outlined" style="font-size: 18px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-verified"/></svg>
-        <span>⭐⭐⭐⭐⭐ 4.9/5 from 1,247+ Restaurants, Cafes & Bars • Trusted Worldwide</span>
+        <span>Built for restaurants, cafes, bars, food trucks, and juice bars</span>
       </div>
       
       <h1>
-        Stop Losing <span class="highlight">$3,600/Month</span> to Paper Menus
+        Create a QR menu your customers can use immediately
       </h1>
       
       <p class="subtitle">
-        Increase revenue by 30% without hiring more staff. Complete digital menu platform for restaurants, cafes, bars & eateries with QR codes, online ordering, and analytics. 
-        <strong>Join 1,247 businesses that switched this month.</strong>
+        RestOrder helps you publish a mobile-friendly menu, update prices in real time, accept table orders, and understand what customers view most.
+        <strong>Start with a free menu and upgrade only when you need more tools.</strong>
       </p>
       
       <div class="hero-cta">
@@ -2302,16 +2131,16 @@
       
       <div class="hero-stats">
         <div class="stat-card">
-          <span class="stat-number">1,247+</span>
-          <span class="stat-label">Cafes, Bars & Restaurants</span>
+          <span class="stat-number">Free</span>
+          <span class="stat-label">Starter menu available</span>
         </div>
         <div class="stat-card">
-          <span class="stat-number">$3,600</span>
-          <span class="stat-label">Avg. Monthly Savings</span>
+          <span class="stat-number">QR</span>
+          <span class="stat-label">Share by table or counter</span>
         </div>
         <div class="stat-card">
-          <span class="stat-number">+30%</span>
-          <span class="stat-label">Revenue Increase</span>
+          <span class="stat-number">Live</span>
+          <span class="stat-label">Edit items anytime</span>
         </div>
         <div class="stat-card">
           <span class="stat-number">5 min</span>
@@ -2807,14 +2636,13 @@
         <div class="testimonial-card">
           <div class="stars">★★★★★</div>
           <p class="testimonial-text">
-            "RestOrder completely transformed how we operate. <strong>Orders increased by 35% in the first month</strong> and we recovered $4,200 monthly from paper menu waste. 
-            The table management feature saves us 15 hours per week. Absolutely worth every penny!"
+            "RestOrder gave us one place to update prices, photos, and specials. The team stopped reprinting menus every time an item changed."
           </p>
           <div class="testimonial-author">
             <div class="author-avatar">MP</div>
             <div class="author-info">
               <h4>Maria Perez</h4>
-              <p>Owner, Pizza Palace Restaurant • <strong>+$4,200/mo</strong></p>
+              <p>Owner, Pizza Palace Restaurant</p>
             </div>
           </div>
         </div>
@@ -2822,14 +2650,13 @@
         <div class="testimonial-card">
           <div class="stars">★★★★★</div>
           <p class="testimonial-text">
-            "Setup was incredibly easy - took me less than 10 minutes! <strong>We saved over $500/month on printing costs</strong> and customer satisfaction increased by 40%. 
-            Customers love scanning the QR code. Best investment we've made this year."
+            "Setup was straightforward. Customers scan the table QR code, browse the latest menu, and our staff no longer answers the same item questions all day."
           </p>
           <div class="testimonial-author">
             <div class="author-avatar">JL</div>
             <div class="author-info">
               <h4>James Liu</h4>
-              <p>Manager, Café Luna • <strong>+$2,800/mo</strong></p>
+              <p>Manager, Café Luna</p>
             </div>
           </div>
         </div>
@@ -2837,14 +2664,13 @@
         <div class="testimonial-card">
           <div class="stars">★★★★★</div>
           <p class="testimonial-text">
-            "Our craft beer menu changes weekly. <strong>RestOrder lets us update it instantly from our phone</strong>. 
-            Customers love seeing real-time availability. We've seen 40% more orders for specialty brews. Game-changer!"
+            "Our drinks list changes weekly. RestOrder lets us update availability from a phone before service starts."
           </p>
           <div class="testimonial-author">
             <div class="author-avatar">TC</div>
             <div class="author-info">
               <h4>Tom Chen</h4>
-              <p>Owner, The Craft Tap Bar • <strong>+40% specialty orders</strong></p>
+              <p>Owner, The Craft Tap Bar</p>
             </div>
           </div>
         </div>
@@ -2856,12 +2682,12 @@
   <section class="cta-section" style="padding: 48px 0;">
     <div class="container cta-content">
       <h2>Ready to Transform Your Business?</h2>
-      <p>Join 10,000+ restaurants already using RestOrder to save time and delight customers.</p>
+      <p>Create your first QR menu today, then add ordering, analytics, and staff tools when your team is ready.</p>
       
       <div class="cta-features">
         <div class="cta-feature-item"><span class="cta-feature-icon">⚡</span><span class="cta-feature-text">5-min setup</span></div>
         <div class="cta-feature-item"><span class="cta-feature-icon">💰</span><span class="cta-feature-text">Save $200+/mo</span></div>
-        <div class="cta-feature-item"><span class="cta-feature-icon">📈</span><span class="cta-feature-text">+35% revenue</span></div>
+        <div class="cta-feature-item"><span class="cta-feature-icon">📈</span><span class="cta-feature-text">Menu analytics</span></div>
         <div class="cta-feature-item"><span class="cta-feature-icon">🔒</span><span class="cta-feature-text">Bank-level security</span></div>
       </div>
       
@@ -3339,39 +3165,6 @@
       });
     });
     
-    // Urgency Bar Countdown Timer
-    function startUrgencyCountdown() {
-      const countdownElement = document.getElementById('urgency-countdown');
-      const spotsElement = document.getElementById('spots-left');
-      
-      // Set end time to 2 days 14 hours from now
-      const endTime = new Date().getTime() + (2.5 * 24 * 60 * 60 * 1000);
-      
-      function updateCountdown() {
-        const now = new Date().getTime();
-        const distance = endTime - now;
-        
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        
-        if (countdownElement) {
-          countdownElement.textContent = `${days}d ${hours}h ${minutes}m`;
-        }
-        
-        // Decrease spots randomly every 5-10 minutes (simulated scarcity)
-        if (spotsElement && Math.random() > 0.95) {
-          const currentSpots = parseInt(spotsElement.textContent);
-          if (currentSpots > 20) {
-            spotsElement.textContent = currentSpots - 1;
-          }
-        }
-      }
-      
-      updateCountdown();
-      setInterval(updateCountdown, 60000); // Update every minute
-    }
-    
     // Close Urgency Bar
     const urgencyClose = document.getElementById('urgency-close');
     const urgencyBar = document.getElementById('urgency-bar');
@@ -3392,77 +3185,6 @@
       header.classList.remove('with-urgency');
       hero.classList.remove('with-urgency');
     }
-    
-    // Exit Intent Popup Detection
-    const exitPopup = document.getElementById('exit-popup');
-    const exitPopupClose = document.getElementById('exit-popup-close');
-    let exitIntentShown = false;
-    
-    function showExitPopup() {
-      if (!exitIntentShown && !sessionStorage.getItem('exitPopupShown')) {
-        exitPopup.classList.add('active');
-        exitIntentShown = true;
-        sessionStorage.setItem('exitPopupShown', 'true');
-        
-        // Track exit intent event (if analytics is set up)
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'exit_intent', {
-            'event_category': 'engagement',
-            'event_label': 'Exit Popup Shown'
-          });
-        }
-      }
-    }
-    
-    // Detect mouse leaving viewport (exit intent)
-    document.addEventListener('mouseleave', (e) => {
-      if (e.clientY <= 0) {
-        showExitPopup();
-      }
-    });
-    
-    // Also show on aggressive scroll up (mobile detection)
-    let lastScrollTop = 0;
-    window.addEventListener('scroll', () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop < lastScrollTop && scrollTop < 100) {
-        // User scrolled up to top quickly
-        if (Math.random() > 0.7) { // 30% chance on scroll up
-          showExitPopup();
-        }
-      }
-      lastScrollTop = scrollTop;
-    }, false);
-    
-    // Close exit popup
-    if (exitPopupClose) {
-      exitPopupClose.addEventListener('click', () => {
-        exitPopup.classList.remove('active');
-      });
-    }
-    
-    // Close popup when clicking outside
-    if (exitPopup) {
-      exitPopup.addEventListener('click', (e) => {
-        if (e.target === exitPopup) {
-          exitPopup.classList.remove('active');
-        }
-      });
-    }
-    
-    // Close popup with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && exitPopup.classList.contains('active')) {
-        exitPopup.classList.remove('active');
-      }
-    });
-    
-    // Show popup after 30 seconds as backup (if not shown yet)
-    setTimeout(() => {
-      if (!exitIntentShown) {
-        showExitPopup();
-      }
-    }, 30000);
     
     // Scroll Reveal Animation with IntersectionObserver
     function initScrollReveal() {
@@ -3535,7 +3257,7 @@
     const planValueProps = {
       trial: { text: '🎁 Full Pro access for 7 days', amount: 'No credit card required' },
       starter: { text: '🎉 Save $200+ on printing costs', amount: '' },
-      professional: { text: '💰 Average revenue increase', amount: '+35% in first month' },
+      professional: { text: '📊 Add ordering and analytics', amount: 'Upgrade when ready' },
       enterprise: { text: '🚀 Complete control & customization', amount: '' }
     };
     
@@ -3645,7 +3367,6 @@
     document.addEventListener('DOMContentLoaded', function() {
       getUserLocation();
       setupCategoryTabs();
-      startUrgencyCountdown();
       loadDynamicPricing();
       addRevealClasses();
       initScrollReveal();
