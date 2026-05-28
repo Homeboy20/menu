@@ -56,8 +56,8 @@
 <script>
   (function() {
     const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-    if (token) {
-      document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    {
       const origFetch = window.fetch;
       window.fetch = async function(...args) {
         const res = await origFetch.apply(this, args);
@@ -72,10 +72,9 @@
               const overlay = document.getElementById('login-overlay');
               if (overlay) overlay.classList.remove('hidden');
               localStorage.removeItem('admin-token');
-              localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminToken');
             } else if (data && data.authenticated === true) {
-              const style = document.getElementById('anti-flash');
-              if (style) style.remove();
+              // Keep anti-flash style until the page applies its permanent hidden state.
             }
           }
         } catch(e) {}
@@ -561,13 +560,17 @@ async function checkAuth() {
     console.warn('Failed to fetch CSRF token:', err);
   }
   try {
-    const token = localStorage.getItem('admin-token');
-    if (!token) return;
-    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken') || '';
+    const headers = token ? { 'x-admin-token': token } : {};
+    const res = await fetch('/api/auth/check', { headers, credentials: 'include' });
     const data = await res.json();
     if (data.authenticated) {
       isAuthenticated = true;
-      adminToken = token;
+      adminToken = token || data.token || null;
+      if (adminToken) {
+        localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
+}
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadCustomers();
@@ -597,6 +600,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       isAuthenticated = true;
       adminToken = data.token;
       localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadCustomers();
@@ -620,6 +624,7 @@ document.getElementById('login-password').addEventListener('keypress', (e) => {
 document.getElementById('logout-btn').addEventListener('click', async () => {
   try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
   localStorage.removeItem('admin-token');
+  localStorage.removeItem('adminToken');
   location.reload();
 });
 

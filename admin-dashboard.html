@@ -56,8 +56,8 @@
 <script>
   (function() {
     const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-    if (token) {
-      document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    {
       const origFetch = window.fetch;
       window.fetch = async function(...args) {
         const res = await origFetch.apply(this, args);
@@ -74,8 +74,7 @@
               localStorage.removeItem('admin-token');
               localStorage.removeItem('adminToken');
             } else if (data && data.authenticated === true) {
-              const style = document.getElementById('anti-flash');
-              if (style) style.remove();
+              // Keep anti-flash style until the page applies its permanent hidden state.
             }
           }
         } catch(e) {}
@@ -770,8 +769,10 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     }
     
     adminToken = data.token || null;
-    localStorage.removeItem('admin-token');
-    localStorage.removeItem('adminToken');
+    if (adminToken) {
+      localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
+    }
     document.getElementById('login-overlay').classList.add('hidden');
     applyUserUI(data.user);
     await loadDashboard();
@@ -801,13 +802,15 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   
   try {
     const headers = token ? { 'x-admin-token': token } : {};
-    const res = await fetch('/api/auth/check', { headers });
+    const res = await fetch('/api/auth/check', { headers, credentials: 'include' });
     const data = await res.json();
     
     if (data.authenticated) {
-      adminToken = token;
-      localStorage.removeItem('admin-token');
-      localStorage.removeItem('adminToken');
+      adminToken = token || data.token || null;
+      if (adminToken) {
+        localStorage.setItem('admin-token', adminToken);
+        localStorage.setItem('adminToken', adminToken);
+      }
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       await loadDashboard();

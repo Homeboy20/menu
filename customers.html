@@ -56,8 +56,8 @@
 <script>
   (function() {
     const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-    if (token) {
-      document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    {
       const origFetch = window.fetch;
       window.fetch = async function(...args) {
         const res = await origFetch.apply(this, args);
@@ -74,8 +74,7 @@
               localStorage.removeItem('admin-token');
               localStorage.removeItem('adminToken');
             } else if (data && data.authenticated === true) {
-              const style = document.getElementById('anti-flash');
-              if (style) style.remove();
+              // Keep anti-flash style until the page applies its permanent hidden state.
             }
           }
         } catch(e) {}
@@ -570,7 +569,11 @@ async function checkAuth() {
     const data = await res.json();
     if (data.authenticated) {
       isAuthenticated = true;
-      adminToken = token;
+      adminToken = token || data.token || null;
+      if (adminToken) {
+        localStorage.setItem('admin-token', adminToken);
+        localStorage.setItem('adminToken', adminToken);
+      }
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadCustomers();

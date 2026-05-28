@@ -58,8 +58,8 @@
 <script>
   (function() {
     const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-    if (token) {
-      document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    document.write('<style id="anti-flash">#login-overlay { display: none !important; }</style>');
+    {
       const origFetch = window.fetch;
       window.fetch = async function(...args) {
         const res = await origFetch.apply(this, args);
@@ -74,10 +74,9 @@
               const overlay = document.getElementById('login-overlay');
               if (overlay) overlay.classList.remove('hidden');
               localStorage.removeItem('admin-token');
-              localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminToken');
             } else if (data && data.authenticated === true) {
-              const style = document.getElementById('anti-flash');
-              if (style) style.remove();
+              // Keep anti-flash style until the page applies its permanent hidden state.
             }
           }
         } catch(e) {}
@@ -383,6 +382,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     }
     adminToken = data.token;
     localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
     document.getElementById('login-overlay').classList.add('hidden');
     applyUserUI(data.user);
     if (data.user?.role !== 'super_admin') {
@@ -399,6 +399,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 document.getElementById('logout-btn').addEventListener('click', async () => {
   try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
   localStorage.removeItem('admin-token');
+  localStorage.removeItem('adminToken');
   location.reload();
 });
 
@@ -412,13 +413,17 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     console.warn('Failed to fetch CSRF token:', err);
   }
 
-  const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
-  if (!token) return;
+  const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken') || '';
   try {
-    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const headers = token ? { 'x-admin-token': token } : {};
+    const res = await fetch('/api/auth/check', { headers, credentials: 'include' });
     const data = await res.json();
     if (data.authenticated) {
-      adminToken = token;
+      adminToken = token || data.token || null;
+      if (adminToken) {
+        localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
+}
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       if (data.user?.role !== 'super_admin') {
@@ -428,9 +433,11 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
       await loadUsers();
     } else {
       localStorage.removeItem('admin-token');
-    }
+  localStorage.removeItem('adminToken');
+            }
   } catch (e) {
     localStorage.removeItem('admin-token');
+  localStorage.removeItem('adminToken');
   }
 })();
 
