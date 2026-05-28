@@ -430,6 +430,14 @@ const verificationLimiter = rateLimit({
   message: { error: 'Too many verification attempts. Please wait 15 minutes.' },
 });
 
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.PAYMENT_RATE_LIMIT || '30', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many payment attempts. Please wait and try again.' },
+});
+
 // Ã¢â€â‚¬Ã¢â€â‚¬ Performance & Compression Middleware Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // High-performance compression with optimal settings
 app.use(compression({
@@ -1513,7 +1521,7 @@ await client.query(`CREATE INDEX IF NOT EXISTS idx_rooms_menu ON menu_rooms (men
         ['default_currency',    'USD'],
         ['currency_geo_detect', 'true'],
         ['integration_clickpesa',    JSON.stringify({ enabled: false, environment: 'sandbox', merchant_id: '', api_key: '', api_secret: '', callback_url: '' })],
-        ['integration_flutterwave', JSON.stringify({ enabled: false, environment: 'sandbox', public_key: '', secret_key: '', encryption_key: '', webhook_url: '' })],
+        ['integration_flutterwave', JSON.stringify({ enabled: false, environment: 'sandbox', public_key: '', secret_key: '', encryption_key: '', webhook_secret: '', webhook_url: '' })],
         ['integration_paypal',       JSON.stringify({ enabled: false, environment: 'sandbox', client_id: '', client_secret: '', webhook_id: '' })],
         ['integration_bank_transfer', JSON.stringify({ enabled: false, bank_name: '', account_name: '', account_number: '', swift_code: '', routing_number: '', instructions: '' })],
         ['integration_email',        JSON.stringify({ provider: 'smtp', host: '', port: '587', secure: false, user: '', pass: '', from_name: 'RestOrder', from_email: '' })],
@@ -3133,23 +3141,25 @@ app.post('/api/customers/verify-otp', verificationLimiter, doubleCsrfProtection,
 
 
 // POST /api/payments/paypal/create-order-public - Create PayPal order before registration (no auth)
-app.post('/api/payments/paypal/create-order-public', async (req, res) => {
+app.post('/api/payments/paypal/create-order-public', paymentLimiter, requireSameOriginPayment, async (req, res) => {
   try {
     const { plan_id, promo_code, billing_cycle } = req.body || {};
     if (!plan_id) return res.status(400).json({ error: 'plan_id required.' });
 
-    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1', [parseInt(plan_id)]);
+    const planId = parsePositiveInt(plan_id, 'plan_id');
+    const cycle = normalizeBillingCycle(billing_cycle);
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1', [planId]);
     if (!planRows.length) return res.status(400).json({ error: 'Plan not found.' });
     const plan = planRows[0];
 
-    const isAnnual = billing_cycle === 'annual' && parseFloat(plan.annual_price) > 0;
+    const isAnnual = cycle === 'annual' && parseFloat(plan.annual_price) > 0;
     let effectivePrice = isAnnual ? parseFloat(plan.annual_price) : parseFloat(plan.price);
     if (promo_code && effectivePrice > 0) {
       const { rows: promos } = await pool.query(`SELECT * FROM promo_codes WHERE UPPER(code)=UPPER($1) AND is_active=1`, [sanitizeStr(promo_code, 50)]);
       if (promos.length) {
         const promo = promos[0];
         const applicablePlans = Array.isArray(promo.applicable_plans) ? promo.applicable_plans : [];
-        const validForPlan = applicablePlans.length === 0 || applicablePlans.includes(parseInt(plan_id));
+        const validForPlan = applicablePlans.length === 0 || applicablePlans.includes(planId);
         const notExpired = !promo.expires_at || new Date(promo.expires_at) > new Date();
         const underLimit = promo.max_uses === 0 || promo.uses_count < promo.max_uses;
         if (validForPlan && notExpired && underLimit) {
@@ -3163,18 +3173,19 @@ app.post('/api/payments/paypal/create-order-public', async (req, res) => {
 
     const cfg = await getGatewayConfig('paypal');
     if (!cfg?.enabled || !cfg.client_id || !cfg.client_secret) return res.status(400).json({ error: 'PayPal not configured.' });
-    const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
-    const authRes = await fetch(`${base}/v1/oauth2/token`, {
-      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + Buffer.from(`${cfg.client_id}:${cfg.client_secret}`).toString('base64') },
-      body: 'grant_type=client_credentials'
-    });
-    const authData = await authRes.json();
-    if (!authData.access_token) return res.status(400).json({ error: 'PayPal auth failed.' });
+    const { base, accessToken } = await getPayPalAccessToken(cfg);
 
     const orderRes = await fetch(`${base}/v2/checkout/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authData.access_token}` },
-      body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ amount: { currency_code: 'USD', value: effectivePrice.toFixed(2) }, description: plan.display_name + ' Plan' }] })
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          amount: { currency_code: 'USD', value: effectivePrice.toFixed(2) },
+          description: plan.display_name + ' Plan',
+          custom_id: `reg:${planId}:${cycle}:${effectivePrice.toFixed(2)}`,
+        }],
+      })
     });
     const orderData = await orderRes.json();
     if (!orderData.id) return res.status(400).json({ error: 'Failed to create PayPal order.', detail: orderData });
@@ -3216,14 +3227,16 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
     const existing = await pool.query('SELECT id FROM customers WHERE email = $1', [cleanEmail]);
     if (existing.rows.length > 0) return res.status(400).json({ error: 'Email already registered. Please sign in instead.' });
 
-    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1', [parseInt(plan_id)]);
+    const planId = parsePositiveInt(plan_id, 'plan_id');
+    const cycle = normalizeBillingCycle(billing_cycle);
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id = $1 AND is_active = 1', [planId]);
     if (!planRows.length) return res.status(400).json({ error: 'Invalid plan selected.' });
     const plan = planRows[0];
 
     // Let trial plan proceed through checkout-register
 
     // Compute effective price (apply promo if valid)
-    const isAnnual = billing_cycle === 'annual' && parseFloat(plan.annual_price) > 0;
+    const isAnnual = cycle === 'annual' && parseFloat(plan.annual_price) > 0;
     let effectivePrice = isAnnual ? parseFloat(plan.annual_price) : parseFloat(plan.price);
     let promoRecord = null;
     if (promo_code && effectivePrice > 0) {
@@ -3231,7 +3244,7 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
       if (promos.length) {
         const promo = promos[0];
         const applicablePlans = Array.isArray(promo.applicable_plans) ? promo.applicable_plans : [];
-        const validForPlan = applicablePlans.length === 0 || applicablePlans.includes(parseInt(plan_id));
+        const validForPlan = applicablePlans.length === 0 || applicablePlans.includes(planId);
         const notExpired = !promo.expires_at || new Date(promo.expires_at) > new Date();
         const underLimit = promo.max_uses === 0 || promo.uses_count < promo.max_uses;
         if (validForPlan && notExpired && underLimit) {
@@ -3256,6 +3269,9 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         });
         const vd = await verifyRes.json();
         if (vd.status !== 'success' || vd.data?.status !== 'successful') return res.status(400).json({ error: 'Payment not successful.' });
+        const txRefParts = String(vd.data.tx_ref || '').split(':');
+        if (txRefParts[0] !== 'reg' || parseInt(txRefParts[1], 10) !== planId) return res.status(400).json({ error: 'Payment reference mismatch.' });
+        if (String(vd.data.currency || '').toUpperCase() !== 'USD') return res.status(400).json({ error: 'Payment currency mismatch.' });
         if (parseFloat(vd.data.amount) < effectivePrice * 0.99) return res.status(400).json({ error: `Payment amount insufficient. Expected $${effectivePrice}.` });
       } else if (payment_method === 'paypal' && paypal_order_id) {
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(paypal_order_id)]);
@@ -3278,8 +3294,14 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         });
         const ppCaptureData = await ppCaptureRes.json();
         if (ppCaptureData.status !== 'COMPLETED') return res.status(400).json({ error: 'PayPal payment not completed.' });
+        const ppCustomId = ppCaptureData.purchase_units?.[0]?.custom_id || '';
+        const ppParts = String(ppCustomId).split(':');
+        if (ppParts[0] && (ppParts[0] !== 'reg' || parseInt(ppParts[1], 10) !== planId)) return res.status(400).json({ error: 'PayPal order reference mismatch.' });
         const ppCapture = ppCaptureData.purchase_units?.[0]?.payments?.captures?.[0];
         const ppAmount = parseFloat(ppCapture?.amount?.value || '0');
+        const ppCurrency = ppCapture?.amount?.currency_code || ppCaptureData.purchase_units?.[0]?.amount?.currency_code || 'USD';
+        if (String(ppCurrency).toUpperCase() !== 'USD') return res.status(400).json({ error: 'PayPal currency mismatch.' });
+        if (ppParts[3] && ppAmount < parseFloat(ppParts[3]) * 0.99) return res.status(400).json({ error: 'PayPal order amount mismatch.' });
         if (ppAmount < effectivePrice * 0.99) return res.status(400).json({ error: `PayPal payment amount insufficient. Expected $${effectivePrice}.` });
       } else if (payment_method === 'bank_transfer') {
         // Bank transfer Ã¢â‚¬â€ account created with pending payment; admin confirms later
@@ -3333,7 +3355,7 @@ app.post('/api/customers/checkout-register', registerLimiter, doubleCsrfProtecti
         const prefix = payment_method === 'clickpesa' ? 'CP' : 'BT';
         await pool.query(`INSERT INTO payments (subscription_id, amount, currency, payment_method, payment_id, status, notes, created_at) VALUES ($1,$2,'USD',$3,$4,'pending',$5,$6)`, [subId, effectivePrice, methodDisplay, `${prefix}-${Date.now()}`, `${plan.display_name} - ${methodDisplay} pending confirmation`, now]);
       } else {
-        await activateSubscriptionPayment(menuId, plan.id, effectivePrice, 'USD', payment_method, transaction_id || paypal_order_id || '', `${plan.display_name} - checkout registration`, billing_cycle);
+        await activateSubscriptionPayment(menuId, plan.id, effectivePrice, 'USD', payment_method, transaction_id || paypal_order_id || '', `${plan.display_name} - checkout registration`, cycle);
       }
       if (plan.name === 'trial') {
         const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -5023,6 +5045,51 @@ const VALID_CURRENCIES   = [
 function sanitizeStr(v, maxLen = 300) {
   if (v == null) return '';
   return String(v).trim().slice(0, maxLen);
+}
+
+function parsePositiveInt(value, fieldName = 'id') {
+  const n = Number.parseInt(String(value ?? ''), 10);
+  if (!Number.isSafeInteger(n) || n <= 0) {
+    const err = new Error(`Invalid ${fieldName}.`);
+    err.statusCode = 400;
+    throw err;
+  }
+  return n;
+}
+
+function normalizeBillingCycle(value) {
+  const cycle = String(value || 'monthly').trim().toLowerCase();
+  return (cycle === 'annual' || cycle === 'yearly') ? 'annual' : 'monthly';
+}
+
+function timingSafeEqualString(a, b) {
+  const left = Buffer.from(String(a || ''), 'utf8');
+  const right = Buffer.from(String(b || ''), 'utf8');
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function requireSameOriginPayment(req, res, next) {
+  const origin = req.get('origin');
+  const referer = req.get('referer');
+  const source = origin || referer || '';
+  if (!source) return res.status(403).json({ error: 'Payment request origin required.' });
+  try {
+    const sourceUrl = new URL(source);
+    const allowedHosts = new Set([
+      String(req.get('host') || '').toLowerCase(),
+      SITE_HOST,
+      'restorder.online',
+      'www.restorder.online',
+      'localhost:3000',
+      '127.0.0.1:3000',
+    ].filter(Boolean).map((host) => host.toLowerCase()));
+    if (!allowedHosts.has(sourceUrl.host.toLowerCase())) {
+      return res.status(403).json({ error: 'Payment request origin not allowed.' });
+    }
+    return next();
+  } catch {
+    return res.status(403).json({ error: 'Payment request origin invalid.' });
+  }
 }
 
 /** Return v if it is a valid #rrggbb hex color, otherwise return fallback */
@@ -7294,6 +7361,23 @@ async function getGatewayConfig(name) {
   try { return JSON.parse(rows[0].value); } catch { return null; }
 }
 
+async function getPayPalAccessToken(cfg) {
+  const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
+  const authRes = await fetch(`${base}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: 'Basic ' + Buffer.from(`${cfg.client_id}:${cfg.client_secret}`).toString('base64'),
+    },
+    body: 'grant_type=client_credentials',
+  });
+  const authData = await authRes.json();
+  if (!authRes.ok || !authData.access_token) {
+    throw new Error('PayPal auth failed.');
+  }
+  return { base, accessToken: authData.access_token };
+}
+
 // Helper: load email integration config from settings
 async function getEmailConfig() {
   const { rows } = await pool.query("SELECT value FROM app_settings WHERE key = 'integration_email'");
@@ -8280,13 +8364,16 @@ async function getCustomerDiscount(customerId) {
 }
 
 // POST /api/payments/flutterwave/verify Ã¢â‚¬â€œ Verify a Flutterwave transaction + activate subscription
-app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
+app.post('/api/payments/flutterwave/verify', paymentLimiter, requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { transaction_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!transaction_id || !menu_id || !plan_id)
     return res.status(400).json({ error: 'transaction_id, menu_id, plan_id required.' });
 
   const customerId = req.customer.id;
-  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menu_id, customerId]);
+  const menuId = sanitizeStr(menu_id, 100);
+  const planId = parsePositiveInt(plan_id, 'plan_id');
+  const cycle = normalizeBillingCycle(billing_cycle);
+  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menuId, customerId]);
   if (!menuRows.length) return res.status(403).json({ error: 'Unauthorized.' });
 
   try {
@@ -8298,13 +8385,13 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
     if (dup.length) return res.status(409).json({ error: 'Transaction already processed.' });
 
     // Validate pricing & amount
-    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [planId]);
     if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
     const plan = planRows[0];
 
     const discountPercent = await getCustomerDiscount(customerId);
 
-    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    const isAnnual = cycle === 'annual';
     let expectedPrice = isAnnual ? plan.annual_price : plan.price;
     if (discountPercent > 0) {
       expectedPrice = expectedPrice * (1 - discountPercent / 100);
@@ -8319,41 +8406,52 @@ app.post('/api/payments/flutterwave/verify', requireCustomerAuth, doubleCsrfProt
     if (vd.status !== 'success' || vd.data?.status !== 'successful')
       return res.status(400).json({ error: 'Payment not successful.', detail: vd.message });
 
+    const txRefParts = String(vd.data.tx_ref || '').split(':');
+    if (String(txRefParts[0] || '') !== menuId || parseInt(txRefParts[1], 10) !== planId) {
+      return res.status(400).json({ error: 'Payment reference mismatch.' });
+    }
+    if (String(vd.data.currency || '').toUpperCase() !== 'USD') {
+      return res.status(400).json({ error: 'Payment currency mismatch.' });
+    }
+
     // Verify amount paid matches expected price
     if (vd.data.amount < expectedPrice * 0.99) {
       return res.status(400).json({ error: `Payment amount insufficient. Expected $${expectedPrice}, got $${vd.data.amount}.` });
     }
 
     const subId = await activateSubscriptionPayment(
-      menu_id, parseInt(plan_id),
+      menuId, planId,
       vd.data.amount, vd.data.currency,
       'flutterwave', String(transaction_id),
       `Flutterwave tx ${transaction_id}`,
-      billing_cycle || 'monthly'
+      cycle
     );
     res.json({ success: true, subscription_id: subId });
   } catch (err) { console.error('Flutterwave verify error:', err); res.status(500).json({ error: 'Payment verification failed. Please contact support.' }); }
 });
 
 // POST /api/payments/paypal/create-order Ã¢â‚¬â€œ Create a PayPal order for a plan
-app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
+app.post('/api/payments/paypal/create-order', paymentLimiter, requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { plan_id, menu_id, billing_cycle } = req.body;
   if (!plan_id || !menu_id) return res.status(400).json({ error: 'plan_id and menu_id required.' });
 
   const customerId = req.customer.id;
-  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menu_id, customerId]);
+  const menuId = sanitizeStr(menu_id, 100);
+  const planId = parsePositiveInt(plan_id, 'plan_id');
+  const cycle = normalizeBillingCycle(billing_cycle);
+  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menuId, customerId]);
   if (!menuRows.length) return res.status(403).json({ error: 'Unauthorized.' });
 
   try {
     const cfg = await getGatewayConfig('paypal');
     if (!cfg?.enabled || !cfg.client_id || !cfg.client_secret) return res.status(400).json({ error: 'PayPal not configured.' });
 
-    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [planId]);
     if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
     const plan = planRows[0];
 
     // Determine the base price based on interval
-    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    const isAnnual = cycle === 'annual';
     let basePrice = isAnnual ? plan.annual_price : plan.price;
 
     // Fetch customer's promo discount if registered
@@ -8365,28 +8463,17 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
     }
     price = Math.max(0, parseFloat(price.toFixed(2)));
 
-    const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
-
-    const tokenRes = await fetch(`${base}/v1/oauth2/token`, {
-      method: 'POST',
-      headers: {
-        Authorization: 'Basic ' + Buffer.from(`${cfg.client_id}:${cfg.client_secret}`).toString('base64'),
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'grant_type=client_credentials'
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) return res.status(500).json({ error: 'PayPal auth failed.' });
+    const { base, accessToken } = await getPayPalAccessToken(cfg);
 
     const orderRes = await fetch(`${base}/v2/checkout/orders`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         intent: 'CAPTURE',
         purchase_units: [{
           amount: { currency_code: 'USD', value: Number(price).toFixed(2) },
-          description: `${plan.display_name} Plan (${billing_cycle || 'monthly'}) Ã¢â‚¬â€œ RestOrder`,
-          custom_id: `${menu_id}:${plan_id}:${billing_cycle || 'monthly'}`
+          description: `${plan.display_name} Plan (${cycle}) - RestOrder`,
+          custom_id: `${menuId}:${planId}:${cycle}:${Number(price).toFixed(2)}`
         }]
       })
     });
@@ -8398,12 +8485,15 @@ app.post('/api/payments/paypal/create-order', requireCustomerAuth, doubleCsrfPro
 });
 
 // POST /api/payments/paypal/capture-order Ã¢â‚¬â€œ Capture approved PayPal order + activate subscription
-app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
+app.post('/api/payments/paypal/capture-order', paymentLimiter, requireCustomerAuth, doubleCsrfProtection, async (req, res) => {
   const { order_id, menu_id, plan_id, billing_cycle } = req.body;
   if (!order_id || !menu_id || !plan_id) return res.status(400).json({ error: 'order_id, menu_id, plan_id required.' });
 
   const customerId = req.customer.id;
-  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menu_id, customerId]);
+  const menuId = sanitizeStr(menu_id, 100);
+  const planId = parsePositiveInt(plan_id, 'plan_id');
+  const cycle = normalizeBillingCycle(billing_cycle);
+  const { rows: menuRows } = await pool.query('SELECT id FROM menus WHERE id=$1 AND customer_id=$2', [menuId, customerId]);
   if (!menuRows.length) return res.status(403).json({ error: 'Unauthorized.' });
 
   try {
@@ -8414,42 +8504,39 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfPr
     if (dup.length) return res.status(409).json({ error: 'Order already captured.' });
 
     // Validate pricing & amount
-    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [plan_id]);
+    const { rows: planRows } = await pool.query('SELECT * FROM subscription_plans WHERE id=$1', [planId]);
     if (!planRows.length) return res.status(404).json({ error: 'Plan not found.' });
     const plan = planRows[0];
 
     const discountPercent = await getCustomerDiscount(customerId);
 
-    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    const isAnnual = cycle === 'annual';
     let expectedPrice = isAnnual ? plan.annual_price : plan.price;
     if (discountPercent > 0) {
       expectedPrice = expectedPrice * (1 - discountPercent / 100);
     }
     expectedPrice = Math.max(0, parseFloat(expectedPrice.toFixed(2)));
 
-    const base = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
-
-    const tokenRes = await fetch(`${base}/v1/oauth2/token`, {
-      method: 'POST',
-      headers: {
-        Authorization: 'Basic ' + Buffer.from(`${cfg.client_id}:${cfg.client_secret}`).toString('base64'),
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'grant_type=client_credentials'
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) return res.status(500).json({ error: 'PayPal auth failed.' });
+    const { base, accessToken } = await getPayPalAccessToken(cfg);
 
     const captureRes = await fetch(`${base}/v2/checkout/orders/${encodeURIComponent(order_id)}/capture`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${tokenData.access_token}`, 'Content-Type': 'application/json' }
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
     });
     const captureData = await captureRes.json();
     if (captureData.status !== 'COMPLETED') return res.status(400).json({ error: 'Capture failed.', detail: captureData });
 
+    const customId = captureData.purchase_units?.[0]?.custom_id || '';
+    const customParts = String(customId).split(':');
+    if (String(customParts[0] || '') !== menuId || parseInt(customParts[1], 10) !== planId || normalizeBillingCycle(customParts[2]) !== cycle) {
+      return res.status(400).json({ error: 'PayPal order reference mismatch.' });
+    }
+
     const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
     const amount   = parseFloat(capture?.amount?.value || '0');
     const currency = capture?.amount?.currency_code || 'USD';
+    if (String(currency).toUpperCase() !== 'USD') return res.status(400).json({ error: 'PayPal currency mismatch.' });
+    if (customParts[3] && amount < parseFloat(customParts[3]) * 0.99) return res.status(400).json({ error: 'PayPal order amount mismatch.' });
 
     // Verify amount matches expected price
     if (amount < expectedPrice * 0.99) {
@@ -8457,9 +8544,9 @@ app.post('/api/payments/paypal/capture-order', requireCustomerAuth, doubleCsrfPr
     }
 
     const subId = await activateSubscriptionPayment(
-      menu_id, parseInt(plan_id), amount, currency,
+      menuId, planId, amount, currency,
       'paypal', order_id, `PayPal order ${order_id}`,
-      billing_cycle || 'monthly'
+      cycle
     );
     res.json({ success: true, subscription_id: subId });
   } catch (err) { console.error('PayPal capture-order error:', err); res.status(500).json({ error: 'Payment capture failed. Please contact support.' }); }
@@ -8473,9 +8560,10 @@ app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
     const cfg = await getGatewayConfig('flutterwave');
     if (!cfg?.enabled) return;
 
-    // Verify webhook hash if configured
+    // Require and verify Flutterwave webhook hash before trusting payload data.
     const hash = req.headers['verif-hash'];
-    if (cfg.webhook_secret && hash !== cfg.webhook_secret) return;
+    const webhookSecret = cfg.webhook_secret || cfg.secret_hash || cfg.webhook_hash || '';
+    if (!webhookSecret || !timingSafeEqualString(hash, webhookSecret)) return;
 
     const { event, data } = req.body || {};
     if (event === 'charge.completed' && data?.status === 'successful') {
@@ -8486,7 +8574,14 @@ app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
         const [menu_id, plan_id] = parts;
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(txId)]);
         if (!dup.length) {
-          await activateSubscriptionPayment(menu_id, parseInt(plan_id), data.amount, data.currency, 'flutterwave', String(txId), `Webhook FW tx ${txId}`);
+          const verifyRes = await fetch(`https://api.flutterwave.com/v3/transactions/${encodeURIComponent(txId)}/verify`, {
+            headers: { Authorization: `Bearer ${cfg.secret_key}`, 'Content-Type': 'application/json' }
+          });
+          const verified = await verifyRes.json();
+          if (verified.status !== 'success' || verified.data?.status !== 'successful') return;
+          if (String(verified.data.tx_ref || '') !== String(tx_ref || '')) return;
+          if (String(verified.data.currency || '').toUpperCase() !== 'USD') return;
+          await activateSubscriptionPayment(menu_id, parseInt(plan_id), verified.data.amount, verified.data.currency, 'flutterwave', String(txId), `Webhook FW tx ${txId}`);
         }
       }
     }
@@ -8494,25 +8589,28 @@ app.post('/webhooks/flutterwave', express.json(), async (req, res) => {
 });
 
 // POST /api/payments/clickpesa/create-order-public Ã¢â‚¬â€œ Initiate a ClickPesa payment request
-app.post('/api/payments/clickpesa/create-order-public', express.json(), async (req, res) => {
+app.post('/api/payments/clickpesa/create-order-public', paymentLimiter, requireSameOriginPayment, express.json(), async (req, res) => {
   try {
     const cfg = await getGatewayConfig('clickpesa');
     if (!cfg?.enabled || !cfg.api_key) return res.status(400).json({ error: 'ClickPesa not configured.' });
 
     const { plan_id, menu_id, billing_cycle, promo_code, email, name } = req.body;
     if (!plan_id) return res.status(400).json({ error: 'plan_id required.' });
+    const planId = parsePositiveInt(plan_id, 'plan_id');
+    const menuId = menu_id ? sanitizeStr(menu_id, 100) : '';
+    const cycle = normalizeBillingCycle(billing_cycle);
 
     // Resolve plan price
-    const { rows: planRows } = await pool.query('SELECT id, price, annual_price, display_name FROM subscription_plans WHERE id=$1', [plan_id]);
+    const { rows: planRows } = await pool.query('SELECT id, price, annual_price, display_name FROM subscription_plans WHERE id=$1 AND is_active=1', [planId]);
     if (!planRows.length) return res.status(400).json({ error: 'Plan not found.' });
 
-    const isAnnual = billing_cycle === 'annual' || billing_cycle === 'yearly';
+    const isAnnual = cycle === 'annual';
     let amount = isAnnual ? parseFloat(planRows[0].annual_price || 0) : parseFloat(planRows[0].price);
 
     // Apply promo if provided
     if (promo_code) {
       const { rows: promoRows } = await pool.query(
-        "SELECT * FROM promo_codes WHERE UPPER(code)=$1 AND active=true AND (expires_at IS NULL OR expires_at > NOW()) AND (max_uses IS NULL OR current_uses < max_uses)",
+        "SELECT * FROM promo_codes WHERE UPPER(code)=UPPER($1) AND is_active=1 AND (expires_at IS NULL OR expires_at > NOW()) AND (max_uses = 0 OR uses_count < max_uses)",
         [String(promo_code).toUpperCase()]
       );
       if (promoRows.length) {
@@ -8522,7 +8620,7 @@ app.post('/api/payments/clickpesa/create-order-public', express.json(), async (r
     }
     amount = Math.max(0, parseFloat(amount.toFixed(2)));
 
-    const reference = `${menu_id || 'no_menu'}:${plan_id}:${billing_cycle || 'monthly'}:${Date.now()}`;
+    const reference = `${menuId || 'no_menu'}:${planId}:${cycle}:${amount.toFixed(2)}:${Date.now()}`;
     const cpBase = cfg.environment === 'sandbox' ? 'https://sandbox.clickpesa.com' : 'https://api.clickpesa.com';
 
     const cpRes = await fetch(`${cpBase}/v1/payment-requests`, {
@@ -8560,18 +8658,26 @@ app.post('/webhooks/clickpesa', express.json(), async (req, res) => {
     const cfg = await getGatewayConfig('clickpesa');
     if (!cfg?.enabled) return;
 
+    const webhookSecret = cfg.webhook_secret || cfg.api_secret || '';
+    const providedSecret = req.headers['x-clickpesa-signature'] || req.headers['clickpesa-signature'] || req.headers['x-signature'] || String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    if (!webhookSecret || !timingSafeEqualString(providedSecret, webhookSecret)) return;
+
     const { reference, status, amount, currency } = req.body || {};
     if (status === 'COMPLETED' && reference) {
       // reference format: menu_id:plan_id:billing_cycle:timestamp
       const parts = String(reference || '').split(':');
-      if (parts.length >= 2) {
-        const menu_id = parts[0];
-        const plan_id = parts[1];
-        const billing_cycle = parts[2] || 'monthly';
+      if (parts.length >= 4) {
+        const menu_id = sanitizeStr(parts[0], 100);
+        const plan_id = parsePositiveInt(parts[1], 'plan_id');
+        const billing_cycle = normalizeBillingCycle(parts[2]);
+        const expectedAmount = parseFloat(parts[3]);
+        if (!Number.isFinite(expectedAmount) || expectedAmount <= 0) return;
+        if (String(currency || '').toUpperCase() !== 'USD') return;
+        if ((parseFloat(amount) || 0) < expectedAmount * 0.99) return;
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(reference)]);
         if (!dup.length) {
           await activateSubscriptionPayment(
-            menu_id, parseInt(plan_id), parseFloat(amount) || 0, currency || 'USD',
+            menu_id, plan_id, parseFloat(amount) || 0, currency || 'USD',
             'clickpesa', String(reference), `Webhook ClickPesa ref ${reference}`,
             billing_cycle
           );
@@ -8591,33 +8697,24 @@ app.post('/webhooks/paypal', express.json(), async (req, res) => {
     const eventType = req.body?.event_type;
     const resource = req.body?.resource;
 
-    // Verify webhook signature if webhook_id is configured
-    if (cfg.webhook_id) {
-      const ppBase = cfg.environment === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
-      const authRes = await fetch(`${ppBase}/v1/oauth2/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + Buffer.from(`${cfg.client_id}:${cfg.client_secret}`).toString('base64') },
-        body: 'grant_type=client_credentials'
-      });
-      const authData = await authRes.json();
-      if (authData.access_token) {
-        const verifyRes = await fetch(`${ppBase}/v1/notifications/verify-webhook-signature`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${authData.access_token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            auth_algo: req.headers['paypal-auth-algo'],
-            cert_url: req.headers['paypal-cert-url'],
-            transmission_id: req.headers['paypal-transmission-id'],
-            transmission_sig: req.headers['paypal-transmission-sig'],
-            transmission_time: req.headers['paypal-transmission-time'],
-            webhook_id: cfg.webhook_id,
-            webhook_event: req.body
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (verifyData.verification_status !== 'SUCCESS') return;
-      }
-    }
+    // Require PayPal webhook signature verification before trusting payload data.
+    if (!cfg.webhook_id || !cfg.client_id || !cfg.client_secret) return;
+    const { base: ppBase, accessToken } = await getPayPalAccessToken(cfg);
+    const verifyRes = await fetch(`${ppBase}/v1/notifications/verify-webhook-signature`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        auth_algo: req.headers['paypal-auth-algo'],
+        cert_url: req.headers['paypal-cert-url'],
+        transmission_id: req.headers['paypal-transmission-id'],
+        transmission_sig: req.headers['paypal-transmission-sig'],
+        transmission_time: req.headers['paypal-transmission-time'],
+        webhook_id: cfg.webhook_id,
+        webhook_event: req.body
+      })
+    });
+    const verifyData = await verifyRes.json();
+    if (verifyData.verification_status !== 'SUCCESS') return;
 
     if (eventType === 'PAYMENT.CAPTURE.COMPLETED' && resource) {
       const orderId = resource.supplementary_data?.related_ids?.order_id || resource.id;
@@ -8627,10 +8724,15 @@ app.post('/webhooks/paypal', express.json(), async (req, res) => {
       // custom_id format: menuId:planId
       const parts = String(customId).split(':');
       if (parts.length >= 2) {
-        const [menu_id, plan_id] = parts;
+        const menu_id = sanitizeStr(parts[0], 100);
+        const plan_id = parsePositiveInt(parts[1], 'plan_id');
+        const billing_cycle = normalizeBillingCycle(parts[2]);
+        const expectedAmount = parseFloat(parts[3]);
+        if (String(currency).toUpperCase() !== 'USD') return;
+        if (Number.isFinite(expectedAmount) && expectedAmount > 0 && amount < expectedAmount * 0.99) return;
         const { rows: dup } = await pool.query('SELECT id FROM payments WHERE payment_id=$1', [String(orderId)]);
         if (!dup.length) {
-          await activateSubscriptionPayment(menu_id, parseInt(plan_id), amount, currency, 'paypal', String(orderId), `Webhook PayPal order ${orderId}`);
+          await activateSubscriptionPayment(menu_id, plan_id, amount, currency, 'paypal', String(orderId), `Webhook PayPal order ${orderId}`, billing_cycle);
         }
       }
     }
@@ -8848,7 +8950,7 @@ app.get('/api/admin/settings', requireAuth, async (req, res) => {
     const { rows } = await pool.query('SELECT key, value FROM app_settings ORDER BY key');
     const out = {};
     const isSA = req.adminUser?.role === 'super_admin';
-    const SECRET_FIELDS = new Set(['api_secret','secret_key','encryption_key','client_secret','pass','secret','private_key']);
+    const SECRET_FIELDS = new Set(['api_secret','secret_key','encryption_key','webhook_secret','client_secret','pass','secret','private_key']);
     for (const row of rows) {
       let val; try { val = JSON.parse(row.value); } catch(e) { val = row.value; }
       if (!isSA && val && typeof val === 'object') {
