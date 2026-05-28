@@ -629,6 +629,27 @@ app.use('/js', express.static(path.join(PUBLIC_DIR, 'js'), {
   }
 }));
 
+// Explicit Tailwind route with fallback so deployed admin pages never render unstyled.
+app.get('/css/tailwind.css', (req, res) => {
+  const candidates = [
+    path.join(PUBLIC_DIR, 'css', 'tailwind.css'),
+    path.join(__dirname, 'temp.css'),
+  ];
+  const cssPath = candidates.find((candidate) => fs.existsSync(candidate));
+
+  if (!cssPath) {
+    res.type('text/css');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(404).send('/* tailwind.css not found */');
+  }
+
+  res.setHeader('Content-Type', 'text/css; charset=utf-8');
+  res.setHeader('Cache-Control', process.env.NODE_ENV === 'production'
+    ? 'public, max-age=300, must-revalidate'
+    : 'no-cache, must-revalidate');
+  return res.sendFile(cssPath);
+});
+
 // Serve compiled CSS from public/css so requests to /css/* return actual CSS files
 app.use('/css', express.static(path.join(PUBLIC_DIR, 'css'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0',
