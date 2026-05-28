@@ -564,9 +564,9 @@ async function checkAuth() {
     console.warn('Failed to fetch CSRF token:', err);
   }
   try {
-    const token = localStorage.getItem('admin-token');
-    if (!token) return;
-    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
+    const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken') || '';
+    const headers = token ? { 'x-admin-token': token } : {};
+    const res = await fetch('/api/auth/check', { headers, credentials: 'include' });
     const data = await res.json();
     if (data.authenticated) {
       isAuthenticated = true;
@@ -600,6 +600,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       isAuthenticated = true;
       adminToken = data.token;
       localStorage.setItem('admin-token', adminToken);
+      localStorage.setItem('adminToken', adminToken);
       document.getElementById('login-overlay').classList.add('hidden');
       applyUserUI(data.user);
       loadCustomers();
@@ -621,14 +622,18 @@ document.getElementById('login-password').addEventListener('keypress', (e) => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: adminToken ? { 'x-admin-token': adminToken } : {}, credentials: 'include' }); } catch(e) {}
   localStorage.removeItem('admin-token');
+  localStorage.removeItem('adminToken');
   location.reload();
 });
 
 // -- API Helpers -------------------------------------------------------------
 function authHeaders(extra) {
-  const headers = { 'x-admin-token': adminToken, 'Content-Type': 'application/json' };
+  const headers = { 'Content-Type': 'application/json' };
+  if (adminToken) {
+    headers['x-admin-token'] = adminToken;
+  }
   if (window.csrfToken) {
     headers['x-csrf-token'] = window.csrfToken;
   }

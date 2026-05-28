@@ -2554,13 +2554,13 @@ app.post('/api/admin/logout', (req, res) => {
 
 // GET /api/auth/check  Ã¢â‚¬â€œ verify token is still valid + return user info
 app.get('/api/auth/check', (req, res) => {
-  const token = req.headers['x-admin-token'];
+  const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
   const valid = isValidSession(token);
   const user = valid ? getSessionUser(token) : null;
   res.json({ authenticated: valid, user: user ? { id: user.id, name: user.name, email: user.email, role: user.role } : null });
 });
 app.get('/api/admin/check', (req, res) => {
-  const token = req.headers['x-admin-token'];
+  const token = req.headers['x-admin-token'] || req.cookies?.adminToken;
   const valid = isValidSession(token);
   const user = valid ? getSessionUser(token) : null;
   res.json({ authenticated: valid, user: user ? { id: user.id, name: user.name, email: user.email, role: user.role } : null });
