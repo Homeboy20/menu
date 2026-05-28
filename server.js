@@ -58,6 +58,7 @@ async function reinitFirebaseAdmin() {
 }
 
 const app  = express();
+app.get('/admin', (req, res) => res.redirect(302, '/admin-dashboard'));
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
@@ -545,7 +546,7 @@ app.use((req, res, next) => {
     '/menu-editor': 'admin.html',
     '/index': 'index.html',
     '/menu': 'menu.html',
-    '/admin': 'admin.html',
+    '/admin': 'admin-dashboard.html',
     '/register': 'register.html',
     '/admin-dashboard': 'admin-dashboard.html',
     '/customers': 'customers.html',
@@ -2425,7 +2426,7 @@ async function handleAdminLogin(req, res) {
 
 // POST /api/auth/login Ã¢â‚¬â€œ multi-user admin login
 app.post('/api/auth/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
-// Alias for admin-dashboard pages that use /api/admin/login
+// Legacy aliases kept for older dashboard pages and bookmarked admin scripts.
 app.post('/api/admin/login', loginLimiter, doubleCsrfProtection, handleAdminLogin);
 
 // POST /api/auth/unified-login Ã¢â‚¬â€œ single form that tries customer Ã¢â€ â€™ staff Ã¢â€ â€™ admin
@@ -9058,8 +9059,9 @@ app.use((err, req, res, next) => {
     await reinitFirebaseAdmin().catch(e => console.warn('Firebase init from DB:', e.message));
   }
   const server = app.listen(PORT, () => {
-    console.log(`\n  MenuAdmin MVP running at http://localhost:${PORT}`);
-    console.log(`  Admin panel   : http://localhost:${PORT}/admin.html`);
+    console.log(`\n  RestOrder running at http://localhost:${PORT}`);
+    console.log(`  Admin panel   : http://localhost:${PORT}/admin-dashboard`);
+    console.log(`  Menu editor   : http://localhost:${PORT}/menu-editor`);
     console.log(`  Customer menu : http://localhost:${PORT}/menu.html?id=<menuId>`);
     console.log(`  Database      : PostgreSQL (${process.env.DATABASE_URL ? 'connected' : 'no DATABASE_URL'})\n`);
   });

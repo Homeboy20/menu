@@ -370,7 +370,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     const csrfRes = await fetch('/api/csrf-token');
     const { csrfToken } = await csrfRes.json();
     window.csrfToken = csrfToken;
-    const res = await fetch('/api/admin/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ email, password })
@@ -397,7 +397,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
   localStorage.removeItem('admin-token');
   location.reload();
 });
@@ -415,7 +415,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   const token = localStorage.getItem('admin-token') || localStorage.getItem('adminToken');
   if (!token) return;
   try {
-    const res = await fetch('/api/admin/check', { headers: { 'x-admin-token': token } });
+    const res = await fetch('/api/auth/check', { headers: { 'x-admin-token': token } });
     const data = await res.json();
     if (data.authenticated) {
       adminToken = token;

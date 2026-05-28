@@ -315,7 +315,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   try {
     const csrfRes = await fetch('/api/csrf-token');
     const { csrfToken } = await csrfRes.json();
-    const res = await fetch('/api/admin/login', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
       body: JSON.stringify({ email, password })
@@ -340,7 +340,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'x-admin-token': adminToken } }); } catch(e) {}
   localStorage.removeItem('admin-token');
   location.reload();
 });
@@ -351,7 +351,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   if (!token) return;
 
   try {
-    const res = await fetch('/api/admin/check', {
+    const res = await fetch('/api/auth/check', {
       headers: { 'x-admin-token': token }
     });
     const data = await res.json();

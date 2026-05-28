@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-  <title>Menu Admin — Upload & Publish</title>
+  <title>Menu Editor - RestOrder</title>
   <!-- Preconnect to Google Fonts for faster icon loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -664,8 +664,8 @@
             <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
           </div>
           <div>
-            <h2 class="font-bold text-lg text-stone-900">Sign In</h2>
-            <p class="text-stone-500 text-xs">Business owner or staff</p>
+            <h2 class="font-bold text-lg text-stone-900">Menu Editor Sign In</h2>
+            <p class="text-stone-500 text-xs">Restaurant owner or staff</p>
           </div>
         </div>
         <div>
@@ -698,7 +698,7 @@
         class="size-8 rounded bg-gradient-to-r from-primary to-primary-light flex items-center justify-center text-white">
         <span class="material-symbols-outlined text-[20px]">restaurant</span>
       </div>
-      <span id="sidebar-app-title" class="text-base font-bold tracking-tight text-stone-900">MenuAdmin</span>
+      <span id="sidebar-app-title" class="text-base font-bold tracking-tight text-stone-900">Menu Editor</span>
     </div>
     <!-- Back to Dashboard link (shown only in customer mode) -->
     <a id="back-to-dashboard" href="/dashboard"
@@ -3357,7 +3357,8 @@
           sessionToken = data.token || '';
           localStorage.removeItem('admin-token');
           localStorage.removeItem('adminToken');
-          if (window.location.pathname.startsWith('/menu-editor')) {
+          const adminEditorPaths = ['/admin.html', '/admin', '/menu-editor'];
+          if (adminEditorPaths.includes(window.location.pathname)) {
             window.location.href = '/admin-dashboard';
             return;
           }
@@ -3389,7 +3390,7 @@
             titleEl.textContent = `${staffName} (${roleLabels[staffRole] || staffRole})`;
           } else {
             const business = localStorage.getItem('customerBusiness');
-            titleEl.textContent = business || 'Menu Admin';
+            titleEl.textContent = business || 'Menu Editor';
           }
         }
       }
@@ -4168,7 +4169,7 @@
           itemsHtml += '<tr><td style="text-align:left">' + esc(it.name) + '</td><td style="text-align:center">' + it.qty + '</td><td style="text-align:right">' + sym + (it.price * it.qty).toFixed(2) + '</td></tr>';
         });
         const customerInfo = order.customer_name ? '<div class="center" style="margin-top:4px">' + esc(order.customer_name) + (order.customer_phone ? ' &mdash; ' + esc(order.customer_phone) : '') + '</div>' : '';
-        const html = '<!DOCTYPE html><html><head><title>Menu Admin — Upload & Publish</title>' +
+        const html = '<!DOCTYPE html><html><head><title>Menu Editor - RestOrder</title>' +
           '<style>.material-symbols-outlined{font-family:"Material Symbols Outlined",sans-serif;font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;-webkit-font-smoothing:antialiased;vertical-align:middle;}' +
           '*{margin:0;padding:0;box-sizing:border-box}' +
           'body{font-family:"Courier New",monospace;width:280px;margin:0 auto;padding:12px;font-size:12px;color:#000}' +
@@ -4193,7 +4194,7 @@
           '<div class="total"><span>TOTAL</span><span>' + sym + parseFloat(order.total).toFixed(2) + '</span></div>' +
           '<div class="line"></div>' +
           '<div class="center" style="margin-top:10px">Thank you!</div>' +
-          '<div class="center" style="font-size:10px;color:#666;margin-top:6px">Powered by MenuAdmin</div>' +
+          '<div class="center" style="font-size:10px;color:#666;margin-top:6px">Powered by RestOrder</div>' +
           '</body></html>';
         // Auto-print via hidden iframe (sends directly to thermal printer without dialog)
         let printFrame = document.getElementById('print-frame');
