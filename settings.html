@@ -1467,7 +1467,7 @@ function testProvider(name) {
 }
 
 async function testPaypalConfig() {
-  const btn = document.getElementById('save-pp-btn') || document.querySelector('button[onclick="testProvider(\\'paypal\\')"]');
+  const btn = document.getElementById('save-pp-btn');
   const prevText = btn ? btn.textContent : '';
   if (btn) { btn.textContent = 'Testing...'; btn.disabled = true; }
 
