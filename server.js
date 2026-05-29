@@ -59,6 +59,14 @@ async function reinitFirebaseAdmin() {
 
 const app  = express();
 app.get('/admin', (req, res) => res.redirect(302, '/admin-dashboard'));
+app.use('/uploads/branding', (req, res, next) => {
+  const filename = path.basename(req.path || '');
+  const brandingDir = path.join(__dirname, 'uploads', 'branding');
+  const filePath = path.join(brandingDir, filename);
+  if (fs.existsSync(filePath)) return res.sendFile(filePath);
+  if (/^favicon-[\w.-]+\.(png|ico|svg|webp)$/i.test(filename)) return sendDefaultFavicon(res);
+  next();
+});
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
@@ -996,8 +1004,9 @@ async function checkSubscriptionLimit(req, res, next) {
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Directories Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const BRANDING_DIR = path.join(UPLOADS_DIR, 'branding');
 const DATA_DIR    = path.join(__dirname, 'data');
-[UPLOADS_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
+[UPLOADS_DIR, BRANDING_DIR, DATA_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d); });
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ PostgreSQL database Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // Strip sslmode from URL so pg-connection-string doesn't override our ssl config
@@ -2045,7 +2054,11 @@ app.post('/api/csp-report', express.json({ type: ['application/csp-report', 'app
   res.status(204).end();
 });
 
-app.use('/uploads', express.static(UPLOADS_DIR));
+function sendDefaultFavicon(res) {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.send('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#059669"/><text x="16" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="#fff">R</text></svg>');
+}
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Item image upload (auto-resize & optimize) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const ITEM_IMG_DIR = path.join(UPLOADS_DIR, 'items');
@@ -2078,8 +2091,7 @@ app.post('/api/upload-item-image', requireAnyAuth, doubleCsrfProtection, imgUplo
 });
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Branding image upload (logo / favicon) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
-const BRANDING_DIR = path.join(UPLOADS_DIR, 'branding');
-if (!fs.existsSync(BRANDING_DIR)) fs.mkdirSync(BRANDING_DIR, { recursive: true });
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 const brandingUpload = multer({
   storage: multer.memoryStorage(),
@@ -2237,10 +2249,7 @@ app.get('/favicon.ico', async (req, res) => {
       }
     }
   } catch (_) {}
-  // Default: orange "R" SVG favicon
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  res.send('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#c2410c"/><text x="16" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="bold" fill="#fff">R</text></svg>');
+  return sendDefaultFavicon(res);
 });
 
 // GET /robots.txt
