@@ -711,7 +711,7 @@ async function getCsrf() {
 async function checkAuth() {
   customerToken = getToken();
   if (!customerToken) {
-    window.location.href = '/login';
+    window.location.href = '/customer-login';
     return false;
   }
 
@@ -722,7 +722,7 @@ async function checkAuth() {
     const data = await res.json();
 
     if (!data.authenticated) {
-      window.location.href = '/login';
+      window.location.href = '/customer-login';
       return false;
     }
 
@@ -737,7 +737,7 @@ async function checkAuth() {
     document.getElementById('sidebar-business').textContent = localStorage.getItem('customerBusiness') || data.customer.email;
     return true;
   } catch (err) {
-    window.location.href = '/login';
+    window.location.href = '/customer-login';
     return false;
   }
 }
@@ -752,7 +752,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   localStorage.removeItem('customerEmail');
   localStorage.removeItem('customerBusiness');
   sessionStorage.removeItem('customerToken');
-  window.location.href = '/login';
+  window.location.href = '/customer-login';
 });
 
 // Load dashboard data

@@ -14,7 +14,7 @@
 :root{
   --bg:#fafaf9;--surface:#ffffff;--surface-2:#f5f5f4;--border:#e7e5e4;
   --text:#1c1917;--text-muted:#57534e;--text-dim:#78716c;
-  --accent:#c2410c;--accent-dark:#9a3412;--accent-glow:rgba(194,65,12,.14);
+  --accent:#059669;--accent-dark:#047857;--accent-glow:rgba(5,150,105,.15);
   --success:#16a34a;--error:#dc2626;
 }
 body{font-family:"Outfit",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden;}
@@ -196,10 +196,10 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
     <h2 class="brand-tagline">Your digital menu,<br><span class="serif-accent">live in seconds.</span></h2>
     <p class="brand-desc">Complete digital menu platform for restaurants, cafes, bars &amp; eateries. QR codes, real-time updates, analytics &amp; online ordering.</p>
     <ul class="brand-checks">
-      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>QR code for every table</li>
-      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Real-time menu updates</li>
-      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ordering and analytics when you upgrade</li>
-      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No credit card required</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>QR code for every table</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Real-time menu updates</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ordering and analytics when you upgrade</li>
+      <li><span class="ck"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>No credit card required</li>
     </ul>
   </div>
   <div class="testimonial-box">
@@ -225,7 +225,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
       <span>RestOrder</span>
     </a>
-    <span style="font-size:.8125rem;color:var(--text-dim)">Already have an account? <a href="/login">Sign in</a></span>
+    <span style="font-size:.8125rem;color:var(--text-dim)">Already have an account? <a href="/customer-login">Sign in</a></span>
   </div>
 
   <!-- Step dots -->
@@ -354,7 +354,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
       </div>
 
       <p class="terms">By continuing you agree to our <a href="/terms">Terms</a> &amp; <a href="/privacy">Privacy Policy</a>.</p>
-      <p class="footer-link" style="display:none" id="desktop-signin">Already have an account? <a href="/login">Sign in</a></p>
+      <p class="footer-link" style="display:none" id="desktop-signin">Already have an account? <a href="/customer-login">Sign in</a></p>
     </div><!-- /step-1 -->
 
     <!--  STEP 2  -->
@@ -465,7 +465,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
     <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Free forever plan</span>
     <span class="trust-chip"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Live in &lt;60 sec</span>
   </div>
-  <p class="footer-link" id="mobile-signin" style="display:none">Already have an account? <a href="/login">Sign in</a></p>
+  <p class="footer-link" id="mobile-signin" style="display:none">Already have an account? <a href="/customer-login">Sign in</a></p>
 </div>
 
 <script>
@@ -1204,7 +1204,7 @@ async function renderGatewaysInRegister(gateways, billingPrice) {
 
   if (!hasFW && !hasPP && !hasBT && !hasCP) {
     container.innerHTML = `
-      <div style="background:rgba(234,88,12,0.05);border:1px solid rgba(234,88,12,0.2);border-radius:12px;padding:1.25rem;font-size:.875rem;color:var(--accent);">
+      <div style="background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.22);border-radius:12px;padding:1.25rem;font-size:.875rem;color:var(--accent);">
         <p style="font-weight:700;margin-bottom:.25rem">Manual Activation</p>
         <p style="margin-bottom:1rem">Our support team will contact you within 24 hours with payment details.</p>
         <button onclick="submitManualRegister('manual')" class="btn-primary" style="width:100%">Confirm &amp; Request Activation</button>

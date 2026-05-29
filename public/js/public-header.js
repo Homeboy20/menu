@@ -2,9 +2,10 @@
   function buildHeader(activePage) {
     const isActive = (key) => (activePage === key ? ' class="active"' : '');
     const isMobileActive = (key) => (activePage === key ? ' class="mobile-nav-link active"' : ' class="mobile-nav-link"');
+    const urgencyClass = document.getElementById('urgency-bar') ? ' class="with-urgency"' : '';
 
     return `
-  <header id="header">
+  <header id="header"${urgencyClass}>
     <nav class="container">
       <a href="/" class="logo">
         <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
@@ -23,7 +24,7 @@
           <svg class="material-symbols-outlined" style="font-size: 16px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg>
           View Demo
         </a>
-        <a href="/login" class="btn-nav-secondary">Sign In</a>
+        <a href="/customer-login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <svg class="material-symbols-outlined" style="font-size: 16px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
           Get Started
@@ -56,7 +57,7 @@
           <svg class="material-symbols-outlined" style="font-size: 18px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-visibility"/></svg>
           View Demo
         </a>
-        <a href="/login" class="btn-nav-secondary">Sign In</a>
+        <a href="/customer-login" class="btn-nav-secondary">Sign In</a>
         <a href="/register" class="btn-nav">
           <svg class="material-symbols-outlined" style="font-size: 18px;" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="/icons/sprite.svg#icon-rocket_launch"/></svg>
           Get Started

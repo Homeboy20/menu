@@ -537,6 +537,7 @@ app.use('/api', (req, res, next) => {
 // Ã¢â€â‚¬Ã¢â€â‚¬ Legacy/alternate registration URLs Ã¢â‚¬â€ redirect to canonical /register Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 app.get('/start', (req, res) => res.redirect(301, '/register'));
 app.get('/register-new', (req, res) => res.redirect(301, '/register'));
+app.get('/login', (req, res) => res.redirect(301, '/customer-login' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '')));
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Clean URLs - Remove .html Extension Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 // This middleware serves HTML files without the .html extension
@@ -549,7 +550,7 @@ app.use((req, res, next) => {
   // Map clean URLs to actual HTML files (handle special cases)
   const urlMap = {
     '/': 'index.html',
-    '/login': 'customer-login.html',
+    '/customer-login': 'customer-login.html',
     '/dashboard': 'customer-dashboard.html',
     '/checkout': 'checkout.html',
     '/menu-editor': 'admin.html',
@@ -3749,21 +3750,21 @@ app.post('/api/customers/register', registerLimiter, doubleCsrfProtection, async
 // GET /api/customers/verify-email Ã¢â‚¬â€œ Click-through email verification link
 app.get('/api/customers/verify-email', async (req, res) => {
   const rawToken = sanitizeStr(String(req.query.token || ''), 128);
-  if (!rawToken) return res.redirect('/login?verified=invalid');
+  if (!rawToken) return res.redirect('/customer-login?verified=invalid');
   try {
     const { rows } = await pool.query(
       `SELECT id FROM customers WHERE verification_token = $1 AND email_verified = 0 AND status = 'active' LIMIT 1`,
       [rawToken]
     );
-    if (!rows.length) return res.redirect('/login?verified=invalid');
+    if (!rows.length) return res.redirect('/customer-login?verified=invalid');
     await pool.query(
       `UPDATE customers SET email_verified = 1, verification_token = '' WHERE id = $1`,
       [rows[0].id]
     );
-    return res.redirect('/login?verified=1');
+    return res.redirect('/customer-login?verified=1');
   } catch (err) {
     console.error('Email verification error:', err);
-    return res.redirect('/login?verified=error');
+    return res.redirect('/customer-login?verified=error');
   }
 });
 
@@ -8005,7 +8006,7 @@ function queueWelcomeEmail({ to, businessName, contactName }) {
   const safeBusiness = sanitizeStr(businessName || 'your business', 120);
   const safeContact = sanitizeStr(contactName || '', 120);
   const greeting = safeContact ? `Hi ${safeContact},` : 'Hi there,';
-  const loginUrl = `${getPublicBaseUrl()}/login`;
+  const loginUrl = `${getPublicBaseUrl()}/customer-login`;
   const supportEmail = process.env.SUPPORT_EMAIL || 'support@restorder.online';
 
   const subject = `Welcome to RestOrder, ${safeBusiness}`;
@@ -8037,7 +8038,7 @@ function queuePasswordResetEmail({ to, token, businessName, contactName }) {
   const safeBusiness = sanitizeStr(businessName || 'your account', 120);
   const safeContact = sanitizeStr(contactName || '', 120);
   const greeting = safeContact ? `Hi ${safeContact},` : 'Hi there,';
-  const resetUrl = `${getPublicBaseUrl()}/login?reset=${encodeURIComponent(token)}`;
+  const resetUrl = `${getPublicBaseUrl()}/customer-login?reset=${encodeURIComponent(token)}`;
   const ttlMinutes = Math.max(1, Math.round(PASSWORD_RESET_TTL_MS / 60000));
 
   const subject = 'Reset your RestOrder password';
