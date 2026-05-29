@@ -374,7 +374,7 @@ app.use(helmet({
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co', 'https://open.er-api.com'],
+      connectSrc:    ["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://sandbox.clickpesa.com', 'https://api.clickpesa.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://*.paypal.com', 'https://*.paypalobjects.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co', 'https://open.er-api.com'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       workerSrc:     ["'self'", 'blob:'],
@@ -830,6 +830,40 @@ function requirePlan(minPlan) {
       console.error('Plan check error:', err);
       next(); // fail open Ã¢â‚¬â€œ don't block on DB errors
     }
+  };
+}
+
+async function hasPlanAccess(req, menuId, minPlan) {
+  if (req.adminUser) return true;
+  const requiredIdx = PLAN_ORDER.indexOf(minPlan);
+  let customerId = req.customer?.customerId || req.customer?.id || null;
+  if (!customerId && menuId) {
+    const { rows } = await pool.query('SELECT customer_id FROM menus WHERE id=$1', [menuId]);
+    customerId = rows[0]?.customer_id || null;
+  }
+  if (!customerId) return false;
+
+  const { rows } = await pool.query(`
+    SELECT s.status, s.trial_end, sp.name AS plan_name
+    FROM subscriptions s
+    JOIN subscription_plans sp ON s.plan_id = sp.id
+    WHERE s.customer_id = $1
+    ORDER BY sp.menu_limit DESC
+    LIMIT 1
+  `, [customerId]);
+  if (!rows.length) return false;
+
+  const sub = rows[0];
+  if (sub.status === 'trial' && sub.trial_end && new Date(sub.trial_end) < new Date()) return false;
+  if (sub.status !== 'active' && sub.status !== 'trial') return false;
+  return PLAN_ORDER.indexOf(sub.plan_name) >= requiredIdx;
+}
+
+function proUpgradePayload(requiredPlan = 'professional') {
+  return {
+    upgrade_required: true,
+    required_plan: requiredPlan,
+    error: `This feature requires the ${requiredPlan.charAt(0).toUpperCase() + requiredPlan.slice(1)} plan or higher.`
   };
 }
 
@@ -5564,13 +5598,25 @@ app.delete('/api/menus/:id', requireAnyAuth, requireOwnerOrManager, doubleCsrfPr
 });
 
 // GET /api/menus/:id/analytics - Get scan analytics for a menu (Professional+)
-app.get('/api/menus/:id/analytics', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.get('/api/menus/:id/analytics', requireAnyAuth, async (req, res) => {
   try {
     const menuId = req.params.id;
     const menu = await dbGetMenu(menuId);
     
     if (!menu) return res.status(404).json({ error: 'Menu not found.' });
     if (req.isCustomer && !await assertMenuOwnership(menuId, req.customer.id, res)) return;
+    if (!await hasPlanAccess(req, menuId, 'professional')) {
+      return res.json({
+        menuId,
+        ...proUpgradePayload('professional'),
+        totalScans: 0,
+        lastScanAt: null,
+        qrVersion: menu.qr_version || 1,
+        updatedAt: menu.updated_at || menu.created_at,
+        recentScans: [],
+        dailyStats: []
+      });
+    }
     
     // Get scan statistics
     const recentScans = await dbGetRecentScans(String(menuId), 10);
@@ -5717,9 +5763,10 @@ app.delete('/api/qr-redirects/:id', requireAnyAuth, doubleCsrfProtection, async 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Table Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/menus/:id/tables - List tables for a menu
-app.get('/api/menus/:id/tables', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.get('/api/menus/:id/tables', requireAnyAuth, async (req, res) => {
   try {
     if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
+    if (!await hasPlanAccess(req, req.params.id, 'professional')) return res.json([]);
     const { rows } = await pool.query(
       'SELECT * FROM menu_tables WHERE menu_id = $1 ORDER BY id',
       [req.params.id]
@@ -5766,9 +5813,10 @@ app.delete('/api/menus/:id/tables/:tableId', requireAnyAuth, requirePlan('profes
 // Ã¢â€â‚¬Ã¢â€â‚¬ Room Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
 // GET /api/menus/:id/rooms - List rooms for a menu
-app.get('/api/menus/:id/rooms', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.get('/api/menus/:id/rooms', requireAnyAuth, async (req, res) => {
   try {
     if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
+    if (!await hasPlanAccess(req, req.params.id, 'professional')) return res.json([]);
     const { rows } = await pool.query(
       'SELECT * FROM menu_rooms WHERE menu_id = $1 ORDER BY id',
       [req.params.id]
@@ -5923,9 +5971,10 @@ app.post('/api/menus/:id/orders', async (req, res) => {
 });
 
 // GET /api/menus/:id/orders - Admin/customer views orders
-app.get('/api/menus/:id/orders', requireAnyAuth, requirePlan('professional'), async (req, res) => {
+app.get('/api/menus/:id/orders', requireAnyAuth, async (req, res) => {
   try {
     if (req.isCustomer && !await assertMenuOwnership(req.params.id, req.customer.id, res)) return;
+    if (!await hasPlanAccess(req, req.params.id, 'professional')) return res.json([]);
     const status = req.query.status || 'pending';
     const { rows } = await pool.query(
       `SELECT * FROM orders WHERE menu_id = $1 AND status = $2 ORDER BY created_at DESC LIMIT 100`,

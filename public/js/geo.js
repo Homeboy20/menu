@@ -208,24 +208,11 @@ async function getOrDetectCountry() {
         code = (d.country_code || '').toUpperCase();
       }
     } catch (e) {
-      console.warn('ipapi.co fallback failed, trying ip-api.com...');
+      console.warn('ipapi.co fallback failed; using timezone fallback.');
     }
   }
 
-  // 3. Try ip-api.com fallback
-  if (!code || code === 'XX' || code === 'T1') {
-    try {
-      const r = await fetch('http://ip-api.com/json/', { signal: AbortSignal.timeout(3000) });
-      if (r.ok) {
-        const d = await r.json();
-        code = (d.countryCode || '').toUpperCase();
-      }
-    } catch (e) {
-      console.warn('ip-api.com fallback failed.');
-    }
-  }
-
-  // 4. Default timezone-based fallback
+  // 3. Default timezone-based fallback
   if (!code) {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     if (tz.includes('Europe/Istanbul') || tz.includes('Turkey')) code = 'TR';

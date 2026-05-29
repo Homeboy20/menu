@@ -2905,6 +2905,10 @@
         if (!res.ok) throw new Error('Failed to load analytics');
         const data = await res.json();
         hideLoading();
+        if (data.upgrade_required) {
+          showStatusBadge(data.error || 'Analytics requires an upgrade', 'yellow');
+          return;
+        }
 
         const dailyHtml = data.dailyStats.length
           ? data.dailyStats.map(d => `
