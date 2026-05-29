@@ -374,12 +374,13 @@ app.use(helmet({
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:        ["'self'", 'data:', 'blob:', 'https:'],
-      connectSrc:    ["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://sandbox.clickpesa.com', 'https://api.clickpesa.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://*.paypal.com', 'https://*.paypalobjects.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://ipapi.co', 'https://open.er-api.com'],
+      connectSrc:    ["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://api.flutterwave.com', 'https://checkout.flutterwave.com', 'https://*.flutterwave.com', 'https://sandbox.clickpesa.com', 'https://api.clickpesa.com', 'https://api-m.paypal.com', 'https://api-m.sandbox.paypal.com', 'https://www.paypal.com', 'https://*.paypal.com', 'https://www.paypalobjects.com', 'https://*.paypalobjects.com', 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://*.googleapis.com', 'https://*.firebaseio.com', 'https://www.gstatic.com', 'https://static.cloudflareinsights.com', 'https://apis.google.com', 'https://www.google.com', 'https://www.google-analytics.com', 'https://*.google-analytics.com', 'https://stats.g.doubleclick.net', 'https://ipapi.co', 'https://open.er-api.com'],
       frameAncestors: ["'self'"],  // Allow framing from same origin
       frameSrc:      ["'self'", 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://accounts.google.com', 'https://*.firebaseapp.com', 'https://www.google.com'],
       workerSrc:     ["'self'", 'blob:'],
       formAction:    ["'self'"],   // Restrict form submissions to same origin
       baseUri:       ["'self'"],   // Prevent base tag attacks
+      reportUri:     ['/api/csp-report'],
     },
   },
   crossOriginEmbedderPolicy: false, // needed for fonts/CDN on same page
@@ -2031,6 +2032,18 @@ const upload = multer({
 
 app.use(express.json({ limit: '12mb' }));  // allow base64 logo (~8Ã¢â‚¬â€œ10 MB encoded)
 app.use(cookieParser());  // Parse cookies for secure session management
+
+app.post('/api/csp-report', express.json({ type: ['application/csp-report', 'application/reports+json', 'application/json'], limit: '20kb' }), (req, res) => {
+  const report = req.body?.['csp-report'] || (Array.isArray(req.body) ? req.body[0]?.body : req.body) || {};
+  const blockedUri = String(report['blocked-uri'] || report.blockedURL || '').slice(0, 300);
+  const directive = String(report['violated-directive'] || report.effectiveDirective || '').slice(0, 120);
+  const sourceFile = String(report['source-file'] || report.sourceFile || '').slice(0, 300);
+  if (blockedUri || directive) {
+    console.warn('[CSP]', { blockedUri, directive, sourceFile });
+  }
+  res.status(204).end();
+});
+
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Ã¢â€â‚¬Ã¢â€â‚¬ Item image upload (auto-resize & optimize) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
