@@ -9164,6 +9164,27 @@ app.post('/api/admin/settings/sms/test', requireRole('super_admin'), doubleCsrfP
   }
 });
 
+// POST /api/admin/settings/paypal/test - Test PayPal credentials
+app.post('/api/admin/settings/paypal/test', requireRole('super_admin'), doubleCsrfProtection, async (req, res) => {
+  try {
+    const { environment, client_id, client_secret } = req.body || {};
+    if (!client_id || !client_secret) {
+      return res.status(400).json({ error: 'Client ID and Client Secret are required.' });
+    }
+
+    const cfg = { environment: environment || 'sandbox', client_id, client_secret };
+    const { accessToken } = await getPayPalAccessToken(cfg);
+
+    if (accessToken) {
+      res.json({ success: true, message: 'Test connection successful!' });
+    } else {
+      res.status(400).json({ error: 'Failed to retrieve access token. Check your credentials.' });
+    }
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Connection failed. Please check your credentials.' });
+  }
+});
+
 // GET /api/settings/currency Ã¢â‚¬â€œ Public: currency config for customer-facing pages
 app.get('/api/settings/currency', async (req, res) => {
   try {

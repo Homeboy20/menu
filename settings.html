@@ -1459,7 +1459,49 @@ async function saveProvider(name) {
 }
 
 function testProvider(name) {
+  if (name === 'paypal') {
+    testPaypalConfig();
+    return;
+  }
   showToast(`Connection test for ${name} coming soon.`, 'error');
+}
+
+async function testPaypalConfig() {
+  const btn = document.getElementById('save-pp-btn') || document.querySelector('button[onclick="testProvider(\\'paypal\\')"]');
+  const prevText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Testing...'; btn.disabled = true; }
+
+  try {
+    const env = document.getElementById('pp-env').value;
+    const clientId = document.getElementById('pp-client-id').value.trim();
+    let clientSecret = document.getElementById('pp-client-secret').value.trim();
+
+    if (clientSecret === '[UNCHANGED]') {
+       clientSecret = serverSettings?.integration_paypal?.client_secret || '';
+    }
+
+    if (!clientId || !clientSecret) {
+      showToast('Client ID and Client Secret are required for testing.', 'error');
+      return;
+    }
+
+    const res = await fetch('/api/admin/settings/paypal/test', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ environment: env, client_id: clientId, client_secret: clientSecret })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || 'PayPal connection test successful!');
+    } else {
+      showToast(`Test failed: ${data.error || 'Invalid credentials'}`, 'error');
+    }
+  } catch(e) {
+    showToast(`Test failed: ${e.message}`, 'error');
+  } finally {
+    if (btn) { btn.textContent = prevText; btn.disabled = false; }
+  }
 }
 
 // -- Email Settings ------------------------------------------------------------
