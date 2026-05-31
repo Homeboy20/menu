@@ -14,7 +14,8 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-        tailwind.config = {
+  window.tailwind = window.tailwind || {};
+window.tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
@@ -38,7 +39,13 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  </head>
+    <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
+</head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
 <div class="relative flex h-auto min-h-screen w-full flex-col mx-auto max-w-md overflow-x-hidden pb-6">
 <!-- Header -->
@@ -161,4 +168,5 @@
 <!-- Bottom padding for mobile -->
 <div class="h-10"></div>
 </div>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body></html>

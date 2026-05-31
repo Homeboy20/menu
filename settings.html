@@ -2,7 +2,7 @@
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
 <title>Settings — RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
@@ -103,6 +103,12 @@
     .grid { grid-template-columns: 1fr !important; }
   }
 </style>
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
 
@@ -1758,5 +1764,6 @@ checkAuth();
 loadSocialSettings();
 </script>
 <script src="/js/icons.js"></script>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body>
 </html>

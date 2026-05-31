@@ -377,7 +377,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:    ["'self'"],
-      scriptSrc:     ["'self'", "'unsafe-inline'", 'blob:', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
+      scriptSrc:     ["'self'", "'unsafe-inline'", 'blob:', 'https://cdn.jsdelivr.net', 'https://checkout.flutterwave.com', 'https://www.paypal.com', 'https://www.sandbox.paypal.com', 'https://www.paypalobjects.com', 'https://www.gstatic.com', 'https://apis.google.com', 'https://www.google.com', 'https://static.cloudflareinsights.com'],
       scriptSrcAttr: ["'unsafe-inline'"],   // allow onclick/oninput/onchange handlers
       styleSrc:      ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:       ["'self'", 'https://fonts.gstatic.com'],
@@ -628,6 +628,14 @@ app.get('/menu', (req, res) => {
 
 // Static file caching and optimization
 const PUBLIC_DIR = path.join(__dirname, 'public');
+
+app.get('/manifest.webmanifest', (req, res) => {
+  res.type('application/manifest+json');
+  res.setHeader('Cache-Control', process.env.NODE_ENV === 'production'
+    ? 'public, max-age=300, must-revalidate'
+    : 'no-cache, must-revalidate');
+  res.sendFile(path.join(PUBLIC_DIR, 'manifest.webmanifest'));
+});
 
 app.use('/icons', express.static(path.join(PUBLIC_DIR, 'icons'), {
   maxAge: process.env.NODE_ENV === 'production' ? '1y' : '0',

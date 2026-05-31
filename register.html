@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
 <title>Create Free Account - RestOrder</title>
 <meta name="description" content="Launch your digital restaurant menu in under 60 seconds. No credit card needed."/>
@@ -183,6 +183,12 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <script>
   initCountryCustomization('register');
 </script>
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
 </head>
 <body>
 
@@ -1663,5 +1669,6 @@ async function handleGoogle(){
   }catch(e){console.warn('Firebase config:',e);}
 })();
 </script>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body>
 </html>

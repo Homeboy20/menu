@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
   <title>RestOrder - Digital Menu Platform for Restaurants, Cafes, Bars & Eateries</title>
   <meta name="description" content="Complete digital menu platform for restaurants, cafes, bars and juice bars. Create QR menus, update items in real time, accept orders, and track performance.">
@@ -2134,6 +2134,12 @@
   <script>
     initCountryCustomization('index');
   </script>
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
 </head>
 <body data-page="home">
 
@@ -2154,6 +2160,75 @@
   <script src="/js/public-header.js"></script>
 
   <main>
+  <!-- Mobile-first landing experience -->
+  <section class="mobile-home-shell" aria-label="RestOrder mobile overview">
+    <div class="mobile-home-card mobile-home-hero">
+      <div class="mobile-home-status">
+        <span class="mobile-home-dot"></span>
+        Free QR menu available
+      </div>
+      <h1>Launch your restaurant menu from your phone.</h1>
+      <p>
+        Create a QR menu, update items before service, and upgrade only when you need ordering, rooms, tables, or analytics.
+      </p>
+      <div class="mobile-home-actions">
+        <a href="/register" class="mobile-home-primary">Create free menu</a>
+        <a href="/menu?id=demo" target="_blank" class="mobile-home-secondary">View demo</a>
+      </div>
+      <div class="mobile-home-proof">
+        <span>No credit card</span>
+        <span>5 min setup</span>
+        <span>Live edits</span>
+      </div>
+    </div>
+
+    <div class="mobile-home-strip" aria-label="How it works">
+      <div>
+        <strong>1</strong>
+        <span>Add items</span>
+      </div>
+      <div>
+        <strong>2</strong>
+        <span>Share QR</span>
+      </div>
+      <div>
+        <strong>3</strong>
+        <span>Go live</span>
+      </div>
+    </div>
+
+    <div class="mobile-home-grid">
+      <article>
+        <span>QR</span>
+        <h2>Menu first</h2>
+        <p>Start free with a mobile menu customers can scan at the table or counter.</p>
+      </article>
+      <article>
+        <span>Live</span>
+        <h2>Edit fast</h2>
+        <p>Change prices, photos, and availability before service without reprinting.</p>
+      </article>
+      <article>
+        <span>Pro</span>
+        <h2>Upgrade when ready</h2>
+        <p>Unlock ordering, analytics, payments, staff, tables, and rooms when you need them.</p>
+      </article>
+    </div>
+
+    <div class="mobile-home-card mobile-home-upgrade">
+      <p class="mobile-home-eyebrow">Best path</p>
+      <h2>Free account beats a short free trial.</h2>
+      <p>Restaurants can build the menu first. When they need to publish, take orders, or track analytics, upgrading feels natural.</p>
+      <a href="/pricing">Compare plans</a>
+    </div>
+
+    <nav class="mobile-home-bottom" aria-label="Mobile quick actions">
+      <a href="/register">Start free</a>
+      <a href="/pricing">Plans</a>
+      <a href="/customer-login">Sign in</a>
+    </nav>
+  </section>
+
   <!-- Hero Section -->
   <section class="hero with-urgency">
     <div class="container hero-content">
@@ -3258,5 +3333,6 @@
 
 <script src="/js/icons.js"></script>
 <script src="/js/social-links.js"></script>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body>
 </html>

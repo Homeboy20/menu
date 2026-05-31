@@ -1,0 +1,20 @@
+﻿{
+  "name": "RestOrder",
+  "short_name": "RestOrder",
+  "description": "Create, publish, and manage mobile-friendly QR menus for restaurants.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fafaf9",
+  "theme_color": "#059669",
+  "categories": ["business", "food", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

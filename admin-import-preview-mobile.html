@@ -14,7 +14,8 @@
 <script>document.fonts&&document.fonts.ready.then(function(){document.documentElement.classList.add('fonts-loaded')});</script>
 <link rel="stylesheet" href="/css/tailwind.css?v=20260528">
 <script id="tailwind-config">
-        tailwind.config = {
+  window.tailwind = window.tailwind || {};
+window.tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
@@ -45,7 +46,13 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  </head>
+    <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
+</head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
 <div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden">
 <!-- Top App Bar -->
@@ -148,4 +155,5 @@
             </button>
 </div>
 </div>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body></html>

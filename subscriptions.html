@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<title>Subscription Management — RestOrder Admin</title>
+<title>Subscription Management â€” RestOrder Admin</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +45,7 @@
   .plan-professional { color: #8b5cf6; }
   .plan-enterprise { color: #f59e0b; }
 
-  /* â”€â”€ Input fields: white bg, charcoal text â”€â”€ */
+  /* Ã¢â€â‚¬Ã¢â€â‚¬ Input fields: white bg, charcoal text Ã¢â€â‚¬Ã¢â€â‚¬ */
   input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]):not([type=file]),
   select, textarea { background: #ffffff !important; color: #1e293b !important; }
   input::placeholder, textarea::placeholder { color: #94a3b8 !important; }
@@ -56,6 +56,12 @@
   }
   select option { background: #ffffff; color: #1e293b; }
 </style>
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
 </head>
 <body class="bg-bg-dark text-slate-100 min-h-screen flex">
 
@@ -522,7 +528,7 @@
       </button>
     </div>
     <div class="p-6">
-      <p class="text-slate-400 text-sm mb-5">Select a new plan. A pending payment will be created ï¿½ mark it completed in Payments to activate.</p>
+      <p class="text-slate-400 text-sm mb-5">Select a new plan. A pending payment will be created Ã¯Â¿Â½ mark it completed in Payments to activate.</p>
       <div id="upgrade-plans-list" class="space-y-3">
         <div class="text-center py-4 text-slate-400">Loading plans...</div>
       </div>
@@ -919,7 +925,7 @@ function renderSubscriptions(subscriptions) {
       <td class="px-6 py-4">
         ${sub.next_billing_date
           ? `<div class="text-sm font-medium ${isOverdue(sub.next_billing_date) && sub.status === 'active' ? 'text-red-400' : sub.status === 'active' ? 'text-green-400' : 'text-slate-400'}">${formatDate(sub.next_billing_date)}</div>`
-          : `<div class="text-xs text-slate-500">ï¿½</div>`}
+          : `<div class="text-xs text-slate-500">Ã¯Â¿Â½</div>`}
       </td>
       <td class="px-6 py-4 text-right">
         <button onclick="event.stopPropagation(); showDetails(${sub.id})"
@@ -1052,7 +1058,7 @@ async function showDetails(subId) {
                     <span class="font-semibold">$${p.amount}</span>
                     <span class="badge badge-${p.status}">${p.status}</span>
                   </div>
-                  <div class="text-xs text-slate-400">${formatDate(p.created_at)} ï¿½ ${p.payment_method}</div>
+                  <div class="text-xs text-slate-400">${formatDate(p.created_at)} Ã¯Â¿Â½ ${p.payment_method}</div>
                   ${p.notes ? `<div class="text-xs text-slate-400 mt-1">${escapeHtml(p.notes)}</div>` : ''}
                 </div>
               `).join('')}
@@ -1121,7 +1127,7 @@ async function openUpgradeModal() {
           onchange="selectedUpgradePlanId=${p.id}; document.getElementById('upgrade-confirm-btn').disabled=(${p.id}===${currentPlanId}); document.querySelectorAll('[id^=plan-label-]').forEach(el=>el.classList.remove('border-primary','bg-primary/10')); document.getElementById('plan-label-${p.id}').classList.add('border-primary','bg-primary/10');" />
         <div class="flex-1">
           <div class="font-semibold">${escapeHtml(p.display_name)}</div>
-          <div class="text-xs text-slate-400">${p.menu_limit === 999 ? 'Unlimited' : p.menu_limit} menus ï¿½ ${p.location_limit === 999 ? 'Unlimited' : p.location_limit} locations</div>
+          <div class="text-xs text-slate-400">${p.menu_limit === 999 ? 'Unlimited' : p.menu_limit} menus Ã¯Â¿Â½ ${p.location_limit === 999 ? 'Unlimited' : p.location_limit} locations</div>
         </div>
         <div class="text-right">
           <div class="font-bold text-primary">$${parseFloat(p.price).toFixed(2)}</div>
@@ -1146,7 +1152,7 @@ document.getElementById('upgrade-confirm-btn').addEventListener('click', async (
   const btn = document.getElementById('upgrade-confirm-btn');
   const errorEl = document.getElementById('upgrade-error');
   btn.disabled = true;
-  btn.textContent = 'Savingï¿½';
+  btn.textContent = 'SavingÃ¯Â¿Â½';
   errorEl.classList.add('hidden');
   try {
     const res = await fetch(`/api/subscriptions/${window.currentSubId}`, {
@@ -1157,7 +1163,7 @@ document.getElementById('upgrade-confirm-btn').addEventListener('click', async (
     if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed to change plan.'); }
     closeUpgradeModal();
     document.getElementById('detail-modal').classList.add('hidden');
-    showToast('Plan changed! A pending payment was created ï¿½ mark it completed in Payments to activate.');
+    showToast('Plan changed! A pending payment was created Ã¯Â¿Â½ mark it completed in Payments to activate.');
     loadSubscriptions();
   } catch (err) {
     errorEl.textContent = err.message;
@@ -1210,7 +1216,7 @@ document.getElementById('record-payment-form').addEventListener('submit', async 
     closeRecordPaymentModal();
     document.getElementById('detail-modal').classList.add('hidden');
     const msg = payload.status === 'completed'
-      ? 'Payment recorded ï¿½ subscription is now active!'
+      ? 'Payment recorded Ã¯Â¿Â½ subscription is now active!'
       : 'Pending payment recorded.';
     showToast(msg);
     loadSubscriptions();
@@ -1267,7 +1273,7 @@ function escapeHtml(str) {
 }
 
 function formatDate(isoStr) {
-  if (!isoStr) return 'ï¿½';
+  if (!isoStr) return 'Ã¯Â¿Â½';
   return new Date(isoStr).toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric'
   });
@@ -1476,7 +1482,7 @@ function renderPromosTable(promos) {
               <td class="py-3 pr-4 font-mono font-bold text-primary">${escHtml(p.code)}</td>
               <td class="py-3 pr-4 text-slate-300">${discStr}</td>
               <td class="py-3 pr-4 text-slate-400">${usesStr}</td>
-              <td class="py-3 pr-4 text-slate-400">${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : 'ï¿½'}</td>
+              <td class="py-3 pr-4 text-slate-400">${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : 'Ã¯Â¿Â½'}</td>
               <td class="py-3 pr-4">${statusBadge}</td>
               <td class="py-3">
                 <div class="flex items-center gap-2">
@@ -1609,5 +1615,6 @@ window.applyUserUI = (function(orig) {
 </script>
 
 <script src="/js/icons.js"></script>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body>
 </html>

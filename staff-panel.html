@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
 <title>Staff Panel — RestOrder</title>
 <!-- Preconnect to Google Fonts for faster icon loading -->
@@ -11,7 +11,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/tailwind.css?v=20260528">
 <script>
-  tailwind.config = {
+  window.tailwind = window.tailwind || {};
+window.tailwind.config = {
     darkMode: 'class',
     theme: {
       extend: {
@@ -143,6 +144,12 @@
     50%       { opacity: .6; transform: scale(1.4); }
   }
 </style>
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/mobile-app.css?v=20260530">
 </head>
 <body class="bg-bg text-stone-900 min-h-screen flex flex-col">
 
@@ -827,5 +834,6 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 init();
 </script>
 <script src="/js/icons.js"></script>
+  <script src="/js/mobile-app.js?v=20260530" defer></script>
 </body>
 </html>

@@ -51,7 +51,7 @@
 
       <ul class="nav-center">
         <li><a href="/features"${isActive('features')}>Features</a></li>
-        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/pricing"${isActive('pricing')}>Pricing</a></li>
         <li><a href="/about"${isActive('about')}>About</a></li>
         <li><a href="/contact"${isActive('contact')}>Contact</a></li>
       </ul>
@@ -68,7 +68,7 @@
         </a>
       </div>
 
-      <button class="mobile-menu-btn" id="mobile-menu-btn">&#9776;</button>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">&#9776;</button>
     </nav>
   </header>
 
@@ -79,7 +79,7 @@
           <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg></div>
           <span>RestOrder</span>
         </a>
-        <button class="mobile-menu-close" id="mobile-menu-close">&times;</button>
+        <button class="mobile-menu-close" id="mobile-menu-close" type="button" aria-label="Close menu">&times;</button>
       </div>
 
       <ul class="mobile-nav-links">
@@ -109,4 +109,28 @@
   injectHeaderStyles();
   const page = document.body.getAttribute('data-page') || '';
   mount.innerHTML = buildHeader(page);
+
+  const menuButton = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const closeButton = document.getElementById('mobile-menu-close');
+  const setMenuOpen = (open) => {
+    if (!menu || !menuButton) return;
+    menu.classList.toggle('active', open);
+    document.body.classList.toggle('public-menu-open', open);
+    menuButton.setAttribute('aria-expanded', String(open));
+  };
+
+  if (menuButton && menu) {
+    menuButton.addEventListener('click', () => setMenuOpen(true));
+    closeButton?.addEventListener('click', () => setMenuOpen(false));
+    menu.addEventListener('click', (event) => {
+      if (event.target === menu) setMenuOpen(false);
+    });
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => setMenuOpen(false));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    });
+  }
 })();
